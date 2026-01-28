@@ -1,41 +1,38 @@
 import { motion } from "framer-motion";
-import { Sparkles, BookOpen, Shield, Beaker, ArrowRight } from "lucide-react";
+import { BookOpen, Scale, Stethoscope, AlertTriangle, Bot, FileCheck } from "lucide-react";
 
 const features = [
   {
-    icon: Sparkles,
-    title: "Smart AI",
-    description: "Trained on thousands of studies",
-  },
-  {
     icon: BookOpen,
-    title: "Research Citations",
-    description: "Every answer backed by sources",
+    title: "Complete Peptide Breakdown",
+    description: "What each peptide does, research status, and evidence quality for every compound.",
   },
   {
-    icon: Beaker,
-    title: "Protocol Guidance",
-    description: "Dosing and timing recommendations",
+    icon: Scale,
+    title: "FDA & Legal Guide",
+    description: "Clear classification: FDA-approved, research-only, or unregulated. No guessing.",
   },
   {
-    icon: Shield,
-    title: "Safety First",
-    description: "Warnings and contraindications",
+    icon: Stethoscope,
+    title: "Doctor Conversation Guide",
+    description: "Exactly what questions to ask your healthcare provider and how to frame them.",
+  },
+  {
+    icon: AlertTriangle,
+    title: "Red Flags to Avoid",
+    description: "Warning signs for sketchy sources, dangerous claims, and misleading marketing.",
+  },
+  {
+    icon: FileCheck,
+    title: "Research Summaries",
+    description: "Plain-English explanations of what studies actually show vs. what influencers claim.",
+  },
+  {
+    icon: Bot,
+    title: "AI Research Assistant",
+    description: "Bonus: Ask questions and get research-backed answers (educational only, with disclaimers).",
   },
 ];
-
-const demoQuestion = "What's the optimal BPC-157 dosage for tendon repair?";
-const demoAnswer = `Based on current research, here's what we know:
-
-**Recommended Range:** 250-500 mcg per injection, 1-2 times daily
-
-**Administration:** Subcutaneous injection near the injury site
-
-**Duration:** Typically 4-6 weeks for tendon injuries
-
-**Citations:**
-• Sikiric et al. (2018) - Journal of Orthopaedic Research
-• Chang et al. (2021) - Peptides`;
 
 export function SolutionSection() {
   return (
@@ -49,94 +46,49 @@ export function SolutionSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Get Answers in <span className="text-primary">Seconds</span>, Not Hours
+            Peptide Playbook Gives You{" "}
+            <span className="text-gradient">Clarity</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Ask anything about peptides. Get research-backed answers with citations instantly.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Everything you need to understand peptides, make informed decisions, 
+            and have productive conversations with healthcare providers.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* Static Demo Preview */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="order-2 lg:order-1"
-          >
-            <div className="card-clean overflow-hidden">
-              {/* Chat header */}
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm">PeptideGPT</p>
-                  <p className="text-xs text-muted-foreground">AI Research Assistant</p>
-                </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 0.3 }}
+              className="glass-card p-6 hover-lift"
+            >
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                <feature.icon className="w-6 h-6 text-primary" />
               </div>
-
-              {/* Chat messages */}
-              <div className="p-5 space-y-4">
-                {/* User message */}
-                <div className="flex justify-end">
-                  <div className="bg-primary text-primary-foreground rounded-xl rounded-br-sm px-4 py-2.5 max-w-[85%]">
-                    <p className="text-sm">{demoQuestion}</p>
-                  </div>
-                </div>
-
-                {/* AI response */}
-                <div className="flex justify-start">
-                  <div className="bg-secondary rounded-xl rounded-bl-sm px-4 py-3 max-w-[90%]">
-                    <pre className="whitespace-pre-wrap font-sans text-sm text-foreground">
-                      {demoAnswer}
-                    </pre>
-                  </div>
-                </div>
-              </div>
-
-              {/* Input hint */}
-              <div className="px-5 py-4 border-t border-border">
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span>Ask any peptide question...</span>
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Features list */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="order-1 lg:order-2 space-y-6"
-          >
-            <div>
-              <h3 className="text-2xl font-bold mb-3">
-                Your Personal Peptide Research Assistant
-              </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Built on the latest AI technology and trained on thousands of peer-reviewed 
-                studies, PeptideGPT gives you instant access to research-backed answers 
-                you can trust.
+              <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {feature.description}
               </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              {features.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="p-4 rounded-xl border border-border bg-card hover-lift"
-                >
-                  <feature.icon className="w-5 h-5 text-primary mb-2" />
-                  <h4 className="font-medium text-sm mb-1">{feature.title}</h4>
-                  <p className="text-xs text-muted-foreground">{feature.description}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+            </motion.div>
+          ))}
         </div>
+
+        {/* Educational disclaimer */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-12 text-center"
+        >
+          <p className="text-sm text-muted-foreground max-w-2xl mx-auto bg-secondary/50 rounded-lg px-6 py-4">
+            ⚠️ <span className="font-medium">Important:</span> Peptide Playbook is an educational resource only. 
+            It does not provide medical advice, dosing recommendations, or treatment guidance. 
+            Always consult a licensed healthcare provider.
+          </p>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,17 +1,17 @@
 import { motion } from "framer-motion";
-import { Check, Shield, Lock, CreditCard } from "lucide-react";
+import { Check, Shield, Lock, CreditCard, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const features = [
-  "Unlimited peptide questions",
-  "Research-backed answers with citations",
-  "Dosing and protocol recommendations",
-  "Safety warnings and contraindications",
-  "Save and organize your research",
-  "Priority response times",
-  "New features as they launch",
-  "Cancel anytime",
+  "Complete peptide breakdown (50+ peptides)",
+  "FDA & legal classification guide",
+  "Research status for every compound",
+  "Questions to ask your doctor",
+  "Red flags & warning signs",
+  "Plain-English research summaries",
+  "Bonus: AI research assistant access",
+  "Lifetime access & free updates",
 ];
 
 const trustBadges = [
@@ -31,10 +31,10 @@ export function Pricing() {
           className="text-center mb-10"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Start Your <span className="text-primary">Research Journey</span>
+            Get <span className="text-gradient">Instant Access</span> Today
           </h2>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Try PeptideGPT risk-free. Full access for just $1 for your first week.
+            One-time purchase. No subscription. Lifetime access to the complete guide.
           </p>
         </motion.div>
 
@@ -44,22 +44,21 @@ export function Pricing() {
           viewport={{ once: true }}
           className="max-w-md mx-auto"
         >
-          <div className="card-clean overflow-hidden">
+          <div className="glass-card overflow-hidden">
             {/* Popular badge */}
-            <div className="bg-primary text-primary-foreground text-center py-2.5 text-sm font-medium">
-              Most Popular Choice
+            <div className="bg-primary text-primary-foreground text-center py-2.5 text-sm font-medium flex items-center justify-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Peptide Playbook
             </div>
 
             <div className="p-6">
               {/* Pricing */}
               <div className="text-center mb-6">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="text-xl text-muted-foreground line-through">$49</span>
-                  <span className="text-4xl font-bold">$20</span>
-                  <span className="text-muted-foreground">/month</span>
+                  <span className="text-5xl font-bold">$67</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Start with a <span className="font-medium text-primary">$1 trial for 7 days</span>
+                  One-time purchase • <span className="font-medium text-primary">Instant access</span>
                 </p>
               </div>
 
@@ -76,15 +75,15 @@ export function Pricing() {
               </ul>
 
               {/* CTA */}
-              <Button asChild size="lg" className="w-full h-11 text-base">
+              <Button asChild size="lg" className="w-full h-12 text-base glow-primary">
                 <Link to="/signup">
-                  Start 7-Day Trial for $1
+                  Get the Playbook — $67
                 </Link>
               </Button>
 
               {/* Money back guarantee */}
               <p className="text-center text-xs text-muted-foreground mt-4">
-                30-day money-back guarantee • Cancel anytime
+                30-day money-back guarantee • No subscription required
               </p>
             </div>
 

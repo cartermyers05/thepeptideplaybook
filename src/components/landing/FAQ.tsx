@@ -8,36 +8,36 @@ import {
 
 const faqs = [
   {
-    question: "How does PeptideGPT work?",
-    answer: "PeptideGPT is powered by advanced AI trained on thousands of peer-reviewed studies, clinical trials, and research papers about peptides. When you ask a question, it searches through this knowledge base to provide you with accurate, research-backed answers complete with citations.",
+    question: "What exactly is Peptide Playbook?",
+    answer: "Peptide Playbook is a comprehensive educational guide that helps you understand peptides: what they are, how they work, their research status, FDA classifications, and how to have informed conversations with your doctor. It includes an AI research assistant as a bonus feature.",
   },
   {
-    question: "Is the information medically accurate?",
-    answer: "Our AI is trained on peer-reviewed research and always provides citations so you can verify the information. However, PeptideGPT is an educational tool and not a substitute for professional medical advice. Always consult with a healthcare provider before starting any peptide protocol.",
+    question: "Is this medical advice?",
+    answer: "No. Peptide Playbook is strictly educational. It does NOT provide dosing recommendations, treatment advice, or substitute for professional medical guidance. We explicitly encourage you to consult licensed healthcare providers for any health decisions. The guide helps you understand the research so you can have better-informed conversations with your doctor.",
   },
   {
-    question: "What's included in the $1 trial?",
-    answer: "The $1 trial gives you full access to PeptideGPT for 7 days. You can ask unlimited questions, save your research, and access all features. After 7 days, you'll be charged $20/month unless you cancel.",
+    question: "What's included in the $67 purchase?",
+    answer: "You get instant access to the complete Peptide Playbook: 50+ peptide breakdowns, FDA & legal classification guide, doctor conversation guide, red flags to avoid, plain-English research summaries, and access to our AI research assistant. This is a one-time purchase with lifetime access and free updates.",
   },
   {
-    question: "Can I cancel anytime?",
-    answer: "Absolutely! There are no contracts or commitments. You can cancel your subscription at any time from your account settings. If you cancel during the trial, you won't be charged the monthly fee.",
+    question: "Why should I trust this over TikTok or forums?",
+    answer: "We review actual published research — not influencer claims. Every peptide entry includes its research status (human trials vs. animal studies), FDA classification, and honest assessments of evidence quality. We tell you what we don't know, not just what sounds exciting.",
   },
   {
-    question: "How is this different from ChatGPT?",
-    answer: "While ChatGPT is a general-purpose AI, PeptideGPT is specifically trained on peptide research. We provide accurate dosing recommendations, safety information, and always cite our sources. Our system is regularly updated with the latest research.",
+    question: "Do you provide dosing or sourcing information?",
+    answer: "No. We do NOT provide dosing recommendations, vendor recommendations, or any guidance that could be construed as encouraging self-experimentation. Those decisions must be made with a licensed healthcare provider who can evaluate your individual situation.",
   },
   {
-    question: "Do you offer refunds?",
-    answer: "Yes! We offer a 30-day money-back guarantee. If you're not satisfied with PeptideGPT for any reason, contact us within 30 days of your purchase and we'll refund you in full.",
+    question: "What is the AI research assistant?",
+    answer: "It's a bonus feature that lets you ask questions about peptide research and get responses based on published studies. It includes strict disclaimers, refuses to provide dosing or treatment advice, and is designed purely for educational exploration — not clinical guidance.",
   },
   {
-    question: "What peptides can I ask about?",
-    answer: "You can ask about any research peptide including BPC-157, TB-500, GHRPs, GHRHs, Thymosin peptides, Melanotan, and many more. Our database covers hundreds of peptides and is constantly expanding.",
+    question: "Is there a refund policy?",
+    answer: "Yes. We offer a 30-day money-back guarantee. If you're not satisfied for any reason, contact us within 30 days of purchase and we'll refund you in full, no questions asked.",
   },
   {
-    question: "How often is the research updated?",
-    answer: "We continuously update our knowledge base as new research is published. Our AI is retrained regularly to incorporate the latest studies and clinical findings in peptide research.",
+    question: "Will there be updates?",
+    answer: "Yes. Peptide research evolves constantly. Your purchase includes lifetime access to future updates at no additional cost. When new research is published or FDA classifications change, we update the guide.",
   },
 ];
 
@@ -55,7 +55,7 @@ export function FAQ() {
             Frequently Asked <span className="text-gradient">Questions</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to know about PeptideGPT.
+            Everything you need to know about Peptide Playbook.
           </p>
         </motion.div>
 
@@ -70,7 +70,7 @@ export function FAQ() {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-card border border-border rounded-xl px-6 data-[state=open]:shadow-soft"
+                className="glass-card px-6 data-[state=open]:shadow-soft border-0"
               >
                 <AccordionTrigger className="text-left font-semibold hover:no-underline py-5">
                   {faq.question}
