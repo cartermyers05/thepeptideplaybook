@@ -45,9 +45,9 @@
     --radius: 0.625rem;
 
     /* Custom tokens for PeptideGPT */
-    --gradient-start: 226 71% 40%;
-    --gradient-mid: 250 83% 55%;
-    --gradient-end: 280 83% 58%;
+    --gradient-start: 250 60% 45%;
+    --gradient-mid: 250 60% 45%;
+    --gradient-end: 250 60% 45%;
     --surface-elevated: 0 0% 100%;
     --surface-sunken: 220 14% 98%;
 
@@ -100,10 +100,10 @@
     --input: 217 33% 15%;
     --ring: 250 100% 65%;
 
-    /* Enhanced gradients for dark mode */
-    --gradient-start: 250 100% 65%;
-    --gradient-mid: 280 100% 60%;
-    --gradient-end: 320 100% 55%;
+    /* Solid dark purple for dark mode */
+    --gradient-start: 250 70% 55%;
+    --gradient-mid: 250 70% 55%;
+    --gradient-end: 250 70% 55%;
     --surface-elevated: 224 71% 7%;
     --surface-sunken: 224 71% 3%;
 
