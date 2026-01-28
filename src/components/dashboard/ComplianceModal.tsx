@@ -52,19 +52,44 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
   const allChecked = Object.values(checks).every(Boolean);
 
   const handleAccept = async () => {
-    if (!user || !allChecked) return;
+    if (!user || !allChecked) {
+      console.log("Cannot accept:", { user: !!user, allChecked });
+      return;
+    }
 
-    const { error } = await supabase
+    console.log("Attempting to save acceptance for user:", user.id);
+
+    // Try update first
+    const { data: updateData, error: updateError } = await supabase
       .from("profiles")
       .update({ terms_accepted_at: new Date().toISOString() })
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .select();
 
-    if (error) {
-      console.error("Error saving acceptance:", error);
+    console.log("Update result:", { updateData, updateError });
+
+    // If update didn't affect any rows (no profile exists), create one
+    if (!updateError && (!updateData || updateData.length === 0)) {
+      console.log("No profile found, creating one...");
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert({ 
+          user_id: user.id, 
+          terms_accepted_at: new Date().toISOString() 
+        });
+
+      if (insertError) {
+        console.error("Error creating profile:", insertError);
+        toast.error("Failed to save. Please try again.");
+        return;
+      }
+    } else if (updateError) {
+      console.error("Error saving acceptance:", updateError);
       toast.error("Failed to save. Please try again.");
       return;
     }
 
+    console.log("Success! Closing modal...");
     setOpen(false);
     onAccept();
   };
