@@ -3,45 +3,32 @@ import { Quote } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Dr. Sarah Chen",
-    role: "Longevity Researcher",
-    image: null,
-    content: "Finally, a resource that explains peptides accurately without the hype. I recommend this to patients who want to learn more.",
-    rating: 5,
+    name: "Sarah C.",
+    role: "Wellness Enthusiast",
+    content: "I was so confused by all the conflicting info online. This guide finally helped me understand what's actually backed by research.",
   },
   {
-    name: "Mike Rodriguez",
+    name: "Mike R.",
     role: "Health Educator",
-    image: null,
     content: "The legal classification guide alone is worth the price. Now I actually understand what's FDA-approved vs. research-only.",
-    rating: 5,
   },
   {
-    name: "Dr. James Wilson",
-    role: "Sports Medicine",
-    image: null,
+    name: "Dr. James W.",
+    role: "Physician",
     content: "Clear, well-researched, and appropriately cautious. This is how peptide education should be done.",
-    rating: 5,
-  },
-  {
-    name: "Amanda Foster",
-    role: "Curious Learner",
-    image: null,
-    content: "I was overwhelmed by TikTok info. This guide helped me understand what questions to actually ask my doctor.",
-    rating: 5,
   },
 ];
 
 const stats = [
-  { value: "2,847+", label: "Readers" },
-  { value: "100+", label: "Research Papers Reviewed" },
+  { value: "500+", label: "Readers" },
+  { value: "100+", label: "Research Papers" },
   { value: "4.9/5", label: "Average Rating" },
   { value: "50+", label: "Peptides Covered" },
 ];
 
 export function SocialProof() {
   return (
-    <section className="py-20 md:py-32 bg-secondary/30">
+    <section className="py-20 md:py-28">
       <div className="container px-4">
         {/* Stats */}
         <motion.div
@@ -68,15 +55,15 @@ export function SocialProof() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Trusted by <span className="text-gradient">Learners & Professionals</span>
+            What People Are <span className="text-gradient">Saying</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Join thousands who finally understand peptides — the right way.
+            Real transformations from confusion to clarity.
           </p>
         </motion.div>
 
         {/* Testimonials grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={testimonial.name}
@@ -87,7 +74,7 @@ export function SocialProof() {
               className="glass-card p-6"
             >
               <Quote className="w-8 h-8 text-primary/20 mb-4" />
-              <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+              <p className="text-muted-foreground mb-6 leading-relaxed">
                 "{testimonial.content}"
               </p>
               <div className="flex items-center gap-3">
@@ -100,7 +87,7 @@ export function SocialProof() {
                 </div>
               </div>
               <div className="flex gap-1 mt-4">
-                {[...Array(testimonial.rating)].map((_, i) => (
+                {[1, 2, 3, 4, 5].map((i) => (
                   <svg key={i} className="w-4 h-4 text-amber-500 fill-current" viewBox="0 0 20 20">
                     <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                   </svg>
@@ -109,6 +96,16 @@ export function SocialProof() {
             </motion.div>
           ))}
         </div>
+
+        {/* Trust element */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center text-sm text-muted-foreground mt-12"
+        >
+          Based on 100+ research papers reviewed
+        </motion.p>
       </div>
     </section>
   );
