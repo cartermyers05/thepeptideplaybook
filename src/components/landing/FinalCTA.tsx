@@ -37,12 +37,11 @@ export function FinalCTA() {
               Get Peptide Clarity Today
             </h2>
             <p className="text-muted-foreground mb-6">
-              One-time purchase. Lifetime access.
+              One-time access. No subscription required.
             </p>
             
             <div className="mb-8">
               <span className="text-5xl md:text-6xl font-bold">$67</span>
-              <span className="text-muted-foreground ml-2">one-time payment</span>
             </div>
             
             {/* Bullet recap */}
