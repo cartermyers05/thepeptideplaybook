@@ -102,9 +102,9 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md [&>button]:hidden glass-panel border-0 overflow-hidden">
+      <DialogContent className="sm:max-w-md [&>button]:hidden glass-panel border-0 flex flex-col max-h-[85vh]">
         {/* Background ambient effect */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
           <motion.div 
             className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl"
             animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
@@ -117,64 +117,69 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
           />
         </div>
 
-        <DialogHeader className="relative">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <DialogTitle className="text-xl">Before You Begin</DialogTitle>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <DialogDescription className="text-base pt-2">
-              PeptideGPT is an educational research tool that provides information based on published scientific literature.
-            </DialogDescription>
-          </motion.div>
-        </DialogHeader>
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto relative">
+          <DialogHeader>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <DialogTitle className="text-xl">Before You Begin</DialogTitle>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <DialogDescription className="text-base pt-2">
+                PeptideGPT is an educational research tool that provides information based on published scientific literature.
+              </DialogDescription>
+            </motion.div>
+          </DialogHeader>
 
-        <div className="space-y-4 py-4 relative">
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-sm text-muted-foreground font-medium"
-          >
-            By continuing, you acknowledge:
-          </motion.p>
+          <div className="space-y-4 py-4">
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-sm text-muted-foreground font-medium"
+            >
+              By continuing, you acknowledge:
+            </motion.p>
 
-          <div className="space-y-3">
-            {checkboxItems.map((item, index) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                className="flex items-start gap-3"
-              >
-                <Checkbox
-                  id={item.id}
-                  checked={checks[item.id as keyof typeof checks]}
-                  onCheckedChange={(checked) =>
-                    setChecks((prev) => ({ ...prev, [item.id]: !!checked }))
-                  }
-                  className="mt-0.5"
-                />
-                <Label htmlFor={item.id} className="text-sm leading-tight cursor-pointer">
-                  {item.label}
-                </Label>
-              </motion.div>
-            ))}
+            <div className="space-y-3">
+              {checkboxItems.map((item, index) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + index * 0.1 }}
+                  className="flex items-start gap-3"
+                >
+                  <Checkbox
+                    id={item.id}
+                    checked={checks[item.id as keyof typeof checks]}
+                    onCheckedChange={(checked) =>
+                      setChecks((prev) => ({ ...prev, [item.id]: !!checked }))
+                    }
+                    className="mt-0.5"
+                  />
+                  <Label htmlFor={item.id} className="text-sm leading-tight cursor-pointer">
+                    {item.label}
+                  </Label>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
 
+        {/* Fixed button at bottom */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
+          className="pt-4 border-t border-border/20 relative"
         >
           <Button
             onClick={handleAccept}
