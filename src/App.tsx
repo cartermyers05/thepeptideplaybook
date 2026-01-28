@@ -14,6 +14,10 @@ import Saved from "./pages/Saved";
 import Stats from "./pages/Stats";
 import Referral from "./pages/Referral";
 import Account from "./pages/Account";
+import Articles from "./pages/Articles";
+import ArticleDetail from "./pages/ArticleDetail";
+import ArticleGenerator from "./pages/admin/ArticleGenerator";
+import CitationsDashboard from "./pages/admin/CitationsDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +33,10 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/articles" element={<Articles />} />
+            <Route path="/articles/:slug" element={<ArticleDetail />} />
+            <Route path="/admin/generate" element={<ProtectedRoute><ArticleGenerator /></ProtectedRoute>} />
+            <Route path="/admin/citations" element={<ProtectedRoute><CitationsDashboard /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
             <Route path="/saved" element={<ProtectedRoute><Saved /></ProtectedRoute>} />
