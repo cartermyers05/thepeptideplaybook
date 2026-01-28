@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -10,6 +10,19 @@ const included = [
   "AI assistant access",
   "Lifetime updates",
 ];
+
+const listVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const listItemVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0 },
+};
 
 export function FinalCTA() {
   return (
@@ -22,30 +35,52 @@ export function FinalCTA() {
           transition={{ duration: 0.5 }}
           className="max-w-md mx-auto"
         >
-          <div className="glass-card-subtle p-8 text-center">
+          <motion.div 
+            className="glass-card-subtle p-8 text-center"
+            animate={{ y: [-2, 2, -2] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
             <h3 className="text-xl font-semibold mb-2">Peptide Playbook</h3>
             <p className="text-4xl font-semibold mb-1">$67</p>
             <p className="text-sm text-muted-foreground mb-8">One-time purchase</p>
             
-            <ul className="text-left space-y-3 mb-8">
+            <motion.ul 
+              className="text-left space-y-3 mb-8"
+              variants={listVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
               {included.map((item) => (
-                <li key={item} className="text-sm text-muted-foreground">
+                <motion.li 
+                  key={item} 
+                  variants={listItemVariants}
+                  className="text-sm text-muted-foreground flex items-center gap-2"
+                >
+                  <Check className="w-4 h-4 text-primary flex-shrink-0" />
                   {item}
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
             
-            <Button asChild size="lg" className="btn-primary-clean w-full h-12 text-base mb-4">
-              <Link to="/signup">
-                Get Started
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Link>
-            </Button>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button asChild size="lg" className="btn-primary-clean w-full h-12 text-base mb-4 relative overflow-hidden group">
+                <Link to="/signup">
+                  <span className="relative z-10 flex items-center justify-center w-full">
+                    Get Started
+                    <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              </Button>
+            </motion.div>
             
             <p className="text-sm text-muted-foreground">
               30-day money-back guarantee
             </p>
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* Final headline CTA */}
