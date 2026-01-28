@@ -52,8 +52,8 @@ export default function NewsCard({ article, featured, index = 0 }: NewsCardProps
       )}
     >
       <div className={cn(
-        "p-5 flex flex-col h-full",
-        featured && "lg:p-6"
+        "p-6 flex flex-col h-full",
+        featured && "lg:p-8"
       )}>
         {/* Top row: Badge + Read time */}
         <div className="flex items-center justify-between gap-2 mb-3">
@@ -71,8 +71,8 @@ export default function NewsCard({ article, featured, index = 0 }: NewsCardProps
 
         {/* Title */}
         <h3 className={cn(
-          "font-semibold leading-snug mb-2 group-hover:text-primary transition-colors",
-          featured ? "text-lg lg:text-xl" : "text-base"
+          "font-semibold leading-snug mb-3 group-hover:text-primary transition-colors",
+          featured ? "text-xl lg:text-2xl" : "text-lg"
         )}>
           {article.title}
         </h3>
@@ -80,20 +80,23 @@ export default function NewsCard({ article, featured, index = 0 }: NewsCardProps
         {/* Excerpt */}
         <p className={cn(
           "text-muted-foreground flex-1 mb-4",
-          featured ? "text-sm line-clamp-4" : "text-sm line-clamp-3"
+          featured ? "text-base line-clamp-4" : "text-sm line-clamp-4"
         )}>
           {article.excerpt}
         </p>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-border">
+        <div className="flex items-center justify-between pt-4 border-t border-border">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>{article.source}</span>
             <span>•</span>
             <span>{article.date}</span>
           </div>
           
-          <ExternalLink className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="flex items-center gap-1.5 text-sm text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+            <span>Read Article</span>
+            <ExternalLink className="w-4 h-4" />
+          </div>
         </div>
       </div>
     </motion.a>
