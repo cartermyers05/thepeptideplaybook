@@ -16,31 +16,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useSavedMessages, useToggleSaveMessage } from "@/hooks/useSavedMessages";
 import { useNavigate, Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-
-interface SavedAnswer {
-  id: string;
-  question: string;
-  answer: string;
-  savedAt: Date;
-}
-
-const mockSavedAnswers: SavedAnswer[] = [
-  {
-    id: "1",
-    question: "What's the optimal BPC-157 dosage for tendon repair?",
-    answer: "Based on current research, the recommended dosage range is 250-500 mcg per injection, 1-2 times daily. Duration typically 4-6 weeks for tendon injuries.",
-    savedAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-  {
-    id: "2",
-    question: "How do TB-500 and BPC-157 work together?",
-    answer: "TB-500 and BPC-157 are often stacked because they work through complementary mechanisms. BPC-157 primarily promotes angiogenesis and tendon healing, while TB-500 upregulates actin for cell migration.",
-    savedAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-  },
-];
 
 const navItems = [
   { icon: MessageSquare, label: "Chat", href: "/chat" },
@@ -55,17 +36,36 @@ export default function Saved() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user, signOut } = useAuth();
+  const { data: savedMessages, isLoading } = useSavedMessages();
+  const toggleSave = useToggleSaveMessage();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const filteredAnswers = mockSavedAnswers.filter(
-    (answer) =>
-      answer.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      answer.answer.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAnswers = savedMessages?.filter(
+    (msg) =>
+      msg.question?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      msg.content.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
   const handleLogout = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const handleUnsave = async (messageId: string) => {
+    try {
+      await toggleSave.mutateAsync({ messageId, isSaved: false });
+      toast({
+        title: "Removed from saved",
+        description: "The answer has been unsaved.",
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to unsave message.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -156,7 +156,18 @@ export default function Saved() {
               />
             </div>
 
-            {filteredAnswers.length === 0 ? (
+            {isLoading ? (
+              <div className="space-y-4">
+                {[1, 2].map((i) => (
+                  <div key={i} className="bg-card border border-border rounded-xl p-5">
+                    <Skeleton className="h-5 w-3/4 mb-3" />
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-2/3 mb-3" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                ))}
+              </div>
+            ) : filteredAnswers.length === 0 ? (
               <div className="text-center py-12">
                 <Bookmark className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No saved answers</h3>
@@ -175,20 +186,24 @@ export default function Saved() {
                     className="group bg-card border border-border rounded-xl p-5"
                   >
                     <div className="flex items-start justify-between gap-4 mb-3">
-                      <h3 className="font-semibold">{item.question}</h3>
+                      <h3 className="font-semibold">
+                        {item.question || "Question not available"}
+                      </h3>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                        onClick={() => handleUnsave(item.id)}
+                        disabled={toggleSave.isPending}
                       >
                         <BookmarkMinus className="w-4 h-4" />
                       </Button>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {item.answer}
+                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
+                      {item.content}
                     </p>
                     <p className="text-xs text-muted-foreground mt-3">
-                      Saved {item.savedAt.toLocaleDateString()}
+                      Saved {new Date(item.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 ))}

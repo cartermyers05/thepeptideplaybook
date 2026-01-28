@@ -17,42 +17,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useConversations, useDeleteConversation } from "@/hooks/useConversations";
 import { useNavigate, Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-
-interface Conversation {
-  id: string;
-  title: string;
-  preview: string;
-  date: Date;
-  messagesCount: number;
-}
-
-// Mock data for now
-const mockConversations: Conversation[] = [
-  {
-    id: "1",
-    title: "BPC-157 Dosing for Tendon Repair",
-    preview: "Based on current research, here's what we know about BPC-157...",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    messagesCount: 4,
-  },
-  {
-    id: "2",
-    title: "TB-500 and BPC-157 Stack",
-    preview: "Combining TB-500 with BPC-157 is a popular protocol...",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    messagesCount: 6,
-  },
-  {
-    id: "3",
-    title: "Ipamorelin vs CJC-1295",
-    preview: "Both are growth hormone secretagogues but work differently...",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    messagesCount: 3,
-  },
-];
 
 const navItems = [
   { icon: MessageSquare, label: "Chat", href: "/chat" },
@@ -67,18 +37,40 @@ export default function History() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user, signOut } = useAuth();
+  const { data: conversations, isLoading } = useConversations();
+  const deleteConversation = useDeleteConversation();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const filteredConversations = mockConversations.filter((conv) =>
-    conv.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredConversations = conversations?.filter((conv) =>
+    conv.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    conv.preview?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
   const handleLogout = async () => {
     await signOut();
     navigate("/");
   };
 
-  const formatDate = (date: Date) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await deleteConversation.mutateAsync(id);
+      toast({
+        title: "Conversation deleted",
+        description: "The conversation has been removed.",
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to delete conversation.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
     const now = new Date();
     const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
     
@@ -93,7 +85,6 @@ export default function History() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-foreground/20 z-40 lg:hidden"
@@ -101,7 +92,6 @@ export default function History() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-200 lg:relative lg:translate-x-0",
@@ -161,7 +151,6 @@ export default function History() {
         </div>
       </aside>
 
-      {/* Main content */}
       <main className="flex-1 flex flex-col min-h-screen">
         <header className="flex items-center gap-4 px-4 h-16 border-b border-border lg:px-6">
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 lg:hidden">
@@ -172,7 +161,6 @@ export default function History() {
 
         <div className="flex-1 p-4 lg:p-6">
           <div className="max-w-3xl mx-auto">
-            {/* Search */}
             <div className="relative mb-6">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -183,8 +171,20 @@ export default function History() {
               />
             </div>
 
-            {/* Conversations list */}
-            {filteredConversations.length === 0 ? (
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-card border border-border rounded-xl p-4">
+                    <Skeleton className="h-5 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-full mb-3" />
+                    <div className="flex gap-4">
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredConversations.length === 0 ? (
               <div className="text-center py-12">
                 <HistoryIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No conversations yet</h3>
@@ -204,22 +204,26 @@ export default function History() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold mb-1 truncate">{conv.title}</h3>
+                        <h3 className="font-semibold mb-1 truncate">
+                          {conv.title || "Untitled conversation"}
+                        </h3>
                         <p className="text-sm text-muted-foreground line-clamp-2">
-                          {conv.preview}
+                          {conv.preview || "No messages yet"}
                         </p>
                         <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
-                            {formatDate(conv.date)}
+                            {formatDate(conv.updated_at)}
                           </span>
-                          <span>{conv.messagesCount} messages</span>
+                          <span>{conv.message_count} messages</span>
                         </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                        onClick={(e) => handleDelete(conv.id, e)}
+                        disabled={deleteConversation.isPending}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

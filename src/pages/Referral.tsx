@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Sparkles,
@@ -20,7 +20,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useReferrals, useCreateReferralCode } from "@/hooks/useReferrals";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -38,19 +40,23 @@ export default function Referral() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const { user, signOut } = useAuth();
+  const { data: referralStats, isLoading } = useReferrals();
+  const createReferralCode = useCreateReferralCode();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Mock referral data
-  const referralCode = "PEPTIDE2024";
-  const referralLink = `https://peptidegpt.com/ref/${referralCode}`;
-  const referrals = {
-    pending: 2,
-    completed: 3,
-    monthsEarned: 3,
-  };
+  // Create referral code on first visit if none exists
+  useEffect(() => {
+    if (!isLoading && !referralStats && user) {
+      createReferralCode.mutate();
+    }
+  }, [isLoading, referralStats, user]);
+
+  const referralCode = referralStats?.referralCode || "";
+  const referralLink = referralCode ? `https://peptidegpt.com/ref/${referralCode}` : "";
 
   const handleCopyLink = () => {
+    if (!referralLink) return;
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
     toast({
@@ -64,6 +70,8 @@ export default function Referral() {
     await signOut();
     navigate("/");
   };
+
+  const isGeneratingCode = createReferralCode.isPending;
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -168,16 +176,20 @@ export default function Referral() {
               className="bg-card border border-border rounded-xl p-6 mb-6"
             >
               <h3 className="font-semibold mb-4">Your Referral Link</h3>
-              <div className="flex gap-2">
-                <Input value={referralLink} readOnly className="font-mono text-sm" />
-                <Button onClick={handleCopyLink} variant="secondary">
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                </Button>
-              </div>
+              {isLoading || isGeneratingCode ? (
+                <Skeleton className="h-10 w-full" />
+              ) : (
+                <div className="flex gap-2">
+                  <Input value={referralLink} readOnly className="font-mono text-sm" />
+                  <Button onClick={handleCopyLink} variant="secondary" disabled={!referralLink}>
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+              )}
 
               {/* Share buttons */}
               <div className="flex gap-3 mt-4">
-                <Button variant="outline" size="sm" className="flex-1" asChild>
+                <Button variant="outline" size="sm" className="flex-1" asChild disabled={!referralLink}>
                   <a
                     href={`https://twitter.com/intent/tweet?text=Check out PeptideGPT - the AI-powered peptide research assistant! Use my link for a 14-day free trial: ${referralLink}`}
                     target="_blank"
@@ -187,7 +199,7 @@ export default function Referral() {
                     Twitter
                   </a>
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1" asChild>
+                <Button variant="outline" size="sm" className="flex-1" asChild disabled={!referralLink}>
                   <a
                     href={`mailto:?subject=Check out PeptideGPT&body=I've been using PeptideGPT for peptide research and it's amazing! Use my link for a 14-day free trial: ${referralLink}`}
                   >
@@ -206,15 +218,27 @@ export default function Referral() {
               className="grid grid-cols-3 gap-4 mb-6"
             >
               <div className="bg-card border border-border rounded-xl p-5 text-center">
-                <p className="text-3xl font-bold text-primary">{referrals.pending}</p>
+                {isLoading ? (
+                  <Skeleton className="h-9 w-8 mx-auto mb-1" />
+                ) : (
+                  <p className="text-3xl font-bold text-primary">{referralStats?.pending || 0}</p>
+                )}
                 <p className="text-sm text-muted-foreground">Pending</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-5 text-center">
-                <p className="text-3xl font-bold text-success">{referrals.completed}</p>
+                {isLoading ? (
+                  <Skeleton className="h-9 w-8 mx-auto mb-1" />
+                ) : (
+                  <p className="text-3xl font-bold text-success">{referralStats?.completed || 0}</p>
+                )}
                 <p className="text-sm text-muted-foreground">Completed</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-5 text-center">
-                <p className="text-3xl font-bold">{referrals.monthsEarned}</p>
+                {isLoading ? (
+                  <Skeleton className="h-9 w-8 mx-auto mb-1" />
+                ) : (
+                  <p className="text-3xl font-bold">{referralStats?.monthsEarned || 0}</p>
+                )}
                 <p className="text-sm text-muted-foreground">Months earned</p>
               </div>
             </motion.div>
