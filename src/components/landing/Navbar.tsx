@@ -54,7 +54,13 @@ export function Navbar() {
             </nav>
 
             {/* Desktop CTA */}
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-4">
+              <Link 
+                to="/login" 
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Log In
+              </Link>
               <Button asChild size="sm" className="btn-primary-clean">
                 <Link to="/signup">Get Started</Link>
               </Button>
@@ -91,7 +97,15 @@ export function Navbar() {
                 {link.label}
               </a>
             ))}
-            <div className="pt-4 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.3s", animationFillMode: "forwards" }}>
+            <Link
+              to="/login"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-lg font-medium py-2 opacity-0 animate-fade-in-up"
+              style={{ animationDelay: "0.3s", animationFillMode: "forwards" }}
+            >
+              Log In
+            </Link>
+            <div className="pt-4 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}>
               <Button asChild className="w-full btn-primary-clean">
                 <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
                   Get Started
