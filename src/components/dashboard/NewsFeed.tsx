@@ -75,14 +75,14 @@ export default function NewsFeed() {
   const otherArticles = filteredNews.filter((a) => !a.featured);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-          <Newspaper className="w-5 h-5 text-primary-foreground" />
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center glow-primary">
+          <Newspaper className="w-6 h-6 text-primary-foreground" />
         </div>
         <div>
-          <h2 className="text-xl font-bold">Peptide News & Research</h2>
+          <h2 className="text-2xl font-bold">Peptide News & Research</h2>
           <p className="text-sm text-muted-foreground">
             Curated updates from trusted sources
           </p>
@@ -90,7 +90,7 @@ export default function NewsFeed() {
       </div>
 
       {/* Category Filters */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-8">
         {(["all", "research", "clinical", "regulatory", "industry"] as Category[]).map(
           (cat) => (
             <Button
@@ -98,7 +98,11 @@ export default function NewsFeed() {
               variant={selectedCategory === cat ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(cat)}
-              className="capitalize"
+              className={`capitalize ${
+                selectedCategory === cat 
+                  ? "bg-gradient-primary hover:opacity-90" 
+                  : "glass-card hover-glow"
+              }`}
             >
               {cat === "all" ? "All Stories" : cat}
             </Button>
@@ -106,22 +110,23 @@ export default function NewsFeed() {
         )}
       </div>
 
-      {/* Featured Article */}
-      {featuredArticle && (
-        <div className="mb-6">
-          <NewsCard article={featuredArticle} featured />
-        </div>
-      )}
+      {/* Bento Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Featured Article - spans 2 columns on larger screens */}
+        {featuredArticle && (
+          <div className="md:col-span-2 lg:row-span-2">
+            <NewsCard article={featuredArticle} featured />
+          </div>
+        )}
 
-      {/* Article Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Other Articles */}
         {otherArticles.map((article) => (
           <NewsCard key={article.id} article={article} />
         ))}
       </div>
 
       {/* Source Attribution */}
-      <p className="text-xs text-muted-foreground text-center mt-8">
+      <p className="text-xs text-muted-foreground text-center mt-10 py-4 border-t border-border/50">
         All articles link to original sources. PeptideGPT does not claim ownership of external content.
       </p>
     </div>

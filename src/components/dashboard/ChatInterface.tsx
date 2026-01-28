@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
-  dbId?: string; // Database ID for saved messages
+  dbId?: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
@@ -75,7 +75,6 @@ export default function ChatInterface() {
 
     let activeConversationId = conversationId;
 
-    // Create conversation if this is the first message
     if (!activeConversationId) {
       try {
         const title = userMessageContent.slice(0, 50) + (userMessageContent.length > 50 ? "..." : "");
@@ -87,7 +86,6 @@ export default function ChatInterface() {
       }
     }
 
-    // Save user message to database
     let userDbId: string | undefined;
     if (activeConversationId) {
       try {
@@ -181,7 +179,6 @@ export default function ChatInterface() {
         }
       }
 
-      // Save assistant message to database
       if (activeConversationId && assistantContent) {
         try {
           const savedAssistantMessage = await saveMessage.mutateAsync({
@@ -199,7 +196,6 @@ export default function ChatInterface() {
         }
       }
 
-      // Increment questions asked count
       try {
         await incrementQuestions.mutateAsync();
       } catch (error) {
@@ -274,39 +270,43 @@ export default function ChatInterface() {
       {/* Chat area */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full" ref={scrollRef}>
-          <div className="max-w-3xl mx-auto px-4 py-6">
+          <div className="max-w-3xl mx-auto px-4 py-8">
             {messages.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mx-auto mb-6">
-                  <Sparkles className="w-8 h-8 text-primary-foreground" />
+              <div className="text-center py-16">
+                {/* Animated logo with glow */}
+                <div className="w-20 h-20 rounded-2xl bg-gradient-primary flex items-center justify-center mx-auto mb-8 pulse-glow">
+                  <Sparkles className="w-10 h-10 text-primary-foreground" />
                 </div>
-                <h2 className="text-2xl font-bold mb-2">
+                <h2 className="text-3xl font-bold mb-3 text-gradient">
                   Welcome to PeptideGPT
                 </h2>
-                <p className="text-muted-foreground mb-8">
-                  Ask any research question about peptides and get evidence-based answers
+                <p className="text-muted-foreground mb-10 max-w-md mx-auto">
+                  Your AI research assistant for evidence-based peptide information
                 </p>
 
-                {/* Suggested questions */}
+                {/* Suggested questions - 2x2 grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">
                   {suggestedQuestions.map((question) => (
                     <button
                       key={question}
                       onClick={() => handleSuggestedQuestion(question)}
-                      className="p-4 text-left rounded-xl bg-secondary hover:bg-secondary/80 border border-border transition-colors"
+                      className="p-4 text-left rounded-xl glass-card card-hover border border-border/50 group"
                     >
-                      <p className="text-sm">{question}</p>
+                      <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                        {question}
+                      </p>
                     </button>
                   ))}
                 </div>
               </div>
             ) : (
               <div className="space-y-6">
-                {messages.map((message) => (
+                {messages.map((message, index) => (
                   <motion.div
                     key={message.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
                     className={cn(
                       "flex",
                       message.role === "user" ? "justify-end" : "justify-start"
@@ -316,10 +316,18 @@ export default function ChatInterface() {
                       className={cn(
                         "max-w-[85%] rounded-2xl px-4 py-3",
                         message.role === "user"
-                          ? "bg-primary text-primary-foreground rounded-br-md"
-                          : "bg-secondary rounded-bl-md"
+                          ? "bg-gradient-primary text-primary-foreground rounded-br-md"
+                          : "glass-card rounded-bl-md"
                       )}
                     >
+                      {message.role === "assistant" && (
+                        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/30">
+                          <div className="w-6 h-6 rounded-lg bg-gradient-primary flex items-center justify-center">
+                            <Sparkles className="w-3 h-3 text-primary-foreground" />
+                          </div>
+                          <span className="text-xs font-medium text-muted-foreground">PeptideGPT</span>
+                        </div>
+                      )}
                       <div className="prose prose-sm dark:prose-invert max-w-none">
                         {message.role === "assistant" ? (
                           <div className="text-sm">
@@ -343,7 +351,7 @@ export default function ChatInterface() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 px-2"
+                              className="h-8 px-2 hover-glow"
                               onClick={() => handleFeedback(message, true)}
                             >
                               <ThumbsUp className="w-4 h-4" />
@@ -351,7 +359,7 @@ export default function ChatInterface() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="h-8 px-2"
+                              className="h-8 px-2 hover-glow"
                               onClick={() => handleFeedback(message, false)}
                             >
                               <ThumbsDown className="w-4 h-4" />
@@ -359,7 +367,7 @@ export default function ChatInterface() {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className={cn("h-8 px-2", message.isSaved && "text-primary")}
+                              className={cn("h-8 px-2 hover-glow", message.isSaved && "text-primary")}
                               onClick={() => handleToggleSave(message)}
                               disabled={!message.dbId}
                             >
@@ -381,10 +389,10 @@ export default function ChatInterface() {
         </ScrollArea>
       </div>
 
-      {/* Input area */}
-      <div className="border-t border-border p-4 lg:p-6">
+      {/* Floating input area */}
+      <div className="p-4 lg:p-6">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-          <div className="relative">
+          <div className="relative glass-card p-2 rounded-2xl">
             <Textarea
               ref={textareaRef}
               value={input}
@@ -396,20 +404,22 @@ export default function ChatInterface() {
                 }
               }}
               placeholder="Ask a research question about peptides..."
-              className="min-h-[56px] max-h-[200px] pr-14 resize-none"
+              className="min-h-[56px] max-h-[200px] pr-14 resize-none bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               disabled={isLoading}
             />
             <Button
               type="submit"
               size="icon"
-              className="absolute right-2 bottom-2"
+              className="absolute right-4 bottom-4 rounded-xl bg-gradient-primary hover:opacity-90 transition-opacity glow-primary"
               disabled={!input.trim() || isLoading}
             >
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground text-center mt-2">
-            PeptideGPT provides research information only. Always verify with healthcare professionals.
+          <p className="text-xs text-muted-foreground text-center mt-3 flex items-center justify-center gap-2">
+            <span>Press</span>
+            <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs font-mono">Enter</kbd>
+            <span>to send • PeptideGPT provides research information only</span>
           </p>
         </form>
       </div>
