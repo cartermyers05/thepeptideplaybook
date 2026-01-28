@@ -14,6 +14,181 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_citations: {
+        Row: {
+          ai_engine: string
+          article_id: string | null
+          citation_position: number | null
+          created_at: string | null
+          id: string
+          query: string
+          referrer_url: string | null
+        }
+        Insert: {
+          ai_engine: string
+          article_id?: string | null
+          citation_position?: number | null
+          created_at?: string | null
+          id?: string
+          query: string
+          referrer_url?: string | null
+        }
+        Update: {
+          ai_engine?: string
+          article_id?: string | null
+          citation_position?: number | null
+          created_at?: string | null
+          id?: string
+          query?: string
+          referrer_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_citations_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          parent_id: string | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          parent_id?: string | null
+          slug: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          parent_id?: string | null
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "article_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_category_mapping: {
+        Row: {
+          article_id: string
+          category_id: string
+        }
+        Insert: {
+          article_id: string
+          category_id: string
+        }
+        Update: {
+          article_id?: string
+          category_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_category_mapping_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_category_mapping_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "article_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      articles: {
+        Row: {
+          author_credential: string | null
+          author_name: string | null
+          citation_count: number | null
+          citations: Json | null
+          content_type: string
+          created_at: string | null
+          full_content: string
+          h1_question: string
+          id: string
+          meta_description: string | null
+          page_views: number | null
+          published_at: string | null
+          related_article_ids: string[] | null
+          slug: string
+          statistics: Json | null
+          status: string | null
+          structured_answer: Json | null
+          target_keywords: string[] | null
+          title: string
+          tldr: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_credential?: string | null
+          author_name?: string | null
+          citation_count?: number | null
+          citations?: Json | null
+          content_type?: string
+          created_at?: string | null
+          full_content: string
+          h1_question: string
+          id?: string
+          meta_description?: string | null
+          page_views?: number | null
+          published_at?: string | null
+          related_article_ids?: string[] | null
+          slug: string
+          statistics?: Json | null
+          status?: string | null
+          structured_answer?: Json | null
+          target_keywords?: string[] | null
+          title: string
+          tldr: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_credential?: string | null
+          author_name?: string | null
+          citation_count?: number | null
+          citations?: Json | null
+          content_type?: string
+          created_at?: string | null
+          full_content?: string
+          h1_question?: string
+          id?: string
+          meta_description?: string | null
+          page_views?: number | null
+          published_at?: string | null
+          related_article_ids?: string[] | null
+          slug?: string
+          statistics?: Json | null
+          status?: string | null
+          structured_answer?: Json | null
+          target_keywords?: string[] | null
+          title?: string
+          tldr?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string

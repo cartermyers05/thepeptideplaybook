@@ -1,3 +1,32 @@
+# PeptideGPT Robots.txt
+# AI Search Engine Optimization
+
+# Allow all search engines
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Explicitly allow AI crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+
+# Traditional search engines
 User-agent: Googlebot
 Allow: /
 
@@ -10,5 +39,5 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+# Sitemap location (served by edge function)
+Sitemap: https://xsanfxyahxcsjsrlfopq.supabase.co/functions/v1/sitemap
