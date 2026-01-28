@@ -13,25 +13,30 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { AlertTriangle } from "lucide-react";
 
 interface ComplianceModalProps {
   onAccept: () => void;
 }
 
 const checkboxItems = [
-  { id: "notMedical", label: "This is not medical advice" },
-  { id: "consultProfessionals", label: "I will consult healthcare professionals before any use" },
-  { id: "notFdaApproved", label: "I understand peptides may not be FDA-approved for human use" },
-  { id: "educationalOnly", label: "I am using this for educational/research purposes" },
+  { id: "notMedical", label: "This is NOT medical advice and cannot replace a healthcare provider" },
+  { id: "noDosing", label: "I will NOT rely on this tool for dosing, treatment, or self-experimentation" },
+  { id: "consultProfessionals", label: "I MUST consult a licensed healthcare professional before any peptide use" },
+  { id: "notFdaApproved", label: "Most peptides discussed are NOT FDA-approved for human use" },
+  { id: "educationalOnly", label: "I am using this strictly for educational/research purposes" },
+  { id: "ageConfirmation", label: "I am 18 years of age or older" },
 ];
 
 export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
   const [open, setOpen] = useState(false);
   const [checks, setChecks] = useState({
     notMedical: false,
+    noDosing: false,
     consultProfessionals: false,
     notFdaApproved: false,
     educationalOnly: false,
+    ageConfirmation: false,
   });
   const { user } = useAuth();
 
@@ -102,6 +107,24 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
               PeptideGPT is an educational research tool that provides information based on published scientific literature.
             </DialogDescription>
           </DialogHeader>
+
+          {/* Legal Warning Box */}
+          <div className="mt-4 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-semibold text-amber-700 dark:text-amber-500 mb-2">
+                  IMPORTANT LEGAL NOTICE
+                </p>
+                <ul className="space-y-1.5 text-foreground/80">
+                  <li>• This is NOT medical advice</li>
+                  <li>• Most peptides discussed are NOT FDA-approved for human use</li>
+                  <li>• I cannot provide dosing, sourcing, or treatment recommendations</li>
+                  <li>• Always consult a licensed healthcare provider</li>
+                </ul>
+              </div>
+            </div>
+          </div>
 
           <div className="space-y-4 py-4">
             <p className="text-sm text-muted-foreground font-medium">
