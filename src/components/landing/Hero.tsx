@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Bot, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -36,49 +36,59 @@ export function Hero() {
             </div>
           </motion.div>
 
-          {/* Visual - Abstract molecules/pills */}
+          {/* Chat Preview Mockup */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
             className="relative"
           >
-            <div className="aspect-square max-w-md mx-auto relative">
-              {/* Abstract floating elements */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                {/* Large central circle */}
-                <div className="w-48 h-48 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 blur-sm" />
-              </div>
-              
-              {/* Floating molecules */}
-              <motion.div
-                animate={{ y: [-10, 10, -10] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-8 right-8 w-16 h-16 rounded-full bg-primary/10 backdrop-blur-sm border border-primary/20"
-              />
-              <motion.div
-                animate={{ y: [10, -10, 10] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-1/3 left-4 w-12 h-12 rounded-full bg-primary/15 backdrop-blur-sm border border-primary/20"
-              />
-              <motion.div
-                animate={{ y: [-8, 8, -8] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-16 right-12 w-20 h-20 rounded-full bg-primary/10 backdrop-blur-sm border border-primary/20"
-              />
-              <motion.div
-                animate={{ y: [5, -5, 5] }}
-                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-8 left-16 w-10 h-10 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30"
-              />
-              
-              {/* Center content */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="glass-card-subtle p-8 text-center">
-                  <p className="text-sm font-medium text-primary">AI-powered • Research-backed</p>
+            <motion.div
+              animate={{ y: [-3, 3, -3] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="glass-card-subtle p-6"
+            >
+              {/* Chat header */}
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border/50">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Peptide Assistant</p>
+                  <p className="text-xs text-muted-foreground">Online</p>
                 </div>
               </div>
-            </div>
+
+              {/* Chat messages */}
+              <div className="space-y-4 mb-6">
+                {/* User message */}
+                <div className="flex justify-end">
+                  <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2 max-w-[80%]">
+                    <p className="text-sm">Is BPC-157 legal to buy?</p>
+                  </div>
+                </div>
+
+                {/* Assistant message */}
+                <div className="flex justify-start">
+                  <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3 max-w-[85%]">
+                    <p className="text-sm text-foreground leading-relaxed">
+                      It depends on your location and intended use. In the US, BPC-157 is not FDA-approved and is sold only for research purposes...
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Input field */}
+              <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-4 py-3">
+                <input
+                  type="text"
+                  placeholder="Ask anything about peptides..."
+                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                  disabled
+                />
+                <Send className="w-4 h-4 text-muted-foreground" />
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
