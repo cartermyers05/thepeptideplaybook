@@ -7,6 +7,7 @@ import {
   ThumbsDown,
   BookmarkPlus,
   Bookmark,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,10 +30,10 @@ interface Message {
 }
 
 const suggestedQuestions = [
-  "What's the best peptide for recovery?",
-  "How do I dose BPC-157 safely?",
-  "Which peptides stack well together?",
-  "What are the side effects of TB-500?",
+  "What does published research say about BPC-157?",
+  "What is the regulatory status of growth hormone peptides?",
+  "How do researchers study peptide mechanisms?",
+  "What human clinical trials exist for TB-500?",
 ];
 
 function TypingIndicator() {
@@ -351,12 +352,23 @@ export default function ChatInterface() {
                         )}
                       >
                         {message.role === "assistant" && (
-                          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
-                            <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center">
-                              <Sparkles className="w-3 h-3 text-primary-foreground" />
+                          <>
+                            {/* Pre-response disclaimer */}
+                            <div className="mb-2 pb-2 border-b border-amber-500/20 bg-amber-500/5 -mx-4 -mt-3 px-4 pt-2 rounded-t-xl">
+                              <div className="flex items-center gap-1.5">
+                                <AlertTriangle className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                                <p className="text-xs text-amber-600 dark:text-amber-400">
+                                  Educational information only. Not medical advice.
+                                </p>
+                              </div>
                             </div>
-                            <span className="text-xs font-medium text-muted-foreground">PeptideGPT</span>
-                          </div>
+                            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
+                              <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center">
+                                <Sparkles className="w-3 h-3 text-primary-foreground" />
+                              </div>
+                              <span className="text-xs font-medium text-muted-foreground">PeptideGPT</span>
+                            </div>
+                          </>
                         )}
                         <div className="prose prose-sm dark:prose-invert max-w-none">
                           {message.role === "assistant" ? (
@@ -373,8 +385,8 @@ export default function ChatInterface() {
                         </div>
                         {message.role === "assistant" && message.content && !isLoading && (
                           <>
-                            <p className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border italic">
-                              For research purposes only. Consult a healthcare provider.
+                            <p className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border">
+                              ⚠️ This information is for educational purposes only. Most peptides are NOT FDA-approved for human use. Always consult a licensed healthcare provider.
                             </p>
                             <div className="flex items-center gap-1 mt-2">
                               <Button 
@@ -427,7 +439,7 @@ export default function ChatInterface() {
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a peptide question..."
+              placeholder="Ask a peptide research question..."
               className="min-h-[52px] max-h-32 pr-12 resize-none rounded-xl border-border"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
