@@ -91,20 +91,24 @@ export function Hero() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
-              Stay current on peptide research and ask our AI assistant anything — backed by real science, not TikTok trends.
+              The research-based guide that tells you what peptides actually do, what's FDA-approved vs. experimental, and exactly what to ask your doctor.
             </p>
 
             <div className="space-y-4">
               <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base">
                 <Link to="/signup">
-                  Start Learning — $67
+                  Get Instant Access — $167
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
               </Button>
 
-              <p className="text-sm text-muted-foreground">
-                Instant access • 30-day guarantee
-              </p>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                <span>30-Day Money-Back Guarantee</span>
+                <span className="hidden sm:inline">•</span>
+                <span>Instant Digital Download</span>
+                <span className="hidden sm:inline">•</span>
+                <span>Updated for 2026</span>
+              </div>
             </div>
           </motion.div>
 

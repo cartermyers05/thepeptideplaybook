@@ -1,18 +1,27 @@
 import { motion } from "framer-motion";
+import { AlertTriangle } from "lucide-react";
+
+const problems = [
+  "TikTok \"experts\" recommending dosages with zero medical training",
+  "Reddit threads full of contradictory advice and bro science",
+  "No clear explanation of what's actually FDA-approved vs. illegal",
+  "Impossible to know which sources to trust",
+  "Doctors who dismiss peptides entirely or know less than you do",
+];
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
+      staggerChildren: 0.1,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  hidden: { opacity: 0, x: -20 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.4 } },
 };
 
 export function ProblemSection() {
@@ -30,30 +39,27 @@ export function ProblemSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="max-w-2xl mx-auto text-center"
+          className="max-w-2xl mx-auto"
         >
           <motion.h2 
             variants={itemVariants}
-            className="text-3xl md:text-4xl font-semibold tracking-tight mb-8"
+            className="text-3xl md:text-4xl font-semibold tracking-tight mb-8 text-center"
           >
-            The peptide space is confusing
+            The Peptide Information Problem
           </motion.h2>
           
-          <motion.p 
-            variants={itemVariants}
-            className="text-lg text-muted-foreground leading-relaxed mb-8"
-          >
-            TikTok creators with no credentials are telling millions of people what to inject. 
-            Dosing advice is inconsistent. Legal status is unclear. And most people have no idea 
-            what questions to ask their doctor — or if they even should.
-          </motion.p>
-          
-          <motion.p 
-            variants={itemVariants}
-            className="text-lg font-medium"
-          >
-            We built this guide to fix that.
-          </motion.p>
+          <motion.ul className="space-y-4 mb-8">
+            {problems.map((problem, index) => (
+              <motion.li
+                key={index}
+                variants={itemVariants}
+                className="flex items-start gap-3"
+              >
+                <AlertTriangle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
+                <span className="text-muted-foreground leading-relaxed">{problem}</span>
+              </motion.li>
+            ))}
+          </motion.ul>
         </motion.div>
       </div>
     </section>
