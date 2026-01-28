@@ -4,7 +4,7 @@ import { Sparkles, History, Bookmark, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import UserMenu from "./UserMenu";
-import FloatingTabs from "./FloatingTabs";
+import TabSwitcher from "./TabSwitcher";
 
 interface DashboardHeaderProps {
   activeTab: "news" | "chat";
@@ -20,58 +20,48 @@ const navItems = [
 export default function DashboardHeader({ activeTab, onTabChange }: DashboardHeaderProps) {
   return (
     <motion.header 
-      initial={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-      className="sticky top-0 z-50 w-full"
+      transition={{ duration: 0.3 }}
+      className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-md border-b border-border"
     >
-      <div className="mx-4 mt-4 lg:mx-6">
-        <div className="glass-panel flex items-center justify-between h-16 px-4 lg:px-6">
+      <div className="container px-4">
+        <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-            <motion.div 
-              className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center glow-primary"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
-            </motion.div>
-            <span className="font-bold text-lg hidden sm:block group-hover:text-primary transition-colors">
+          <Link to="/" className="flex items-center gap-2.5 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="font-semibold hidden sm:block">
               PeptideGPT
             </span>
           </Link>
 
-          {/* Centered Floating Tabs */}
+          {/* Centered Tab Switcher */}
           <div className="absolute left-1/2 -translate-x-1/2">
-            <FloatingTabs activeTab={activeTab} onTabChange={onTabChange} />
+            <TabSwitcher activeTab={activeTab} onTabChange={onTabChange} />
           </div>
 
           {/* Right side: Nav icons + User menu */}
           <div className="flex items-center gap-1">
             {/* Icon nav buttons - hidden on mobile */}
             <nav className="hidden md:flex items-center gap-1 mr-2">
-              {navItems.map((item, index) => (
+              {navItems.map((item) => (
                 <Tooltip key={item.label}>
                   <TooltipTrigger asChild>
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.1 + index * 0.05 }}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      asChild
                     >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 hover-glow rounded-xl"
-                        asChild
-                      >
-                        <Link to={item.href}>
-                          <item.icon className="w-4 h-4" />
-                          <span className="sr-only">{item.label}</span>
-                        </Link>
-                      </Button>
-                    </motion.div>
+                      <Link to={item.href}>
+                        <item.icon className="w-4 h-4" />
+                        <span className="sr-only">{item.label}</span>
+                      </Link>
+                    </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="glass-panel border-0">
+                  <TooltipContent side="bottom">
                     <p>{item.label}</p>
                   </TooltipContent>
                 </Tooltip>

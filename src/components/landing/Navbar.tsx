@@ -29,20 +29,20 @@ export function Navbar() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-200",
           isScrolled
-            ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-soft"
+            ? "bg-background/95 backdrop-blur-md border-b border-border"
             : "bg-transparent"
         )}
       >
         <div className="container px-4">
-          <div className="flex items-center justify-between h-16 md:h-20">
+          <div className="flex items-center justify-between h-16 md:h-18">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
+            <Link to="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg">PeptideGPT</span>
+              <span className="font-semibold text-lg">PeptideGPT</span>
             </Link>
 
             {/* Desktop nav */}
@@ -59,7 +59,7 @@ export function Navbar() {
             </nav>
 
             {/* Desktop CTAs */}
-            <div className="hidden md:flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-3">
               <Button asChild variant="ghost" size="sm">
                 <Link to="/login">Log in</Link>
               </Button>
@@ -74,9 +74,9 @@ export function Navbar() {
               className="md:hidden p-2 -mr-2"
             >
               {isMobileMenuOpen ? (
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               ) : (
-                <Menu className="w-6 h-6" />
+                <Menu className="w-5 h-5" />
               )}
             </button>
           </div>
@@ -87,10 +87,10 @@ export function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-x-0 top-16 z-40 md:hidden bg-background border-b border-border shadow-lg"
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed inset-x-0 top-16 z-40 md:hidden bg-background border-b border-border"
           >
             <nav className="container px-4 py-6 space-y-4">
               {navLinks.map((link) => (

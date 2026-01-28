@@ -35,20 +35,18 @@ const suggestedQuestions = [
   "What are the side effects of TB-500?",
 ];
 
-// Typing indicator component
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-1 px-3 py-2">
+    <div className="flex items-center gap-1.5 px-3 py-2">
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
-          className="w-2 h-2 rounded-full bg-muted-foreground/60"
-          animate={{ y: [0, -6, 0] }}
+          className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50"
+          animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{
-            duration: 0.6,
+            duration: 1,
             repeat: Infinity,
-            delay: i * 0.15,
-            ease: "easeInOut"
+            delay: i * 0.2,
           }}
         />
       ))}
@@ -296,82 +294,33 @@ export default function ChatInterface() {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="text-center py-16 relative"
+                transition={{ duration: 0.3 }}
+                className="text-center py-12"
               >
-                {/* Ambient particles */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                  <motion.div 
-                    className="absolute top-1/4 left-1/3 w-32 h-32 rounded-full bg-primary/10 blur-2xl"
-                    animate={{ 
-                      x: [0, 30, 0],
-                      y: [0, -20, 0],
-                      scale: [1, 1.1, 1]
-                    }}
-                    transition={{ duration: 8, repeat: Infinity }}
-                  />
-                  <motion.div 
-                    className="absolute bottom-1/3 right-1/3 w-24 h-24 rounded-full bg-primary/8 blur-2xl"
-                    animate={{ 
-                      x: [0, -20, 0],
-                      y: [0, 15, 0],
-                      scale: [1, 0.9, 1]
-                    }}
-                    transition={{ duration: 10, repeat: Infinity }}
-                  />
+                {/* Logo */}
+                <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="w-8 h-8 text-primary-foreground" />
                 </div>
 
-                {/* Animated logo with multi-layer glow */}
-                <motion.div 
-                  className="w-24 h-24 rounded-3xl bg-gradient-primary flex items-center justify-center mx-auto mb-8 relative"
-                  animate={{ 
-                    boxShadow: [
-                      "0 0 30px -5px hsl(var(--glow) / 0.4), 0 0 60px -10px hsl(var(--glow) / 0.3)",
-                      "0 0 50px -5px hsl(var(--glow) / 0.6), 0 0 100px -10px hsl(var(--glow) / 0.4)",
-                      "0 0 30px -5px hsl(var(--glow) / 0.4), 0 0 60px -10px hsl(var(--glow) / 0.3)"
-                    ]
-                  }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
-                  <Sparkles className="w-12 h-12 text-primary-foreground" />
-                </motion.div>
-
-                <motion.h2 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-3xl font-bold mb-3 text-gradient"
-                >
+                <h2 className="text-2xl font-bold mb-2">
                   Welcome to PeptideGPT
-                </motion.h2>
-                <motion.p 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-muted-foreground mb-10 max-w-md mx-auto"
-                >
+                </h2>
+                <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                   Your AI research assistant for evidence-based peptide information
-                </motion.p>
+                </p>
 
-                {/* Suggested questions - 2x2 grid with staggered entrance */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">
+                {/* Suggested questions */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto">
                   {suggestedQuestions.map((question, index) => (
                     <motion.button
                       key={question}
-                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ 
-                        delay: 0.4 + index * 0.1,
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 25
-                      }}
-                      whileHover={{ y: -4, scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 + index * 0.05 }}
                       onClick={() => handleSuggestedQuestion(question)}
-                      className="p-4 text-left rounded-xl glass-panel border-glow group"
+                      className="p-3 text-left rounded-lg border border-border bg-card hover:border-primary/30 hover:bg-accent transition-colors"
                     >
-                      <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+                      <p className="text-sm text-muted-foreground">
                         {question}
                       </p>
                     </motion.button>
@@ -379,19 +328,15 @@ export default function ChatInterface() {
                 </div>
               </motion.div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <AnimatePresence mode="popLayout">
-                  {messages.map((message, index) => (
+                  {messages.map((message) => (
                     <motion.div
                       key={message.id}
-                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ 
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 25
-                      }}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
                       className={cn(
                         "flex",
                         message.role === "user" ? "justify-end" : "justify-start"
@@ -399,21 +344,17 @@ export default function ChatInterface() {
                     >
                       <div
                         className={cn(
-                          "max-w-[85%] rounded-2xl px-4 py-3",
+                          "max-w-[85%] rounded-xl px-4 py-3",
                           message.role === "user"
-                            ? "bg-gradient-primary text-primary-foreground rounded-br-md glow-primary"
-                            : "glass-panel rounded-bl-md"
+                            ? "bg-primary text-primary-foreground rounded-br-sm"
+                            : "bg-card border border-border rounded-bl-sm"
                         )}
                       >
                         {message.role === "assistant" && (
-                          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/30">
-                            <motion.div 
-                              className="w-6 h-6 rounded-lg bg-gradient-primary flex items-center justify-center"
-                              animate={{ rotate: [0, 5, -5, 0] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            >
+                          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
+                            <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center">
                               <Sparkles className="w-3 h-3 text-primary-foreground" />
-                            </motion.div>
+                            </div>
                             <span className="text-xs font-medium text-muted-foreground">PeptideGPT</span>
                           </div>
                         )}
@@ -432,45 +373,40 @@ export default function ChatInterface() {
                         </div>
                         {message.role === "assistant" && message.content && !isLoading && (
                           <>
-                            <p className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border/30 italic">
+                            <p className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border italic">
                               For research purposes only. Consult a healthcare provider.
                             </p>
-                            <motion.div 
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: 0.3 }}
-                              className="flex items-center gap-2 mt-2"
-                            >
+                            <div className="flex items-center gap-1 mt-2">
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-8 px-2 hover-glow rounded-lg"
+                                className="h-7 px-2"
                                 onClick={() => handleFeedback(message, true)}
                               >
-                                <ThumbsUp className="w-4 h-4" />
+                                <ThumbsUp className="w-3.5 h-3.5" />
                               </Button>
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className="h-8 px-2 hover-glow rounded-lg"
+                                className="h-7 px-2"
                                 onClick={() => handleFeedback(message, false)}
                               >
-                                <ThumbsDown className="w-4 h-4" />
+                                <ThumbsDown className="w-3.5 h-3.5" />
                               </Button>
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className={cn("h-8 px-2 hover-glow rounded-lg", message.isSaved && "text-primary")}
+                                className={cn("h-7 px-2", message.isSaved && "text-primary")}
                                 onClick={() => handleToggleSave(message)}
                                 disabled={!message.dbId}
                               >
                                 {message.isSaved ? (
-                                  <Bookmark className="w-4 h-4 fill-current" />
+                                  <Bookmark className="w-3.5 h-3.5 fill-current" />
                                 ) : (
-                                  <BookmarkPlus className="w-4 h-4" />
+                                  <BookmarkPlus className="w-3.5 h-3.5" />
                                 )}
                               </Button>
-                            </motion.div>
+                            </div>
                           </>
                         )}
                       </div>
@@ -483,53 +419,33 @@ export default function ChatInterface() {
         </ScrollArea>
       </div>
 
-      {/* Floating input area */}
-      <div className="p-4 lg:p-6">
-        <motion.form 
-          onSubmit={handleSubmit} 
-          className="max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <div className="relative glass-panel p-2">
+      {/* Input area */}
+      <div className="border-t border-border bg-background">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <form onSubmit={handleSubmit} className="relative">
             <Textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask a peptide question..."
+              className="min-h-[52px] max-h-32 pr-12 resize-none rounded-xl border-border"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleSubmit(e);
                 }
               }}
-              placeholder="Ask a research question about peptides..."
-              className="min-h-[56px] max-h-[200px] pr-14 resize-none bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-              disabled={isLoading}
             />
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <Button
+              type="submit"
+              size="icon"
+              disabled={!input.trim() || isLoading}
+              className="absolute right-2 bottom-2 h-8 w-8 rounded-lg"
             >
-              <Button
-                type="submit"
-                size="icon"
-                className={cn(
-                  "absolute right-4 bottom-4 rounded-xl bg-gradient-primary hover:opacity-90 transition-all",
-                  input.trim() && "glow-primary"
-                )}
-                disabled={!input.trim() || isLoading}
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </motion.div>
-          </div>
-          <p className="text-xs text-muted-foreground text-center mt-3 flex items-center justify-center gap-2">
-            <span>Press</span>
-            <kbd className="px-1.5 py-0.5 rounded-md glass-panel text-xs font-mono">Enter</kbd>
-            <span>to send • PeptideGPT provides research information only</span>
-          </p>
-        </motion.form>
+              <Send className="w-4 h-4" />
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );

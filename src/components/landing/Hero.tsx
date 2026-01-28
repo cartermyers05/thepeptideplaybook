@@ -1,80 +1,39 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-const typingExamples = [
-  "What's the optimal BPC-157 dosage for tendon repair?",
-  "How do I safely stack TB-500 with BPC-157?",
-  "What are the research-backed benefits of Ipamorelin?",
-  "Which peptides help with sleep and recovery?",
+const benefits = [
+  "Research-backed answers",
+  "Cited sources",
+  "Instant responses",
 ];
 
 export function Hero() {
-  const [currentExample, setCurrentExample] = useState(0);
-  const [displayText, setDisplayText] = useState("");
-  const [isTyping, setIsTyping] = useState(true);
-
-  useEffect(() => {
-    const text = typingExamples[currentExample];
-    
-    if (isTyping) {
-      if (displayText.length < text.length) {
-        const timeout = setTimeout(() => {
-          setDisplayText(text.slice(0, displayText.length + 1));
-        }, 40);
-        return () => clearTimeout(timeout);
-      } else {
-        const timeout = setTimeout(() => {
-          setIsTyping(false);
-        }, 2000);
-        return () => clearTimeout(timeout);
-      }
-    } else {
-      if (displayText.length > 0) {
-        const timeout = setTimeout(() => {
-          setDisplayText(displayText.slice(0, -1));
-        }, 20);
-        return () => clearTimeout(timeout);
-      } else {
-        setCurrentExample((prev) => (prev + 1) % typingExamples.length);
-        setIsTyping(true);
-      }
-    }
-  }, [displayText, isTyping, currentExample]);
-
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-accent/50 via-background to-background" />
+      {/* Subtle dot grid background */}
+      <div className="absolute inset-0 dot-grid" />
       
-      {/* Subtle grid pattern */}
-      <div 
-        className="absolute inset-0 opacity-[0.015]"
-        style={{
-          backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px),
-                           linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px'
-        }}
-      />
+      {/* Gradient wash */}
+      <div className="absolute inset-0 gradient-wash opacity-50" />
 
       <div className="container relative z-10 px-4 py-20 md:py-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-4xl mx-auto text-center"
+          transition={{ duration: 0.4 }}
+          className="max-w-3xl mx-auto text-center"
         >
           {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full bg-accent border border-border"
+            className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 rounded-full border border-border bg-card"
           >
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-foreground">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-medium text-muted-foreground">
               AI-Powered Peptide Research
             </span>
           </motion.div>
@@ -82,51 +41,41 @@ export function Hero() {
           {/* Main headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
             Get Instant,{" "}
-            <span className="text-gradient">Expert-Level</span>
+            <span className="text-primary">Expert-Level</span>
             <br />
             Peptide Answers
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            Stop wasting hours searching forums and outdated sources. 
-            Get research-backed answers with citations in seconds.
+          <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-8">
+            Stop wasting hours searching forums. Get research-backed answers with citations in seconds.
           </p>
 
-          {/* Interactive demo input */}
+          {/* Benefits list */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="max-w-2xl mx-auto mb-10"
+            transition={{ delay: 0.2 }}
+            className="flex flex-wrap items-center justify-center gap-4 mb-10"
           >
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-primary rounded-xl opacity-20 blur-lg group-hover:opacity-30 transition-opacity" />
-              <div className="relative bg-card border border-border rounded-xl p-4 shadow-elevated">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="text-sm text-muted-foreground mb-1">Ask PeptideGPT...</p>
-                    <p className="text-foreground min-h-[28px]">
-                      {displayText}
-                      <span className="typing-cursor" />
-                    </p>
-                  </div>
+            {benefits.map((benefit) => (
+              <div key={benefit} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Check className="w-2.5 h-2.5 text-primary" />
                 </div>
+                {benefit}
               </div>
-            </div>
+            ))}
           </motion.div>
 
           {/* CTA buttons */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            transition={{ delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-3"
           >
-            <Button asChild size="lg" className="h-12 px-8 text-base glow-primary">
+            <Button asChild size="lg" className="h-12 px-8 text-base">
               <Link to="/signup">
                 Start 7-Day Trial for $1
                 <ArrowRight className="ml-2 w-4 h-4" />
@@ -141,7 +90,7 @@ export function Hero() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.5 }}
             className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground"
           >
             <div className="flex items-center gap-2">
@@ -149,7 +98,7 @@ export function Hero() {
                 {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
-                    className="w-8 h-8 rounded-full bg-gradient-primary ring-2 ring-background"
+                    className="w-7 h-7 rounded-full bg-primary/20 ring-2 ring-background"
                   />
                 ))}
               </div>

@@ -22,29 +22,24 @@ export default function DisclaimerBanner() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: -20, height: 0 }}
-          animate={{ opacity: 1, y: 0, height: "auto" }}
-          exit={{ opacity: 0, y: -20, height: 0 }}
-          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          className="mx-4 mt-4 lg:mx-6 overflow-hidden"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2 }}
+          className="border-b border-destructive/20 bg-destructive/5 overflow-hidden"
         >
-          <div className="glass-panel bg-amber-500/5 border-amber-500/20 px-4 py-3">
-            <div className="max-w-4xl mx-auto flex items-center gap-3">
-              <motion.div
-                animate={{ rotate: [0, -10, 10, -10, 0] }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-              >
-                <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />
-              </motion.div>
+          <div className="container px-4">
+            <div className="flex items-center gap-3 py-2.5">
+              <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0" />
               <p className="text-sm text-foreground/80 flex-1">
-                <span className="font-semibold text-amber-500">Educational Purposes Only.</span>{" "}
-                PeptideGPT provides research information, not medical advice. Always consult a qualified healthcare provider.
+                <span className="font-medium text-destructive">Educational Purposes Only.</span>{" "}
+                PeptideGPT provides research information, not medical advice.
               </p>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleDismiss}
-                className="text-muted-foreground hover:text-foreground hover:bg-amber-500/10 p-1 h-auto rounded-lg"
+                className="text-muted-foreground hover:text-foreground p-1 h-auto"
               >
                 <X className="w-4 h-4" />
               </Button>
