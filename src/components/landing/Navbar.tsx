@@ -55,7 +55,7 @@ export function Navbar() {
             {/* Desktop CTA */}
             <div className="hidden md:block">
               <Button asChild size="sm" className="btn-primary-clean">
-                <Link to="/signup">Get Access</Link>
+                <Link to="/signup">Get Started</Link>
               </Button>
             </div>
 
@@ -92,7 +92,7 @@ export function Navbar() {
             <div className="pt-4">
               <Button asChild className="w-full btn-primary-clean">
                 <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                  Get Access — $67
+                  Get Started
                 </Link>
               </Button>
             </div>

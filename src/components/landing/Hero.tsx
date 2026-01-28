@@ -26,7 +26,7 @@ export function Hero() {
             <div className="space-y-4">
               <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base">
                 <Link to="/signup">
-                  Get the Guide — $67
+                  Start Learning — $67
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Link>
               </Button>
