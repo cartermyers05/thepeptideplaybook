@@ -9,19 +9,27 @@ import {
 const faqs = [
   {
     question: "Is this medical advice?",
-    answer: "No. Peptide Playbook is strictly educational. It does NOT provide dosing recommendations, treatment advice, or substitute for professional medical guidance. Always consult a licensed healthcare provider for any health decisions.",
+    answer: "No. This is educational information to help you understand peptides and have informed conversations with healthcare providers. Always consult a licensed doctor before making any health decisions.",
   },
   {
-    question: "What if I'm completely new to peptides?",
-    answer: "Perfect! This guide is designed for beginners. We start with the basics and explain everything in plain English, so you'll never feel lost or overwhelmed.",
+    question: "I'm completely new to peptides. Is this for me?",
+    answer: "Yes — this was designed for beginners. No prior knowledge needed. We start with the basics and explain everything in plain English, so you'll never feel lost or overwhelmed.",
+  },
+  {
+    question: "What if I've already started using peptides?",
+    answer: "Even better. You'll finally understand what you're doing and catch any red flags you might have missed. The legal and safety sections are especially valuable for people already in the game.",
+  },
+  {
+    question: "How is this different from free info on Reddit/TikTok?",
+    answer: "It's organized, researched, and written by someone who spent 200+ hours separating fact from bro-science. No conflicting advice, no agenda, no product pushing. Just clear, actionable information.",
   },
   {
     question: "Do I get lifetime access?",
     answer: "Yes! This is a one-time purchase with lifetime access. You'll also receive all future updates at no additional cost as peptide research evolves.",
   },
   {
-    question: "Is there a refund policy?",
-    answer: "Absolutely. We offer a 30-day money-back guarantee. If you're not satisfied for any reason, contact us within 30 days of purchase for a full refund, no questions asked.",
+    question: "What's the refund policy?",
+    answer: "We offer a 30-day money-back guarantee. If you're not satisfied for any reason, email us within 30 days of purchase for a full refund, no questions asked.",
   },
   {
     question: "What about the AI assistant?",
@@ -31,7 +39,7 @@ const faqs = [
 
 export function FAQ() {
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-20 md:py-28 bg-secondary/30">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -43,7 +51,7 @@ export function FAQ() {
             Frequently Asked <span className="text-gradient">Questions</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to know about Peptide Playbook.
+            Everything you need to know before getting started.
           </p>
         </motion.div>
 

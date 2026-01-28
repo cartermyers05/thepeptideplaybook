@@ -1,40 +1,49 @@
 import { motion } from "framer-motion";
-import { BookOpen, Scale, Stethoscope, Bot } from "lucide-react";
+import { BookOpen, Scale, Stethoscope, ShieldAlert, Bot } from "lucide-react";
 
 const inclusions = [
   {
     icon: BookOpen,
-    title: "Complete Peptide Breakdown",
+    title: "The Complete Peptide Breakdown",
     points: [
-      "What each popular peptide does",
-      "Current research status (animal vs human studies)",
-      "Regulatory classification",
+      "The 15 most popular peptides explained in plain English",
+      "What each one does, current research status, and real risks",
+      "Which ones have actual human studies vs. just Reddit hype",
     ],
   },
   {
     icon: Scale,
-    title: "FDA & Legal Guide",
+    title: "The Legal Reality Check",
     points: [
-      "What's approved vs research-only",
-      "Why 'research chemical' labels don't protect you",
-      "State-by-state considerations",
+      "FDA-approved vs. 'research only' — what it actually means",
+      "Why 'for research purposes' labels don't protect you",
+      "What could happen if you get caught with the wrong stuff",
     ],
   },
   {
     icon: Stethoscope,
-    title: "Doctor Conversation Guide",
+    title: "The Doctor Conversation Script",
     points: [
-      "Exactly what questions to ask",
-      "How to bring up peptides professionally",
-      "Red flags to watch for",
+      "Exactly what to say (and not say) to your doctor",
+      "How to bring up peptides without sounding like a TikTok bro",
+      "Questions that get real answers, not dismissals",
+    ],
+  },
+  {
+    icon: ShieldAlert,
+    title: "The Red Flag Checklist",
+    points: [
+      "How to spot sketchy sources before you waste money",
+      "Quality indicators that actually matter",
+      "When to walk away",
     ],
   },
   {
     icon: Bot,
-    title: "AI Assistant Access",
+    title: "AI Assistant Access (Bonus)",
     points: [
-      "Get answers to your peptide questions 24/7",
-      "Educational information at your fingertips",
+      "Get your peptide questions answered 24/7",
+      "Educational info at your fingertips",
       "Note: Educational only, not medical advice",
     ],
   },
@@ -42,7 +51,7 @@ const inclusions = [
 
 export function WhatsIncluded() {
   return (
-    <section className="py-20 md:py-28 bg-secondary/30">
+    <section id="features" className="py-20 md:py-28 bg-secondary/30">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -52,14 +61,14 @@ export function WhatsIncluded() {
           className="text-center mb-14"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            What's Inside the <span className="text-gradient">Playbook</span>
+            Here's Exactly What <span className="text-gradient">You Get</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Four comprehensive sections to give you complete peptide clarity.
+            Five comprehensive sections to give you complete peptide clarity.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-10">
           {inclusions.map((item, index) => (
             <motion.div
               key={item.title}
@@ -74,7 +83,7 @@ export function WhatsIncluded() {
                   <item.icon className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+                  <h3 className="text-lg font-semibold mb-3">{item.title}</h3>
                   <ul className="space-y-2">
                     {item.points.map((point, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -88,6 +97,21 @@ export function WhatsIncluded() {
             </motion.div>
           ))}
         </div>
+
+        {/* Value stack */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center"
+        >
+          <p className="text-lg">
+            <span className="text-muted-foreground">Total value: </span>
+            <span className="line-through text-muted-foreground">$197</span>
+            <span className="mx-2">→</span>
+            <span className="font-bold text-xl text-gradient">Yours today for $47</span>
+          </p>
+        </motion.div>
       </div>
     </section>
   );

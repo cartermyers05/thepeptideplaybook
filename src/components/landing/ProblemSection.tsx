@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { AlertCircle, Scale, ShieldX, MessageCircleQuestion, type LucideIcon } from "lucide-react";
+import { AlertTriangle, Skull, DollarSign, Stethoscope, type LucideIcon } from "lucide-react";
 
 interface Problem {
   icon: LucideIcon;
@@ -9,24 +9,24 @@ interface Problem {
 
 const problems: Problem[] = [
   {
-    icon: AlertCircle,
-    title: "Conflicting Information",
-    description: "Different sources give contradictory information about peptide research",
+    icon: AlertTriangle,
+    title: "Blind Trust in Beginners",
+    description: "Dosing advice from people who've been using peptides for 3 weeks",
   },
   {
-    icon: Scale,
-    title: "Legal Uncertainty",
-    description: "Unclear what's FDA-approved versus research-only compounds",
+    icon: Skull,
+    title: "Legal Blindspots",
+    description: "Zero mention of what's FDA-approved vs. what could land you in legal trouble",
   },
   {
-    icon: ShieldX,
-    title: "Quality Concerns",
-    description: "Difficulty verifying the legitimacy of information sources",
+    icon: DollarSign,
+    title: "Money Down the Drain",
+    description: "Wasted hundreds on 'research chemicals' with no quality guarantees",
   },
   {
-    icon: MessageCircleQuestion,
-    title: "Unanswered Questions",
-    description: "Not knowing what questions to ask your healthcare provider",
+    icon: Stethoscope,
+    title: "Doctor Disconnection",
+    description: "No idea what to tell your doctor — or if you even should",
   },
 ];
 
@@ -39,14 +39,15 @@ export function ProblemSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Peptide Information is a <span className="text-destructive">Mess</span>
+            TikTok Peptide Advice is a{" "}
+            <span className="text-destructive">Disaster Waiting to Happen</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Finding reliable, well-organized peptide research information 
-            shouldn't be this difficult.
+            Right now, thousands of people are injecting compounds they found from random TikTok creators. 
+            No credentials. No research. No idea what's legal.
           </p>
         </motion.div>
 
@@ -62,8 +63,8 @@ export function ProblemSection() {
                 transition={{ delay: index * 0.1, duration: 0.4 }}
                 className="glass-card p-6"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                  <Icon className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center mb-4">
+                  <Icon className="w-6 h-6 text-destructive" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{problem.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
@@ -74,14 +75,19 @@ export function ProblemSection() {
           })}
         </div>
 
-        <motion.p
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center text-lg font-medium text-foreground"
+          className="text-center space-y-4"
         >
-          You deserve clarity, not confusion.
-        </motion.p>
+          <p className="text-lg font-semibold text-destructive">
+            One wrong decision could cost you your health, your money, or worse.
+          </p>
+          <p className="text-muted-foreground">
+            There's a smarter way to navigate this.
+          </p>
+        </motion.div>
       </div>
     </section>
   );
