@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -40,9 +40,9 @@ export function Navbar() {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
+                <BookOpen className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-semibold text-lg">PeptideGPT</span>
+              <span className="font-semibold text-lg">Peptide Playbook</span>
             </Link>
 
             {/* Desktop nav */}
@@ -63,8 +63,8 @@ export function Navbar() {
               <Button asChild variant="ghost" size="sm">
                 <Link to="/login">Log in</Link>
               </Button>
-              <Button asChild size="sm">
-                <Link to="/signup">Start Free Trial</Link>
+              <Button asChild size="sm" className="glow-primary">
+                <Link to="/signup">Get the Playbook</Link>
               </Button>
             </div>
 
@@ -109,9 +109,9 @@ export function Navbar() {
                     Log in
                   </Link>
                 </Button>
-                <Button asChild className="w-full">
+                <Button asChild className="w-full glow-primary">
                   <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                    Start Free Trial
+                    Get the Playbook — $67
                   </Link>
                 </Button>
               </div>

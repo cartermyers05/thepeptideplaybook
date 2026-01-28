@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Check } from "lucide-react";
+import { ArrowRight, BookOpen, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const benefits = [
-  "Research-backed answers",
-  "Cited sources",
-  "Instant responses",
+  "100+ research papers reviewed",
+  "FDA status for every peptide",
+  "Doctor-ready questions",
 ];
 
 export function Hero() {
@@ -17,6 +17,13 @@ export function Hero() {
       
       {/* Gradient wash */}
       <div className="absolute inset-0 gradient-wash opacity-50" />
+
+      {/* Abstract blobs */}
+      <div className="absolute top-20 left-10 w-72 h-72 blob-bg animate-orb-float" />
+      <div 
+        className="absolute bottom-20 right-10 w-96 h-96 blob-bg animate-orb-float" 
+        style={{ animationDelay: '-4s' }} 
+      />
 
       <div className="container relative z-10 px-4 py-20 md:py-32">
         <motion.div
@@ -30,25 +37,23 @@ export function Hero() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 rounded-full border border-border bg-card"
+            className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 rounded-full border border-primary/20 bg-primary/5"
           >
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-medium text-muted-foreground">
-              AI-Powered Peptide Research
+            <BookOpen className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-medium text-primary">
+              The Complete Peptide Education Guide
             </span>
           </motion.div>
 
           {/* Main headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-            Get Instant,{" "}
-            <span className="text-primary">Expert-Level</span>
-            <br />
-            Peptide Answers
+            Finally Understand Peptides{" "}
+            <span className="text-gradient">Without the TikTok Confusion</span>
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-8">
-            Stop wasting hours searching forums. Get research-backed answers with citations in seconds.
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+            The complete guide to peptides: what they are, how they work, what the research actually says, and how to have informed conversations with your doctor.
           </p>
 
           {/* Benefits list */}
@@ -75,18 +80,18 @@ export function Hero() {
             transition={{ delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-3"
           >
-            <Button asChild size="lg" className="h-12 px-8 text-base">
+            <Button asChild size="lg" className="h-14 px-10 text-lg glow-primary">
               <Link to="/signup">
-                Start 7-Day Trial for $1
-                <ArrowRight className="ml-2 w-4 h-4" />
+                Get the Playbook — $67
+                <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base">
-              <a href="#demo">Watch Demo</a>
+              <a href="#demo">See What's Inside</a>
             </Button>
           </motion.div>
 
-          {/* Trust indicators */}
+          {/* Trust indicator */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -102,7 +107,7 @@ export function Hero() {
                   />
                 ))}
               </div>
-              <span>2,847+ researchers</span>
+              <span>2,847+ readers</span>
             </div>
             <div className="hidden sm:block w-px h-4 bg-border" />
             <div className="flex items-center gap-1">
@@ -111,8 +116,10 @@ export function Hero() {
                   <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
                 </svg>
               ))}
-              <span className="ml-1">4.9/5 from 847 reviews</span>
+              <span className="ml-1">4.9/5 rating</span>
             </div>
+            <div className="hidden sm:block w-px h-4 bg-border" />
+            <span>Instant digital access</span>
           </motion.div>
         </motion.div>
       </div>

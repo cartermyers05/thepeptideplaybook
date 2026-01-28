@@ -6,37 +6,37 @@ const testimonials = [
     name: "Dr. Sarah Chen",
     role: "Longevity Researcher",
     image: null,
-    content: "PeptideGPT has cut my research time in half. The citations are invaluable for my clinical work.",
+    content: "Finally, a resource that explains peptides accurately without the hype. I recommend this to patients who want to learn more.",
     rating: 5,
   },
   {
     name: "Mike Rodriguez",
-    role: "Performance Coach",
+    role: "Health Educator",
     image: null,
-    content: "Finally, a tool that gives me research-backed protocols I can share with clients confidently.",
+    content: "The legal classification guide alone is worth the price. Now I actually understand what's FDA-approved vs. research-only.",
     rating: 5,
   },
   {
     name: "Dr. James Wilson",
     role: "Sports Medicine",
     image: null,
-    content: "The dosing recommendations and safety warnings are exactly what I need. Highly recommend.",
+    content: "Clear, well-researched, and appropriately cautious. This is how peptide education should be done.",
     rating: 5,
   },
   {
     name: "Amanda Foster",
-    role: "Biohacker",
+    role: "Curious Learner",
     image: null,
-    content: "I was skeptical at first, but the depth of knowledge here is incredible. Worth every penny.",
+    content: "I was overwhelmed by TikTok info. This guide helped me understand what questions to actually ask my doctor.",
     rating: 5,
   },
 ];
 
 const stats = [
-  { value: "2,847+", label: "Active Researchers" },
-  { value: "124,000+", label: "Questions Answered" },
+  { value: "2,847+", label: "Readers" },
+  { value: "100+", label: "Research Papers Reviewed" },
   { value: "4.9/5", label: "Average Rating" },
-  { value: "12,000+", label: "Studies Referenced" },
+  { value: "50+", label: "Peptides Covered" },
 ];
 
 export function SocialProof() {
@@ -68,10 +68,10 @@ export function SocialProof() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Trusted by <span className="text-gradient">Researchers</span> Worldwide
+            Trusted by <span className="text-gradient">Learners & Professionals</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Join thousands of researchers, practitioners, and biohackers who trust PeptideGPT.
+            Join thousands who finally understand peptides — the right way.
           </p>
         </motion.div>
 
@@ -84,7 +84,7 @@ export function SocialProof() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="bg-card rounded-xl p-6 border border-border shadow-soft"
+              className="glass-card p-6"
             >
               <Quote className="w-8 h-8 text-primary/20 mb-4" />
               <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
