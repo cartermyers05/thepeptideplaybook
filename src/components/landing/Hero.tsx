@@ -51,8 +51,23 @@ export function Hero() {
   const headlineWords = "Stop Taking Peptide Advice From 19-Year-Olds on TikTok".split(" ");
 
   return (
-    <section className="pt-24 pb-16 md:pt-32 md:pb-24">
-      <div className="container px-4">
+    <section className="pt-24 pb-16 md:pt-32 md:pb-24 relative overflow-hidden">
+      {/* Floating background orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute -top-20 -left-20 w-[500px] h-[500px] rounded-full bg-primary/10 blur-3xl animate-orb-float"
+        />
+        <div 
+          className="absolute -bottom-32 -right-20 w-[350px] h-[350px] rounded-full bg-primary/15 blur-3xl animate-orb-float"
+          style={{ animationDelay: "-4s" }}
+        />
+        <div 
+          className="absolute top-1/2 right-0 w-[250px] h-[250px] rounded-full bg-primary/10 blur-3xl animate-orb-float"
+          style={{ animationDelay: "-8s" }}
+        />
+      </div>
+
+      <div className="container px-4 relative z-10">
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center max-w-6xl mx-auto">
           {/* Text content */}
           <motion.div
