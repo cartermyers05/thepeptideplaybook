@@ -1,86 +1,73 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Shield, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const included = [
-  "Complete 15-peptide breakdown",
-  "Legal reality check guide",
+  "Complete peptide guide",
+  "Legal & FDA breakdown",
   "Doctor conversation scripts",
-  "Red flag checklist",
   "AI assistant access",
-  "Future updates included",
+  "Lifetime updates",
 ];
 
 export function FinalCTA() {
   return (
-    <section id="pricing" className="py-20 md:py-32 relative overflow-hidden">
-      {/* Large gradient glow behind card */}
-      <div className="gradient-glow gradient-glow-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-      
-      {/* Abstract blobs */}
-      <div className="blob-bg absolute top-10 left-10 w-64 h-64 animate-orb-float opacity-20" />
-      <div 
-        className="blob-bg absolute bottom-10 right-10 w-80 h-80 animate-orb-float opacity-20" 
-        style={{ animationDelay: '-4s' }} 
-      />
-
-      <div className="container px-4 relative z-10">
+    <section id="pricing" className="py-24 md:py-32 bg-[#FAFBFC]">
+      <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="max-w-xl mx-auto"
+          className="max-w-md mx-auto"
         >
-          <div className="glass-card p-8 md:p-10 text-center">
-            {/* Urgency reminder */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
-              <span className="text-sm font-medium">🚀 Launch price ends soon</span>
-            </div>
-
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">
-              Get Peptide Clarity in 20 Minutes
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              One-time payment • Instant access • Lifetime updates
-            </p>
+          <div className="glass-card-subtle p-8 text-center">
+            <h3 className="text-xl font-semibold mb-2">Peptide Playbook</h3>
+            <p className="text-4xl font-semibold mb-1">$67</p>
+            <p className="text-sm text-muted-foreground mb-8">One-time purchase</p>
             
-            {/* Price display with anchoring */}
-            <div className="mb-8">
-              <span className="text-2xl text-muted-foreground line-through mr-3">$197</span>
-              <span className="text-5xl md:text-6xl font-bold">$47</span>
-            </div>
-            
-            {/* Bullet recap */}
-            <ul className="text-left space-y-3 mb-8 max-w-sm mx-auto">
+            <ul className="text-left space-y-3 mb-8">
               {included.map((item) => (
-                <li key={item} className="flex items-center gap-3 text-sm">
-                  <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-3 h-3 text-success" />
-                  </div>
+                <li key={item} className="text-sm text-muted-foreground">
                   {item}
                 </li>
               ))}
             </ul>
             
-            <Button asChild size="lg" className="btn-primary-glow w-full h-14 text-lg mb-6">
+            <Button asChild size="lg" className="btn-primary-clean w-full h-12 text-base mb-4">
               <Link to="/signup">
-                Get Protected for $47
-                <ArrowRight className="ml-2 w-5 h-5" />
+                Get Instant Access
+                <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
             
-            {/* Guarantee badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 text-success mb-4">
-              <Shield className="w-4 h-4" />
-              <span className="text-sm font-medium">30-Day Money-Back Guarantee</span>
-            </div>
-            
-            <p className="text-xs text-muted-foreground">
-              Instant access. No subscription. Educational information only.
+            <p className="text-sm text-muted-foreground">
+              30-day money-back guarantee
             </p>
           </div>
+        </motion.div>
+
+        {/* Final headline CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="text-center mt-16"
+        >
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-6">
+            Ready to cut through the noise?
+          </h2>
+          <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base">
+            <Link to="/signup">
+              Get the Guide — $67
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Link>
+          </Button>
+          <p className="text-sm text-muted-foreground mt-4">
+            Instant access • 30-day guarantee
+          </p>
         </motion.div>
       </div>
     </section>

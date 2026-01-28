@@ -1,128 +1,88 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Play, Shield, Star } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-      {/* Gradient glow behind content */}
-      <div className="gradient-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-      
-      {/* Abstract blobs */}
-      <div className="blob-bg absolute top-20 -left-40 w-[500px] h-[500px] animate-orb-float" />
-      <div 
-        className="blob-bg absolute -bottom-20 -right-40 w-[600px] h-[600px] animate-orb-float" 
-        style={{ animationDelay: '-4s' }} 
-      />
-
-      {/* Subtle dot grid */}
-      <div className="absolute inset-0 dot-grid opacity-50" />
-
-      <div className="container relative z-10 px-4 py-20 md:py-32">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-4xl mx-auto text-center"
-        >
-          {/* Main headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-            Stop Taking Peptide Advice From{" "}
-            <span className="text-gradient">19-Year-Olds on TikTok</span>
-          </h1>
-
-          {/* Subheadline */}
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.5 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6"
-          >
-            The 20-minute safety guide that replaces 40 hours of confusing research. 
-            Know exactly what's safe, what's legal, and what questions to ask your doctor.
-          </motion.p>
-
-          {/* Specificity badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-8"
-          >
-            <Star className="w-4 h-4 fill-primary" />
-            <span className="text-sm font-medium">Covers the 15 most popular peptides</span>
-          </motion.div>
-
-          {/* CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.5 }}
-            className="mb-4"
-          >
-            <Button asChild size="lg" className="btn-primary-glow h-14 px-10 text-lg">
-              <Link to="/signup">
-                Get Protected for $47
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Link>
-            </Button>
-          </motion.div>
-
-          {/* Trust badges below CTA */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.35, duration: 0.5 }}
-            className="flex items-center justify-center gap-4 text-sm text-muted-foreground mb-10"
-          >
-            <div className="flex items-center gap-1">
-              <Shield className="w-4 h-4 text-success" />
-              <span>30-day money-back guarantee</span>
-            </div>
-            <span className="text-border">•</span>
-            <span>Instant access</span>
-          </motion.div>
-
-          {/* Video placeholder */}
+    <section className="pt-24 pb-16 md:pt-32 md:pb-24">
+      <div className="container px-4">
+        <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center max-w-6xl mx-auto">
+          {/* Text content */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="max-w-2xl mx-auto mb-8"
+            transition={{ duration: 0.5 }}
           >
-            <div className="glass-card aspect-video flex items-center justify-center cursor-pointer group">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
-                <Play className="w-8 h-8 text-primary fill-primary" />
-              </div>
-              <span className="absolute bottom-4 text-sm text-muted-foreground">
-                Watch: Why TikTok peptide advice is dangerous
-              </span>
+            <h1 className="text-4xl sm:text-5xl md:text-[3.25rem] font-semibold tracking-tight leading-[1.1] mb-6">
+              Stop Taking Peptide Advice From 19-Year-Olds on TikTok
+            </h1>
+
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
+              A research-backed guide to understanding peptides — what they do, 
+              what's legal, and what to ask your doctor.
+            </p>
+
+            <div className="space-y-4">
+              <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base">
+                <Link to="/signup">
+                  Get the Guide — $67
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Link>
+              </Button>
+
+              <p className="text-sm text-muted-foreground">
+                Instant access • 30-day guarantee
+              </p>
             </div>
           </motion.div>
 
-          {/* Social proof */}
+          {/* Visual - Abstract molecules/pills */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="flex items-center justify-center gap-2"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="relative"
           >
-            <div className="flex -space-x-2">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border-2 border-background flex items-center justify-center text-xs"
-                >
-                  👤
+            <div className="aspect-square max-w-md mx-auto relative">
+              {/* Abstract floating elements */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                {/* Large central circle */}
+                <div className="w-48 h-48 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 blur-sm" />
+              </div>
+              
+              {/* Floating molecules */}
+              <motion.div
+                animate={{ y: [-10, 10, -10] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-8 right-8 w-16 h-16 rounded-full bg-primary/10 backdrop-blur-sm border border-primary/20"
+              />
+              <motion.div
+                animate={{ y: [10, -10, 10] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-1/3 left-4 w-12 h-12 rounded-full bg-primary/15 backdrop-blur-sm border border-primary/20"
+              />
+              <motion.div
+                animate={{ y: [-8, 8, -8] }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute bottom-16 right-12 w-20 h-20 rounded-full bg-primary/10 backdrop-blur-sm border border-primary/20"
+              />
+              <motion.div
+                animate={{ y: [5, -5, 5] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute bottom-8 left-16 w-10 h-10 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30"
+              />
+              
+              {/* Center content */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="glass-card-subtle p-8 text-center">
+                  <p className="text-4xl font-semibold text-primary mb-2">15</p>
+                  <p className="text-sm text-muted-foreground">Peptides covered</p>
                 </div>
-              ))}
+              </div>
             </div>
-            <span className="text-sm text-muted-foreground">
-              Join <span className="font-semibold text-foreground">500+</span> people who stopped guessing
-            </span>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
