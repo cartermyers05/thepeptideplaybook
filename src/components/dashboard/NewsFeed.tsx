@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import NewsCard, { NewsArticle } from "./NewsCard";
 import { Button } from "@/components/ui/button";
 import { Newspaper } from "lucide-react";
@@ -77,58 +78,93 @@ export default function NewsFeed() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center glow-primary">
-          <Newspaper className="w-6 h-6 text-primary-foreground" />
-        </div>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center gap-4 mb-8"
+      >
+        <motion.div 
+          className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center glow-primary"
+          animate={{ 
+            boxShadow: [
+              "0 0 20px -5px hsl(var(--glow) / 0.4)",
+              "0 0 40px -5px hsl(var(--glow) / 0.6)",
+              "0 0 20px -5px hsl(var(--glow) / 0.4)"
+            ]
+          }}
+          transition={{ duration: 3, repeat: Infinity }}
+        >
+          <Newspaper className="w-7 h-7 text-primary-foreground" />
+        </motion.div>
         <div>
           <h2 className="text-2xl font-bold">Peptide News & Research</h2>
           <p className="text-sm text-muted-foreground">
             Curated updates from trusted sources
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Category Filters */}
-      <div className="flex flex-wrap gap-2 mb-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="flex flex-wrap gap-2 mb-8"
+      >
         {(["all", "research", "clinical", "regulatory", "industry"] as Category[]).map(
-          (cat) => (
-            <Button
+          (cat, index) => (
+            <motion.div
               key={cat}
-              variant={selectedCategory === cat ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(cat)}
-              className={`capitalize ${
-                selectedCategory === cat 
-                  ? "bg-gradient-primary hover:opacity-90" 
-                  : "glass-card hover-glow"
-              }`}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 + index * 0.05 }}
             >
-              {cat === "all" ? "All Stories" : cat}
-            </Button>
+              <Button
+                variant={selectedCategory === cat ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(cat)}
+                className={`capitalize ${
+                  selectedCategory === cat 
+                    ? "bg-gradient-primary hover:opacity-90 glow-primary" 
+                    : "glass-panel hover-glow border-0"
+                }`}
+              >
+                {cat === "all" ? "All Stories" : cat}
+              </Button>
+            </motion.div>
           )
         )}
-      </div>
+      </motion.div>
 
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Featured Article - spans 2 columns on larger screens */}
         {featuredArticle && (
           <div className="md:col-span-2 lg:row-span-2">
-            <NewsCard article={featuredArticle} featured />
+            <NewsCard article={featuredArticle} featured index={0} />
           </div>
         )}
 
         {/* Other Articles */}
-        {otherArticles.map((article) => (
-          <NewsCard key={article.id} article={article} />
+        {otherArticles.map((article, index) => (
+          <NewsCard 
+            key={article.id} 
+            article={article} 
+            index={featuredArticle ? index + 1 : index} 
+          />
         ))}
       </div>
 
       {/* Source Attribution */}
-      <p className="text-xs text-muted-foreground text-center mt-10 py-4 border-t border-border/50">
+      <motion.p 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="text-xs text-muted-foreground text-center mt-10 py-4 border-t border-border/30"
+      >
         All articles link to original sources. PeptideGPT does not claim ownership of external content.
-      </p>
+      </motion.p>
     </div>
   );
 }

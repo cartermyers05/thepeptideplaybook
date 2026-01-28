@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
   Send,
@@ -34,6 +34,27 @@ const suggestedQuestions = [
   "Which peptides stack well together?",
   "What are the side effects of TB-500?",
 ];
+
+// Typing indicator component
+function TypingIndicator() {
+  return (
+    <div className="flex items-center gap-1 px-3 py-2">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="w-2 h-2 rounded-full bg-muted-foreground/60"
+          animate={{ y: [0, -6, 0] }}
+          transition={{
+            duration: 0.6,
+            repeat: Infinity,
+            delay: i * 0.15,
+            ease: "easeInOut"
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -272,117 +293,190 @@ export default function ChatInterface() {
         <ScrollArea className="h-full" ref={scrollRef}>
           <div className="max-w-3xl mx-auto px-4 py-8">
             {messages.length === 0 ? (
-              <div className="text-center py-16">
-                {/* Animated logo with glow */}
-                <div className="w-20 h-20 rounded-2xl bg-gradient-primary flex items-center justify-center mx-auto mb-8 pulse-glow">
-                  <Sparkles className="w-10 h-10 text-primary-foreground" />
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-center py-16 relative"
+              >
+                {/* Ambient particles */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  <motion.div 
+                    className="absolute top-1/4 left-1/3 w-32 h-32 rounded-full bg-primary/10 blur-2xl"
+                    animate={{ 
+                      x: [0, 30, 0],
+                      y: [0, -20, 0],
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{ duration: 8, repeat: Infinity }}
+                  />
+                  <motion.div 
+                    className="absolute bottom-1/3 right-1/3 w-24 h-24 rounded-full bg-primary/8 blur-2xl"
+                    animate={{ 
+                      x: [0, -20, 0],
+                      y: [0, 15, 0],
+                      scale: [1, 0.9, 1]
+                    }}
+                    transition={{ duration: 10, repeat: Infinity }}
+                  />
                 </div>
-                <h2 className="text-3xl font-bold mb-3 text-gradient">
-                  Welcome to PeptideGPT
-                </h2>
-                <p className="text-muted-foreground mb-10 max-w-md mx-auto">
-                  Your AI research assistant for evidence-based peptide information
-                </p>
 
-                {/* Suggested questions - 2x2 grid */}
+                {/* Animated logo with multi-layer glow */}
+                <motion.div 
+                  className="w-24 h-24 rounded-3xl bg-gradient-primary flex items-center justify-center mx-auto mb-8 relative"
+                  animate={{ 
+                    boxShadow: [
+                      "0 0 30px -5px hsl(var(--glow) / 0.4), 0 0 60px -10px hsl(var(--glow) / 0.3)",
+                      "0 0 50px -5px hsl(var(--glow) / 0.6), 0 0 100px -10px hsl(var(--glow) / 0.4)",
+                      "0 0 30px -5px hsl(var(--glow) / 0.4), 0 0 60px -10px hsl(var(--glow) / 0.3)"
+                    ]
+                  }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                >
+                  <Sparkles className="w-12 h-12 text-primary-foreground" />
+                </motion.div>
+
+                <motion.h2 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-3xl font-bold mb-3 text-gradient"
+                >
+                  Welcome to PeptideGPT
+                </motion.h2>
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-muted-foreground mb-10 max-w-md mx-auto"
+                >
+                  Your AI research assistant for evidence-based peptide information
+                </motion.p>
+
+                {/* Suggested questions - 2x2 grid with staggered entrance */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto">
-                  {suggestedQuestions.map((question) => (
-                    <button
+                  {suggestedQuestions.map((question, index) => (
+                    <motion.button
                       key={question}
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ 
+                        delay: 0.4 + index * 0.1,
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 25
+                      }}
+                      whileHover={{ y: -4, scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => handleSuggestedQuestion(question)}
-                      className="p-4 text-left rounded-xl glass-card card-hover border border-border/50 group"
+                      className="p-4 text-left rounded-xl glass-panel border-glow group"
                     >
-                      <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                      <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-200">
                         {question}
                       </p>
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             ) : (
               <div className="space-y-6">
-                {messages.map((message, index) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={cn(
-                      "flex",
-                      message.role === "user" ? "justify-end" : "justify-start"
-                    )}
-                  >
-                    <div
+                <AnimatePresence mode="popLayout">
+                  {messages.map((message, index) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ 
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 25
+                      }}
                       className={cn(
-                        "max-w-[85%] rounded-2xl px-4 py-3",
-                        message.role === "user"
-                          ? "bg-gradient-primary text-primary-foreground rounded-br-md"
-                          : "glass-card rounded-bl-md"
+                        "flex",
+                        message.role === "user" ? "justify-end" : "justify-start"
                       )}
                     >
-                      {message.role === "assistant" && (
-                        <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/30">
-                          <div className="w-6 h-6 rounded-lg bg-gradient-primary flex items-center justify-center">
-                            <Sparkles className="w-3 h-3 text-primary-foreground" />
-                          </div>
-                          <span className="text-xs font-medium text-muted-foreground">PeptideGPT</span>
-                        </div>
-                      )}
-                      <div className="prose prose-sm dark:prose-invert max-w-none">
-                        {message.role === "assistant" ? (
-                          <div className="text-sm">
-                            <ReactMarkdown>{message.content}</ReactMarkdown>
-                          </div>
-                        ) : (
-                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <div
+                        className={cn(
+                          "max-w-[85%] rounded-2xl px-4 py-3",
+                          message.role === "user"
+                            ? "bg-gradient-primary text-primary-foreground rounded-br-md glow-primary"
+                            : "glass-panel rounded-bl-md"
                         )}
-                        {isLoading &&
-                          message.role === "assistant" &&
-                          message === messages[messages.length - 1] && (
-                            <span className="typing-cursor" />
-                          )}
-                      </div>
-                      {message.role === "assistant" && message.content && !isLoading && (
-                        <>
-                          <p className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border/30 italic">
-                            For research purposes only. Consult a healthcare provider.
-                          </p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 px-2 hover-glow"
-                              onClick={() => handleFeedback(message, true)}
+                      >
+                        {message.role === "assistant" && (
+                          <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/30">
+                            <motion.div 
+                              className="w-6 h-6 rounded-lg bg-gradient-primary flex items-center justify-center"
+                              animate={{ rotate: [0, 5, -5, 0] }}
+                              transition={{ duration: 2, repeat: Infinity }}
                             >
-                              <ThumbsUp className="w-4 h-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 px-2 hover-glow"
-                              onClick={() => handleFeedback(message, false)}
-                            >
-                              <ThumbsDown className="w-4 h-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className={cn("h-8 px-2 hover-glow", message.isSaved && "text-primary")}
-                              onClick={() => handleToggleSave(message)}
-                              disabled={!message.dbId}
-                            >
-                              {message.isSaved ? (
-                                <Bookmark className="w-4 h-4 fill-current" />
-                              ) : (
-                                <BookmarkPlus className="w-4 h-4" />
-                              )}
-                            </Button>
+                              <Sparkles className="w-3 h-3 text-primary-foreground" />
+                            </motion.div>
+                            <span className="text-xs font-medium text-muted-foreground">PeptideGPT</span>
                           </div>
-                        </>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
+                        )}
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          {message.role === "assistant" ? (
+                            <div className="text-sm">
+                              {message.content ? (
+                                <ReactMarkdown>{message.content}</ReactMarkdown>
+                              ) : isLoading && message === messages[messages.length - 1] ? (
+                                <TypingIndicator />
+                              ) : null}
+                            </div>
+                          ) : (
+                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                          )}
+                        </div>
+                        {message.role === "assistant" && message.content && !isLoading && (
+                          <>
+                            <p className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border/30 italic">
+                              For research purposes only. Consult a healthcare provider.
+                            </p>
+                            <motion.div 
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.3 }}
+                              className="flex items-center gap-2 mt-2"
+                            >
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 px-2 hover-glow rounded-lg"
+                                onClick={() => handleFeedback(message, true)}
+                              >
+                                <ThumbsUp className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 px-2 hover-glow rounded-lg"
+                                onClick={() => handleFeedback(message, false)}
+                              >
+                                <ThumbsDown className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className={cn("h-8 px-2 hover-glow rounded-lg", message.isSaved && "text-primary")}
+                                onClick={() => handleToggleSave(message)}
+                                disabled={!message.dbId}
+                              >
+                                {message.isSaved ? (
+                                  <Bookmark className="w-4 h-4 fill-current" />
+                                ) : (
+                                  <BookmarkPlus className="w-4 h-4" />
+                                )}
+                              </Button>
+                            </motion.div>
+                          </>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
             )}
           </div>
@@ -391,8 +485,14 @@ export default function ChatInterface() {
 
       {/* Floating input area */}
       <div className="p-4 lg:p-6">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-          <div className="relative glass-card p-2 rounded-2xl">
+        <motion.form 
+          onSubmit={handleSubmit} 
+          className="max-w-3xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="relative glass-panel p-2">
             <Textarea
               ref={textareaRef}
               value={input}
@@ -407,21 +507,29 @@ export default function ChatInterface() {
               className="min-h-[56px] max-h-[200px] pr-14 resize-none bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               disabled={isLoading}
             />
-            <Button
-              type="submit"
-              size="icon"
-              className="absolute right-4 bottom-4 rounded-xl bg-gradient-primary hover:opacity-90 transition-opacity glow-primary"
-              disabled={!input.trim() || isLoading}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Send className="w-4 h-4" />
-            </Button>
+              <Button
+                type="submit"
+                size="icon"
+                className={cn(
+                  "absolute right-4 bottom-4 rounded-xl bg-gradient-primary hover:opacity-90 transition-all",
+                  input.trim() && "glow-primary"
+                )}
+                disabled={!input.trim() || isLoading}
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </motion.div>
           </div>
           <p className="text-xs text-muted-foreground text-center mt-3 flex items-center justify-center gap-2">
             <span>Press</span>
-            <kbd className="px-1.5 py-0.5 rounded bg-secondary text-xs font-mono">Enter</kbd>
+            <kbd className="px-1.5 py-0.5 rounded-md glass-panel text-xs font-mono">Enter</kbd>
             <span>to send • PeptideGPT provides research information only</span>
           </p>
-        </form>
+        </motion.form>
       </div>
     </div>
   );

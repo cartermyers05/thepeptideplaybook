@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { ExternalLink, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -30,20 +31,34 @@ const categoryLabels: Record<NewsArticle["category"], string> = {
 interface NewsCardProps {
   article: NewsArticle;
   featured?: boolean;
+  index?: number;
 }
 
-export default function NewsCard({ article, featured }: NewsCardProps) {
+export default function NewsCard({ article, featured, index = 0 }: NewsCardProps) {
   // Estimate read time (rough: 200 words per minute)
   const wordCount = article.excerpt.split(" ").length;
   const readTime = Math.max(1, Math.ceil(wordCount / 40));
 
   return (
-    <a
+    <motion.a
       href={article.url}
       target="_blank"
       rel="noopener noreferrer"
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ 
+        delay: index * 0.08,
+        type: "spring",
+        stiffness: 300,
+        damping: 25
+      }}
+      whileHover={{ 
+        y: -6,
+        scale: 1.02,
+        transition: { duration: 0.2 }
+      }}
       className={cn(
-        "group block h-full glass-card card-hover overflow-hidden",
+        "group block h-full glass-panel border-glow overflow-hidden",
         featured && "lg:flex lg:flex-col"
       )}
     >
@@ -55,7 +70,10 @@ export default function NewsCard({ article, featured }: NewsCardProps) {
         <div className="flex items-center justify-between gap-2 mb-3">
           <Badge 
             variant="outline" 
-            className={cn("border", categoryStyles[article.category])}
+            className={cn(
+              "border glass-panel backdrop-blur-sm",
+              categoryStyles[article.category]
+            )}
           >
             {categoryLabels[article.category]}
           </Badge>
@@ -67,7 +85,7 @@ export default function NewsCard({ article, featured }: NewsCardProps) {
 
         {/* Title */}
         <h3 className={cn(
-          "font-semibold leading-tight mb-3 group-hover:text-primary transition-colors",
+          "font-semibold leading-tight mb-3 group-hover:text-primary transition-colors duration-200",
           featured ? "text-xl lg:text-2xl" : "text-base"
         )}>
           {article.title}
@@ -82,7 +100,7 @@ export default function NewsCard({ article, featured }: NewsCardProps) {
         </p>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-border/50">
+        <div className="flex items-center justify-between pt-3 border-t border-border/30">
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">
               {article.source}
@@ -93,12 +111,20 @@ export default function NewsCard({ article, featured }: NewsCardProps) {
             </span>
           </div>
           
-          <div className="flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-            Read more
-            <ExternalLink className="w-3 h-3" />
-          </div>
+          <motion.div 
+            className="flex items-center gap-1 text-xs font-medium text-primary"
+            initial={{ opacity: 0, x: -10 }}
+            whileHover={{ x: 0 }}
+            animate={{ opacity: 0 }}
+            whileInView={{ opacity: 0 }}
+          >
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              Read more
+            </span>
+            <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          </motion.div>
         </div>
       </div>
-    </a>
+    </motion.a>
   );
 }
