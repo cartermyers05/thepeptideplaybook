@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 interface ComplianceModalProps {
   onAccept: () => void;
@@ -30,11 +31,15 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
     const checkCompliance = async () => {
       if (!user) return;
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("terms_accepted_at")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking compliance:", error);
+      }
 
       if (!data?.terms_accepted_at) {
         setOpen(true);
@@ -49,10 +54,16 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
   const handleAccept = async () => {
     if (!user || !allChecked) return;
 
-    await supabase
+    const { error } = await supabase
       .from("profiles")
       .update({ terms_accepted_at: new Date().toISOString() })
       .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error saving acceptance:", error);
+      toast.error("Failed to save. Please try again.");
+      return;
+    }
 
     setOpen(false);
     onAccept();
