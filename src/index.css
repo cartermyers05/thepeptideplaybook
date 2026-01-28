@@ -2,23 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* PeptideGPT Design System - Apple Glass Aesthetic */
+/* PeptideGPT Design System - Futuristic & Trustworthy */
 
 @layer base {
   :root {
-    /* Core neutrals - Clean, minimal */
+    /* Core neutrals - Pure, clean */
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 222 47% 8%;
 
     /* Card and surface */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 47% 8%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 222 47% 8%;
 
-    /* Primary - Deep indigo/blue like Linear */
-    --primary: 226 71% 40%;
+    /* Primary - Vibrant violet */
+    --primary: 250 85% 60%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - Subtle gray */
@@ -29,40 +29,34 @@
     --muted: 220 14% 96%;
     --muted-foreground: 220 9% 46%;
 
-    /* Accent - Lighter blue for highlights */
-    --accent: 226 100% 97%;
-    --accent-foreground: 226 71% 40%;
+    /* Accent - Very subtle purple tint */
+    --accent: 250 100% 98%;
+    --accent-foreground: 250 85% 50%;
 
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 226 71% 40%;
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 250 85% 60%;
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;
 
-    /* Custom tokens for PeptideGPT */
-    --gradient-start: 250 60% 45%;
-    --gradient-mid: 250 60% 45%;
-    --gradient-end: 250 60% 45%;
+    /* Custom tokens */
     --surface-elevated: 0 0% 100%;
     --surface-sunken: 220 14% 98%;
 
-    /* Glow effect */
-    --glow: 226 71% 40%;
-
-    /* Sidebar (kept for compatibility) */
+    /* Sidebar */
     --sidebar-background: 220 14% 98%;
     --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 226 71% 40%;
+    --sidebar-primary: 250 85% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 14% 96%;
     --sidebar-accent-foreground: 222 47% 11%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 226 71% 40%;
+    --sidebar-ring: 250 85% 60%;
 
     /* Success state */
     --success: 142 71% 45%;
@@ -70,53 +64,48 @@
   }
 
   .dark {
-    /* Deeper, richer dark background */
-    --background: 224 71% 4%;
-    --foreground: 210 40% 98%;
+    /* Deep, rich dark */
+    --background: 222 47% 3%;
+    --foreground: 0 0% 98%;
 
-    --card: 224 71% 6%;
-    --card-foreground: 210 40% 98%;
+    --card: 222 47% 5%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 224 71% 6%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 222 47% 5%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Vibrant primary */
-    --primary: 250 100% 65%;
-    --primary-foreground: 224 71% 4%;
+    /* Bright violet */
+    --primary: 250 90% 65%;
+    --primary-foreground: 222 47% 3%;
 
-    --secondary: 217 33% 12%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 217 33% 10%;
+    --secondary-foreground: 0 0% 98%;
 
     --muted: 217 33% 12%;
     --muted-foreground: 215 20% 55%;
 
-    --accent: 250 50% 15%;
-    --accent-foreground: 250 100% 75%;
+    /* Dark purple tint */
+    --accent: 250 50% 10%;
+    --accent-foreground: 250 90% 75%;
 
     --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217 33% 15%;
-    --input: 217 33% 15%;
-    --ring: 250 100% 65%;
+    --border: 217 33% 14%;
+    --input: 217 33% 14%;
+    --ring: 250 90% 65%;
 
-    /* Solid dark purple for dark mode */
-    --gradient-start: 250 70% 55%;
-    --gradient-mid: 250 70% 55%;
-    --gradient-end: 250 70% 55%;
-    --surface-elevated: 224 71% 7%;
-    --surface-sunken: 224 71% 3%;
+    --surface-elevated: 222 47% 6%;
+    --surface-sunken: 222 47% 2%;
 
-    --glow: 250 100% 65%;
-
-    --sidebar-background: 224 71% 5%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 250 100% 65%;
-    --sidebar-primary-foreground: 224 71% 4%;
+    --sidebar-background: 222 47% 4%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 250 90% 65%;
+    --sidebar-primary-foreground: 222 47% 3%;
     --sidebar-accent: 217 33% 12%;
-    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 217 33% 15%;
-    --sidebar-ring: 250 100% 65%;
+    --sidebar-ring: 250 90% 65%;
 
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
@@ -131,216 +120,138 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    letter-spacing: -0.01em;
   }
 
-  /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
+  }
+
+  /* Tighter headline typography */
+  h1, h2, h3, h4 {
+    letter-spacing: -0.02em;
+    font-weight: 600;
   }
 }
 
 @layer utilities {
-  /* Gradient text utility */
+  /* Gradient text - refined */
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(
-      135deg,
-      hsl(var(--gradient-start)) 0%,
-      hsl(var(--gradient-mid)) 50%,
-      hsl(var(--gradient-end)) 100%
-    );
+    background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(250 100% 75%) 100%);
   }
 
-  /* Gradient background utility */
+  /* Solid primary background */
   .bg-gradient-primary {
-    background-image: linear-gradient(
-      135deg,
-      hsl(var(--gradient-start)) 0%,
-      hsl(var(--gradient-mid)) 50%,
-      hsl(var(--gradient-end)) 100%
-    );
+    background: hsl(var(--primary));
   }
 
   /* ========================================
-     APPLE GLASS EFFECT SYSTEM
+     CLEAN CARD SYSTEM
      ======================================== */
 
-  /* Standard glass effect */
-  .glass {
-    @apply backdrop-blur-xl border border-border/50;
-    background: hsl(var(--background) / 0.8);
-  }
-
-  /* Glass card - for cards and containers */
-  .glass-card {
+  /* Clean card with subtle border */
+  .card-clean {
     @apply rounded-xl;
-    background: hsl(var(--card) / 0.6);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid hsl(var(--border) / 0.3);
-    box-shadow: 
-      0 8px 32px hsl(0 0% 0% / 0.1),
-      inset 0 1px 0 hsl(0 0% 100% / 0.05);
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    transition: all 0.2s ease;
   }
 
-  .dark .glass-card {
-    background: hsl(224 71% 8% / 0.6);
-    border-color: hsl(0 0% 100% / 0.08);
-    box-shadow: 
-      0 8px 32px hsl(0 0% 0% / 0.25),
-      inset 0 1px 0 hsl(0 0% 100% / 0.05);
+  .card-clean:hover {
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 8px 24px -8px hsl(var(--primary) / 0.12);
   }
 
-  /* Apple-style frosted glass panel */
+  /* Glass - refined, cleaner */
+  .glass {
+    @apply backdrop-blur-md;
+    background: hsl(var(--background) / 0.85);
+    border: 1px solid hsl(var(--border) / 0.6);
+  }
+
+  /* Glass panel - minimal, professional */
   .glass-panel {
-    @apply rounded-2xl relative overflow-hidden;
-    background: hsl(var(--card) / 0.7);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid hsl(0 0% 100% / 0.1);
-    box-shadow: 
-      0 8px 32px hsl(0 0% 0% / 0.12),
-      0 4px 16px hsl(0 0% 0% / 0.08),
-      inset 0 1px 0 hsl(0 0% 100% / 0.08);
+    @apply rounded-xl relative;
+    background: hsl(var(--card) / 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border) / 0.5);
   }
 
   .dark .glass-panel {
-    background: hsl(224 71% 8% / 0.7);
-    border-color: hsl(0 0% 100% / 0.08);
-    box-shadow: 
-      0 8px 32px hsl(0 0% 0% / 0.3),
-      0 4px 16px hsl(0 0% 0% / 0.2),
-      inset 0 1px 0 hsl(0 0% 100% / 0.05);
-  }
-
-  /* Gradient border glow */
-  .border-glow {
-    position: relative;
-  }
-  .border-glow::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      135deg,
-      hsl(var(--glow) / 0.4) 0%,
-      hsl(var(--glow) / 0.1) 50%,
-      hsl(var(--glow) / 0.3) 100%
-    );
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  .border-glow:hover::before {
-    opacity: 1;
-  }
-
-  /* Animated mesh gradient background */
-  .mesh-gradient {
-    position: relative;
-  }
-  .mesh-gradient::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background: 
-      radial-gradient(ellipse 80% 50% at 20% 30%, hsl(var(--glow) / 0.12) 0%, transparent 50%),
-      radial-gradient(ellipse 60% 40% at 80% 70%, hsl(220 70% 50% / 0.08) 0%, transparent 50%),
-      radial-gradient(ellipse 70% 50% at 50% 50%, hsl(var(--glow) / 0.06) 0%, transparent 60%);
-    animation: mesh-shift 20s ease-in-out infinite;
-    z-index: -1;
+    background: hsl(var(--card) / 0.8);
+    border-color: hsl(var(--border) / 0.4);
   }
 
   /* ========================================
-     SHADOW UTILITIES
+     DOT GRID BACKGROUND
      ======================================== */
 
-  /* Subtle shadow for cards */
-  .shadow-soft {
-    box-shadow: 
-      0 1px 2px 0 hsl(0 0% 0% / 0.03),
-      0 1px 6px -1px hsl(0 0% 0% / 0.02),
-      0 2px 4px 0 hsl(0 0% 0% / 0.02);
+  .dot-grid {
+    background-image: radial-gradient(circle, hsl(var(--primary) / 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 
-  /* Elevated shadow */
+  .dark .dot-grid {
+    background-image: radial-gradient(circle, hsl(var(--primary) / 0.15) 1px, transparent 1px);
+  }
+
+  /* Gradient wash - subtle, static */
+  .gradient-wash {
+    background: linear-gradient(
+      135deg, 
+      hsl(var(--background)) 0%,
+      hsl(var(--accent)) 50%,
+      hsl(var(--background)) 100%
+    );
+  }
+
+  /* ========================================
+     SHADOWS
+     ======================================== */
+
+  .shadow-soft {
+    box-shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.04);
+  }
+
   .shadow-elevated {
     box-shadow: 
       0 4px 6px -1px hsl(0 0% 0% / 0.05),
-      0 2px 4px -2px hsl(0 0% 0% / 0.05),
-      0 0 0 1px hsl(0 0% 0% / 0.02);
+      0 2px 4px -2px hsl(0 0% 0% / 0.03);
   }
 
   /* ========================================
-     GLOW EFFECTS
+     HOVER EFFECTS
      ======================================== */
 
-  /* Glow effect for primary elements */
-  .glow-primary {
-    box-shadow: 
-      0 0 20px -5px hsl(var(--glow) / 0.4),
-      0 0 40px -10px hsl(var(--glow) / 0.3);
+  .hover-lift {
+    @apply transition-all duration-200;
   }
 
-  /* Hover glow effect */
-  .hover-glow {
-    @apply transition-all duration-300;
-  }
-  .hover-glow:hover {
-    box-shadow: 0 0 24px -4px hsl(var(--glow) / 0.35);
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -4px hsl(var(--primary) / 0.1);
   }
 
-  /* Card hover effect with lift */
-  .card-hover {
-    @apply transition-all duration-300 ease-out;
-  }
-  .card-hover:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: 
-      0 20px 40px -10px hsl(var(--glow) / 0.2),
-      0 8px 16px -8px hsl(0 0% 0% / 0.1);
+  .hover-border {
+    @apply transition-colors duration-200;
   }
 
-  /* Card lift effect - more dramatic */
-  .card-lift {
-    @apply transition-all duration-300;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .card-lift:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow: 
-      0 24px 48px -12px hsl(var(--glow) / 0.25),
-      0 0 0 1px hsl(var(--glow) / 0.1);
+  .hover-border:hover {
+    border-color: hsl(var(--primary) / 0.4);
   }
 
   /* ========================================
-     ANIMATION UTILITIES
+     ANIMATIONS
      ======================================== */
-
-  .animate-fade-up {
-    animation: fadeUp 0.5s ease-out forwards;
-  }
 
   .animate-fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
+    animation: fadeIn 0.2s ease-out forwards;
   }
 
-  @keyframes fadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .animate-fade-up {
+    animation: fadeUp 0.3s ease-out forwards;
   }
 
   @keyframes fadeIn {
@@ -348,57 +259,18 @@
     to { opacity: 1; }
   }
 
-  /* Mesh gradient movement */
-  @keyframes mesh-shift {
-    0%, 100% { 
-      transform: translateX(0) translateY(0) scale(1);
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
     }
-    25% { 
-      transform: translateX(2%) translateY(-2%) scale(1.02);
-    }
-    50% { 
-      transform: translateX(-1%) translateY(1%) scale(0.98);
-    }
-    75% { 
-      transform: translateX(-2%) translateY(-1%) scale(1.01);
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
-  /* Pulse glow animation for empty state */
-  @keyframes pulse-glow {
-    0%, 100% {
-      box-shadow: 
-        0 0 20px -5px hsl(var(--glow) / 0.4),
-        0 0 40px -10px hsl(var(--glow) / 0.3);
-    }
-    50% {
-      box-shadow: 
-        0 0 40px -5px hsl(var(--glow) / 0.6),
-        0 0 80px -10px hsl(var(--glow) / 0.4);
-    }
-  }
-
-  .pulse-glow {
-    animation: pulse-glow 2.5s ease-in-out infinite;
-  }
-
-  /* Breathing animation */
-  @keyframes breathe {
-    0%, 100% { 
-      opacity: 0.5; 
-      transform: scale(1); 
-    }
-    50% { 
-      opacity: 0.8; 
-      transform: scale(1.05); 
-    }
-  }
-
-  .animate-breathe {
-    animation: breathe 4s ease-in-out infinite;
-  }
-
-  /* Typing cursor animation */
+  /* Typing cursor */
   .typing-cursor::after {
     content: '|';
     animation: blink 1s step-end infinite;
@@ -409,104 +281,13 @@
     50% { opacity: 0; }
   }
 
-  /* Floating animation */
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+  /* Pulse opacity - subtle */
+  @keyframes pulse-opacity {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
 
-  .floating {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  /* Slow floating animation */
-  @keyframes float-slow {
-    0%, 100% { transform: translateY(0) translateX(0); }
-    25% { transform: translateY(-10px) translateX(5px); }
-    75% { transform: translateY(5px) translateX(-5px); }
-  }
-
-  .float-slow {
-    animation: float-slow 6s ease-in-out infinite;
-  }
-
-  /* Shimmer effect */
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-
-  .shimmer {
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      hsl(var(--glow) / 0.1) 50%,
-      transparent 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2s ease-in-out infinite;
-  }
-
-  /* Bounce dots for typing indicator */
-  @keyframes bounce-dot {
-    0%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-6px); }
-  }
-
-  .typing-dots span {
-    @apply inline-block w-2 h-2 rounded-full bg-muted-foreground;
-    animation: bounce-dot 1.4s ease-in-out infinite;
-  }
-  .typing-dots span:nth-child(1) { animation-delay: 0ms; }
-  .typing-dots span:nth-child(2) { animation-delay: 160ms; }
-  .typing-dots span:nth-child(3) { animation-delay: 320ms; }
-
-  /* Gradient border animation */
-  @keyframes gradient-shift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  .gradient-border {
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
-  }
-
-  /* Stagger entrance animation */
-  @keyframes stagger-in {
-    from { 
-      opacity: 0; 
-      transform: translateY(20px) scale(0.95); 
-    }
-    to { 
-      opacity: 1; 
-      transform: translateY(0) scale(1); 
-    }
-  }
-
-  .stagger-in {
-    animation: stagger-in 0.5s ease-out forwards;
-  }
-
-  /* Ambient orb animations */
-  @keyframes orb-float-1 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -20px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-  }
-
-  @keyframes orb-float-2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(-25px, 15px) scale(0.95); }
-    66% { transform: translate(20px, -25px) scale(1.05); }
-  }
-
-  .orb-1 {
-    animation: orb-float-1 12s ease-in-out infinite;
-  }
-
-  .orb-2 {
-    animation: orb-float-2 15s ease-in-out infinite;
+  .pulse-opacity {
+    animation: pulse-opacity 2s ease-in-out infinite;
   }
 }
