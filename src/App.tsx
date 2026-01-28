@@ -25,6 +25,7 @@ import Disclaimer from "./pages/Disclaimer";
 import ThankYou from "./pages/ThankYou";
 import ArticleGenerator from "./pages/admin/ArticleGenerator";
 import CitationsDashboard from "./pages/admin/CitationsDashboard";
+import NewsDetail from "./pages/NewsDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/articles/:slug" element={<ArticleDetail />} />
+            <Route path="/news/:slug" element={<ProtectedRoute><NewsDetail /></ProtectedRoute>} />
             <Route path="/admin/generate" element={<ProtectedRoute><ArticleGenerator /></ProtectedRoute>} />
             <Route path="/admin/citations" element={<ProtectedRoute><CitationsDashboard /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
