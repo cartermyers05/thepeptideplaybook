@@ -19,8 +19,7 @@ export function Hero() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
-              A research-backed guide to understanding peptides — what they do, 
-              what's legal, and what to ask your doctor.
+              Stay current on peptide research and ask our AI assistant anything — backed by real science, not TikTok trends.
             </p>
 
             <div className="space-y-4">
@@ -76,8 +75,7 @@ export function Hero() {
               {/* Center content */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="glass-card-subtle p-8 text-center">
-                  <p className="text-4xl font-semibold text-primary mb-2">15</p>
-                  <p className="text-sm text-muted-foreground">Peptides covered</p>
+                  <p className="text-sm font-medium text-primary">AI-powered • Research-backed</p>
                 </div>
               </div>
             </div>
