@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,13 @@ import { toast } from "sonner";
 interface ComplianceModalProps {
   onAccept: () => void;
 }
+
+const checkboxItems = [
+  { id: "notMedical", label: "This is not medical advice" },
+  { id: "consultProfessionals", label: "I will consult healthcare professionals before any use" },
+  { id: "notFdaApproved", label: "I understand peptides may not be FDA-approved for human use" },
+  { id: "educationalOnly", label: "I am using this for educational/research purposes" },
+];
 
 export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
   const [open, setOpen] = useState(false);
@@ -59,7 +67,6 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
 
     console.log("Attempting to save acceptance for user:", user.id);
 
-    // Try update first
     const { data: updateData, error: updateError } = await supabase
       .from("profiles")
       .update({ terms_accepted_at: new Date().toISOString() })
@@ -68,7 +75,6 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
 
     console.log("Update result:", { updateData, updateError });
 
-    // If update didn't affect any rows (no profile exists), create one
     if (!updateError && (!updateData || updateData.length === 0)) {
       console.log("No profile found, creating one...");
       const { error: insertError } = await supabase
@@ -96,81 +102,90 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md [&>button]:hidden">
-        <DialogHeader>
-          <DialogTitle className="text-xl">Before You Begin</DialogTitle>
-          <DialogDescription className="text-base pt-2">
-            PeptideGPT is an educational research tool that provides information based on published scientific literature.
-          </DialogDescription>
+      <DialogContent className="sm:max-w-md [&>button]:hidden glass-panel border-0 overflow-hidden">
+        {/* Background ambient effect */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <motion.div 
+            className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-primary/10 blur-3xl"
+            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+            transition={{ duration: 4, repeat: Infinity }}
+          />
+          <motion.div 
+            className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-primary/8 blur-3xl"
+            animate={{ scale: [1.2, 1, 1.2], opacity: [0.3, 0.5, 0.3] }}
+            transition={{ duration: 5, repeat: Infinity }}
+          />
+        </div>
+
+        <DialogHeader className="relative">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <DialogTitle className="text-xl">Before You Begin</DialogTitle>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <DialogDescription className="text-base pt-2">
+              PeptideGPT is an educational research tool that provides information based on published scientific literature.
+            </DialogDescription>
+          </motion.div>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <p className="text-sm text-muted-foreground font-medium">
+        <div className="space-y-4 py-4 relative">
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-sm text-muted-foreground font-medium"
+          >
             By continuing, you acknowledge:
-          </p>
+          </motion.p>
 
           <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="notMedical"
-                checked={checks.notMedical}
-                onCheckedChange={(checked) =>
-                  setChecks((prev) => ({ ...prev, notMedical: !!checked }))
-                }
-              />
-              <Label htmlFor="notMedical" className="text-sm leading-tight cursor-pointer">
-                This is not medical advice
-              </Label>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="consultProfessionals"
-                checked={checks.consultProfessionals}
-                onCheckedChange={(checked) =>
-                  setChecks((prev) => ({ ...prev, consultProfessionals: !!checked }))
-                }
-              />
-              <Label htmlFor="consultProfessionals" className="text-sm leading-tight cursor-pointer">
-                I will consult healthcare professionals before any use
-              </Label>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="notFdaApproved"
-                checked={checks.notFdaApproved}
-                onCheckedChange={(checked) =>
-                  setChecks((prev) => ({ ...prev, notFdaApproved: !!checked }))
-                }
-              />
-              <Label htmlFor="notFdaApproved" className="text-sm leading-tight cursor-pointer">
-                I understand peptides may not be FDA-approved for human use
-              </Label>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="educationalOnly"
-                checked={checks.educationalOnly}
-                onCheckedChange={(checked) =>
-                  setChecks((prev) => ({ ...prev, educationalOnly: !!checked }))
-                }
-              />
-              <Label htmlFor="educationalOnly" className="text-sm leading-tight cursor-pointer">
-                I am using this for educational/research purposes
-              </Label>
-            </div>
+            {checkboxItems.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 + index * 0.1 }}
+                className="flex items-start gap-3"
+              >
+                <Checkbox
+                  id={item.id}
+                  checked={checks[item.id as keyof typeof checks]}
+                  onCheckedChange={(checked) =>
+                    setChecks((prev) => ({ ...prev, [item.id]: !!checked }))
+                  }
+                  className="mt-0.5"
+                />
+                <Label htmlFor={item.id} className="text-sm leading-tight cursor-pointer">
+                  {item.label}
+                </Label>
+              </motion.div>
+            ))}
           </div>
         </div>
 
-        <Button
-          onClick={handleAccept}
-          disabled={!allChecked}
-          className="w-full"
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
         >
-          I Understand – Continue
-        </Button>
+          <Button
+            onClick={handleAccept}
+            disabled={!allChecked}
+            className={`w-full bg-gradient-primary hover:opacity-90 transition-all ${
+              allChecked ? "glow-primary" : ""
+            }`}
+          >
+            I Understand – Continue
+          </Button>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );

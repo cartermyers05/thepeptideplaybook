@@ -14,17 +14,19 @@ const tabs = [
 
 export default function FloatingTabs({ activeTab, onTabChange }: FloatingTabsProps) {
   return (
-    <div className="relative flex items-center gap-1 p-1 rounded-full glass-card">
+    <div className="relative flex items-center gap-1 p-1.5 rounded-2xl glass-panel">
       {tabs.map((tab) => (
-        <button
+        <motion.button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            "relative z-10 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200",
+            "relative z-10 flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200",
             activeTab === tab.id
               ? "text-primary-foreground"
               : "text-muted-foreground hover:text-foreground"
           )}
+          whileHover={{ scale: activeTab === tab.id ? 1 : 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           <tab.icon className="w-4 h-4" />
           <span className="hidden sm:inline">{tab.label}</span>
@@ -32,12 +34,16 @@ export default function FloatingTabs({ activeTab, onTabChange }: FloatingTabsPro
           {activeTab === tab.id && (
             <motion.div
               layoutId="active-tab-indicator"
-              className="absolute inset-0 rounded-full bg-gradient-primary"
+              className="absolute inset-0 rounded-xl bg-gradient-primary glow-primary"
               style={{ zIndex: -1 }}
-              transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 400, 
+                damping: 30 
+              }}
             />
           )}
-        </button>
+        </motion.button>
       ))}
     </div>
   );
