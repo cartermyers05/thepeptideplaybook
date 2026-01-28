@@ -1,9 +1,38 @@
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Bot, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+const chatExamples = [
+  { 
+    question: "Is BPC-157 legal to buy?", 
+    answer: "It depends on your location and intended use. In the US, BPC-157 is not FDA-approved and is sold only for research purposes..." 
+  },
+  { 
+    question: "What's the difference between BPC-157 and TB-500?", 
+    answer: "Both are peptides studied for tissue repair, but they work through different mechanisms. BPC-157 focuses on gut and tendon healing..." 
+  },
+  { 
+    question: "How do I know if a peptide source is legit?", 
+    answer: "Look for third-party testing certificates (COAs), check for purity percentages above 98%, and research the vendor's reputation..." 
+  },
+  { 
+    question: "Are peptides safe to use?", 
+    answer: "Safety depends on the specific peptide, dosage, and individual factors. Most peptides in research have shown favorable safety profiles..." 
+  },
+];
+
 export function Hero() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % chatExamples.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section className="pt-24 pb-16 md:pt-32 md:pb-24">
       <div className="container px-4">
@@ -60,22 +89,33 @@ export function Hero() {
               </div>
 
               {/* Chat messages */}
-              <div className="space-y-4 mb-6">
-                {/* User message */}
-                <div className="flex justify-end">
-                  <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2 max-w-[80%]">
-                    <p className="text-sm">Is BPC-157 legal to buy?</p>
-                  </div>
-                </div>
+              <div className="space-y-4 mb-6 min-h-[140px]">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentIndex}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.4 }}
+                    className="space-y-4"
+                  >
+                    {/* User message */}
+                    <div className="flex justify-end">
+                      <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2 max-w-[80%]">
+                        <p className="text-sm">{chatExamples[currentIndex].question}</p>
+                      </div>
+                    </div>
 
-                {/* Assistant message */}
-                <div className="flex justify-start">
-                  <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3 max-w-[85%]">
-                    <p className="text-sm text-foreground leading-relaxed">
-                      It depends on your location and intended use. In the US, BPC-157 is not FDA-approved and is sold only for research purposes...
-                    </p>
-                  </div>
-                </div>
+                    {/* Assistant message */}
+                    <div className="flex justify-start">
+                      <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3 max-w-[85%]">
+                        <p className="text-sm text-foreground leading-relaxed">
+                          {chatExamples[currentIndex].answer}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
 
               {/* Input field */}
