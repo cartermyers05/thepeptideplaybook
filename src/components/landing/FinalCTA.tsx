@@ -1,24 +1,26 @@
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, Shield, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+const included = [
+  "Complete peptide breakdown (50+ peptides)",
+  "FDA & legal classification guide",
+  "Doctor conversation scripts",
+  "AI research assistant access",
+  "Lifetime access & free updates",
+];
+
 export function FinalCTA() {
   return (
-    <section className="py-20 md:py-32 relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-primary opacity-5" />
-      <div 
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.1) 0%, transparent 70%)`,
-        }}
-      />
-
+    <section id="pricing" className="py-20 md:py-32 relative overflow-hidden">
+      {/* Large gradient glow behind card */}
+      <div className="gradient-glow gradient-glow-lg absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+      
       {/* Abstract blobs */}
-      <div className="absolute top-10 left-20 w-64 h-64 blob-bg animate-orb-float opacity-10" />
+      <div className="blob-bg absolute top-10 left-10 w-64 h-64 animate-orb-float opacity-20" />
       <div 
-        className="absolute bottom-10 right-20 w-80 h-80 blob-bg animate-orb-float opacity-10" 
+        className="blob-bg absolute bottom-10 right-10 w-80 h-80 animate-orb-float opacity-20" 
         style={{ animationDelay: '-4s' }} 
       />
 
@@ -27,37 +29,51 @@ export function FinalCTA() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-3xl mx-auto text-center"
+          transition={{ duration: 0.5 }}
+          className="max-w-xl mx-auto"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full bg-primary/10 border border-primary/20">
-            <BookOpen className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">
-              Join 2,847+ readers
-            </span>
-          </div>
-
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Ready to Finally{" "}
-            <span className="text-gradient">Understand Peptides?</span>
-          </h2>
-
-          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Stop scrolling through confusing TikToks and sketchy forums. 
-            Get the complete, research-backed guide to peptides today.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button asChild size="lg" className="h-14 px-10 text-lg glow-primary">
+          <div className="glass-card p-8 md:p-10 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">
+              Get Peptide Clarity Today
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              One-time purchase. Lifetime access.
+            </p>
+            
+            <div className="mb-8">
+              <span className="text-5xl md:text-6xl font-bold">$67</span>
+              <span className="text-muted-foreground ml-2">one-time payment</span>
+            </div>
+            
+            {/* Bullet recap */}
+            <ul className="text-left space-y-3 mb-8 max-w-sm mx-auto">
+              {included.map((item) => (
+                <li key={item} className="flex items-center gap-3 text-sm">
+                  <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 text-success" />
+                  </div>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            
+            <Button asChild size="lg" className="btn-primary-glow w-full h-14 text-lg mb-6">
               <Link to="/signup">
-                Get the Playbook — $67
+                Get Instant Access
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </Button>
+            
+            {/* Guarantee badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/10 text-success mb-4">
+              <Shield className="w-4 h-4" />
+              <span className="text-sm font-medium">30-Day Money-Back Guarantee</span>
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              Instant access. No subscription. Educational information only.
+            </p>
           </div>
-
-          <p className="text-sm text-muted-foreground mt-6">
-            One-time purchase • Instant access • 30-day money-back guarantee
-          </p>
         </motion.div>
       </div>
     </section>
