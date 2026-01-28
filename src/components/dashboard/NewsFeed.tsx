@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import NewsCard, { NewsArticle } from "./NewsCard";
 import { Button } from "@/components/ui/button";
-import { Newspaper } from "lucide-react";
+import { Newspaper, TrendingUp, ExternalLink } from "lucide-react";
 
 const mockNews: NewsArticle[] = [
   {
@@ -114,19 +114,50 @@ export default function NewsFeed() {
         ))}
       </motion.div>
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {featuredArticle && (
-          <div className="md:col-span-2 lg:row-span-2">
-            <NewsCard article={featuredArticle} featured index={0} />
+      {/* Top Story Hero */}
+      {featuredArticle && (
+        <motion.a
+          href={featuredArticle.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="block mb-8 card-clean border-primary/20 hover:border-primary/40 transition-colors group"
+        >
+          <div className="p-8">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center gap-1.5">
+                <TrendingUp className="w-4 h-4" />
+                Top Story Today
+              </div>
+            </div>
+            <h2 className="text-2xl lg:text-3xl font-bold mb-4 group-hover:text-primary transition-colors">
+              {featuredArticle.title}
+            </h2>
+            <p className="text-muted-foreground text-base mb-6 line-clamp-3">
+              {featuredArticle.excerpt}
+            </p>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                {featuredArticle.source} • {featuredArticle.date}
+              </span>
+              <div className="flex items-center gap-2 text-primary font-medium">
+                Read Full Article
+                <ExternalLink className="w-4 h-4" />
+              </div>
+            </div>
           </div>
-        )}
+        </motion.a>
+      )}
 
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {otherArticles.map((article, index) => (
           <NewsCard 
             key={article.id} 
             article={article} 
-            index={featuredArticle ? index + 1 : index} 
+            index={index} 
           />
         ))}
       </div>
