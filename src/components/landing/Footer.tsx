@@ -11,6 +11,18 @@ export function Footer() {
           
           {/* Links */}
           <div className="flex flex-wrap justify-center gap-6">
+            <Link
+              to="/about"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              About
+            </Link>
+            <Link
+              to="/blog"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Blog
+            </Link>
             <a
               href="#features"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -27,13 +39,13 @@ export function Footer() {
               to="/terms"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Terms
+              Terms of Service
             </Link>
             <Link
               to="/privacy"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Privacy
+              Privacy Policy
             </Link>
             <Link
               to="/disclaimer"
@@ -45,15 +57,15 @@ export function Footer() {
           
           {/* Copyright */}
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()}
+            © {new Date().getFullYear()} Peptide Playbook
           </p>
         </div>
         
         {/* Disclaimer */}
         <div className="pt-8 border-t border-border">
           <p className="text-xs text-muted-foreground text-center max-w-2xl mx-auto leading-relaxed">
-            This product provides educational information only. Not medical advice. 
-            Consult a healthcare provider before making health decisions.
+            This website provides educational information only. It is not medical advice. 
+            Consult a healthcare provider before making any health decisions.
           </p>
         </div>
       </div>

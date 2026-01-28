@@ -5,28 +5,31 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ChevronDown } from "lucide-react";
 
 const faqs = [
   {
     question: "Is this medical advice?",
-    answer: "No. This is educational information to help you have informed conversations with healthcare providers.",
+    answer: "No. The Peptide Playbook provides educational information about peptide research and regulations. It does not replace consultation with a qualified healthcare provider. Always discuss health decisions with your doctor.",
   },
   {
-    question: "What if I'm new to peptides?",
-    answer: "Perfect. This guide assumes no prior knowledge.",
+    question: "What peptides does this cover?",
+    answer: "We cover FDA-approved peptides (semaglutide, tirzepatide, liraglutide, bremelanotide) and research peptides (BPC-157, TB-500, Ipamorelin, CJC-1295, GHK-Cu, and more). Each gets a complete breakdown of research status, regulatory classification, and what we know vs. don't know.",
   },
   {
-    question: "Do I get lifetime access?",
-    answer: "Yes. One purchase, forever access, including updates.",
+    question: "How is this different from free info online?",
+    answer: "Free information is scattered, contradictory, and often wrong. We've synthesized peer-reviewed research, FDA documents, and regulatory filings into one clear, organized resource. No TikTok bro science. No Reddit speculation. Just research.",
   },
   {
-    question: "What's the refund policy?",
-    answer: "30 days, no questions asked.",
+    question: "What if I'm not satisfied?",
+    answer: "30-day money-back guarantee, no questions asked. If the Peptide Playbook doesn't deliver value, email us for a full refund.",
   },
   {
-    question: "What about the AI assistant?",
-    answer: "It's an educational tool to help answer your questions. Not a replacement for medical advice.",
+    question: "How do I access it?",
+    answer: "Instant digital delivery. After purchase, you'll get immediate access to download the PDF and access the online version. No waiting.",
+  },
+  {
+    question: "Will this tell me what to take?",
+    answer: "No. We don't recommend specific peptides, dosages, or protocols. That's medical advice, which requires a healthcare provider who knows your situation. We give you the information to have an informed conversation with your doctor.",
   },
 ];
 
@@ -41,7 +44,7 @@ export function FAQ() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Questions
+            Frequently Asked Questions
           </h2>
         </motion.div>
 
@@ -79,3 +82,5 @@ export function FAQ() {
     </section>
   );
 }
+
+export { faqs };

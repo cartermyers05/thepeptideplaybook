@@ -1,14 +1,15 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, CreditCard, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const included = [
-  "Complete peptide guide",
-  "Legal & FDA breakdown",
-  "Doctor conversation scripts",
-  "AI assistant access",
-  "Lifetime updates",
+  "Complete Digital Guide (PDF + Online Access)",
+  "All Peptide Deep-Dive Modules",
+  "Doctor Conversation Scripts",
+  "Source Evaluation Checklist",
+  "Red Flags Reference Sheet",
+  "Free Updates for Life",
 ];
 
 const listVariants = {
@@ -40,8 +41,8 @@ export function FinalCTA() {
             animate={{ y: [-2, 2, -2] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
-            <h3 className="text-xl font-semibold mb-2">Peptide Playbook</h3>
-            <p className="text-4xl font-semibold mb-1">$67</p>
+            <h3 className="text-xl font-semibold mb-2">Get the Peptide Playbook</h3>
+            <p className="text-4xl font-semibold mb-1">$167</p>
             <p className="text-sm text-muted-foreground mb-8">One-time purchase</p>
             
             <motion.ul 
@@ -70,16 +71,22 @@ export function FinalCTA() {
               <Button asChild size="lg" className="btn-primary-clean w-full h-12 text-base mb-4 relative overflow-hidden group">
                 <Link to="/signup">
                   <span className="relative z-10 flex items-center justify-center w-full">
-                    Get Started
+                    Get Instant Access Now
                     <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
               </Button>
             </motion.div>
             
-            <p className="text-sm text-muted-foreground">
-              30-day money-back guarantee
+            <p className="text-sm text-muted-foreground mb-4">
+              30-Day Money-Back Guarantee — If it's not worth 10x what you paid, get a full refund.
             </p>
+
+            {/* Payment icons */}
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+              <CreditCard className="w-5 h-5" />
+              <span className="text-xs">Visa, Mastercard, Amex, PayPal, Apple Pay</span>
+            </div>
           </motion.div>
         </motion.div>
 
@@ -91,17 +98,20 @@ export function FinalCTA() {
           transition={{ delay: 0.1, duration: 0.5 }}
           className="text-center mt-16"
         >
-          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-6">
-            Ready to cut through the noise?
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4">
+            Ready to Actually Understand Peptides?
           </h2>
+          <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
+            Stop guessing. Stop scrolling Reddit threads at 2am. Get the research-based resource that gives you clarity.
+          </p>
           <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base">
             <Link to="/signup">
-              Start Learning — $67
+              Get the Peptide Playbook — $167
               <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
           </Button>
           <p className="text-sm text-muted-foreground mt-4">
-            Instant access • 30-day guarantee
+            Instant access. 30-day guarantee. No fluff.
           </p>
         </motion.div>
       </div>

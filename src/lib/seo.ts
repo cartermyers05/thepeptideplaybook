@@ -1,11 +1,11 @@
 // SEO utilities and constants
 
-export const SITE_NAME = "PeptideGPT";
-export const SITE_URL = "https://peptidegpt.com"; // Update with your actual domain
-export const SITE_DESCRIPTION = "Expert peptide research, protocols, and evidence-based information for researchers and biohackers.";
+export const SITE_NAME = "Peptide Playbook";
+export const SITE_URL = "https://peptideplaybook.com";
+export const SITE_DESCRIPTION = "Stop taking peptide advice from TikTok. Get the research-based guide covering BPC-157, semaglutide, TB-500 and more. Know what's FDA-approved, what's experimental, and what to ask your doctor.";
 export const DEFAULT_AUTHOR = {
-  name: "Dr. Sarah Chen",
-  credential: "PhD Biochemistry, 15 years research",
+  name: "Peptide Playbook",
+  credential: "Research-based peptide education",
 };
 
 export interface ArticleMeta {

@@ -26,28 +26,37 @@ serve(async (req) => {
 
     if (error) throw error;
 
-    const baseUrl = "https://peptidegpt.com"; // Update with actual domain
+    const baseUrl = "https://peptideplaybook.com";
+
+    // Static pages with their priorities and change frequencies
+    const staticPages = [
+      { path: "/", priority: "1.0", changefreq: "daily" },
+      { path: "/blog", priority: "0.9", changefreq: "daily" },
+      { path: "/about", priority: "0.7", changefreq: "monthly" },
+      { path: "/terms", priority: "0.3", changefreq: "yearly" },
+      { path: "/privacy", priority: "0.3", changefreq: "yearly" },
+      { path: "/disclaimer", priority: "0.3", changefreq: "yearly" },
+    ];
 
     // Generate XML sitemap
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  ${staticPages
+    .map(
+      (page) => `
   <url>
-    <loc>${baseUrl}/</loc>
+    <loc>${baseUrl}${page.path}</loc>
     <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/articles</loc>
-    <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>`
+    )
+    .join("")}
   ${articles
     ?.map(
       (article) => `
   <url>
-    <loc>${baseUrl}/articles/${article.slug}</loc>
+    <loc>${baseUrl}/blog/${article.slug}</loc>
     <lastmod>${
       article.updated_at
         ? new Date(article.updated_at).toISOString().split("T")[0]
