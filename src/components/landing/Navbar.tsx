@@ -45,9 +45,10 @@ export function Navbar() {
                 <a
                   key={link.label}
                   href={link.href}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
                 >
                   {link.label}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
                 </a>
               ))}
             </nav>
@@ -77,19 +78,20 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-x-0 top-16 z-40 md:hidden bg-white border-b border-border">
+        <div className="fixed inset-x-0 top-16 z-40 md:hidden bg-white border-b border-border animate-slide-down">
           <nav className="container px-4 py-6 space-y-4">
-            {navLinks.map((link) => (
+            {navLinks.map((link, index) => (
               <a
                 key={link.label}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block text-lg font-medium py-2"
+                className="block text-lg font-medium py-2 opacity-0 animate-fade-in-up"
+                style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "forwards" }}
               >
                 {link.label}
               </a>
             ))}
-            <div className="pt-4">
+            <div className="pt-4 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.3s", animationFillMode: "forwards" }}>
               <Button asChild className="w-full btn-primary-clean">
                 <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
                   Get Started

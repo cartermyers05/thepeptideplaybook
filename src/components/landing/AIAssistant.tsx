@@ -30,38 +30,64 @@ export function AIAssistant() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ 
+                rotateX: 2, 
+                rotateY: -2,
+                transition: { duration: 0.3 }
+              }}
               viewport={{ once: true }}
               transition={{ delay: 0.1, duration: 0.5 }}
               className="glass-card-subtle p-6"
+              style={{ transformStyle: "preserve-3d", perspective: 1000 }}
             >
               {/* Chat header */}
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border/50">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <motion.div 
+                  className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
                   <Bot className="w-5 h-5 text-primary" />
-                </div>
+                </motion.div>
                 <div>
                   <p className="font-medium text-sm">Peptide Assistant</p>
-                  <p className="text-xs text-muted-foreground">Online</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                    <p className="text-xs text-muted-foreground">Online</p>
+                  </div>
                 </div>
               </div>
 
               {/* Chat messages */}
               <div className="space-y-4 mb-6">
                 {/* User message */}
-                <div className="flex justify-end">
+                <motion.div 
+                  className="flex justify-end"
+                  initial={{ opacity: 0, x: 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 }}
+                >
                   <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2 max-w-[80%]">
                     <p className="text-sm">What's the difference between BPC-157 and TB-500?</p>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Assistant message */}
-                <div className="flex justify-start">
+                <motion.div 
+                  className="flex justify-start"
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.5 }}
+                >
                   <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3 max-w-[85%]">
                     <p className="text-sm text-foreground leading-relaxed">
-                      Great question. Both are peptides studied for tissue repair, but they work differently...
+                      Great question. Both are peptides studied for tissue repair, but they work differently
+                      <span className="typing-cursor" />
                     </p>
                   </div>
-                </div>
+                </motion.div>
               </div>
 
               {/* Input field */}

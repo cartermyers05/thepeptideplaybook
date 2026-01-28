@@ -1,8 +1,21 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Bot, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+
+const wordVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.08,
+      duration: 0.4,
+      ease: "easeOut" as const,
+    },
+  }),
+};
 
 const chatExamples = [
   { 
@@ -25,6 +38,8 @@ const chatExamples = [
 
 export function Hero() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { scrollY } = useScroll();
+  const chatY = useTransform(scrollY, [0, 300], [0, 30]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,6 +47,8 @@ export function Hero() {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
+
+  const headlineWords = "Stop Taking Peptide Advice From 19-Year-Olds on TikTok".split(" ");
 
   return (
     <section className="pt-24 pb-16 md:pt-32 md:pb-24">
@@ -44,7 +61,18 @@ export function Hero() {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-4xl sm:text-5xl md:text-[3.25rem] font-semibold tracking-tight leading-[1.1] mb-6">
-              Stop Taking Peptide Advice From 19-Year-Olds on TikTok
+              {headlineWords.map((word, i) => (
+                <motion.span
+                  key={i}
+                  custom={i}
+                  variants={wordVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="inline-block mr-[0.25em]"
+                >
+                  {word}
+                </motion.span>
+              ))}
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
@@ -69,6 +97,7 @@ export function Hero() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
+            style={{ y: chatY }}
             transition={{ delay: 0.2, duration: 0.5 }}
             className="relative"
           >
@@ -84,7 +113,10 @@ export function Hero() {
                 </div>
                 <div>
                   <p className="font-medium text-sm">Peptide Assistant</p>
-                  <p className="text-xs text-muted-foreground">Online</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                    <p className="text-xs text-muted-foreground">Online</p>
+                  </div>
                 </div>
               </div>
 
