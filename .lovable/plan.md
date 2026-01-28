@@ -1,327 +1,147 @@
 
-# Futuristic & Trustworthy Design Overhaul
+
+# News Feed Enhancements
 
 ## Overview
 
-Transform PeptideGPT from "Apple Glass" to a more **sci-fi tech** aesthetic - think Linear, Vercel, or Stripe's new design language. Clean, sharp, futuristic, and professional while keeping your white/purple palette.
+Improve the news feed with bigger card sizes, better click interactions, and a prominent "Top Story of the Day" feature for trending content.
 
 ---
 
-## Design Philosophy Shift
+## Changes
 
-### From → To
+### 1. Bigger News Cards
 
-| Current | New Direction |
-|---------|---------------|
-| Soft, bubbly glassmorphism | Sharp, geometric precision |
-| Floating orbs & blobs | Subtle grid patterns & clean lines |
-| Heavy blur everywhere | Strategic blur, more solid surfaces |
-| Rounded corners (lg-3xl) | Tighter corners (md-lg) |
-| Playful animations | Purposeful, subtle micro-interactions |
+**File: `src/components/dashboard/NewsCard.tsx`**
 
-### New Aesthetic Principles
+Increase sizing across the board:
+- Padding: `p-5` to `p-6` (featured: `p-6` to `p-8`)
+- Title font: `text-base` to `text-lg` (featured: `text-lg lg:text-xl` to `text-xl lg:text-2xl`)
+- Excerpt: Show more lines (`line-clamp-3` to `line-clamp-4`)
+- Add "Read Full Article" text next to the external link icon for clearer click affordance
 
-1. **Precision over softness** - Sharp edges, clean typography, mathematical spacing
-2. **Trust through clarity** - Clear hierarchy, professional layouts, no visual noise
-3. **Futuristic minimalism** - Less decoration, more function, subtle tech cues
-4. **White space as luxury** - Generous padding, breathing room
-5. **Motion with purpose** - Smooth but restrained animations
+### 2. Top Story of the Day Section
+
+**File: `src/components/dashboard/NewsFeed.tsx`**
+
+Add a prominent "Top Story" hero section at the top:
+- Large featured card with gradient accent border
+- "Top Story" badge with fire/trending icon
+- Bigger image placeholder area (for future use)
+- More prominent call-to-action
+
+```text
++--------------------------------------------------+
+|  [Fire Icon] TOP STORY TODAY                     |
+|                                                   |
+|  [Large Title - Much Bigger]                     |
+|  [Longer excerpt with more detail]               |
+|                                                   |
+|  Source • Date           [Read Full Article ->]  |
++--------------------------------------------------+
+```
+
+### 3. Grid Layout Adjustments
+
+**File: `src/components/dashboard/NewsFeed.tsx`**
+
+- Increase gap from `gap-4` to `gap-5`
+- Top story spans full width on all screens
+- Regular cards in 2-column grid on tablet, 3-column on desktop
 
 ---
 
-## Color Refinements
+## Technical Details
 
-Keep white + purple, but refine the implementation:
+### NewsCard.tsx Changes
 
-```css
-/* Light mode - cleaner, crisper */
---background: 0 0% 100%;           /* Pure white */
---foreground: 220 25% 10%;         /* Near black, slightly warm */
---primary: 250 85% 60%;            /* Vibrant violet */
---accent: 250 100% 97%;            /* Very subtle purple tint */
+```tsx
+// Increased padding
+<div className={cn(
+  "p-6 flex flex-col h-full",
+  featured && "lg:p-8"
+)}>
 
-/* Dark mode - deeper, richer */
---background: 222 47% 3%;          /* Very deep blue-black */
---foreground: 0 0% 98%;            /* Off-white */
---primary: 250 90% 65%;            /* Bright violet */
---accent: 250 50% 10%;             /* Dark purple tint */
+// Bigger title
+<h3 className={cn(
+  "font-semibold leading-snug mb-3 group-hover:text-primary transition-colors",
+  featured ? "text-xl lg:text-2xl" : "text-lg"
+)}>
+
+// More visible click prompt
+<div className="flex items-center gap-1.5 text-sm text-primary font-medium">
+  <span>Read Article</span>
+  <ExternalLink className="w-4 h-4" />
+</div>
+```
+
+### NewsFeed.tsx Changes
+
+Add new TopStoryCard component inline or separate:
+- Uses the first featured article or a dedicated "top story" field
+- Styled with a subtle purple gradient border
+- Trending/fire icon badge
+- Full-width layout
+
+```tsx
+{/* Top Story Hero */}
+<motion.a
+  href={topStory.url}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="block mb-8 card-clean border-primary/20 hover:border-primary/40 transition-colors"
+>
+  <div className="p-8">
+    <div className="flex items-center gap-2 mb-4">
+      <div className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center gap-1.5">
+        <TrendingUp className="w-4 h-4" />
+        Top Story Today
+      </div>
+    </div>
+    <h2 className="text-2xl lg:text-3xl font-bold mb-4">{topStory.title}</h2>
+    <p className="text-muted-foreground text-base mb-6 line-clamp-3">{topStory.excerpt}</p>
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-muted-foreground">{topStory.source} • {topStory.date}</span>
+      <div className="flex items-center gap-2 text-primary font-medium">
+        Read Full Article
+        <ExternalLink className="w-4 h-4" />
+      </div>
+    </div>
+  </div>
+</motion.a>
 ```
 
 ---
 
-## Visual System Changes
+## Future Enhancement: Real Trending Data
 
-### 1. Background Treatment
+For the "top story" feature to show actual trending content, you'd later connect this to:
+- An edge function that fetches from a news API (PubMed, BioSpace, etc.)
+- Logic to determine "trending" based on recency + engagement
+- Daily refresh mechanism
 
-**Remove:** Animated orbs, mesh gradients, floating blobs
-**Add:** Subtle dot grid pattern, clean gradient wash
-
-```css
-/* Clean dot grid - futuristic & minimal */
-.dot-grid {
-  background-image: radial-gradient(circle, rgba(139, 92, 246, 0.15) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-/* Subtle gradient wash - not animated */
-.gradient-wash {
-  background: linear-gradient(135deg, 
-    hsl(var(--background)) 0%,
-    hsl(var(--accent)) 50%,
-    hsl(var(--background)) 100%
-  );
-}
-```
-
-### 2. Card System
-
-**Remove:** Heavy blur, noise texture, gradient borders
-**Add:** Clean borders, subtle shadows, hover elevation
-
-```css
-/* New clean card */
-.card-clean {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  transition: all 0.2s ease;
-}
-
-.card-clean:hover {
-  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.08);
-  border-color: hsl(var(--primary) / 0.2);
-}
-```
-
-### 3. Glass Effect (Refined)
-
-Keep glass but make it cleaner:
-
-```css
-.glass-clean {
-  background: hsl(var(--background) / 0.85);
-  backdrop-filter: blur(16px);
-  border: 1px solid hsl(var(--border) / 0.5);
-  /* No noise, no heavy shadows */
-}
-```
-
-### 4. Typography Hierarchy
-
-Tighter, more professional:
-- Headlines: Font weight 600-700, tight letter-spacing (-0.02em)
-- Body: Weight 400, comfortable line-height (1.6)
-- Labels: Weight 500, slightly smaller, uppercase for emphasis
-
-### 5. Button Refinements
-
-**Current:** Heavy glow, gradient backgrounds
-**New:** Solid colors, subtle hover states, clean focus rings
-
-```css
-/* Primary button */
-.btn-primary {
-  background: hsl(var(--primary));
-  color: white;
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.15s ease;
-}
-
-.btn-primary:hover {
-  background: hsl(var(--primary) / 0.9);
-  transform: translateY(-1px);
-}
-
-/* Subtle glow only on focus/active */
-.btn-primary:focus-visible {
-  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.25);
-}
-```
+For now, I'll use the existing featured article as the top story.
 
 ---
 
-## Component Redesigns
+## Files Modified
 
-### Landing Page - Hero Section
+1. **`src/components/dashboard/NewsCard.tsx`**
+   - Increase padding (p-5 to p-6, featured p-8)
+   - Larger typography
+   - Add "Read Article" text with icon in footer
 
-**Changes:**
-- Remove animated typing demo (feels gimmicky)
-- Add static, clean input mockup
-- Tighter spacing, bolder headline
-- Trust badges in a cleaner horizontal strip
-- Subtle grid background instead of gradient blobs
-
-### Landing Page - Problem/Solution Sections
-
-**Changes:**
-- Use icons with thinner strokes (Lucide outline style)
-- Cards with subtle borders, no heavy shadows
-- Cleaner 2-column or 3-column grids
-- Remove stagger animations, use simple fade-in
-
-### Landing Page - Pricing Card
-
-**Changes:**
-- Remove the outer glow blur
-- Cleaner card with sharp border
-- Popular badge as a subtle pill, not full-width banner
-- Features list with simple checkmarks
-
-### Dashboard Header
-
-**Changes:**
-- Solid background with bottom border (not floating island)
-- Cleaner tab switcher with underline indicator
-- Logo without the pulsing glow
-
-### News Feed
-
-**Changes:**
-- Cards in a clean grid layout
-- Subtle hover state (border color change + slight shadow)
-- Remove 3D tilt effects
-- Category badges as small pills
-
-### Chat Interface
-
-**Changes:**
-- Clean input area with solid border
-- Messages with subtle backgrounds, no heavy glass
-- Typing indicator with simple opacity pulse
-- Suggested questions as clean pills/chips
-
-### Modals
-
-**Changes:**
-- Clean white/dark background, light blur
-- Sharp corners (12px radius)
-- Clear visual hierarchy
-- Button aligned right (standard pattern)
+2. **`src/components/dashboard/NewsFeed.tsx`**
+   - Add Top Story hero section at the top
+   - Increase grid gap
+   - Adjust featured article to be the "Top Story"
 
 ---
 
-## Animation Refinements
+## Result
 
-### Remove:
-- Orb floating animations
-- Breathing/pulsing glows
-- 3D tilt effects
-- Mesh gradient shifts
-- Bouncing typing dots
+- Cards will be more spacious and easier to read
+- Clear "Read Article" prompt makes clickability obvious
+- Top Story section gives prominence to trending content
+- Professional, magazine-style layout
 
-### Keep (but refine):
-- Fade-in on scroll (faster, 0.2s)
-- Hover transitions (subtle lift, 0.15s)
-- Tab indicator movement (spring physics)
-- Page transitions (simple crossfade)
-
-### New:
-- Subtle scale on button click (0.98)
-- Border color transitions on focus
-- Smooth scroll for anchor links
-
----
-
-## Files to Modify
-
-### Core Styling
-
-1. **src/index.css**
-   - Simplify color palette
-   - Remove heavy glass utilities
-   - Add dot-grid background
-   - Clean up animation utilities
-   - Tighten shadows
-
-2. **tailwind.config.ts**
-   - Remove excessive keyframes
-   - Adjust border-radius defaults
-   - Refine shadow scale
-
-### Landing Page
-
-3. **src/components/landing/Hero.tsx**
-   - Remove typing animation
-   - Cleaner layout, sharper copy
-   - Subtle background pattern
-
-4. **src/components/landing/Navbar.tsx**
-   - Solid header style
-   - Cleaner navigation
-
-5. **src/components/landing/ProblemSection.tsx**
-   - Cleaner card styling
-   - Simpler icons
-
-6. **src/components/landing/SolutionSection.tsx**
-   - Remove animated demo
-   - Static preview with clean styling
-
-7. **src/components/landing/Pricing.tsx**
-   - Remove blur glow
-   - Clean card design
-
-### Dashboard
-
-8. **src/pages/Chat.tsx**
-   - Remove mesh gradient and orbs
-   - Add subtle dot grid
-
-9. **src/components/dashboard/DashboardHeader.tsx**
-   - Solid header, not floating
-   - Cleaner tabs
-
-10. **src/components/dashboard/FloatingTabs.tsx**
-    - Rename to TabSwitcher
-    - Simple underline indicator
-
-11. **src/components/dashboard/ChatInterface.tsx**
-    - Clean input styling
-    - Subtle message bubbles
-    - Professional empty state
-
-12. **src/components/dashboard/NewsCard.tsx**
-    - Remove tilt effects
-    - Clean hover states
-
-13. **src/components/dashboard/NewsFeed.tsx**
-    - Standard grid layout
-    - Remove stagger animations
-
-14. **src/components/dashboard/ComplianceModal.tsx**
-    - Clean modal styling
-    - Standard button alignment
-
-15. **src/components/dashboard/DisclaimerBanner.tsx**
-    - Subtle banner styling
-
----
-
-## Visual Reference
-
-The new design should feel like:
-- **Linear** - Clean, precise, developer-focused
-- **Vercel** - Minimal, futuristic, trustworthy
-- **Stripe** - Professional, clear, polished
-- **Raycast** - Modern, fast, purposeful
-
-Not like:
-- Heavy neomorphism
-- Overblown glassmorphism
-- Gimmicky animations
-- Cluttered layouts
-
----
-
-## Expected Outcome
-
-After this redesign, PeptideGPT will feel:
-
-- **Futuristic** - Clean lines, subtle tech patterns, modern typography
-- **Trustworthy** - Professional layout, clear hierarchy, no gimmicks
-- **Modern** - Current design trends, refined details
-- **Cool** - Confident restraint, premium feel without trying too hard
-
-The white and purple palette will shine through in a more sophisticated way - purple as an accent that draws attention to key actions, not splashed everywhere.
