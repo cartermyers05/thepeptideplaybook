@@ -1,42 +1,54 @@
 
 
-# Update CTA Button Copy
+# Update Hero Section Messaging
 
 ## Overview
 
-Update all CTA buttons to better reflect the core value proposition: an AI-powered chatbot and ongoing news/updates to stay informed about peptides — not just a static "guide."
+Update the Hero section to better communicate the core value proposition: staying up-to-date on peptides + AI chatbot access — not just a static guide about 15 peptides.
 
 ---
 
-## Current vs. New Button Text
+## Changes
 
-| Location | Current | New |
-|----------|---------|-----|
-| Hero.tsx | "Get the Guide — $67" | "Start Learning — $67" |
-| FinalCTA pricing card | "Get Instant Access" | "Get Started" |
-| FinalCTA bottom | "Get the Guide — $67" | "Start Learning — $67" |
-| Navbar desktop | "Get Access" | "Get Started" |
-| Navbar mobile | "Get Access — $67" | "Get Started" |
+### 1. Center Visual Card (lines 77-82)
 
-## Alternative CTA Options
+**Current:**
+```
+15
+Peptides covered
+```
 
-Depending on which angle resonates best:
+**New Options:**
 
-**Option A: Learning-focused**
-- "Start Learning — $67"
-- "Get Started"
+| Option | Text |
+|--------|------|
+| A | "Research-backed peptide education" |
+| B | "Your peptide research companion" |
+| C | "Stay informed. Stay safe." |
+| D | "AI-powered • Research-backed" |
 
-**Option B: Stay informed**
-- "Stay Informed — $67"
-- "Get Access"
+**Recommendation:** Option D — concise, communicates both key differentiators (AI + research)
 
-**Option C: AI assistant-focused**
-- "Try the Assistant — $67"
-- "Get Started"
+---
 
-**Option D: Simple action**
-- "Join Now — $67"
-- "Get Started"
+### 2. Subheadline (lines 21-24)
+
+**Current:**
+```
+A research-backed guide to understanding peptides — what they do, 
+what's legal, and what to ask your doctor.
+```
+
+**New (one sentence that captures everything):**
+
+| Option | Copy |
+|--------|------|
+| A | "Stay up-to-date on peptide research and get instant answers from our AI assistant — grounded in science, not social media." |
+| B | "The research-backed platform that keeps you informed on peptides and lets you ask anything through our AI assistant." |
+| C | "Get the latest peptide research, news, and an AI assistant that actually knows what it's talking about." |
+| D | "Stay current on peptide research and ask our AI assistant anything — backed by real science, not TikTok trends." |
+
+**Recommendation:** Option D — punchy, ties back to the H1 about TikTok, captures both "stay up-to-date" and "AI chatbot"
 
 ---
 
@@ -44,29 +56,41 @@ Depending on which angle resonates best:
 
 | File | Changes |
 |------|---------|
-| `src/components/landing/Hero.tsx` | Line 29: Update button text |
-| `src/components/landing/FinalCTA.tsx` | Line 40: Update pricing card button; Line 64: Update bottom CTA |
-| `src/components/landing/Navbar.tsx` | Line 58: Update desktop button; Line 95: Update mobile button |
+| `src/components/landing/Hero.tsx` | Lines 21-24: Update subheadline; Lines 77-82: Update center card content |
 
 ---
 
-## Supporting Copy Updates (Optional)
+## Visual Card Layout
 
-If we're shifting the messaging away from "guide" toward chatbot + news, we may also want to update:
+The center card will change from:
+```text
++----------------+
+|      15        |
+| Peptides       |
+| covered        |
++----------------+
+```
 
-1. **Hero subheadline** (line 21-23): Currently says "A research-backed guide..." — could become something like "Your AI-powered research companion for peptide education."
+To:
+```text
++-------------------+
+| AI-powered        |
+| Research-backed   |
++-------------------+
+```
 
-2. **FinalCTA included list**: Already mentions "AI assistant access" and "Lifetime updates" — could be reordered to emphasize these first.
-
-3. **Pricing card title**: "Peptide Playbook" could stay, or become "Peptide Playbook Access"
+Or a single impactful line if preferred.
 
 ---
 
-## Recommendation
+## Final Copy Preview
 
-Go with **Option A** ("Start Learning") as it:
-- Implies ongoing engagement, not a one-time download
-- Feels action-oriented without being pushy
-- Works well with the AI assistant + updates value prop
-- Maintains premium, confident tone
+**H1 (unchanged):**
+"Stop Taking Peptide Advice From 19-Year-Olds on TikTok"
+
+**Subheadline (new):**
+"Stay current on peptide research and ask our AI assistant anything — backed by real science, not TikTok trends."
+
+**Center card (new):**
+"AI-powered • Research-backed"
 
