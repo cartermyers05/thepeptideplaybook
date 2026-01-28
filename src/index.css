@@ -348,4 +348,27 @@
   .pulse-opacity {
     animation: pulse-opacity 2s ease-in-out infinite;
   }
+
+  /* ========================================
+     URGENCY BANNER
+     ======================================== */
+
+  .urgency-banner {
+    background: linear-gradient(90deg, #8B5CF6, #7C3AED);
+    color: white;
+    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-weight: 500;
+  }
+
+  .countdown-timer {
+    font-weight: 700;
+    font-size: 1.1em;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-variant-numeric: tabular-nums;
+  }
 }

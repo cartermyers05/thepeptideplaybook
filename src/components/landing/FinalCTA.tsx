@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const included = [
-  "Complete peptide breakdown (50+ peptides)",
-  "FDA & legal classification guide",
+  "Complete 15-peptide breakdown",
+  "Legal reality check guide",
   "Doctor conversation scripts",
-  "AI research assistant access",
-  "Lifetime access & free updates",
+  "Red flag checklist",
+  "AI assistant access",
+  "Future updates included",
 ];
 
 export function FinalCTA() {
@@ -33,15 +34,22 @@ export function FinalCTA() {
           className="max-w-xl mx-auto"
         >
           <div className="glass-card p-8 md:p-10 text-center">
+            {/* Urgency reminder */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
+              <span className="text-sm font-medium">🚀 Launch price ends soon</span>
+            </div>
+
             <h2 className="text-3xl md:text-4xl font-bold mb-2">
-              Get Peptide Clarity Today
+              Get Peptide Clarity in 20 Minutes
             </h2>
             <p className="text-muted-foreground mb-6">
-              One-time access. No subscription required.
+              One-time payment • Instant access • Lifetime updates
             </p>
             
+            {/* Price display with anchoring */}
             <div className="mb-8">
-              <span className="text-5xl md:text-6xl font-bold">$67</span>
+              <span className="text-2xl text-muted-foreground line-through mr-3">$197</span>
+              <span className="text-5xl md:text-6xl font-bold">$47</span>
             </div>
             
             {/* Bullet recap */}
@@ -58,7 +66,7 @@ export function FinalCTA() {
             
             <Button asChild size="lg" className="btn-primary-glow w-full h-14 text-lg mb-6">
               <Link to="/signup">
-                Get Instant Access
+                Get Protected for $47
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </Button>

@@ -1,20 +1,7 @@
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
-
-const benefits = [
-  {
-    title: "Research Status",
-    description: "Know exactly what each peptide does and its current research status",
-  },
-  {
-    title: "Legal Clarity",
-    description: "Understand FDA regulations and what's actually legal",
-  },
-  {
-    title: "Doctor Ready",
-    description: "Get the questions to ask your doctor for an informed conversation",
-  },
-];
+import { Zap, BookOpen, Scale, Stethoscope, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export function SolutionSection() {
   return (
@@ -31,35 +18,101 @@ export function SolutionSection() {
           className="text-center mb-14"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Peptide Playbook Gives You{" "}
-            <span className="text-gradient">Clarity</span>
+            Peptide Playbook: Your{" "}
+            <span className="text-gradient">20-Minute Safety Briefing</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to understand peptides — organized, researched, 
-            and written for real people.
+            Everything you need to understand peptides — without the guesswork, 
+            the TikTok bros, or the 40-hour research rabbit hole.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {benefits.map((benefit, index) => (
-            <motion.div
-              key={benefit.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.4 }}
-              className="glass-card p-6 text-center"
-            >
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Check className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {benefit.description}
-              </p>
-            </motion.div>
-          ))}
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-12">
+          {/* Card 1: Not a course */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="glass-card p-6"
+          >
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+              <Zap className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-3">
+              Not a course. Not a community. Just clarity.
+            </h3>
+            <ul className="space-y-2 text-muted-foreground text-sm">
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                A focused, no-fluff guide you can read in one sitting
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                Written in plain English, not bro-science
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-primary mt-1">•</span>
+                Based on 200+ hours of research so you don't have to
+              </li>
+            </ul>
+          </motion.div>
+
+          {/* Card 2: 3-Step Framework */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="glass-card p-6"
+          >
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+              <BookOpen className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-3">The 3-Step Framework</h3>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                  1
+                </div>
+                <span className="text-muted-foreground">
+                  Understand what each peptide actually does (and doesn't do)
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                  2
+                </div>
+                <span className="text-muted-foreground">
+                  Know what's legal, what's sketchy, and what's dangerous
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center flex-shrink-0 text-xs font-bold">
+                  3
+                </div>
+                <span className="text-muted-foreground">
+                  Walk into your doctor's office with the right questions
+                </span>
+              </li>
+            </ul>
+          </motion.div>
         </div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center"
+        >
+          <Button asChild size="lg" className="btn-primary-glow h-14 px-10 text-lg">
+            <Link to="/signup">
+              Get the Safety Guide — $47
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
+          </Button>
+        </motion.div>
 
         {/* Educational disclaimer */}
         <motion.div

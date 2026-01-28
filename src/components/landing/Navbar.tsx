@@ -111,7 +111,7 @@ export function Navbar() {
                 </Button>
                 <Button asChild className="w-full glow-primary">
                   <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                    Get the Playbook — $67
+                    Get the Playbook — $47
                   </Link>
                 </Button>
               </div>

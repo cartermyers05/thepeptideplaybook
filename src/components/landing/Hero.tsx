@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Play, Shield, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Gradient glow behind content */}
       <div className="gradient-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
       
@@ -28,8 +28,8 @@ export function Hero() {
         >
           {/* Main headline */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-            Navigate Peptide Research{" "}
-            <span className="text-gradient">with Confidence</span>
+            Stop Taking Peptide Advice From{" "}
+            <span className="text-gradient">19-Year-Olds on TikTok</span>
           </h1>
 
           {/* Subheadline */}
@@ -37,35 +37,91 @@ export function Hero() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.5 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
+            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6"
           >
-            An educational resource covering what peptides are, how they're studied, 
-            their regulatory status, and questions to discuss with your healthcare provider.
+            The 20-minute safety guide that replaces 40 hours of confusing research. 
+            Know exactly what's safe, what's legal, and what questions to ask your doctor.
           </motion.p>
+
+          {/* Specificity badge */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-8"
+          >
+            <Star className="w-4 h-4 fill-primary" />
+            <span className="text-sm font-medium">Covers the 15 most popular peptides</span>
+          </motion.div>
 
           {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5 }}
+            className="mb-4"
           >
             <Button asChild size="lg" className="btn-primary-glow h-14 px-10 text-lg">
               <Link to="/signup">
-                Get Started Today
+                Get Protected for $47
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </Button>
           </motion.div>
 
-          {/* Simple tagline */}
-          <motion.p
+          {/* Trust badges below CTA */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.35, duration: 0.5 }}
+            className="flex items-center justify-center gap-4 text-sm text-muted-foreground mb-10"
+          >
+            <div className="flex items-center gap-1">
+              <Shield className="w-4 h-4 text-success" />
+              <span>30-day money-back guarantee</span>
+            </div>
+            <span className="text-border">•</span>
+            <span>Instant access</span>
+          </motion.div>
+
+          {/* Video placeholder */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="max-w-2xl mx-auto mb-8"
+          >
+            <div className="glass-card aspect-video flex items-center justify-center cursor-pointer group">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
+                <Play className="w-8 h-8 text-primary fill-primary" />
+              </div>
+              <span className="absolute bottom-4 text-sm text-muted-foreground">
+                Watch: Why TikTok peptide advice is dangerous
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Social proof */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
-            className="mt-8 text-sm text-muted-foreground"
+            className="flex items-center justify-center gap-2"
           >
-            Educational peptide research guide
-          </motion.p>
+            <div className="flex -space-x-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border-2 border-background flex items-center justify-center text-xs"
+                >
+                  👤
+                </div>
+              ))}
+            </div>
+            <span className="text-sm text-muted-foreground">
+              Join <span className="font-semibold text-foreground">500+</span> people who stopped guessing
+            </span>
+          </motion.div>
         </motion.div>
       </div>
     </section>
