@@ -1,96 +1,113 @@
 
 
-# Update Hero Section Messaging
+# Replace Bland Hero Visual with Engaging Chat Preview
 
 ## Overview
 
-Update the Hero section to better communicate the core value proposition: staying up-to-date on peptides + AI chatbot access — not just a static guide about 15 peptides.
+The current right-side visual has abstract floating circles with just "AI-powered • Research-backed" text — it's too generic and doesn't communicate the product value. We'll replace it with a compelling chat preview mockup that immediately shows what users are getting.
 
 ---
 
-## Changes
+## The Problem
 
-### 1. Center Visual Card (lines 77-82)
-
-**Current:**
-```
-15
-Peptides covered
-```
-
-**New Options:**
-
-| Option | Text |
-|--------|------|
-| A | "Research-backed peptide education" |
-| B | "Your peptide research companion" |
-| C | "Stay informed. Stay safe." |
-| D | "AI-powered • Research-backed" |
-
-**Recommendation:** Option D — concise, communicates both key differentiators (AI + research)
+Current visual:
+- Abstract floating purple circles (meaningless)
+- Small text card with "AI-powered • Research-backed" (bland)
+- Doesn't show what the product actually is
+- No personality or engagement
 
 ---
 
-### 2. Subheadline (lines 21-24)
+## The Solution: Interactive Chat Preview
 
-**Current:**
-```
-A research-backed guide to understanding peptides — what they do, 
-what's legal, and what to ask your doctor.
-```
+Replace the abstract circles with a **mini chat mockup** that immediately demonstrates the AI assistant value proposition. This gives users a taste of what they're buying.
 
-**New (one sentence that captures everything):**
+### Visual Design
 
-| Option | Copy |
-|--------|------|
-| A | "Stay up-to-date on peptide research and get instant answers from our AI assistant — grounded in science, not social media." |
-| B | "The research-backed platform that keeps you informed on peptides and lets you ask anything through our AI assistant." |
-| C | "Get the latest peptide research, news, and an AI assistant that actually knows what it's talking about." |
-| D | "Stay current on peptide research and ask our AI assistant anything — backed by real science, not TikTok trends." |
-
-**Recommendation:** Option D — punchy, ties back to the H1 about TikTok, captures both "stay up-to-date" and "AI chatbot"
-
----
-
-## Files to Update
-
-| File | Changes |
-|------|---------|
-| `src/components/landing/Hero.tsx` | Lines 21-24: Update subheadline; Lines 77-82: Update center card content |
-
----
-
-## Visual Card Layout
-
-The center card will change from:
 ```text
-+----------------+
-|      15        |
-| Peptides       |
-| covered        |
-+----------------+
+┌─────────────────────────────────────────┐
+│  🤖 Peptide Assistant          Online   │
+├─────────────────────────────────────────┤
+│                                         │
+│                     ┌─────────────────┐ │
+│                     │ Is BPC-157      │ │
+│                     │ legal to buy?   │ │
+│                     └─────────────────┘ │
+│                                         │
+│  ┌────────────────────────────────────┐ │
+│  │ It depends on your location and   │ │
+│  │ intended use. In the US, BPC-157  │ │
+│  │ is not FDA-approved and...        │ │
+│  └────────────────────────────────────┘ │
+│                                         │
+│  ┌───────────────────────────────┐      │
+│  │ Ask anything about peptides...│ 🔍   │
+│  └───────────────────────────────┘      │
+└─────────────────────────────────────────┘
 ```
 
-To:
-```text
-+-------------------+
-| AI-powered        |
-| Research-backed   |
-+-------------------+
-```
+### Why This Works
 
-Or a single impactful line if preferred.
+1. **Immediate clarity** — Shows exactly what users get
+2. **Real value demo** — Answers a common peptide question
+3. **Premium look** — Uses the existing glass card styling
+4. **Matches AIAssistant section** — Consistent design language
+5. **More engaging** — Interactive-looking, not abstract
 
 ---
 
-## Final Copy Preview
+## Technical Implementation
 
-**H1 (unchanged):**
-"Stop Taking Peptide Advice From 19-Year-Olds on TikTok"
+### File: `src/components/landing/Hero.tsx`
 
-**Subheadline (new):**
-"Stay current on peptide research and ask our AI assistant anything — backed by real science, not TikTok trends."
+**Replace lines 39-82** (the entire visual section) with:
 
-**Center card (new):**
-"AI-powered • Research-backed"
+1. **Chat container** using `glass-card-subtle` styling
+2. **Header** with bot icon, "Peptide Assistant", and "Online" status
+3. **Message bubbles**:
+   - User question: "Is BPC-157 legal to buy?"
+   - AI response: Brief, helpful preview of an answer
+4. **Input field** (disabled, placeholder "Ask anything about peptides...")
+5. **Subtle floating animation** on the entire card for polish
+
+### Animation
+
+- Gentle floating animation on the whole card (2-3px subtle movement)
+- No bouncing circles — just the clean card
+
+### Message Content Options
+
+| User Question | AI Preview |
+|---------------|------------|
+| "Is BPC-157 legal to buy?" | "It depends on your location and intended use. In the US, BPC-157 is not FDA-approved and is sold only for research purposes..." |
+| "What's the difference between BPC-157 and TB-500?" | "Both are peptides studied for tissue repair, but they work through different mechanisms..." |
+| "Are peptides safe?" | "Safety depends on the specific peptide, source quality, and how it's used. Here's what the research shows..." |
+
+**Recommendation:** Use the "Is BPC-157 legal?" question — it addresses a top concern and shows the AI gives nuanced, helpful answers.
+
+---
+
+## Styling Details
+
+- Card: `glass-card-subtle` (already defined)
+- User bubble: `bg-primary text-white rounded-2xl rounded-br-sm`
+- AI bubble: `bg-muted rounded-2xl rounded-bl-sm`
+- Header: Bot icon in `bg-primary/10` circle
+- Input: `bg-muted/50 rounded-xl` with placeholder text
+
+---
+
+## Mobile Considerations
+
+- Card shrinks gracefully on mobile
+- Messages remain readable
+- Maintains visual hierarchy
+
+---
+
+## File Changes Summary
+
+| File | Action |
+|------|--------|
+| `src/components/landing/Hero.tsx` | UPDATE - Replace lines 39-82 with chat mockup component |
 
