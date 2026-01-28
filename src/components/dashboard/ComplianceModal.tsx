@@ -102,7 +102,7 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md [&>button]:hidden glass-panel border-0 flex flex-col max-h-[85vh]">
+      <DialogContent className="sm:max-w-md [&>button]:hidden glass-panel border-0 flex flex-col max-h-[85vh] !overflow-visible">
         {/* Background ambient effect */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
           <motion.div 
@@ -118,7 +118,7 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
         </div>
 
         {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto relative">
+        <div className="flex-1 min-h-0 overflow-y-auto relative z-10">
           <DialogHeader>
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -179,7 +179,7 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="pt-4 border-t border-border/20 relative"
+          className="pt-4 border-t border-border/20 relative z-10 flex-shrink-0"
         >
           <Button
             onClick={handleAccept}
