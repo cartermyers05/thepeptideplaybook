@@ -1,279 +1,212 @@
 
 
-# Dashboard Redesign: News + AI Chat Tabs with Legal Compliance
+# Replace Mock Data with Real User Data
 
 ## Overview
 
-Transform the current Chat page into a two-tab dashboard:
-1. **News** - Curated peptide research news and top stories
-2. **AI Chat** - The existing chatbot (enhanced with stronger disclaimers)
-
-Plus comprehensive legal compliance measures throughout the experience.
+Transform all dashboard pages from using hardcoded mock data to fetching real data from the database. This will show users their actual usage, real conversation history, genuine saved items, and true referral statistics.
 
 ---
 
-## Dashboard Structure
+## Current Mock Data Locations
 
-### Header with Tabs
-
-The main content area will have a clean tab interface at the top:
-
-```text
-+----------------------------------------------------------+
-|  [Hamburger]  PeptideGPT                                 |
-+----------------------------------------------------------+
-|          [ News ]     [ AI Chat ]                         |
-+----------------------------------------------------------+
-|                                                           |
-|               (Tab content renders here)                  |
-|                                                           |
-+----------------------------------------------------------+
-```
+| Page | Mock Data | Replace With |
+|------|-----------|--------------|
+| Stats | Questions asked, streak, time saved | `profiles` table + calculated from `messages` |
+| History | 3 fake conversations | Real `conversations` + `messages` tables |
+| Saved | 2 fake saved answers | `messages` where `is_saved = true` |
+| Referral | Fake referral code "PEPTIDE2024" | Real referral code from `referrals` table |
+| Account | Fake subscription "Pro Plan" | Real `profiles.subscription_status` |
 
 ---
 
-## Tab 1: News & Top Stories
+## Implementation
 
-### Content Layout
+### 1. Stats Page - Real Usage Metrics
 
-A clean, scannable news feed featuring:
+**Data Sources:**
+- `questions_asked` from `profiles` table
+- `current_streak` from `profiles` table
+- Studies cited: count from `messages` (assistant messages)
+- Time saved: calculate as `questions_asked * 30 min` (avg research time per question)
 
-**Featured Story Card**
-- Large hero card at top with featured peptide research news
-- Eye-catching image placeholder
-- Headline, excerpt, source, and date
-- "Read More" link opens source
-
-**Story Grid/List**
-- 2-column grid on desktop, single column on mobile
-- Each card shows:
-  - Category badge (Research, Clinical Trial, Industry, Regulatory)
-  - Headline
-  - Short excerpt
-  - Source name + publication date
-  - "Read full article" external link
-
-**Categories to Cover**
-- Latest peptide research findings
-- Clinical trial updates
-- FDA/regulatory news
-- Industry developments
-- Safety advisories
-
-### News Data Approach
-
-For MVP, we'll use curated static content that can be easily updated:
-- Create a `news-feed` edge function that returns curated articles
-- Articles stored as structured data (title, excerpt, source, url, date, category)
-- Easy to replace with real RSS feeds or API integration later
-
-### News Source Attribution
-- Always link to original sources
-- Clear "Source:" labels
-- No plagiarism, only excerpts + links
+**Changes:**
+- Add React Query hook to fetch profile data
+- Calculate derived metrics (time saved, value saved)
+- Show loading skeleton while fetching
+- Show empty state for new users (0 questions)
 
 ---
 
-## Tab 2: AI Chat (Enhanced)
+### 2. History Page - Real Conversations
 
-The existing chat functionality with improvements:
+**Data Sources:**
+- `conversations` table (user's conversations)
+- `messages` table (get preview + message count)
 
-### Stronger Disclaimer Banner
-
-Add a persistent, visible disclaimer at the top:
-
-```text
-+----------------------------------------------------------+
-|  ⚠️ EDUCATIONAL PURPOSES ONLY                             |
-|  PeptideGPT provides research information, not medical    |
-|  advice. Always consult a qualified healthcare provider.  |
-+----------------------------------------------------------+
-```
-
-### Enhanced System Prompt
-
-Update the AI system prompt with stronger compliance language:
-
-**Current:** General peptide expert  
-**Enhanced:**
-- Explicitly state information is for educational/research purposes
-- Refuse to provide personalized dosing recommendations
-- Add disclaimers to every response about peptide usage
-- Reference regulatory status of peptides
-- Encourage professional consultation more prominently
-- Note that many peptides are not FDA-approved for human use
-
-### Response Footer
-
-Each AI response will include:
-- "Was this helpful?" feedback buttons
-- Bookmark functionality
-- A small disclaimer: "This information is for research purposes only"
+**Changes:**
+- Fetch conversations with message count using React Query
+- Get first assistant message as preview text
+- Enable delete functionality (already has UI)
+- Show real timestamps
+- Empty state prompting to start chatting
 
 ---
 
-## Legal Compliance Framework
+### 3. Saved Page - Real Bookmarked Answers
 
-### 1. Persistent Disclaimers
+**Data Sources:**
+- `messages` table where `is_saved = true`
+- Join with `conversations` to get question context
 
-**Dashboard Header Disclaimer**
-- Subtle but visible banner that can be dismissed but reappears each session
-- "For educational and research purposes only"
-
-**Chat Input Placeholder**
-- Update from "Ask anything about peptides..." to:
-- "Ask a research question about peptides..."
-
-**Every AI Response**
-- End with: "Note: This information is educational. Consult a healthcare provider before any use."
-
-### 2. Terms of Service Acceptance
-
-- Require explicit Terms of Service acceptance during signup
-- Include clear language about:
-  - Educational nature of content
-  - Not medical advice
-  - User responsibility
-  - Research-only context
-
-### 3. Content Guardrails in AI
-
-Enhanced system prompt additions:
-```text
-CRITICAL COMPLIANCE RULES:
-1. Never provide personalized medical advice
-2. Always clarify peptides discussed are for research purposes
-3. Mention FDA approval status when relevant
-4. Do not recommend specific sources for purchasing
-5. Emphasize the importance of professional medical guidance
-6. If asked about illegal activities, politely decline
-7. When discussing dosing, use phrases like "research literature suggests" not "you should take"
-```
-
-### 4. User Agreement Flow
-
-Before first chat, show a one-time modal:
-```text
-Before You Begin
-
-PeptideGPT is an educational research tool that provides 
-information based on published scientific literature.
-
-By continuing, you acknowledge:
-☐ This is not medical advice
-☐ I will consult healthcare professionals before any use
-☐ I understand peptides may not be FDA-approved
-☐ I am using this for educational/research purposes
-
-[I Understand - Continue]
-```
+**Changes:**
+- Query saved messages with conversation context
+- Wire up unsave button functionality
+- Show real saved dates
+- Empty state when nothing saved
 
 ---
 
-## Technical Implementation
+### 4. Referral Page - Real Referral Data
 
-### New Components
+**Data Sources:**
+- `referrals` table for user's referral code
+- Count pending vs completed referrals
 
-1. **`src/components/dashboard/NewsFeed.tsx`**
-   - Featured story card component
-   - News card grid
-   - Category filtering
-   - Loading skeleton states
+**Changes:**
+- Generate unique referral code on first visit (using `generate_referral_code()` function)
+- Store in referrals table
+- Count pending (no `referred_id`) vs completed referrals
+- Calculate months earned from `reward_applied = true` count
 
-2. **`src/components/dashboard/NewsCard.tsx`**
-   - Individual news article card
-   - Source attribution
-   - External link handling
+---
 
-3. **`src/components/dashboard/DisclaimerBanner.tsx`**
-   - Persistent compliance banner
-   - Dismissible per session
+### 5. Account Page - Real Subscription Status
 
-4. **`src/components/dashboard/ComplianceModal.tsx`**
-   - First-use agreement modal
-   - Checkbox acknowledgments
-   - Stored acceptance in localStorage/database
+**Data Sources:**
+- `profiles.subscription_status` 
+- `profiles.trial_ends_at`
 
-### Updated Components
+**Changes:**
+- Display real subscription status (trial/active/canceled)
+- Show trial days remaining if applicable
+- Connect profile updates to database
 
-1. **`src/pages/Chat.tsx`**
-   - Add Tabs component wrapping content
-   - News tab renders NewsFeed
-   - Chat tab renders existing chat interface
-   - Add DisclaimerBanner at top
+---
 
-2. **`supabase/functions/chat/index.ts`**
-   - Enhanced system prompt with compliance rules
-   - Stronger guardrails in AI behavior
+### 6. Chat Interface - Save Conversations
 
-### Edge Function (Optional)
+Currently conversations aren't saved. Need to:
+- Create conversation on first message
+- Save each message to database
+- Update `profiles.questions_asked` count
+- Track `last_active_at` for streak calculation
 
-**`supabase/functions/news-feed/index.ts`**
-- Returns curated peptide news articles
-- Can be expanded later to pull from RSS feeds or APIs
+---
 
-### Database Schema Addition
+## Database Changes
 
+Add streak calculation logic:
 ```sql
--- Track user compliance acknowledgment
-ALTER TABLE profiles ADD COLUMN 
-  terms_accepted_at timestamptz DEFAULT NULL;
+-- Add longest_streak column for tracking
+ALTER TABLE profiles ADD COLUMN longest_streak integer DEFAULT 0;
 ```
 
 ---
 
-## UI/UX Design Details
+## New Hooks to Create
 
-### Tab Styling
-- Use existing shadcn Tabs component
-- Full-width tabs centered in header
-- Active tab has underline indicator (Linear-style)
-- Smooth transition between tabs
-
-### News Feed Design
-- Clean card design matching existing aesthetic
-- Category badges with color coding:
-  - Research: Blue
-  - Clinical: Green  
-  - Regulatory: Orange
-  - Industry: Purple
-- Subtle hover effects
-- External link icons for source attribution
-
-### Disclaimer Styling
-- Soft yellow/amber background for visibility
-- Dismissible X button (but returns next session)
-- Professional, non-alarming tone
+1. **`useProfile`** - Fetch and update user profile data
+2. **`useConversations`** - List user's conversations with previews
+3. **`useSavedMessages`** - List bookmarked messages
+4. **`useReferrals`** - User's referral code and stats
+5. **`useSaveMessage`** - Toggle is_saved on messages
 
 ---
 
-## Files to Create/Modify
+## Files to Create
 
-**Create:**
-- `src/components/dashboard/NewsFeed.tsx`
-- `src/components/dashboard/NewsCard.tsx`
-- `src/components/dashboard/DisclaimerBanner.tsx`
-- `src/components/dashboard/ComplianceModal.tsx`
-- `supabase/functions/news-feed/index.ts` (optional)
+- `src/hooks/useProfile.ts` - Profile data fetching/updating
+- `src/hooks/useConversations.ts` - Conversation history
+- `src/hooks/useSavedMessages.ts` - Saved messages
+- `src/hooks/useReferrals.ts` - Referral data
 
-**Modify:**
-- `src/pages/Chat.tsx` - Add tabs, disclaimer, modal
-- `supabase/functions/chat/index.ts` - Enhanced compliance prompt
+---
 
-**Database:**
-- Add `terms_accepted_at` column to profiles table
+## Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/pages/Stats.tsx` | Replace mock stats with `useProfile` hook |
+| `src/pages/History.tsx` | Replace mock conversations with `useConversations` |
+| `src/pages/Saved.tsx` | Replace mock saved with `useSavedMessages` |
+| `src/pages/Referral.tsx` | Replace mock referral with `useReferrals` |
+| `src/pages/Account.tsx` | Use `useProfile` for subscription status |
+| `src/components/dashboard/ChatInterface.tsx` | Save conversations + messages to database |
+
+---
+
+## User Experience
+
+**Empty States**
+When users have no data, show encouraging messages:
+- Stats: "Start your research journey - ask your first question!"
+- History: "No conversations yet. Start chatting!"
+- Saved: "Save helpful answers for quick access"
+
+**Loading States**
+Add skeleton loaders while data fetches to prevent layout shift.
+
+**Real-Time Updates**
+After chatting, stats should reflect the new question count immediately.
+
+---
+
+## Technical Details
+
+### Profile Hook Example
+
+```typescript
+// src/hooks/useProfile.ts
+export function useProfile() {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user!.id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+}
+```
+
+### Conversation Saving
+
+When user sends a message:
+1. If no active conversation, create one
+2. Save user message to `messages` table
+3. After AI response, save assistant message
+4. Increment `profiles.questions_asked`
+5. Update conversation title (first few words of first question)
 
 ---
 
 ## Summary
 
-This plan transforms the dashboard into a two-tab experience (News + AI Chat) while implementing robust legal compliance measures including:
+This update transforms the dashboard from a demo with fake data into a real, personalized experience where users see their actual:
+- Question count and research streak
+- Complete conversation history
+- Saved/bookmarked answers
+- Referral progress
+- Subscription status
 
-- Persistent educational disclaimers
-- First-use compliance acknowledgment modal
-- Enhanced AI guardrails and response disclaimers
-- Clear source attribution on news content
-- Terms acceptance tracking
-
-The result is a product that provides maximum value to users while protecting both users and the business through proper compliance frameworks.
+All data persists between sessions, making the product feel professional and trustworthy.
 
