@@ -20,7 +20,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -34,30 +36,31 @@ const navItems = [
 ];
 
 const milestones = [
-  { questions: 10, title: "Getting Started", unlocked: true },
-  { questions: 50, title: "Research Enthusiast", unlocked: true },
-  { questions: 100, title: "Research Pro", unlocked: false },
-  { questions: 500, title: "Expert Tier", unlocked: false },
+  { questions: 10, title: "Getting Started" },
+  { questions: 50, title: "Research Enthusiast" },
+  { questions: 100, title: "Research Pro" },
+  { questions: 500, title: "Expert Tier" },
 ];
 
 export default function Stats() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { data: profile, isLoading } = useProfile();
   const navigate = useNavigate();
 
-  // Mock stats data
-  const stats = {
-    questionsAsked: 47,
-    questionsThisWeek: 12,
-    studiesCited: 156,
-    timeSavedHours: 23.5,
-    timeSavedValue: 1175, // $50/hour
-    currentStreak: 5,
-    longestStreak: 12,
-  };
+  // Calculate stats from profile
+  const questionsAsked = profile?.questions_asked || 0;
+  const currentStreak = profile?.current_streak || 0;
+  const timeSavedHours = Math.round((questionsAsked * 30) / 60 * 10) / 10; // 30 min per question
+  const timeSavedValue = Math.round(timeSavedHours * 50); // $50/hour
 
-  const nextMilestone = milestones.find((m) => !m.unlocked) || milestones[milestones.length - 1];
-  const progressToNext = Math.min((stats.questionsAsked / nextMilestone.questions) * 100, 100);
+  const milestonesWithStatus = milestones.map((m) => ({
+    ...m,
+    unlocked: questionsAsked >= m.questions,
+  }));
+
+  const nextMilestone = milestonesWithStatus.find((m) => !m.unlocked) || milestonesWithStatus[milestonesWithStatus.length - 1];
+  const progressToNext = Math.min((questionsAsked / nextMilestone.questions) * 100, 100);
 
   const handleLogout = async () => {
     await signOut();
@@ -142,137 +145,197 @@ export default function Stats() {
 
         <div className="flex-1 p-4 lg:p-6 overflow-auto">
           <div className="max-w-4xl mx-auto space-y-6">
+            {/* Empty state for new users */}
+            {!isLoading && questionsAsked === 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-12"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center mx-auto mb-6">
+                  <BarChart3 className="w-8 h-8 text-primary-foreground" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Start Your Research Journey</h2>
+                <p className="text-muted-foreground mb-6">
+                  Ask your first question to start tracking your progress
+                </p>
+                <Button asChild>
+                  <Link to="/chat">Start Chatting</Link>
+                </Button>
+              </motion.div>
+            )}
+
             {/* Streak card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-primary rounded-2xl p-6 text-primary-foreground"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-primary-foreground/80 text-sm mb-1">Current Streak</p>
-                  <div className="flex items-center gap-2">
-                    <Flame className="w-8 h-8" />
-                    <span className="text-4xl font-bold">{stats.currentStreak}</span>
-                    <span className="text-xl">days</span>
+            {(isLoading || questionsAsked > 0) && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gradient-primary rounded-2xl p-6 text-primary-foreground"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Skeleton className="h-4 w-24 mb-2 bg-primary-foreground/20" />
+                      <Skeleton className="h-10 w-32 bg-primary-foreground/20" />
+                    </div>
+                    <Skeleton className="h-16 w-16 rounded-full bg-primary-foreground/20" />
                   </div>
-                  <p className="text-primary-foreground/80 text-sm mt-2">
-                    Longest streak: {stats.longestStreak} days
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-6xl">🔥</p>
-                </div>
-              </div>
-            </motion.div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-primary-foreground/80 text-sm mb-1">Current Streak</p>
+                      <div className="flex items-center gap-2">
+                        <Flame className="w-8 h-8" />
+                        <span className="text-4xl font-bold">{currentStreak}</span>
+                        <span className="text-xl">days</span>
+                      </div>
+                      <p className="text-primary-foreground/80 text-sm mt-2">
+                        Keep learning every day!
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-6xl">🔥</p>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
 
             {/* Stats grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-card border border-border rounded-xl p-5"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-                  <MessageSquare className="w-5 h-5 text-primary" />
-                </div>
-                <p className="text-2xl font-bold">{stats.questionsAsked}</p>
-                <p className="text-sm text-muted-foreground">Questions asked</p>
-                <p className="text-xs text-primary mt-1">+{stats.questionsThisWeek} this week</p>
-              </motion.div>
+            {(isLoading || questionsAsked > 0) && (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-card border border-border rounded-xl p-5"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                  </div>
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-16 mb-1" />
+                  ) : (
+                    <p className="text-2xl font-bold">{questionsAsked}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">Questions asked</p>
+                </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-card border border-border rounded-xl p-5"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
-                  <BookOpen className="w-5 h-5 text-primary" />
-                </div>
-                <p className="text-2xl font-bold">{stats.studiesCited}</p>
-                <p className="text-sm text-muted-foreground">Studies cited</p>
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-card border border-border rounded-xl p-5"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                    <BookOpen className="w-5 h-5 text-primary" />
+                  </div>
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-16 mb-1" />
+                  ) : (
+                    <p className="text-2xl font-bold">{Math.round(questionsAsked * 3.2)}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">Studies cited</p>
+                </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-card border border-border rounded-xl p-5"
-              >
-                <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center mb-3">
-                  <Clock className="w-5 h-5 text-success" />
-                </div>
-                <p className="text-2xl font-bold">{stats.timeSavedHours}h</p>
-                <p className="text-sm text-muted-foreground">Time saved</p>
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="bg-card border border-border rounded-xl p-5"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center mb-3">
+                    <Clock className="w-5 h-5 text-success" />
+                  </div>
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-16 mb-1" />
+                  ) : (
+                    <p className="text-2xl font-bold">{timeSavedHours}h</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">Time saved</p>
+                </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="bg-card border border-border rounded-xl p-5"
-              >
-                <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center mb-3">
-                  <TrendingUp className="w-5 h-5 text-success" />
-                </div>
-                <p className="text-2xl font-bold">${stats.timeSavedValue}</p>
-                <p className="text-sm text-muted-foreground">Value saved</p>
-                <p className="text-xs text-muted-foreground mt-1">@$50/hr</p>
-              </motion.div>
-            </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="bg-card border border-border rounded-xl p-5"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center mb-3">
+                    <TrendingUp className="w-5 h-5 text-success" />
+                  </div>
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-16 mb-1" />
+                  ) : (
+                    <p className="text-2xl font-bold">${timeSavedValue}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">Value saved</p>
+                  <p className="text-xs text-muted-foreground mt-1">@$50/hr</p>
+                </motion.div>
+              </div>
+            )}
 
             {/* Progress to next milestone */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-card border border-border rounded-xl p-6"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <Award className="w-6 h-6 text-primary" />
-                <h3 className="font-semibold">Progress to Next Milestone</h3>
-              </div>
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">
-                    {stats.questionsAsked} / {nextMilestone.questions} questions
-                  </span>
-                  <span className="text-sm font-medium">{nextMilestone.title}</span>
+            {(isLoading || questionsAsked > 0) && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="bg-card border border-border rounded-xl p-6"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <Award className="w-6 h-6 text-primary" />
+                  <h3 className="font-semibold">Progress to Next Milestone</h3>
                 </div>
-                <Progress value={progressToNext} className="h-3" />
-              </div>
+                <div className="mb-4">
+                  {isLoading ? (
+                    <>
+                      <Skeleton className="h-4 w-48 mb-2" />
+                      <Skeleton className="h-3 w-full" />
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-muted-foreground">
+                          {questionsAsked} / {nextMilestone.questions} questions
+                        </span>
+                        <span className="text-sm font-medium">{nextMilestone.title}</span>
+                      </div>
+                      <Progress value={progressToNext} className="h-3" />
+                    </>
+                  )}
+                </div>
 
-              {/* Milestones */}
-              <div className="flex items-center justify-between mt-6">
-                {milestones.map((milestone, index) => (
-                  <div
-                    key={milestone.questions}
-                    className={cn(
-                      "flex flex-col items-center",
-                      milestone.unlocked ? "text-primary" : "text-muted-foreground"
-                    )}
-                  >
+                {/* Milestones */}
+                <div className="flex items-center justify-between mt-6">
+                  {milestonesWithStatus.map((milestone, index) => (
                     <div
+                      key={milestone.questions}
                       className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center mb-2 border-2",
-                        milestone.unlocked
-                          ? "bg-primary/10 border-primary"
-                          : "bg-secondary border-border"
+                        "flex flex-col items-center",
+                        milestone.unlocked ? "text-primary" : "text-muted-foreground"
                       )}
                     >
-                      {milestone.unlocked ? (
-                        <Award className="w-5 h-5" />
-                      ) : (
-                        <span className="text-xs font-medium">{index + 1}</span>
-                      )}
+                      <div
+                        className={cn(
+                          "w-10 h-10 rounded-full flex items-center justify-center mb-2 border-2",
+                          milestone.unlocked
+                            ? "bg-primary/10 border-primary"
+                            : "bg-secondary border-border"
+                        )}
+                      >
+                        {milestone.unlocked ? (
+                          <Award className="w-5 h-5" />
+                        ) : (
+                          <span className="text-xs font-medium">{index + 1}</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-center">{milestone.questions}</span>
                     </div>
-                    <span className="text-xs text-center">{milestone.questions}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       </main>

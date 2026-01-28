@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Sparkles,
@@ -12,7 +12,6 @@ import {
   LogOut,
   X,
   User,
-  Mail,
   Lock,
   CreditCard,
   Bell,
@@ -25,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -54,22 +55,53 @@ export default function Account() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
   const { user, signOut } = useAuth();
+  const { data: profile, isLoading } = useProfile();
+  const updateProfile = useUpdateProfile();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Mock subscription data
-  const subscription = {
-    plan: "Pro",
-    status: "active",
-    nextBilling: new Date(Date.now() + 1000 * 60 * 60 * 24 * 15),
-    price: "$20/month",
+  useEffect(() => {
+    if (profile?.full_name) {
+      setName(profile.full_name);
+    }
+  }, [profile]);
+
+  // Calculate subscription status
+  const subscriptionStatus = profile?.subscription_status || "trial";
+  const trialEndsAt = profile?.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+  const isTrialActive = trialEndsAt && trialEndsAt > new Date();
+  const trialDaysRemaining = trialEndsAt 
+    ? Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
+  const getStatusLabel = () => {
+    if (subscriptionStatus === "active") return "Active";
+    if (subscriptionStatus === "canceled") return "Canceled";
+    if (isTrialActive) return `Trial (${trialDaysRemaining} days left)`;
+    return "Expired";
   };
 
-  const handleSaveProfile = () => {
-    toast({
-      title: "Profile updated",
-      description: "Your changes have been saved.",
-    });
+  const getStatusColor = () => {
+    if (subscriptionStatus === "active") return "bg-success/10 text-success";
+    if (subscriptionStatus === "canceled") return "bg-destructive/10 text-destructive";
+    if (isTrialActive) return "bg-primary/10 text-primary";
+    return "bg-muted text-muted-foreground";
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      await updateProfile.mutateAsync({ full_name: name });
+      toast({
+        title: "Profile updated",
+        description: "Your changes have been saved.",
+      });
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to update profile.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleLogout = async () => {
@@ -176,12 +208,16 @@ export default function Account() {
                 <div className="grid gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full name</Label>
-                    <Input
-                      id="name"
-                      value={name || user?.user_metadata?.full_name || ""}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Your name"
-                    />
+                    {isLoading ? (
+                      <Skeleton className="h-10 w-full" />
+                    ) : (
+                      <Input
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your name"
+                      />
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -191,7 +227,12 @@ export default function Account() {
                     </p>
                   </div>
                 </div>
-                <Button onClick={handleSaveProfile}>Save changes</Button>
+                <Button 
+                  onClick={handleSaveProfile} 
+                  disabled={updateProfile.isPending}
+                >
+                  {updateProfile.isPending ? "Saving..." : "Save changes"}
+                </Button>
               </div>
             </motion.section>
 
@@ -206,44 +247,63 @@ export default function Account() {
                 <h2 className="text-lg font-semibold">Subscription</h2>
               </div>
               <div className="bg-card border border-border rounded-xl p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold">{subscription.plan} Plan</span>
-                      <span className="px-2 py-0.5 text-xs rounded-full bg-success/10 text-success">
-                        {subscription.status}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {subscription.price} • Next billing on{" "}
-                      {subscription.nextBilling.toLocaleDateString()}
-                    </p>
+                {isLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-4 w-48" />
                   </div>
-                  <Button variant="outline" size="sm">
-                    Manage
-                    <ExternalLink className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-                <Separator className="my-4" />
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                      Cancel subscription
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Cancel subscription?</DialogTitle>
-                      <DialogDescription>
-                        You'll lose access to PeptideGPT at the end of your billing period. Are you sure?
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <Button variant="outline">Keep subscription</Button>
-                      <Button variant="destructive">Yes, cancel</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                ) : (
+                  <>
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold">
+                            {subscriptionStatus === "active" ? "Pro Plan" : "Free Plan"}
+                          </span>
+                          <span className={cn("px-2 py-0.5 text-xs rounded-full", getStatusColor())}>
+                            {getStatusLabel()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {subscriptionStatus === "active" 
+                            ? "$20/month"
+                            : isTrialActive 
+                              ? `Trial ends on ${trialEndsAt?.toLocaleDateString()}`
+                              : "Upgrade to continue using PeptideGPT"
+                          }
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        {subscriptionStatus === "active" ? "Manage" : "Upgrade"}
+                        <ExternalLink className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
+                    {subscriptionStatus === "active" && (
+                      <>
+                        <Separator className="my-4" />
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                              Cancel subscription
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Cancel subscription?</DialogTitle>
+                              <DialogDescription>
+                                You'll lose access to PeptideGPT at the end of your billing period. Are you sure?
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                              <Button variant="outline">Keep subscription</Button>
+                              <Button variant="destructive">Yes, cancel</Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </>
+                    )}
+                  </>
+                )}
               </div>
             </motion.section>
 
@@ -264,7 +324,7 @@ export default function Account() {
                     <div>
                       <p className="font-medium">Password</p>
                       <p className="text-sm text-muted-foreground">
-                        Last changed 30 days ago
+                        Change your password
                       </p>
                     </div>
                   </div>
