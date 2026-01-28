@@ -37,7 +37,7 @@ export function FinalCTA() {
             
             <Button asChild size="lg" className="btn-primary-clean w-full h-12 text-base mb-4">
               <Link to="/signup">
-                Get Instant Access
+                Get Started
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
@@ -61,7 +61,7 @@ export function FinalCTA() {
           </h2>
           <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base">
             <Link to="/signup">
-              Get the Guide — $67
+              Start Learning — $67
               <ArrowRight className="ml-2 w-4 h-4" />
             </Link>
           </Button>
