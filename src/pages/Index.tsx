@@ -3,7 +3,6 @@ import { ProblemSection } from "@/components/landing/ProblemSection";
 import { SolutionSection } from "@/components/landing/SolutionSection";
 import { WhatsIncluded } from "@/components/landing/WhatsIncluded";
 import { SocialProof } from "@/components/landing/SocialProof";
-import { AboutCreator } from "@/components/landing/AboutCreator";
 import { FAQ } from "@/components/landing/FAQ";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { Footer } from "@/components/landing/Footer";
@@ -18,7 +17,6 @@ const Index = () => {
         <SolutionSection />
         <WhatsIncluded />
         <SocialProof />
-        <AboutCreator />
         <section id="faq">
           <FAQ />
         </section>
