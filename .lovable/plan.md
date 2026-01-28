@@ -1,115 +1,113 @@
 
-# Add More Animations to Make the Page Feel Alive
+
+# Add Floating Orbs & Background Animation to Hero
 
 ## Overview
 
-The landing page currently has basic `whileInView` fade animations, but we can add much more polish using the existing keyframes in `tailwind.config.ts` plus some new Framer Motion interactions to create a more dynamic, engaging experience.
+Add subtle, animated floating orbs behind the hero section to create depth and visual interest. The orbs will use the existing `animate-orb-float` animation from tailwind config and the primary color palette for consistency.
 
 ---
 
-## Animation Additions by Section
+## Visual Design
 
-### 1. Hero Section — Staggered Text Animation
-**File:** `src/components/landing/Hero.tsx`
+```text
+        ○ (orb 1 - top left, large, very subtle)
+                    
+  ┌─────────────────────────────────────────────────┐
+  │  Stop Taking Peptide         ┌────────────────┐ │
+  │  Advice From...              │  Chat Preview  │ │
+  │                              │    Mockup      │ │
+  │  Stay current on...          │                │ │
+  │                              └────────────────┘ │
+  │  [Start Learning — $67]                         │
+  └─────────────────────────────────────────────────┘
 
-- Add staggered letter or word animation on the H1 headline
-- Add subtle parallax effect on the chat preview (moves slightly as you scroll)
-- Add a pulsing "Online" indicator dot next to "Peptide Assistant"
-
----
-
-### 2. WhatsIncluded — Icon Hover Effects & Staggered Cards
-**File:** `src/components/landing/WhatsIncluded.tsx`
-
-- Add hover scale + glow effect on feature cards
-- Add subtle icon bounce/pulse on hover
-- Increase stagger delay between cards for more dramatic reveal
-
----
-
-### 3. ProblemSection — Text Reveal Animation
-**File:** `src/components/landing/ProblemSection.tsx`
-
-- Add progressive text fade-in (paragraph reveals line by line or word by word)
-- Add subtle background gradient animation or mesh shift
+             ○ (orb 2 - bottom right, medium)
+                              ○ (orb 3 - mid right, small)
+```
 
 ---
 
-### 4. AIAssistant — Typing Effect
-**File:** `src/components/landing/AIAssistant.tsx`
+## Orb Specifications
 
-- Add typing cursor animation on the AI response
-- Add subtle hover tilt effect on the chat card
-
----
-
-### 5. SocialProof — Counter Animation
-**File:** `src/components/landing/SocialProof.tsx`
-
-- Add count-up animation for "200+ hours" and "100+ sources"
-- Add subtle fade-in stagger on stats
+| Orb | Size | Position | Opacity | Animation Delay | Color |
+|-----|------|----------|---------|-----------------|-------|
+| 1 | 400-500px | Top-left | 10-15% | 0s | Primary (violet) |
+| 2 | 300-350px | Bottom-right | 12-18% | -4s | Primary (violet) |
+| 3 | 200-250px | Mid-right | 8-12% | -8s | Primary/accent blend |
 
 ---
 
-### 6. FAQ — Smooth Accordion Animation  
-**File:** `src/components/landing/FAQ.tsx`
+## Technical Implementation
 
-- Already has accordion animation — add hover effect on items
-- Add icon rotation animation on expand
+### File: `src/components/landing/Hero.tsx`
 
----
+**Add before the container div (inside section):**
 
-### 7. FinalCTA — Attention-Grabbing Button
-**File:** `src/components/landing/FinalCTA.tsx`
+1. A `div` with `absolute inset-0 overflow-hidden pointer-events-none` to contain the orbs
+2. Three orb divs with:
+   - `absolute` positioning
+   - `rounded-full` shape
+   - `bg-primary/10` or similar subtle opacity
+   - `blur-3xl` for soft glow effect
+   - `animate-orb-float` animation (already in tailwind)
+   - Different `animation-delay` values for offset movement
 
-- Add subtle pulse/glow animation on the CTA button
-- Add floating animation on the pricing card
-- Add checkmark icons with staggered reveal on the feature list
-
----
-
-### 8. Navbar — Micro-interactions
-**File:** `src/components/landing/Navbar.tsx`
-
-- Add underline hover animation on nav links
-- Add smooth slide-in for mobile menu
+**Key Styling:**
+- Use `pointer-events-none` so orbs don't interfere with clicks
+- Use `overflow-hidden` on container to prevent orbs from causing horizontal scroll
+- Use very low opacity (10-20%) to keep it subtle
+- Large blur radius creates soft, atmospheric effect
 
 ---
 
-## Technical Implementation Summary
+## Code Structure
 
-| Section | Animation Type | Method |
-|---------|---------------|--------|
-| Hero H1 | Staggered word reveal | Framer Motion `variants` with stagger |
-| Hero Chat | Floating + pulse dot | Existing `animate-float` + custom pulse |
-| WhatsIncluded | Hover scale + icon bounce | Framer Motion `whileHover` |
-| ProblemSection | Background mesh animation | CSS `animate-mesh-shift` |
-| AIAssistant | Typing cursor + tilt | CSS + Framer Motion |
-| SocialProof | Number count-up | Custom React hook with animation |
-| FAQ | Hover highlight | CSS transitions |
-| FinalCTA | Button pulse + floating card | CSS `animate-pulse-soft` + `animate-float` |
-| Navbar | Link underline slide | CSS pseudo-element animation |
+```tsx
+<section className="pt-24 pb-16 md:pt-32 md:pb-24 relative overflow-hidden">
+  {/* Floating background orbs */}
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div 
+      className="absolute -top-20 -left-20 w-[500px] h-[500px] 
+                 rounded-full bg-primary/10 blur-3xl animate-orb-float"
+    />
+    <div 
+      className="absolute -bottom-32 -right-20 w-[350px] h-[350px] 
+                 rounded-full bg-primary/15 blur-3xl animate-orb-float"
+      style={{ animationDelay: "-4s" }}
+    />
+    <div 
+      className="absolute top-1/2 right-0 w-[250px] h-[250px] 
+                 rounded-full bg-violet-400/10 blur-3xl animate-orb-float"
+      style={{ animationDelay: "-8s" }}
+    />
+  </div>
+  
+  <div className="container px-4 relative z-10">
+    {/* existing content */}
+  </div>
+</section>
+```
 
 ---
 
-## Files to Update
+## Animation Details
 
-| File | Changes |
-|------|---------|
-| `src/components/landing/Hero.tsx` | Staggered H1 + pulsing online dot |
-| `src/components/landing/WhatsIncluded.tsx` | Hover effects on cards and icons |
-| `src/components/landing/ProblemSection.tsx` | Background animation |
-| `src/components/landing/AIAssistant.tsx` | Typing cursor + hover tilt |
-| `src/components/landing/SocialProof.tsx` | Count-up animation on stats |
-| `src/components/landing/FAQ.tsx` | Hover states on accordion items |
-| `src/components/landing/FinalCTA.tsx` | Button pulse + floating card + staggered list |
-| `src/components/landing/Navbar.tsx` | Link hover animations + mobile menu slide |
+- Using existing `animate-orb-float` (12s cycle, translate + scale)
+- Staggered delays create organic, non-synchronized movement
+- Large blur makes movement very subtle and atmospheric
 
 ---
 
-## Animation Philosophy
+## Dark Mode Consideration
 
-- **Subtle > Flashy** — Animations enhance, not distract
-- **Purpose-Driven** — Each animation guides attention or provides feedback
-- **Performance-First** — Using CSS animations where possible, Framer Motion for complex interactions
-- **Consistent Timing** — Similar elements use similar timing (0.3-0.5s transitions)
+The orbs use `bg-primary/10` which automatically adapts to dark mode since `--primary` is defined for both themes.
+
+---
+
+## File Changes Summary
+
+| File | Action |
+|------|--------|
+| `src/components/landing/Hero.tsx` | UPDATE - Add floating orb background layer |
+
