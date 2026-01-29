@@ -108,12 +108,12 @@ export function HeroSection() {
               variants={itemVariants}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12"
             >
-              <Link to="/signup">
+              <a href="#demo">
                 <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group">
                   <Sparkles className="w-4 h-4 mr-2" />
-                  Try AI Assistant Free
+                  See It In Action
                 </Button>
-              </Link>
+              </a>
               <a href="#product">
                 <Button variant="outline" size="lg" className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm">
                   See What's Included
