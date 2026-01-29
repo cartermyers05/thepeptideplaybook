@@ -6,7 +6,6 @@ import {
   Database, 
   Bot, 
   Mail, 
-  Users, 
   Settings,
   LogOut,
   ChevronLeft,
@@ -14,7 +13,6 @@ import {
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Button } from "@/components/ui/button";
-import { useTier } from "@/hooks/useTier";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -23,23 +21,20 @@ interface NavItem {
   icon: React.ElementType;
   label: string;
   path: string;
-  requiredTier?: "starter" | "pro" | "insider";
 }
 
 const navItems: NavItem[] = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
-  { icon: BookOpen, label: "The Guide", path: "/dashboard/guide", requiredTier: "starter" },
-  { icon: MessageSquare, label: "Doctor Scripts", path: "/dashboard/scripts", requiredTier: "starter" },
-  { icon: ClipboardCheck, label: "Source Checklist", path: "/dashboard/checklist", requiredTier: "starter" },
-  { icon: Database, label: "Peptide Database", path: "/dashboard/database", requiredTier: "pro" },
-  { icon: Bot, label: "AI Assistant", path: "/dashboard/chat", requiredTier: "pro" },
-  { icon: Mail, label: "Research Digest", path: "/dashboard/digest", requiredTier: "pro" },
-  { icon: Users, label: "Community", path: "/dashboard/community", requiredTier: "insider" },
+  { icon: BookOpen, label: "The Guide", path: "/dashboard/guide" },
+  { icon: MessageSquare, label: "Doctor Scripts", path: "/dashboard/scripts" },
+  { icon: ClipboardCheck, label: "Source Checklist", path: "/dashboard/checklist" },
+  { icon: Database, label: "Peptide Database", path: "/dashboard/database" },
+  { icon: Bot, label: "AI Assistant", path: "/dashboard/chat" },
+  { icon: Mail, label: "Research Digest", path: "/dashboard/digest" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
 export function DashboardSidebar() {
-  const { hasAccess, tier } = useTier();
   const { signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -77,7 +72,6 @@ export function DashboardSidebar() {
         {/* Navigation */}
         <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            const isLocked = item.requiredTier && !hasAccess(item.requiredTier);
             const Icon = item.icon;
 
             return (
@@ -85,24 +79,11 @@ export function DashboardSidebar() {
                 key={item.path}
                 to={item.path}
                 end={item.path === "/dashboard"}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                  "text-sidebar-foreground hover:bg-sidebar-accent",
-                  isLocked && "opacity-50"
-                )}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-sidebar-foreground hover:bg-sidebar-accent"
                 activeClassName="bg-sidebar-accent text-sidebar-primary"
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
-                {!collapsed && (
-                  <>
-                    <span className="flex-1">{item.label}</span>
-                    {isLocked && (
-                      <span className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                        {item.requiredTier?.toUpperCase()}
-                      </span>
-                    )}
-                  </>
-                )}
+                {!collapsed && <span className="flex-1">{item.label}</span>}
               </NavLink>
             );
           })}
@@ -110,12 +91,6 @@ export function DashboardSidebar() {
 
         {/* Footer */}
         <div className="p-2 border-t border-sidebar-border">
-          {!collapsed && (
-            <div className="px-3 py-2 mb-2">
-              <p className="text-xs text-muted-foreground">Current Plan</p>
-              <p className="text-sm font-medium capitalize">{tier}</p>
-            </div>
-          )}
           <Button
             variant="ghost"
             size="sm"

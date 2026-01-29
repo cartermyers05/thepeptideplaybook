@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useTier } from "@/hooks/useTier";
 import { UpgradePrompt } from "@/components/dashboard/UpgradePrompt";
-import { BookOpen, Download, ExternalLink } from "lucide-react";
+import { BookOpen, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const chapters = [
@@ -16,12 +16,12 @@ const chapters = [
 ];
 
 export default function Guide() {
-  const { canAccessGuide } = useTier();
+  const { isPaid } = useTier();
 
-  if (!canAccessGuide) {
+  if (!isPaid) {
     return (
       <DashboardLayout>
-        <UpgradePrompt requiredTier="starter" feature="The Complete Guide" />
+        <UpgradePrompt feature="The Complete Guide" />
       </DashboardLayout>
     );
   }

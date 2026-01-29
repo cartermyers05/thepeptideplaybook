@@ -171,13 +171,13 @@ Emerging mitochondrial peptide showing promise:
 ];
 
 export default function Digest() {
-  const { canAccessDigest } = useTier();
+  const { isPaid } = useTier();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  if (!canAccessDigest) {
+  if (!isPaid) {
     return (
       <DashboardLayout>
-        <UpgradePrompt requiredTier="pro" feature="Research Digest" />
+        <UpgradePrompt feature="Research Digest" />
       </DashboardLayout>
     );
   }

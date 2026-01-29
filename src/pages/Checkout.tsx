@@ -1,25 +1,18 @@
 import { useEffect } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useCheckout } from "@/hooks/useCheckout";
 import { useAuth } from "@/hooks/useAuth";
 import { Shield, CreditCard, RefreshCcw } from "lucide-react";
 
-const validTiers = ["starter", "pro", "insider", "monthly", "annual"];
-
 export default function Checkout() {
-  const { tier } = useParams<{ tier: string }>();
   const { startCheckout, isLoading } = useCheckout();
   const { user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (!authLoading && user && tier && validTiers.includes(tier)) {
-      startCheckout(tier as any);
+    if (!authLoading && user) {
+      startCheckout();
     }
-  }, [authLoading, user, tier]);
-
-  if (!tier || !validTiers.includes(tier)) {
-    return <Navigate to="/pricing" replace />;
-  }
+  }, [authLoading, user]);
 
   if (authLoading || isLoading) {
     return (
@@ -33,7 +26,7 @@ export default function Checkout() {
   }
 
   if (!user) {
-    return <Navigate to={`/signup?redirect=/checkout/${tier}`} replace />;
+    return <Navigate to="/signup?redirect=/checkout" replace />;
   }
 
   return (

@@ -43,12 +43,12 @@ const events = [
 ];
 
 export default function Community() {
-  const { canAccessCommunity } = useTier();
+  const { isPaid } = useTier();
 
-  if (!canAccessCommunity) {
+  if (!isPaid) {
     return (
       <DashboardLayout>
-        <UpgradePrompt requiredTier="insider" feature="Private Community" />
+        <UpgradePrompt feature="Private Community" />
       </DashboardLayout>
     );
   }
@@ -61,7 +61,7 @@ export default function Community() {
             Private Community
           </h1>
           <p className="text-muted-foreground">
-            Connect with other Insider members for discussions and support
+            Connect with other members for discussions and support
           </p>
         </div>
 
@@ -130,12 +130,12 @@ export default function Community() {
             </ul>
 
             <div className="mt-6 p-4 bg-primary/5 rounded-lg">
-              <p className="text-sm font-medium mb-1">Your 1:1 Strategy Call</p>
+              <p className="text-sm font-medium mb-1">Community Bonus</p>
               <p className="text-xs text-muted-foreground mb-3">
-                As an Insider, you have access to a 30-minute strategy call
+                As a member, you have access to exclusive community features and group calls.
               </p>
               <Button size="sm" className="btn-primary-clean">
-                Schedule Call
+                Join Next Call
               </Button>
             </div>
           </div>

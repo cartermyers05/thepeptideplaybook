@@ -2,71 +2,63 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Button } from "@/components/ui/button";
-import { Check, Star } from "lucide-react";
+import { Check, ArrowRight, Shield, Zap, Clock, HelpCircle } from "lucide-react";
 import { useCheckout } from "@/hooks/useCheckout";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "react-router-dom";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
-const tiers = [
+const features = [
   {
-    id: "starter",
-    name: "Starter",
-    price: 67,
-    description: "Essential peptide education",
-    features: [
-      "Complete PDF Guide (80+ pages)",
-      "Source Evaluation Checklist",
-      "Doctor Conversation Scripts",
-      "Lifetime updates to guide",
-    ],
-    popular: false,
+    name: "The Complete Guide",
+    description: "80+ pages of research-backed peptide education covering GLP-1s, recovery peptides, growth hormone secretagogues, and more.",
   },
   {
-    id: "pro",
-    name: "Pro",
-    price: 197,
-    description: "Full research toolkit",
-    features: [
-      "Everything in Starter",
-      "Interactive Peptide Database",
-      "AI Research Assistant",
-      "Monthly Research Digest (12 months)",
-      "Email support",
-    ],
-    popular: true,
+    name: "Peptide Database",
+    description: "Search and filter 41 peptides by category, research status, and FDA classification. Includes mechanisms, studies, and safety info.",
   },
   {
-    id: "insider",
-    name: "Insider",
-    price: 497,
-    description: "Complete access + community",
-    features: [
-      "Everything in Pro",
-      "Private Community Access",
-      "1:1 Strategy Call (30 min)",
-      "Priority email support",
-      "Early access to new features",
-      "Lifetime digest access",
-    ],
-    popular: false,
+    name: "AI Research Assistant",
+    description: "Get instant answers about peptide mechanisms, research findings, and safety considerations. Available 24/7.",
+  },
+  {
+    name: "Doctor Conversation Scripts",
+    description: "5 word-for-word templates for talking to your healthcare provider about peptides.",
+  },
+  {
+    name: "Source Evaluation Checklist",
+    description: "Red flags and verification steps to identify legitimate sources before buying anything.",
+  },
+  {
+    name: "Monthly Research Digest",
+    description: "Stay updated on new studies, FDA changes, and emerging peptide research.",
   },
 ];
 
-const subscriptions = [
+const faqs = [
   {
-    id: "monthly",
-    name: "Monthly",
-    price: 29,
-    period: "month",
-    features: ["Peptide Database", "AI Assistant", "Research Digest"],
+    question: "Is this a subscription?",
+    answer: "No. You pay once and get lifetime access to everything, including all future updates.",
   },
   {
-    id: "annual",
-    name: "Annual",
-    price: 247,
-    period: "year",
-    savings: "Save $101/year",
-    features: ["Peptide Database", "AI Assistant", "Research Digest"],
+    question: "What if I'm not satisfied?",
+    answer: "We offer a 30-day money-back guarantee. If you're not happy, email us and we'll refund you — no questions asked.",
+  },
+  {
+    question: "Is this medical advice?",
+    answer: "No. Peptide Playbook provides educational information based on published research. It's not a substitute for professional medical advice. Always consult a healthcare provider.",
+  },
+  {
+    question: "How do I access the content?",
+    answer: "After purchase, you'll create an account and get instant access to everything through your personal dashboard.",
+  },
+  {
+    question: "Will this tell me what peptides to take?",
+    answer: "No. We explain what the research shows — mechanisms, studies, safety profiles — so you can have informed conversations with your doctor. We don't recommend, prescribe, or tell you what to take.",
   },
 ];
 
@@ -74,145 +66,132 @@ export default function Pricing() {
   const { startCheckout, isLoading } = useCheckout();
   const { user } = useAuth();
 
-  const handleCheckout = (tierId: string) => {
+  const handleCheckout = () => {
     if (!user) {
-      window.location.href = `/signup?redirect=/checkout/${tierId}`;
+      window.location.href = "/signup?redirect=/checkout";
       return;
     }
-    startCheckout(tierId as any);
+    startCheckout();
   };
 
   return (
     <>
       <SEOHead
         title="Pricing — Peptide Playbook"
-        description="Choose your level of peptide education access. One-time purchase or subscription options available with 30-day money-back guarantee."
+        description="Get full access to Peptide Playbook for $67. One-time payment, lifetime access, 30-day money-back guarantee."
       />
       <div className="min-h-screen bg-background">
         <Navbar />
         
         <main className="pt-24 pb-20">
-          <div className="container px-4 max-w-6xl mx-auto">
-            {/* Header */}
+          <div className="container px-4 max-w-4xl mx-auto">
+            {/* Hero */}
             <div className="text-center mb-16">
               <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-4">
-                PRICING
+                SIMPLE PRICING
               </p>
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-4">
-                Choose Your Level of Access
+                Simple, Honest Pricing
               </h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                All plans include a 30-day money-back guarantee. No questions asked.
+                One price. Full access. No upsells, no subscriptions, no nonsense.
               </p>
             </div>
 
-            {/* One-time tiers */}
-            <div className="grid md:grid-cols-3 gap-6 mb-20">
-              {tiers.map((tier) => (
-                <div
-                  key={tier.id}
-                  className={`relative rounded-xl border p-8 ${
-                    tier.popular
-                      ? "border-primary border-2 scale-105 shadow-lg z-10"
-                      : "border-border"
-                  }`}
-                >
-                  {tier.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
-                        <Star className="w-3 h-3" /> MOST POPULAR
-                      </span>
-                    </div>
-                  )}
+            {/* Pricing Card */}
+            <div className="max-w-lg mx-auto mb-20">
+              <div className="rounded-2xl border-2 border-primary shadow-xl bg-white overflow-hidden">
+                {/* Header */}
+                <div className="bg-primary/5 p-8 text-center border-b border-primary/10">
+                  <p className="text-sm font-semibold text-primary mb-2">Complete Access</p>
+                  <div className="flex items-baseline justify-center gap-2">
+                    <span className="text-6xl font-bold">$67</span>
+                    <span className="text-muted-foreground">USD</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">One-time payment • Lifetime access</p>
+                </div>
 
-                  <div className="mb-6">
-                    <h3 className="text-sm uppercase tracking-wide text-muted-foreground mb-2">
-                      {tier.name}
-                    </h3>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-bold">${tier.price}</span>
-                      <span className="text-muted-foreground">one-time</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">{tier.description}</p>
+                {/* CTA */}
+                <div className="p-8">
+                  <Button
+                    onClick={handleCheckout}
+                    disabled={isLoading}
+                    size="lg"
+                    className="w-full btn-primary-clean h-14 text-lg mb-4"
+                  >
+                    {isLoading ? "Loading..." : "Get Instant Access"}
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                  
+                  <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Shield className="w-3.5 h-3.5" />
+                      30-day guarantee
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Zap className="w-3.5 h-3.5" />
+                      Instant access
+                    </span>
                   </div>
 
-                  <div className="border-t border-border pt-6 mb-6">
-                    <ul className="space-y-3">
-                      {tier.features.map((feature, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm">
-                          <Check className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                          <span>{feature}</span>
-                        </li>
+                  {/* Features */}
+                  <div className="mt-8 pt-8 border-t border-border">
+                    <p className="text-sm font-semibold mb-4">Everything included:</p>
+                    <div className="space-y-4">
+                      {features.map((feature, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Check className="w-3 h-3 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">{feature.name}</p>
+                            <p className="text-xs text-muted-foreground">{feature.description}</p>
+                          </div>
+                        </div>
                       ))}
-                    </ul>
-                  </div>
-
-                  <Button
-                    onClick={() => handleCheckout(tier.id)}
-                    disabled={isLoading}
-                    className={`w-full ${
-                      tier.popular
-                        ? "btn-primary-clean"
-                        : "bg-background border border-border text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    Get {tier.name} Access
-                  </Button>
-                </div>
-              ))}
-            </div>
-
-            {/* Subscription options */}
-            <div className="text-center mb-12">
-              <h2 className="text-2xl font-semibold mb-2">Prefer Monthly Access?</h2>
-              <p className="text-muted-foreground">
-                Get database, AI assistant, and research digest for one low price
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-              {subscriptions.map((sub) => (
-                <div key={sub.id} className="rounded-xl border border-border p-6">
-                  <div className="flex items-baseline justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold">{sub.name}</h3>
-                      {sub.savings && (
-                        <span className="text-xs text-primary font-medium">{sub.savings}</span>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <span className="text-3xl font-bold">${sub.price}</span>
-                      <span className="text-muted-foreground">/{sub.period}</span>
                     </div>
                   </div>
-
-                  <ul className="space-y-2 mb-6">
-                    {sub.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm">
-                        <Check className="w-4 h-4 text-primary" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    onClick={() => handleCheckout(sub.id)}
-                    disabled={isLoading}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    Start {sub.name} Subscription
-                  </Button>
                 </div>
-              ))}
+              </div>
             </div>
 
-            {/* Guarantee */}
-            <div className="text-center mt-16 p-8 bg-muted/50 rounded-xl max-w-2xl mx-auto">
-              <h3 className="font-semibold mb-2">30-Day Money-Back Guarantee</h3>
-              <p className="text-sm text-muted-foreground">
-                Not satisfied? Email us within 30 days for a full refund. No questions asked.
+            {/* FAQ */}
+            <div className="max-w-2xl mx-auto mb-20">
+              <div className="flex items-center gap-2 mb-6">
+                <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                <h2 className="text-xl font-semibold">Common Questions</h2>
+              </div>
+              <Accordion type="single" collapsible className="w-full">
+                {faqs.map((faq, i) => (
+                  <AccordionItem key={i} value={`faq-${i}`}>
+                    <AccordionTrigger className="text-left">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </div>
+
+            {/* Final CTA */}
+            <div className="text-center bg-muted/50 rounded-2xl p-12">
+              <h2 className="text-2xl font-semibold mb-3">
+                Ready to Actually Understand Peptides?
+              </h2>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                Join 4,200+ members who stopped relying on TikTok and Reddit for peptide information.
               </p>
+              <Button
+                onClick={handleCheckout}
+                disabled={isLoading}
+                size="lg"
+                className="btn-primary-clean h-12"
+              >
+                Get Full Access — $67
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
             </div>
           </div>
         </main>
