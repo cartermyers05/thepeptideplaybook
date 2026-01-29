@@ -1,0 +1,124 @@
+import { useState, useEffect } from "react";
+import { X, Gift } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+export function ExitIntentPopup() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Don't show if already shown
+    const hasShown = sessionStorage.getItem("exit_popup_shown");
+    if (hasShown) return;
+
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0) {
+        setIsOpen(true);
+        sessionStorage.setItem("exit_popup_shown", "true");
+      }
+    };
+
+    // Delay adding listener to avoid immediate trigger
+    const timeout = setTimeout(() => {
+      document.addEventListener("mouseleave", handleMouseLeave);
+    }, 5000);
+
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from("leads")
+        .insert({ email, source: "exit-intent" });
+
+      if (error) throw error;
+
+      toast({
+        title: "You're in!",
+        description: "Check your email for the free guide.",
+      });
+      setIsOpen(false);
+    } catch (error: any) {
+      // Handle duplicate email gracefully
+      if (error.code === "23505") {
+        toast({
+          title: "You're already signed up!",
+          description: "Check your email for the guide.",
+        });
+        setIsOpen(false);
+      } else {
+        toast({
+          title: "Something went wrong",
+          description: "Please try again.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full relative shadow-2xl animate-fade-up">
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Close popup"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+            <Gift className="w-8 h-8 text-primary" />
+          </div>
+
+          <h3 className="text-2xl font-bold mb-2">
+            Wait! Don't leave confused.
+          </h3>
+
+          <p className="text-muted-foreground">
+            Get our free "5 Red Flags" checklist — learn exactly what to watch for before buying anything.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="h-12"
+          />
+          <Button
+            type="submit"
+            className="w-full h-12 btn-primary-clean"
+            disabled={isLoading}
+          >
+            {isLoading ? "Sending..." : "Send Me the Free Guide"}
+          </Button>
+        </form>
+
+        <p className="text-xs text-muted-foreground text-center mt-4">
+          No spam. Unsubscribe anytime.
+        </p>
+      </div>
+    </div>
+  );
+}

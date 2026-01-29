@@ -55,8 +55,8 @@ export default function Checklist() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="max-w-4xl">
+      <DashboardLayout>
+        <div className="max-w-4xl print-content">
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight mb-2">
@@ -66,9 +66,9 @@ export default function Checklist() {
               Use this checklist before purchasing from any peptide source
             </p>
           </div>
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => window.print()} className="no-print">
             <Download className="w-4 h-4 mr-2" />
-            Print PDF
+            Print Checklist
           </Button>
         </div>
 

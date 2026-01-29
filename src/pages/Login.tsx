@@ -26,7 +26,7 @@ export default function Login() {
       });
 
       if (error) throw error;
-      navigate("/chat");
+      navigate("/dashboard");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -114,7 +114,7 @@ export default function Login() {
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link to="/signup" className="text-primary hover:underline">
-              Start free trial
+              Create account
             </Link>
           </p>
         </div>
