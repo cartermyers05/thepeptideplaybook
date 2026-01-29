@@ -5,14 +5,16 @@ import { motion } from "framer-motion";
 
 import { SEOHead } from "@/components/seo/SEOHead";
 import { ArticleSchema } from "@/components/seo/ArticleSchema";
+import { MedicalWebPageSchema } from "@/components/seo/MedicalWebPageSchema";
 import { FAQSchema } from "@/components/seo/FAQSchema";
 import { OrganizationSchema } from "@/components/seo/OrganizationSchema";
 import { Breadcrumbs } from "@/components/articles/Breadcrumbs";
 import { AuthorSection } from "@/components/articles/AuthorSection";
-import { TLDRBox } from "@/components/articles/TLDRBox";
+import { DirectAnswerBlock } from "@/components/articles/DirectAnswerBlock";
 import { ArticleContent } from "@/components/articles/ArticleContent";
 import { CitationsSection } from "@/components/articles/CitationsSection";
 import { RelatedArticles } from "@/components/articles/RelatedArticles";
+import { InlineAICTA } from "@/components/articles/InlineAICTA";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -133,6 +135,20 @@ export default function ArticleDetail() {
         publishedAt={article.published_at || article.created_at}
         updatedAt={article.updated_at}
       />
+      <MedicalWebPageSchema
+        title={article.title}
+        description={article.tldr}
+        slug={article.slug}
+        author={{
+          name: article.author_name,
+          credential: article.author_credential,
+        }}
+        publishedAt={article.published_at || article.created_at}
+        updatedAt={article.updated_at}
+        peptideName={article.title.match(/BPC-157|TB-500|GHK-Cu|CJC-1295|Ipamorelin|Thymosin|Semaglutide|Tirzepatide/i)?.[0]}
+        legalStatus="Research chemical - not FDA approved for human use"
+        keywords={article.target_keywords || []}
+      />
       {article.structured_answer && article.structured_answer.length > 0 && (
         <FAQSchema faqs={article.structured_answer} />
       )}
@@ -213,13 +229,23 @@ export default function ArticleDetail() {
               </div>
             </header>
 
-            {/* TL;DR Box - Direct answer for AI extraction */}
-            <TLDRBox content={article.tldr} />
+            {/* Direct Answer Block - Optimized for AI extraction */}
+            <DirectAnswerBlock 
+              question={article.h1_question}
+              answer={article.tldr}
+              keywords={article.target_keywords || []}
+            />
+
+            {/* Inline CTA after quick answer */}
+            <InlineAICTA articleTitle={article.title} variant="compact" />
 
             {/* Main Content */}
             <div className="mt-8">
               <ArticleContent content={article.full_content} />
             </div>
+
+            {/* Mid-article CTA */}
+            <InlineAICTA articleTitle={article.title} />
 
             {/* FAQ Section (if exists) */}
             {article.structured_answer && article.structured_answer.length > 0 && (

@@ -18,29 +18,41 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Fetch all published articles
-    const { data: articles, error } = await supabase
+    const { data: articles, error: articlesError } = await supabase
       .from("articles")
-      .select("slug, updated_at, published_at")
+      .select("slug, updated_at, published_at, title")
       .eq("status", "published")
       .order("published_at", { ascending: false });
 
-    if (error) throw error;
+    if (articlesError) throw articlesError;
+
+    // Fetch all news articles
+    const { data: newsArticles, error: newsError } = await supabase
+      .from("news_articles")
+      .select("slug, updated_at, published_at, title")
+      .order("published_at", { ascending: false });
+
+    if (newsError) throw newsError;
 
     const baseUrl = "https://peptideplaybook.com";
 
     // Static pages with their priorities and change frequencies
     const staticPages = [
       { path: "/", priority: "1.0", changefreq: "daily" },
+      { path: "/articles", priority: "0.9", changefreq: "daily" },
       { path: "/blog", priority: "0.9", changefreq: "daily" },
       { path: "/about", priority: "0.7", changefreq: "monthly" },
+      { path: "/pricing", priority: "0.8", changefreq: "weekly" },
       { path: "/terms", priority: "0.3", changefreq: "yearly" },
       { path: "/privacy", priority: "0.3", changefreq: "yearly" },
       { path: "/disclaimer", priority: "0.3", changefreq: "yearly" },
     ];
 
-    // Generate XML sitemap
+    // Generate XML sitemap with enhanced structure
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   ${staticPages
     .map(
       (page) => `
@@ -56,7 +68,7 @@ serve(async (req) => {
     ?.map(
       (article) => `
   <url>
-    <loc>${baseUrl}/blog/${article.slug}</loc>
+    <loc>${baseUrl}/articles/${article.slug}</loc>
     <lastmod>${
       article.updated_at
         ? new Date(article.updated_at).toISOString().split("T")[0]
@@ -64,6 +76,33 @@ serve(async (req) => {
     }</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>`
+    )
+    .join("")}
+  ${newsArticles
+    ?.map(
+      (news) => `
+  <url>
+    <loc>${baseUrl}/news/${news.slug}</loc>
+    <lastmod>${
+      news.updated_at
+        ? new Date(news.updated_at).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0]
+    }</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+    <news:news>
+      <news:publication>
+        <news:name>Peptide Playbook</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>${
+        news.published_at
+          ? new Date(news.published_at).toISOString()
+          : new Date().toISOString()
+      }</news:publication_date>
+      <news:title>${escapeXml(news.title)}</news:title>
+    </news:news>
   </url>`
     )
     .join("")}
@@ -84,3 +123,13 @@ serve(async (req) => {
     });
   }
 });
+
+// Helper to escape XML special characters
+function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
