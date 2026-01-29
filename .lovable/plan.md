@@ -1,243 +1,214 @@
 
 
-# Peptide Playbook — Critical Conversion Fixes
+# Dashboard Redesign Implementation Plan
 
 ## Overview
 
-This plan implements 10 high-impact fixes to maximize conversions, improve user experience, and add trust elements throughout the site.
+Replace the current basic dashboard with an enhanced, modern design featuring:
+- Hero welcome section with tier badge and quick stats
+- Visual feature cards with tier-based access indicators
+- Free user upgrade banner with gradient styling
+- Recent updates and suggested actions sections
 
 ---
 
 ## Changes Summary
 
-| Fix | Priority | Effort |
-|-----|----------|--------|
-| 1. FinalCTA tiered pricing | Critical | 15 min |
-| 2. Login redirect to /dashboard | Critical | 2 min |
-| 3. Urgency banner with countdown | High | 15 min |
-| 4. Exit intent popup | High | 20 min |
-| 5. Floating mobile CTA | High | 10 min |
-| 6. Print checklist functionality | Medium | 10 min |
-| 7. Expand digest content | Medium | 30 min |
-| 8. Enhanced testimonials | Medium | 15 min |
-| 9. Trust badges/elements | Medium | 20 min |
-| 10. Signup page redirect fix | Critical | 2 min |
+| Task | File | Effort |
+|------|------|--------|
+| Replace dashboard component | `src/pages/dashboard/Home.tsx` | Main work |
+| Add `profile` to useAuth | `src/hooks/useAuth.tsx` | Small update |
+| Update index.css | `src/index.css` | Add grain animation |
 
 ---
 
-## Fix 1: Update FinalCTA Section
+## Implementation Details
 
-**File:** `src/components/landing/FinalCTA.tsx`
+### 1. Update useAuth Hook
 
-Replace the single $167 pricing card with a 3-tier summary:
-- Starter ($67) - Guide + Scripts + Checklist
-- Pro ($197) - marked as "MOST POPULAR" - adds Database + AI + Digest  
-- Insider ($497) - adds Community + 1:1 Call
+**File:** `src/hooks/useAuth.tsx`
 
-Include two CTAs:
-- "View Full Pricing" linking to /pricing
-- "Get Free Guide First" linking to /free-guide
+The new dashboard expects `profile` from `useAuth()`, but currently useAuth only provides `user`, `session`, `isLoading`, and `signOut`. 
 
-Update bottom CTA text to remove $167 reference and link to /pricing.
+**Solution:** Instead of modifying useAuth, the new dashboard should use the existing pattern with `useProfile()` and `useTier()` hooks separately. This maintains the current architecture.
+
+**Changes to the provided code:**
+- Import `useProfile` and `useTier` instead of expecting `profile` from `useAuth`
+- Use `profile?.tier` via the existing hooks
 
 ---
 
-## Fix 2: Login Redirect
+### 2. Replace Dashboard Component
 
-**File:** `src/pages/Login.tsx`
+**File:** `src/pages/dashboard/Home.tsx`
 
-Change line 29:
+Complete replacement with the new design featuring:
+
+**Hero Section:**
+- Welcome message with user's first name and emoji wave
+- Tier badge (Free Account / Starter Member / Pro Member / Insider Member)
+- Quick stats row for paid users (Guide Progress, Peptides Explored, AI Questions Asked)
+- Note: Stats are currently placeholder values - will show static data for now
+
+**Upgrade Banner (Free Users Only):**
+- Gradient purple/blue background with decorative circles
+- Sparkles icon
+- "Limited Time" badge
+- CTA button to pricing page
+
+**Feature Grid:**
+- 7 feature cards in responsive grid (3-2-2 layout on desktop)
+- Each card shows:
+  - Tier badge with checkmark (if accessible) or lock icon (if locked)
+  - Icon in colored circle
+  - Title and description
+  - Stats count where applicable
+  - Hover arrow indicator for accessible features
+
+**Feature Cards:**
+| Feature | Tier Required | Stats |
+|---------|---------------|-------|
+| The Guide | starter | 8 chapters |
+| Peptide Database | pro | 41 peptides |
+| AI Assistant | pro | Unlimited |
+| Doctor Scripts | starter | 5 templates |
+| Source Checklist | starter | 12 criteria |
+| Research Digest | pro | Monthly |
+| Community | insider | 500+ members |
+
+**Bottom Section:**
+- "What's New" - 3 recent updates with "New" badges
+- "Suggested Next Steps" - personalized actions based on tier
+
+---
+
+### 3. Component Architecture
+
+The new file includes 4 components:
+1. **Dashboard** (main) - The page component with layout
+2. **FeatureCard** - Reusable card for each feature
+3. **UpdateItem** - Individual update row
+4. **SuggestedAction** - Action link item
+
+---
+
+### 4. Styling Considerations
+
+**CSS Classes Used:**
+- `bg-gradient-to-br from-primary/5 via-background to-background` - Hero gradient
+- `bg-gradient-to-br from-purple-600/20 via-primary/20 to-blue-600/20` - Upgrade banner
+- `shadow-lg shadow-primary/20` - Elevated CTA button
+- Tier-specific colors: slate (starter), emerald (pro), amber (insider)
+
+**Responsive Breakpoints:**
+- Mobile: 1 column grid
+- `sm:` 2 columns
+- `lg:` 3 columns for feature grid
+
+---
+
+### 5. Data Flow
+
+**Current Data Available:**
+- `profile?.full_name` - From useProfile()
+- `profile?.tier` - User's current tier
+- `profile?.questions_asked` - AI questions count
+
+**Static/Placeholder Data:**
+- Guide Progress: "Chapter 3" (no tracking yet)
+- Peptides Explored: "12 of 41" (no tracking yet)
+- Updates list (hardcoded dates)
+
+**Future Enhancement:** Could add `guide_chapter` and `peptides_viewed` columns to profiles table for real progress tracking.
+
+---
+
+### 6. Complete Code Structure
+
+The implementation will:
+
+1. Import required dependencies:
+   - React Router `Link`
+   - Lucide icons (BookOpen, MessageSquare, ClipboardCheck, Database, Bot, Mail, Users, ArrowRight, Sparkles, Lock, TrendingUp, Clock, CheckCircle2)
+   - DashboardLayout wrapper
+   - useProfile and useTier hooks
+   - Button and cn utility
+
+2. Define feature data array with tier requirements
+
+3. Main Dashboard component:
+   - Fetch profile and tier data
+   - Render hero, upgrade banner (conditional), feature grid, and bottom sections
+
+4. FeatureCard sub-component:
+   - Props: title, description, icon, href, tier, userTier, featured, stats, className
+   - Computes hasAccess based on tier hierarchy
+   - Renders tier badge, icon, content, and hover state
+
+5. Helper sub-components:
+   - UpdateItem for news items
+   - SuggestedAction for action buttons
+
+---
+
+## Visual Layout
+
 ```text
-navigate("/chat")  →  navigate("/dashboard")
-```
++--------------------------------------------------+
+|  Welcome back, [Name]! 👋                        |
+|  Your peptide education hub is ready.            |
+|                                    [Tier Badge]  |
+|  +------------+ +------------+ +------------+    |  (Paid users only)
+|  |Guide Prog. | |Peptides    | |AI Questions|    |
+|  | Chapter 3  | | 12 of 41   | | 8          |    |
+|  +------------+ +------------+ +------------+    |
++--------------------------------------------------+
 
-Also update the "Start free trial" link text to "Create account" since free trial was removed.
++--------------------------------------------------+
+|  🔮 Limited Time - Unlock the full Playbook      |  (Free users only)
+|  [View Plans →]                                  |
++--------------------------------------------------+
 
----
++--------+ +--------+ +--------+
+|📖 Guide| |🗄️ DB   | |🤖 AI  |
++--------+ +--------+ +--------+
++--------+ +--------+
+|Scripts | |Checklist|
++--------+ +--------+
++--------+ +--------+
+|Digest  | |Community|
++--------+ +--------+
 
-## Fix 3: Urgency Banner
-
-**New File:** Create updated `src/components/landing/UrgencyBanner.tsx`
-
-Features:
-- Sticky banner at top of page with primary background
-- 24-hour countdown timer (persisted in localStorage)
-- Dismissible with X button
-- "New Year Special: Get 20% off Pro with code PEPTIDE2026"
-- Clean, non-spammy design
-
-**Update:** `src/pages/Index.tsx` to include banner above Navbar
-
----
-
-## Fix 4: Exit Intent Popup
-
-**New File:** `src/components/landing/ExitIntentPopup.tsx`
-
-Features:
-- Triggers when mouse leaves viewport (clientY <= 0)
-- Only shows once per session (stored in sessionStorage)
-- 5-second delay before activating listener
-- Offers free "5 Red Flags" checklist
-- Email capture form → inserts to `leads` table with source: "exit-intent"
-- Clean modal design with Gift icon
-
-**Update:** `src/pages/Index.tsx` to include popup component
-
----
-
-## Fix 5: Floating Mobile CTA
-
-**New File:** `src/components/landing/FloatingCTA.tsx`
-
-Features:
-- Fixed button at bottom of screen on mobile
-- Only appears after scrolling past 600px
-- Links to /pricing
-- "Get Instant Access" with arrow icon
-- Subtle shadow and animation
-
-**Update:** `src/pages/Index.tsx` to include floating CTA
-
----
-
-## Fix 6: Print Checklist Functionality
-
-**File:** `src/pages/dashboard/Checklist.tsx`
-
-Changes:
-- Add onClick handler to Print button: `window.print()`
-- Add `print-content` class to main content wrapper
-
-**File:** `src/index.css`
-
-Add print media query:
-```css
-@media print {
-  nav, .sidebar, button, .no-print { display: none !important; }
-  .print-content { width: 100% !important; margin: 0 !important; padding: 20px !important; }
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-}
++---------------------+ +---------------------+
+| What's New          | | Suggested Next Steps|
+| • Guide updated     | | → Read Chapter 3    |
+| • 3 peptides added  | | → Ask the AI        |
+| • New digest        | | → View database     |
++---------------------+ +---------------------+
 ```
 
 ---
 
-## Fix 7: Expand Digest Content
+## Files Changed
 
-**File:** `src/pages/dashboard/Digest.tsx`
+| File | Action |
+|------|--------|
+| `src/pages/dashboard/Home.tsx` | Replace entirely with new design |
 
-Changes:
-- Add `fullContent` and `sources` fields to each digest object
-- Add expandable state management with useState
-- When "Read full digest" is clicked, expand to show:
-  - Full markdown content (rendered with react-markdown)
-  - Source links
-- Collapse functionality to hide content again
-
----
-
-## Fix 8: Enhanced Testimonials
-
-**File:** `src/components/landing/Testimonials.tsx`
-
-Updates to testimonials array:
-- Add `title` field (e.g., "Marketing Director, Austin TX")
-- Add `date` field (e.g., "January 2026")
-- Enhance quotes with more specific details
-
-Update component:
-- Display job title below name
-- Show verification date
-- Add avatar placeholder styling
-
----
-
-## Fix 9: Trust Badges/Elements
-
-**File:** `src/components/landing/PricingSection.tsx`
-
-Add below pricing cards:
-- Security badges: "SSL Secured", "Stripe Payments", "30-Day Refund"
-- Member count: "Join 4,200+ members"
-
-**File:** `src/pages/Checkout.tsx`
-
-Add trust elements near checkout button:
-- Lock icon with "256-bit SSL encryption"
-- Credit card icons
-- Money-back guarantee text
-
----
-
-## Fix 10: Signup Page Redirect
-
-**File:** `src/pages/Signup.tsx`
-
-Change line 66 in `handleContinue`:
-```text
-navigate("/chat")  →  navigate("/dashboard")
-```
-
-Also update marketing copy:
-- Remove "7-day trial for just $1" (line 284)
-- Update to match new pricing model
-
----
-
-## Implementation Order
-
-1. Login & Signup redirects (Critical path fixes)
-2. FinalCTA tiered pricing (Landing page accuracy)
-3. Urgency banner (Conversion lift)
-4. Exit intent popup (Lead capture)
-5. Floating mobile CTA (Mobile conversion)
-6. Enhanced testimonials (Social proof)
-7. Trust badges (Reduce friction)
-8. Print checklist (Feature completion)
-9. Expand digest content (Feature completion)
-10. Print CSS styles (Finish print feature)
-
----
-
-## Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/components/landing/ExitIntentPopup.tsx` | Lead capture popup |
-| `src/components/landing/FloatingCTA.tsx` | Mobile sticky CTA |
-
----
-
-## Files to Update
-
-| File | Changes |
-|------|---------|
-| `src/pages/Login.tsx` | Redirect to /dashboard |
-| `src/pages/Signup.tsx` | Redirect to /dashboard, update copy |
-| `src/components/landing/FinalCTA.tsx` | Complete rewrite with tiered pricing |
-| `src/components/landing/UrgencyBanner.tsx` | Update with dismiss functionality |
-| `src/components/landing/Testimonials.tsx` | Enhanced data and display |
-| `src/components/landing/PricingSection.tsx` | Add trust badges |
-| `src/pages/Index.tsx` | Add UrgencyBanner, ExitIntentPopup, FloatingCTA |
-| `src/pages/dashboard/Checklist.tsx` | Add print functionality |
-| `src/pages/dashboard/Digest.tsx` | Add expandable content |
-| `src/pages/Checkout.tsx` | Add trust elements |
-| `src/index.css` | Add print media query |
+No other files need modification - the new design uses existing hooks (`useProfile`, `useTier`) and the existing `DashboardLayout` wrapper.
 
 ---
 
 ## Testing Checklist
 
-After implementation, verify:
-- Login redirects to /dashboard (not /chat)
-- Signup flow ends at /dashboard
-- FinalCTA shows 3 tiers with correct prices
-- Urgency banner shows countdown, dismisses on X
-- Exit intent fires when mouse leaves viewport (after 5s delay)
-- Mobile floating CTA appears on scroll (test on mobile viewport)
-- Print checklist opens browser print dialog
-- Digest cards expand to show full content
-- All testimonials show name, title, and date
-- Trust badges visible on pricing section
-- No console errors
+After implementation:
+- [ ] Free user sees upgrade banner and locked features
+- [ ] Starter user sees Guide, Scripts, Checklist unlocked
+- [ ] Pro user sees Database, AI, Digest unlocked
+- [ ] Insider user sees Community unlocked
+- [ ] Feature cards link to correct dashboard pages
+- [ ] Tier badge shows correct plan name
+- [ ] Stats section only shows for paid users
+- [ ] Responsive layout works on mobile
+- [ ] Hover states work on feature cards
 
