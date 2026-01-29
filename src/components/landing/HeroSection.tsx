@@ -57,8 +57,9 @@ export function HeroSection() {
             </motion.div>
 
             {/* Headline */}
-            <motion.h1 variants={itemVariants} className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6">Ask Anything About Peptides
-Get Research Backed Answers<motion.span className="block text-gradient mt-2" initial={{
+            <motion.h1 variants={itemVariants} className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6">
+              Ask Anything About Peptides
+              <motion.span className="block text-gradient mt-2" initial={{
               opacity: 0,
               y: 10
             }} animate={{
