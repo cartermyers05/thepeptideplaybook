@@ -27,8 +27,6 @@ import Pricing from "./pages/Pricing";
 import FreeGuide from "./pages/FreeGuide";
 import Checkout from "./pages/Checkout";
 import Dashboard from "./pages/dashboard/Home";
-import DashboardGuide from "./pages/dashboard/Guide";
-import DashboardScripts from "./pages/dashboard/Scripts";
 import DashboardChecklist from "./pages/dashboard/Checklist";
 import DashboardDatabase from "./pages/dashboard/Database";
 import DashboardChat from "./pages/dashboard/ChatPage";
@@ -65,8 +63,6 @@ const App = () => (
             
             {/* Protected routes - Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/dashboard/guide" element={<ProtectedRoute><DashboardGuide /></ProtectedRoute>} />
-            <Route path="/dashboard/scripts" element={<ProtectedRoute><DashboardScripts /></ProtectedRoute>} />
             <Route path="/dashboard/checklist" element={<ProtectedRoute><DashboardChecklist /></ProtectedRoute>} />
             <Route path="/dashboard/database" element={<ProtectedRoute><DashboardDatabase /></ProtectedRoute>} />
             <Route path="/dashboard/chat" element={<ProtectedRoute><DashboardChat /></ProtectedRoute>} />

@@ -4,10 +4,8 @@ import { Check, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const features = [
-  "80+ page research guide",
   "Interactive peptide database (41 peptides)",
   "AI research assistant",
-  "Doctor conversation scripts",
   "Source evaluation checklist",
   "Monthly research digest",
   "Lifetime access + updates",

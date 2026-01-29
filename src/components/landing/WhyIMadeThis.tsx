@@ -19,7 +19,7 @@ export function WhyIMadeThis() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Why I Created This <span className="text-gradient">Guide</span>
+            Why I Created This <span className="text-gradient">Platform</span>
           </h2>
         </motion.div>
 
@@ -47,7 +47,7 @@ export function WhyIMadeThis() {
                 </p>
                 <p>
                   "I'm not a doctor. I'm not going to tell you what to take. But I am someone who's 
-                  done the research — and I built this guide so you don't have to waste 200+ hours 
+                  done the research — and I built this platform so you don't have to waste 200+ hours 
                   like I did."
                 </p>
                 <p className="font-medium text-foreground">

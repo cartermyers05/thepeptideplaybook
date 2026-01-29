@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { 
-  BookOpen, ClipboardCheck, Database, 
+  ClipboardCheck, Database, 
   Bot, Mail, ArrowRight, Sparkles,
-  TrendingUp, Clock, FileText
+  TrendingUp, Clock
 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -12,19 +12,12 @@ import { cn } from "@/lib/utils";
 
 const features = [
   {
-    title: "The Guide",
-    description: "Complete peptide education from basics to advanced",
-    icon: BookOpen,
-    href: "/dashboard/guide",
-    stats: "8 chapters",
-    featured: true,
-  },
-  {
     title: "Peptide Database",
     description: "Search and filter 41+ research peptides",
     icon: Database,
     href: "/dashboard/database",
     stats: "41 peptides",
+    featured: true,
   },
   {
     title: "AI Assistant",
@@ -32,13 +25,6 @@ const features = [
     icon: Bot,
     href: "/dashboard/chat",
     stats: "Unlimited",
-  },
-  {
-    title: "Doctor Scripts",
-    description: "Conversation templates for your physician",
-    icon: FileText,
-    href: "/dashboard/scripts",
-    stats: "5 templates",
   },
   {
     title: "Source Checklist",
@@ -57,7 +43,6 @@ const features = [
 ];
 
 const updates = [
-  { title: "Guide updated: January 2026", date: "Jan 15", isNew: true },
   { title: "3 new peptides added to database", date: "Jan 10", isNew: true },
   { title: "New research digest available", date: "Jan 1", isNew: false },
 ];
@@ -103,11 +88,7 @@ export default function Dashboard() {
             
             {/* Quick stats for members */}
             {isPaid && (
-              <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
-                <div className="text-center sm:text-left">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Guide Progress</p>
-                  <p className="text-lg font-semibold mt-1">Chapter 3</p>
-                </div>
+              <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-border">
                 <div className="text-center sm:text-left">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Peptides Explored</p>
                   <p className="text-lg font-semibold mt-1">12 of 41</p>
@@ -137,7 +118,7 @@ export default function Dashboard() {
                   Unlock full access for $67
                 </h2>
                 <p className="text-muted-foreground text-sm">
-                  Get instant access to the complete guide, interactive database, AI assistant, and more. One-time payment, lifetime access.
+                  Get instant access to the interactive database, AI assistant, and more. One-time payment, lifetime access.
                 </p>
               </div>
               
@@ -151,7 +132,7 @@ export default function Dashboard() {
         )}
 
         {/* Main feature grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 gap-4">
           {features.map((feature) => (
             <FeatureCard
               key={feature.href}
@@ -162,7 +143,6 @@ export default function Dashboard() {
               featured={feature.featured}
               stats={feature.stats}
               isPaid={isPaid}
-              className={feature.featured ? "sm:col-span-2 lg:col-span-1" : ""}
             />
           ))}
         </div>
@@ -191,9 +171,9 @@ export default function Dashboard() {
             <div className="space-y-2">
               {isPaid ? (
                 <>
-                  <SuggestedAction text="Continue reading: Chapter 3" href="/dashboard/guide" primary />
+                  <SuggestedAction text="Explore the peptide database" href="/dashboard/database" primary />
                   <SuggestedAction text="Ask the AI assistant" href="/dashboard/chat" />
-                  <SuggestedAction text="Explore the peptide database" href="/dashboard/database" />
+                  <SuggestedAction text="Check source evaluation checklist" href="/dashboard/checklist" />
                 </>
               ) : (
                 <>
@@ -224,7 +204,6 @@ interface FeatureCardProps {
 function FeatureCard({ 
   title, description, icon: Icon, href, featured, stats, isPaid, className 
 }: FeatureCardProps) {
-  // Free users can still browse but see limited content on feature pages
   return (
     <Link
       to={href}

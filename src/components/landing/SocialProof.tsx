@@ -61,7 +61,7 @@ export function SocialProof() {
             </motion.p>
             
             <motion.p variants={itemVariants}>
-              This guide is the resource I wish existed when I started. It's not medical advice. 
+              Peptide Playbook is the resource I wish existed when I started. It's not medical advice. 
               It won't tell you what to take. But it will help you understand what's actually 
               going on so you can make informed decisions with real professionals.
             </motion.p>
