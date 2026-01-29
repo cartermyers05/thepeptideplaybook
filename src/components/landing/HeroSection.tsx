@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Shield, Zap, Clock } from "lucide-react";
+import { Shield, Zap, Clock, Sparkles } from "lucide-react";
 import { FloatingOrbs } from "./FloatingOrbs";
 import { GridPattern } from "./GridPattern";
 import { AIAssistant } from "./AIAssistant";
+import { Link } from "react-router-dom";
 
 const trustItems = [
   { icon: Shield, text: "30-Day Money-Back Guarantee" },
@@ -46,32 +47,61 @@ export function HeroSection() {
             initial="hidden"
             animate="visible"
           >
+            {/* AI Badge */}
+            <motion.div
+              variants={itemVariants}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
+            >
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">AI-Powered Research Assistant</span>
+            </motion.div>
 
             {/* Headline */}
             <motion.h1
               variants={itemVariants}
               className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6"
             >
-              The Complete Peptide Playbook AI
+              Ask Anything About Peptides.
               <motion.span 
                 className="block text-gradient mt-2"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
               >
-                Data-Backed Research, Made Simple
+                Get Research-Backed Answers.
               </motion.span>
             </motion.h1>
 
             {/* Subheadline */}
             <motion.p
               variants={itemVariants}
-              className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed"
+              className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed"
             >
-              Your personal AI research assistant that stays on top of the latest peptide science: 
-              breaking news, study updates, and instant answers to any question. No more 
-              endless scrolling. Just ask.
+              Your 24/7 AI research assistant that knows 41+ peptides, their FDA status, 
+              mechanisms, and the latest studies. No more TikTok myths or Reddit speculation. 
+              Just ask.
             </motion.p>
+
+            {/* Stats row */}
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-wrap justify-center lg:justify-start gap-6 mb-8"
+            >
+              <div className="text-center lg:text-left">
+                <p className="text-2xl font-bold text-gradient">41+</p>
+                <p className="text-xs text-muted-foreground">Peptides</p>
+              </div>
+              <div className="h-10 w-px bg-border" />
+              <div className="text-center lg:text-left">
+                <p className="text-2xl font-bold text-gradient">500+</p>
+                <p className="text-xs text-muted-foreground">Studies Referenced</p>
+              </div>
+              <div className="h-10 w-px bg-border" />
+              <div className="text-center lg:text-left">
+                <p className="text-2xl font-bold text-gradient">24/7</p>
+                <p className="text-xs text-muted-foreground">Instant Answers</p>
+              </div>
+            </motion.div>
 
             {/* CTAs */}
             <motion.div
@@ -79,12 +109,13 @@ export function HeroSection() {
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12"
             >
               <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-                <a href="#pricing">
-                  Get Full Access
-                </a>
+                <Link to="/signup">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Try AI Assistant Free
+                </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm">
-                <a href="#product">See What's Inside</a>
+                <a href="#ai-demo">See It In Action</a>
               </Button>
             </motion.div>
 
@@ -109,12 +140,12 @@ export function HeroSection() {
             </motion.div>
           </motion.div>
 
-          {/* Right content - Chat demo */}
+          {/* Right content - Chat demo (visible on all screens now) */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="hidden lg:block"
+            className="hidden md:block"
           >
             <AIAssistant />
           </motion.div>

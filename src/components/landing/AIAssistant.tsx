@@ -1,19 +1,37 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send } from "lucide-react";
+import { Bot, Send, Sparkles, FileText, Scale, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const chatExamples = [
   {
     question: "What's the difference between BPC-157 and TB-500?",
-    answer: "Great question. Both are peptides studied for tissue repair, but they work differently. BPC-157 primarily targets the digestive system and local tissue..."
+    answer: "Great question. Both are peptides studied for tissue repair, but they work differently. **BPC-157** primarily targets the digestive system and local tissue healing, while **TB-500** focuses on systemic tissue repair and cell migration...",
+    capability: "Compare peptides",
+    icon: Scale,
   },
   {
-    question: "Is semaglutide legal to buy online?",
-    answer: "Semaglutide is FDA-approved but requires a prescription. Buying without a prescription is illegal and risky. Legitimate sources require..."
+    question: "Is semaglutide FDA approved?",
+    answer: "✅ **Yes, semaglutide is FDA-approved** under brand names Ozempic, Wegovy, and Rybelsus. It's approved for Type 2 diabetes and chronic weight management. However, compounded versions are NOT FDA-approved...",
+    capability: "FDA status checks",
+    icon: Shield,
   },
   {
     question: "What does the research say about MK-677 for sleep?",
-    answer: "Studies show MK-677 can increase REM sleep and overall sleep quality. A 2-month study found improved sleep duration in elderly subjects..."
+    answer: "Studies show MK-677 can improve sleep quality. A notable 1997 study in *Neuroendocrinology* found it **increased REM sleep by 50%** and improved sleep duration in older adults. However, it may also cause...",
+    capability: "Research summaries",
+    icon: FileText,
+  },
+  {
+    question: "What peptides help with injury recovery?",
+    answer: "Several peptides are studied for recovery: **BPC-157** (tendon/ligament), **TB-500** (muscle/systemic), **GHK-Cu** (skin/wound healing). Research quality varies—BPC-157 has the most animal studies...",
+    capability: "Category guidance",
+    icon: Sparkles,
+  },
+  {
+    question: "Are peptides legal to buy online?",
+    answer: "It's complicated. **FDA-approved peptides** (insulin, semaglutide) require prescriptions. Research peptides sold 'not for human consumption' exist in a gray area. Buying for personal use is technically...",
+    capability: "Legal clarity",
+    icon: Shield,
   },
 ];
 
@@ -23,11 +41,12 @@ export function AIAssistant() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % chatExamples.length);
-    }, 4000);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
   const currentExample = chatExamples[currentIndex];
+  const CurrentIcon = currentExample.icon;
 
   return (
     <motion.div
@@ -39,29 +58,42 @@ export function AIAssistant() {
         transition: { duration: 0.3 }
       }}
       transition={{ delay: 0.2, duration: 0.5 }}
-      className="glass-card p-5 shadow-glow"
+      className="glass-card p-5 shadow-glow glow-border"
       style={{ transformStyle: "preserve-3d", perspective: 1000 }}
     >
       {/* Chat header */}
-      <div className="flex items-center gap-3 mb-5 pb-3 border-b border-border/50">
-        <motion.div 
-          className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center"
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <Bot className="w-4 h-4 text-primary" />
-        </motion.div>
-        <div>
-          <p className="font-medium text-sm">Peptide Assistant</p>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-            <p className="text-xs text-muted-foreground">Online</p>
+      <div className="flex items-center justify-between mb-5 pb-3 border-b border-border/50">
+        <div className="flex items-center gap-3">
+          <motion.div 
+            className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <Bot className="w-4 h-4 text-primary" />
+          </motion.div>
+          <div>
+            <p className="font-medium text-sm">Peptide Playbook AI</p>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+              <p className="text-xs text-muted-foreground">Ready to help</p>
+            </div>
           </div>
         </div>
+        {/* Capability badge */}
+        <motion.div
+          key={currentIndex}
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -10 }}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-xs text-primary"
+        >
+          <CurrentIcon className="w-3 h-3" />
+          <span>{currentExample.capability}</span>
+        </motion.div>
       </div>
 
       {/* Chat messages */}
-      <div className="space-y-3 mb-5 min-h-[140px]">
+      <div className="space-y-3 mb-5 min-h-[160px]">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
@@ -81,7 +113,7 @@ export function AIAssistant() {
             {/* Assistant message */}
             <div className="flex justify-start">
               <div className="bg-muted rounded-2xl rounded-bl-sm px-3 py-2.5 max-w-[90%]">
-                <p className="text-xs text-foreground leading-relaxed">
+                <p className="text-xs text-foreground leading-relaxed whitespace-pre-line">
                   {currentExample.answer}
                   <span className="typing-cursor" />
                 </p>
@@ -95,7 +127,7 @@ export function AIAssistant() {
       <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-3 py-2.5">
         <input
           type="text"
-          placeholder="Ask a question..."
+          placeholder="Ask about any peptide..."
           className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
           disabled
         />
@@ -105,10 +137,11 @@ export function AIAssistant() {
       {/* Dots indicator */}
       <div className="flex justify-center gap-1.5 mt-4">
         {chatExamples.map((_, idx) => (
-          <motion.div
+          <motion.button
             key={idx}
-            className={`w-1.5 h-1.5 rounded-full transition-colors ${
-              idx === currentIndex ? "bg-primary" : "bg-muted-foreground/30"
+            onClick={() => setCurrentIndex(idx)}
+            className={`w-1.5 h-1.5 rounded-full transition-colors cursor-pointer ${
+              idx === currentIndex ? "bg-primary" : "bg-muted-foreground/30 hover:bg-muted-foreground/50"
             }`}
             animate={idx === currentIndex ? { scale: [1, 1.2, 1] } : {}}
             transition={{ duration: 0.3 }}

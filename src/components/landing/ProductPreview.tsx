@@ -1,24 +1,27 @@
 import { motion } from "framer-motion";
-import { Database, Bot, ShieldCheck, Mail } from "lucide-react";
+import { Bot, Database, ShieldCheck, Mail, Sparkles, ArrowRight } from "lucide-react";
 import { FloatingOrbs } from "./FloatingOrbs";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+
+const aiFeatures = [
+  "Compare any two peptides side-by-side",
+  "Check FDA approval status instantly",
+  "Get research summaries with citations",
+  "Understand mechanisms of action",
+];
 
 const products = [
   {
     icon: Database,
     title: "Peptide Database",
-    description: "Look up any peptide and instantly see its research status, FDA classification, mechanism of action, key studies, and safety considerations. Filter by category or research strength.",
+    description: "Look up any peptide and instantly see its research status, FDA classification, mechanism of action, and safety considerations.",
     stats: "41 peptides • Searchable • Filterable",
-  },
-  {
-    icon: Bot,
-    title: "AI Research Assistant",
-    description: "Ask questions about peptide mechanisms, research findings, or safety considerations and get clear, research-based answers. Available 24/7.",
-    stats: "Instant answers • Educational only",
   },
   {
     icon: ShieldCheck,
     title: "Source Evaluation Checklist",
-    description: "Before you buy anything from anyone, run them through this checklist. Know exactly what legitimate sources look like and what sketchy ones do.",
+    description: "Before you buy anything from anyone, run them through this checklist. Know exactly what legitimate sources look like.",
     stats: "5 red flags • Verification steps",
   },
   {
@@ -81,8 +84,98 @@ export function ProductPreview() {
           </p>
         </motion.div>
 
+        {/* Featured AI Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.98 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="max-w-4xl mx-auto mb-8"
+        >
+          <div className="glass-card p-8 glow-border shadow-glow relative overflow-hidden">
+            {/* Gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
+            
+            <div className="relative grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <motion.div 
+                    className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 400 }}
+                  >
+                    <Bot className="w-7 h-7 text-primary" />
+                  </motion.div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-xl font-semibold">AI Research Assistant</h3>
+                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-xs font-medium text-primary">Featured</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">The core of Peptide Playbook AI</p>
+                  </div>
+                </div>
+                
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  Your personal peptide researcher available 24/7. Ask about mechanisms, research status, 
+                  FDA classification, safety considerations, and more. Trained on peer-reviewed literature 
+                  covering 41+ peptides.
+                </p>
+
+                <ul className="space-y-2 mb-6">
+                  {aiFeatures.map((feature, index) => (
+                    <motion.li
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.1 * index }}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span>{feature}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+
+                <Button asChild className="btn-primary-clean group">
+                  <Link to="/signup">
+                    Try AI Assistant
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="hidden md:block">
+                <div className="bg-muted/50 rounded-xl p-4 border border-border/50">
+                  <p className="text-xs text-muted-foreground mb-3">Example questions:</p>
+                  <div className="space-y-2">
+                    {[
+                      "What's the difference between BPC-157 and TB-500?",
+                      "Is semaglutide safe for long-term use?",
+                      "What peptides are FDA approved for weight loss?",
+                      "How does MK-677 affect sleep quality?",
+                    ].map((q, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.2 + i * 0.1 }}
+                        className="bg-background rounded-lg px-3 py-2 text-xs border border-border/30"
+                      >
+                        "{q}"
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Other products grid */}
         <motion.div 
-          className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto"
+          className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
