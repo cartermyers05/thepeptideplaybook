@@ -95,7 +95,7 @@ export function PricingCTA() {
               ))}
             </motion.ul>
 
-            <Link to="/signup" className="w-full">
+            <Link to="/signup" className="w-full relative z-10 block">
               <Button size="lg" className="w-full btn-primary-clean h-12 text-base">
                 <Sparkles className="w-4 h-4 mr-2" />
                 Get AI Access Now
