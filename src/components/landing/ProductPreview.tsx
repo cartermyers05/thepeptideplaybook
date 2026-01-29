@@ -40,9 +40,29 @@ const products = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.98 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.4, ease: "easeOut" as const }
+  },
+};
+
 export function ProductPreview() {
   return (
-    <section id="product" className="py-20 md:py-28 bg-secondary/30">
+    <section id="product" className="py-20 md:py-28 bg-secondary/30 relative section-gradient-top">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -58,27 +78,37 @@ export function ProductPreview() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <motion.div 
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
           {products.map((product, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-card border border-border rounded-xl p-6 hover:shadow-elevated transition-shadow duration-300"
+              variants={cardVariants}
+              className="glass-card p-6 glow-border group"
+              whileHover={{ y: -4 }}
+              transition={{ type: "spring", stiffness: 300 }}
             >
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
+              <motion.div 
+                className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/15 transition-colors"
+                whileHover={{ scale: 1.05 }}
+              >
                 <product.icon className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-3">{product.title}</h3>
+              </motion.div>
+              <h3 className="text-lg font-semibold mb-3 group-hover:text-primary transition-colors">
+                {product.title}
+              </h3>
               <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                 {product.description}
               </p>
               <p className="text-xs font-medium text-primary">{product.stats}</p>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

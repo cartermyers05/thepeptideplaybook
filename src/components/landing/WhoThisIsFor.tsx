@@ -16,59 +16,104 @@ const notForYou = [
   "You think this will replace actual medical advice",
 ];
 
+const listItemVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: { duration: 0.3, ease: "easeOut" as const }
+  },
+};
+
 export function WhoThisIsFor() {
   return (
-    <section className="py-20 md:py-28 bg-secondary/30">
+    <section className="py-20 md:py-28 bg-secondary/30 relative section-gradient-top">
       <div className="container px-4">
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* For you */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="bg-card border border-border rounded-xl p-6 md:p-8"
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="glass-card-success p-6 md:p-8"
           >
             <h3 className="text-xl font-semibold mb-6 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
+              <motion.div 
+                className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center"
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
                 <Check className="w-4 h-4 text-success" />
-              </div>
+              </motion.div>
               This Is For You If...
             </h3>
-            <ul className="space-y-4">
+            <motion.ul 
+              className="space-y-4"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              transition={{ staggerChildren: 0.08, delayChildren: 0.2 }}
+            >
               {forYou.map((item, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <motion.li 
+                  key={index} 
+                  className="flex items-start gap-3"
+                  variants={listItemVariants}
+                >
+                  <motion.div 
+                    className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0 mt-0.5"
+                    whileHover={{ scale: 1.2 }}
+                  >
                     <Check className="w-3 h-3 text-success" />
-                  </div>
+                  </motion.div>
                   <span className="text-muted-foreground">{item}</span>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </motion.div>
 
           {/* Not for you */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="bg-card border border-border rounded-xl p-6 md:p-8"
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="glass-card-destructive p-6 md:p-8"
           >
             <h3 className="text-xl font-semibold mb-6 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
+              <motion.div 
+                className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center"
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
                 <X className="w-4 h-4 text-destructive" />
-              </div>
+              </motion.div>
               Not For You If...
             </h3>
-            <ul className="space-y-4">
+            <motion.ul 
+              className="space-y-4"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              transition={{ staggerChildren: 0.08, delayChildren: 0.2 }}
+            >
               {notForYou.map((item, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <motion.li 
+                  key={index} 
+                  className="flex items-start gap-3"
+                  variants={listItemVariants}
+                >
+                  <motion.div 
+                    className="w-5 h-5 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0 mt-0.5"
+                    whileHover={{ scale: 1.2 }}
+                  >
                     <X className="w-3 h-3 text-destructive" />
-                  </div>
+                  </motion.div>
                   <span className="text-muted-foreground">{item}</span>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </motion.div>
         </div>
       </div>
