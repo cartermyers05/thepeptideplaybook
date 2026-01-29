@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export function useCheckout() {
   const [isLoading, setIsLoading] = useState(false);
+  const redirectingRef = useRef(false);
   const { toast } = useToast();
 
-  const startCheckout = async () => {
+  const startCheckout = useCallback(async () => {
+    if (isLoading || redirectingRef.current) return;
     setIsLoading(true);
     
     try {
@@ -18,6 +20,7 @@ export function useCheckout() {
           description: "You need to be signed in to make a purchase.",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
 
@@ -35,21 +38,24 @@ export function useCheckout() {
       const { url } = response.data;
       
       if (url) {
+        redirectingRef.current = true;
         window.location.href = url;
+        return;
       } else {
         throw new Error("No checkout URL returned");
       }
     } catch (error) {
-      console.error("Checkout error:", error);
-      toast({
-        title: "Checkout failed",
-        description: error instanceof Error ? error.message : "Something went wrong",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      if (!redirectingRef.current) {
+        console.error("Checkout error:", error);
+        toast({
+          title: "Checkout failed",
+          description: error instanceof Error ? error.message : "Something went wrong",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+      }
     }
-  };
+  }, [isLoading, toast]);
 
   return {
     startCheckout,
