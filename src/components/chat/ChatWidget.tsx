@@ -91,7 +91,7 @@ export function ChatWidget({ onClose }: ChatWidgetProps) {
       if (response.error) throw response.error;
 
       // Handle streaming response
-      const reader = response.data.getReader();
+      const reader = response.data.body.getReader();
       const decoder = new TextDecoder();
       let fullContent = "";
 
