@@ -31,25 +31,36 @@ serve(async (req) => {
       );
     }
 
+    // Check if this is a pillar page (comprehensive guide)
+    const isPillar = content_type === "pillar";
+    
+    // Build related articles context for internal linking
+    const relatedArticlesContext = related_articles?.length
+      ? `\n\nIMPORTANT - Internal Links: You MUST include links to these related articles within the content using <a href="/articles/SLUG">anchor text</a> format:\n${related_articles.map((a: { slug: string; title: string }) => `- ${a.title}: /articles/${a.slug}`).join("\n")}`
+      : "";
+
     // Construct the prompt for AI-optimized content generation
-    const prompt = `Generate an AI-search-optimized article about: ${topic}
+    const prompt = `Generate an AI-search-optimized ${isPillar ? "comprehensive pillar page" : "article"} about: ${topic}
 
 Content Type: ${content_type || "guide"}
 Target Keywords: ${target_keywords?.join(", ") || "relevant peptide terms"}
+${relatedArticlesContext}
 
 Requirements:
 1. Title: Write as an exact question someone would ask (e.g., "What is BPC-157 and How Does It Work?")
 2. TL;DR: Provide a direct, comprehensive answer in exactly 100 words - this is what AI search engines extract
-3. Main content: 2,000+ words with:
+3. Main content: ${isPillar ? "3,000+" : "2,000+"} words with:
    - Clear H2 and H3 subheadings using <h2> and <h3> tags
    - Short paragraphs (3-4 sentences max)
    - Bullet lists using <ul> and <li> tags
    - Statistical claims with specific percentages
-   - At least 5 research citations
+   - At least ${isPillar ? "10" : "5"} research citations
    - Bold key terms using <strong> tags
-4. FAQ section: 5 related questions with concise answers
+   ${isPillar ? "- Internal links to related articles using <a href=\"/articles/slug\">text</a> format" : ""}
+4. FAQ section: ${isPillar ? "8-10" : "5"} related questions with concise answers
 5. Tone: Authoritative but accessible, written by an expert
 6. Include: Research citations with PubMed/scientific sources, specific numbers and statistics
+${isPillar ? "7. Structure as a comprehensive hub covering all aspects of the topic with clear sections for each subtopic" : ""}
 
 Format your response as valid JSON with this exact structure:
 {
@@ -58,7 +69,7 @@ Format your response as valid JSON with this exact structure:
   "slug": "url-friendly-slug",
   "meta_description": "SEO meta description under 160 characters",
   "tldr": "Direct answer in exactly 100 words",
-  "full_content": "HTML formatted content with h2, h3, p, ul, li, strong tags",
+  "full_content": "HTML formatted content with h2, h3, p, ul, li, strong, a tags",
   "structured_answer": [
     {"question": "FAQ question 1", "answer": "Concise answer 1"},
     {"question": "FAQ question 2", "answer": "Concise answer 2"}
