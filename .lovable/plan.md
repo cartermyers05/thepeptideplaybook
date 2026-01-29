@@ -1,151 +1,89 @@
 
-# Fix: Require Payment Before Using AI Assistant
+# Remove Free User Access - Redirect Unpaid Users to Checkout
 
 ## The Problem
 
-Users can create an account and immediately access the full AI Assistant without paying because:
-
-1. **Signup flow bypasses payment**: After signup, users go directly to `/dashboard` without being routed through checkout
-2. **Dashboard Home shows full chat**: The main dashboard page (`/dashboard`) embeds `ChatInterface` directly **without checking if the user has paid**
-3. **ProtectedRoute only checks login**: It verifies if someone is logged in, not if they've purchased
-
-### Current Flow (Broken)
-```text
-Homepage → Signup → Account Created → /dashboard → Full AI Access (FREE!)
-```
-
-### Correct Flow
-```text
-Homepage → Signup → Account Created → /checkout → Payment → /dashboard → Full AI Access
-```
-
----
+Currently, unpaid users can still access the dashboard and see an "Upgrade Prompt". The user wants to eliminate this entirely - **no free users should exist in the app**. If someone hasn't paid, they should be redirected to checkout immediately.
 
 ## The Solution
 
-### 1. Update Dashboard Home to Check Payment
+Update the `ProtectedRoute` component to check **both** authentication AND payment status:
+- If not logged in → redirect to `/login`
+- If logged in but not paid → redirect to `/checkout`
+- If logged in AND paid → show the protected content
 
-**File:** `src/pages/dashboard/Home.tsx`
+## File to Modify
 
-The main dashboard page currently shows `ChatInterface` to everyone. We need to:
-- Import `useTier` hook
-- Check if user `isPaid`
-- Show `UpgradePrompt` instead of `ChatInterface` for free users
+### `src/components/auth/ProtectedRoute.tsx`
 
-This mirrors how `ChatPage.tsx` already handles this for the dedicated chat route.
+**Current behavior:**
+- Only checks if user is authenticated
+- Unpaid users can access dashboard pages
 
-### 2. Update Signup Flow to Route to Checkout
-
-**File:** `src/pages/Signup.tsx`
-
-After successful account creation (Step 3), instead of going directly to `/dashboard`, redirect to `/checkout` to complete the purchase.
-
-Change:
-```typescript
-// From:
-navigate("/dashboard");
-
-// To:
-navigate("/checkout");
-```
-
-Also update the welcome message to set expectations:
-```typescript
-// From:
-"Your account is ready. Let's ask your first peptide question."
-
-// To:
-"Your account is ready. Complete your purchase to unlock full access."
-```
-
-And the button text:
-```typescript
-// From:
-"Start Exploring"
-
-// To:
-"Complete Purchase"
-```
-
----
-
-## Technical Details
-
-### Dashboard Home Changes
+**New behavior:**
+- Check authentication first
+- Then check payment status via `useTier`
+- Redirect unpaid users to `/checkout`
 
 ```typescript
-// Add imports
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { useTier } from "@/hooks/useTier";
-import { UpgradePrompt } from "@/components/dashboard/UpgradePrompt";
 
-// Inside component
-const { isPaid } = useTier();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
 
-// Replace ChatInterface with conditional rendering:
-{isPaid ? (
-  <ChatInterface />
-) : (
-  <UpgradePrompt feature="AI Research Assistant" />
-)}
+export function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { user, isLoading: authLoading } = useAuth();
+  const { isPaid, isLoading: tierLoading } = useTier();
+  const location = useLocation();
+
+  // Show loading while checking auth or tier
+  if (authLoading || tierLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse-soft">
+          <div className="w-8 h-8 rounded-lg bg-gradient-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in → go to login
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Logged in but hasn't paid → go to checkout
+  if (!isPaid) {
+    return <Navigate to="/checkout" replace />;
+  }
+
+  // Logged in AND paid → show content
+  return <>{children}</>;
+}
 ```
 
-### Signup Flow Changes
+## Cleanup
 
-The "Welcome" step (Step 3) will:
-- Change button action from `/dashboard` to `/checkout`
-- Update copy to reflect that payment is the next step
-
----
-
-## Files to Modify
-
-| File | Change |
-|------|--------|
-| `src/pages/dashboard/Home.tsx` | Add `useTier` check, show `UpgradePrompt` for free users |
-| `src/pages/Signup.tsx` | Redirect to `/checkout` after signup, update copy |
-
----
+Since unpaid users can no longer reach the dashboard, the `UpgradePrompt` conditional checks in `Home.tsx` become unnecessary (but harmless). We can optionally remove them for cleaner code, but the redirect in `ProtectedRoute` will prevent unpaid access regardless.
 
 ## Result
 
 ### New User Flow
-```text
-┌──────────────────┐
-│  Landing Page    │
-│  "Get Full Access"│
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  Signup Page     │
-│  Create Account  │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  Checkout Page   │ ◄── Payment required here
-│  Pay $67         │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  Thank You Page  │
-│  Payment Success │
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│  Dashboard       │
-│  Full AI Access  │ ◄── Only accessible after payment
-└──────────────────┘
+```
+Homepage → Signup → Checkout (required) → Payment → Dashboard
+```
+
+### Returning Unpaid User (edge case - started signup but didn't pay)
+```
+Login → Redirect to /checkout → Payment → Dashboard
 ```
 
 ### Returning Paid User
-```text
-Login → Dashboard → Full AI Access ✓
+```
+Login → Dashboard ✓
 ```
 
-### Returning Free User (edge case)
-```text
-Login → Dashboard → UpgradePrompt → Checkout → Payment → Full Access
-```
+**No free users can ever access any protected route.**
