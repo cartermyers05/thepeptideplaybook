@@ -46,13 +46,6 @@ export function HeroSection() {
             initial="hidden"
             animate="visible"
           >
-            {/* Badge */}
-            <motion.div variants={itemVariants}>
-              <span className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground bg-secondary/80 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-border/50">
-                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                Updated January 2026
-              </span>
-            </motion.div>
 
             {/* Headline */}
             <motion.h1
