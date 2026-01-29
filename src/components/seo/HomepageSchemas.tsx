@@ -17,7 +17,7 @@ export function HomepageSchemas() {
       "@type": "Offer",
       url: SITE_URL,
       priceCurrency: "USD",
-      price: "167",
+      price: "67",
       availability: "https://schema.org/InStock",
     },
     aggregateRating: {

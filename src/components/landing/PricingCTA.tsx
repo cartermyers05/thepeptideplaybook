@@ -112,6 +112,23 @@ export function PricingCTA() {
               <Shield className="w-4 h-4 text-success" />
               <span>30-day money-back guarantee. No questions asked.</span>
             </motion.div>
+
+            {/* Payment Method Icons */}
+            <motion.div 
+              className="flex items-center justify-center gap-3 mt-4 pt-4 border-t border-border/50"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.6 }}
+            >
+              <span className="text-xs text-muted-foreground">Secure payment via</span>
+              <div className="flex items-center gap-2">
+                <div className="bg-muted/50 rounded px-2 py-1 text-xs font-medium text-muted-foreground">Visa</div>
+                <div className="bg-muted/50 rounded px-2 py-1 text-xs font-medium text-muted-foreground">Mastercard</div>
+                <div className="bg-muted/50 rounded px-2 py-1 text-xs font-medium text-muted-foreground">Amex</div>
+                <div className="bg-muted/50 rounded px-2 py-1 text-xs font-medium text-muted-foreground">Stripe</div>
+              </div>
+            </motion.div>
           </div>
         </motion.div>
 
