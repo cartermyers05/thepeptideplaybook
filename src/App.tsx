@@ -8,12 +8,6 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Chat from "./pages/Chat";
-import History from "./pages/History";
-import Saved from "./pages/Saved";
-import Stats from "./pages/Stats";
-import Referral from "./pages/Referral";
-import Account from "./pages/Account";
 import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import Blog from "./pages/Blog";
@@ -80,16 +74,11 @@ const App = () => (
             <Route path="/dashboard/community" element={<ProtectedRoute><DashboardCommunity /></ProtectedRoute>} />
             <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardSettings /></ProtectedRoute>} />
             
-            {/* Legacy protected routes */}
+            {/* Legacy protected routes - redirects to new dashboard */}
+            <Route path="/chat" element={<ProtectedRoute><DashboardChat /></ProtectedRoute>} />
             <Route path="/news/:slug" element={<ProtectedRoute><NewsDetail /></ProtectedRoute>} />
             <Route path="/admin/generate" element={<ProtectedRoute><ArticleGenerator /></ProtectedRoute>} />
             <Route path="/admin/citations" element={<ProtectedRoute><CitationsDashboard /></ProtectedRoute>} />
-            <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-            <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
-            <Route path="/saved" element={<ProtectedRoute><Saved /></ProtectedRoute>} />
-            <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
-            <Route path="/referral" element={<ProtectedRoute><Referral /></ProtectedRoute>} />
-            <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
             
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
