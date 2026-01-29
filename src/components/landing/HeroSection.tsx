@@ -59,7 +59,7 @@ export function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
               >
-                — Data-Backed Research, Made Simple
+                Data-Backed Research, Made Simple
               </motion.span>
             </motion.h1>
 
@@ -68,8 +68,8 @@ export function HeroSection() {
               variants={itemVariants}
               className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed"
             >
-              Your personal AI research assistant that stays on top of the latest peptide science 
-              — breaking news, study updates, and instant answers to any question. No more 
+              Your personal AI research assistant that stays on top of the latest peptide science: 
+              breaking news, study updates, and instant answers to any question. No more 
               endless scrolling. Just ask.
             </motion.p>
 
@@ -80,7 +80,7 @@ export function HeroSection() {
             >
               <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
                 <a href="#pricing">
-                  Get Full Access — $67
+                  Get Full Access
                 </a>
               </Button>
               <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm">

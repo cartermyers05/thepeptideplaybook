@@ -66,7 +66,7 @@ export function SolutionSection() {
           <div className="space-y-6 text-lg text-muted-foreground leading-relaxed text-left md:text-center mb-10">
             <motion.p variants={itemVariants}>
               Imagine knowing exactly what the research says about BPC-157, semaglutide, 
-              or any peptide you're curious about — not what some guy on Reddit thinks, 
+              or any peptide you're curious about. Not what some guy on Reddit thinks, 
               but what the actual studies show.
             </motion.p>
 
@@ -85,14 +85,14 @@ export function SolutionSection() {
 
             <motion.p variants={itemVariants}>
               It's not medical advice. It's not telling you what to take. It's giving you 
-              the education you need to stop guessing and start understanding — so you 
+              the education you need to stop guessing and start understanding, so you 
               can make informed decisions with your healthcare provider.
             </motion.p>
           </div>
 
           <motion.div variants={itemVariants}>
             <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base">
-              <a href="#pricing">Get Full Access — $67</a>
+              <a href="#pricing">Get Full Access</a>
             </Button>
           </motion.div>
         </motion.div>

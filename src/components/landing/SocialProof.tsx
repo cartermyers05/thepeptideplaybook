@@ -55,7 +55,7 @@ export function SocialProof() {
           
           <div className="text-lg text-muted-foreground leading-relaxed space-y-6 text-left">
             <motion.p variants={itemVariants}>
-              I spent months going down the peptide rabbit hole — TikTok videos, Reddit threads, 
+              I spent months going down the peptide rabbit hole. TikTok videos, Reddit threads, 
               sketchy forums. The more I researched, the more I realized most advice was unreliable 
               at best, dangerous at worst.
             </motion.p>
@@ -63,7 +63,7 @@ export function SocialProof() {
             <motion.p variants={itemVariants}>
               This guide is the resource I wish existed when I started. It's not medical advice. 
               It won't tell you what to take. But it will help you understand what's actually 
-              going on — so you can make informed decisions with real professionals.
+              going on so you can make informed decisions with real professionals.
             </motion.p>
           </div>
           

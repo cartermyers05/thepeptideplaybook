@@ -6,7 +6,7 @@ const products = [
   {
     icon: BookOpen,
     title: "The Complete Guide",
-    description: "80+ pages covering every major peptide category — GLP-1s, recovery peptides, growth hormone secretagogues, and more. Each section explains mechanisms, research status, FDA classification, and what the studies actually show.",
+    description: "80+ pages covering every major peptide category: GLP-1s, recovery peptides, growth hormone secretagogues, and more. Each section explains mechanisms, research status, FDA classification, and what the studies actually show.",
     stats: "8 chapters • 82 pages • Downloadable PDF",
   },
   {
@@ -30,7 +30,7 @@ const products = [
   {
     icon: ShieldCheck,
     title: "Source Evaluation Checklist",
-    description: "Before you buy anything from anyone, run them through this checklist. Know exactly what legitimate sources look like — and what sketchy ones do.",
+    description: "Before you buy anything from anyone, run them through this checklist. Know exactly what legitimate sources look like and what sketchy ones do.",
     stats: "5 red flags • Verification steps",
   },
   {
@@ -89,7 +89,7 @@ export function ProductPreview() {
             Here's Exactly What You Get
           </h2>
           <p className="text-lg text-muted-foreground">
-            Everything you need to understand peptides — in one place.
+            Everything you need to understand peptides. All in one place.
           </p>
         </motion.div>
 

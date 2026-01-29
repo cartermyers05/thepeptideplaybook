@@ -19,7 +19,7 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="Peptide Playbook — The Research-Based Guide to Understanding Peptides"
+        title="Peptide Playbook | The Research-Based Guide to Understanding Peptides"
         description="Stop taking peptide advice from TikTok. Get the research-based guide covering BPC-157, semaglutide, TB-500 and more. Know what's FDA-approved, what's experimental, and what to ask your doctor."
       />
       <HomepageSchemas />
