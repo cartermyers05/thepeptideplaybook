@@ -482,6 +482,42 @@ export type Database = {
         }
         Relationships: []
       }
+      research_digests: {
+        Row: {
+          created_at: string
+          date: string
+          full_content: string
+          highlights: Json
+          id: string
+          month: string
+          published_at: string | null
+          sources: Json | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          full_content: string
+          highlights?: Json
+          id?: string
+          month: string
+          published_at?: string | null
+          sources?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          full_content?: string
+          highlights?: Json
+          id?: string
+          month?: string
+          published_at?: string | null
+          sources?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
