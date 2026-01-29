@@ -1,128 +1,82 @@
 
-# Fix Misleading "Try Free" Language on Landing Page
+# Fix Streaming Response Bug in ChatbotDemo and ChatWidget
 
-## The Problem
+## Problem
 
-The landing page has confusing messaging around "free" that makes it seem like users can try the full product for free:
+Both `ChatbotDemo.tsx` and `ChatWidget.tsx` have the same bug:
 
-1. **Hero button says "Try AI Assistant Free"** → Goes to `/signup` (a paid page)
-2. **ChatbotDemo badge says "Try It Free"** → This IS the controlled demo, but the language is misleading
+```
+TypeError: res.data.getReader is not a function
+```
 
-Users seeing "Try AI Assistant Free" expect to actually try it free, not land on a signup/payment page.
+## Root Cause
+
+When the Supabase Edge Function returns a streaming response with `Content-Type: text/event-stream`, the `supabase.functions.invoke()` method returns the full `Response` object as `data` (see lines 182-183 in `@supabase/functions-js/src/FunctionsClient.ts`).
+
+The code tries to call `res.data.getReader()`, but `Response` objects don't have a `getReader()` method - the `ReadableStream` is accessed via `Response.body`.
+
+**Current (broken):**
+```typescript
+const reader = res.data.getReader();
+```
+
+**Correct:**
+```typescript
+const reader = res.data.body.getReader();
+```
 
 ---
 
-## The Solution
+## Files to Fix
 
-### 1. Update Hero CTA Button
+### 1. `src/components/landing/ChatbotDemo.tsx`
 
-Change from:
-```
-"Try AI Assistant Free" → links to /signup
-```
-
-To:
-```
-"Get Full Access" → links to /signup
-```
-
-OR point to the demo section:
-```
-"Try Demo" → links to #demo
-```
-
-**Recommended approach:** Change the primary CTA to point to the demo section (`#demo`) so users can actually "try" something, then update the text to match.
-
-| Current | Proposed |
-|---------|----------|
-| "Try AI Assistant Free" → `/signup` | "See It In Action" → `#demo` |
-
-The second button "See What's Included" stays as is, pointing to `#product`.
-
-### 2. Update ChatbotDemo Badge
-
-Change the badge from:
-```
-"Try It Free"
-```
-
-To:
-```
-"Live Demo"
-```
-
-This correctly sets expectations - it's a demo, not the full product for free.
-
----
-
-## Files to Modify
-
-### 1. `src/components/landing/HeroSection.tsx`
-
-**Line 111-116:**
-```tsx
+**Line 57:**
+```typescript
 // Change from:
-<Link to="/signup">
-  <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-    <Sparkles className="w-4 h-4 mr-2" />
-    Try AI Assistant Free
-  </Button>
-</Link>
+const reader = res.data.getReader();
 
 // To:
-<a href="#demo">
-  <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-    <Sparkles className="w-4 h-4 mr-2" />
-    See It In Action
-  </Button>
-</a>
+const reader = res.data.body.getReader();
 ```
 
-This makes the primary CTA scroll to the demo section where users can actually interact with the bot.
+### 2. `src/components/chat/ChatWidget.tsx`
 
-### 2. `src/components/landing/ChatbotDemo.tsx`
-
-**Line 106-109:**
-```tsx
+**Line 94:**
+```typescript
 // Change from:
-<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-  <Bot className="w-4 h-4" />
-  Try It Free
-</div>
+const reader = response.data.getReader();
 
 // To:
-<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-  <Bot className="w-4 h-4" />
-  Live Demo
-</div>
+const reader = response.data.body.getReader();
 ```
 
 ---
 
-## Updated User Flow
+## Technical Explanation
 
+The supabase-js library (`@supabase/functions-js`) handles streaming responses specially:
+
+```typescript
+// From FunctionsClient.ts lines 182-183
+} else if (responseType === 'text/event-stream') {
+  data = response  // Returns the full Response object
+}
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  HERO SECTION                                               │
-│                                                             │
-│  [See It In Action] ─────────────► Scrolls to #demo         │
-│  [See What's Included] ──────────► Scrolls to #product      │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│  DEMO SECTION (ChatbotDemo)                                 │
-│                                                             │
-│  Badge: "Live Demo"                                         │
-│  User picks 1 of 4 questions → Gets real AI response        │
-│  After response → Paywall: "Get Full Access — $67"          │
-└─────────────────────────────────────────────────────────────┘
-```
+
+The `Response` object has:
+- `response.ok` - boolean
+- `response.status` - HTTP status
+- `response.headers` - Headers object
+- `response.body` - ReadableStream ← **This is what we need**
+
+So to get the stream reader, we must access `res.data.body.getReader()`.
 
 ---
 
-## Result
+## Summary
 
-- **No more "free" confusion** - Language accurately describes what happens
-- **Better conversion funnel** - Hero CTA leads to demo where users experience the product, then see the paywall
-- **Controlled demo intact** - Users can only ask 1 of 4 questions, then hit the paywall
+| File | Line | Fix |
+|------|------|-----|
+| ChatbotDemo.tsx | 57 | `res.data.getReader()` → `res.data.body.getReader()` |
+| ChatWidget.tsx | 94 | `response.data.getReader()` → `response.data.body.getReader()` |
