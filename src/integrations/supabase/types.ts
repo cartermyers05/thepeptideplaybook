@@ -189,6 +189,91 @@ export type Database = {
         }
         Relationships: []
       }
+      citation_monitoring: {
+        Row: {
+          ai_engine: string
+          article_id: string | null
+          checked_at: string
+          citation_position: number | null
+          competing_sources: string[] | null
+          id: string
+          is_cited: boolean
+          query: string
+        }
+        Insert: {
+          ai_engine: string
+          article_id?: string | null
+          checked_at?: string
+          citation_position?: number | null
+          competing_sources?: string[] | null
+          id?: string
+          is_cited?: boolean
+          query: string
+        }
+        Update: {
+          ai_engine?: string
+          article_id?: string | null
+          checked_at?: string
+          citation_position?: number | null
+          competing_sources?: string[] | null
+          id?: string
+          is_cited?: boolean
+          query?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "citation_monitoring_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_calendar: {
+        Row: {
+          article_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          priority: string
+          query_cluster: string
+          status: string
+          target_query: string
+          updated_at: string
+        }
+        Insert: {
+          article_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          priority?: string
+          query_cluster: string
+          status?: string
+          target_query: string
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          priority?: string
+          query_cluster?: string
+          status?: string
+          target_query?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_calendar_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           created_at: string
