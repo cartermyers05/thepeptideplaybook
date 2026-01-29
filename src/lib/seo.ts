@@ -108,6 +108,7 @@ export const CONTENT_TYPE_LABELS: Record<string, string> = {
   "question-answer": "Q&A",
   comparison: "Comparison",
   guide: "Guide",
+  pillar: "Complete Guide",
 };
 
 /**
