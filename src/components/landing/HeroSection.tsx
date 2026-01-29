@@ -59,14 +59,14 @@ export function HeroSection() {
               variants={itemVariants}
               className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6"
             >
-              Everything You Need to Know About Peptides
+              What 4,200+ Members Know About Peptides
               <motion.span 
                 className="block text-gradient mt-2"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
               >
-                — Without the TikTok BS
+                — That Reddit and TikTok Won't Tell You
               </motion.span>
             </motion.h1>
 
