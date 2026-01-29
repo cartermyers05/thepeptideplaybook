@@ -27,6 +27,37 @@ function calculateReadTime(content: string): number {
   return Math.max(1, Math.ceil(wordCount / 200));
 }
 
+function FreshnessIndicator({ latestDate }: { latestDate: string }) {
+  const now = new Date();
+  const articleDate = new Date(latestDate);
+  const diffMs = now.getTime() - articleDate.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  let label: string;
+  let dotColor: string;
+
+  if (diffDays === 0) {
+    label = "Updated today";
+    dotColor = "bg-green-500";
+  } else if (diffDays === 1) {
+    label = "Updated yesterday";
+    dotColor = "bg-green-500";
+  } else if (diffDays <= 7) {
+    label = `Updated ${diffDays} days ago`;
+    dotColor = "bg-yellow-500";
+  } else {
+    label = `Updated ${diffDays} days ago`;
+    dotColor = "bg-muted-foreground";
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+      <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+      {label}
+    </div>
+  );
+}
+
 interface CompactNewsCardProps {
   article: NewsArticle;
   index: number;
@@ -161,18 +192,23 @@ export default function QuickNewsPanel() {
   return (
     <div className="h-full flex flex-col rounded-xl border border-border bg-card overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Newspaper className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-sm">Latest News</h3>
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <Newspaper className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-sm">Latest News</h3>
+          </div>
+          <Link 
+            to="/dashboard/digest" 
+            className="text-xs text-primary hover:underline flex items-center gap-1"
+          >
+            View all
+            <ArrowRight className="w-3 h-3" />
+          </Link>
         </div>
-        <Link 
-          to="/dashboard/digest" 
-          className="text-xs text-primary hover:underline flex items-center gap-1"
-        >
-          View all
-          <ArrowRight className="w-3 h-3" />
-        </Link>
+        {articles && articles.length > 0 && (
+          <FreshnessIndicator latestDate={articles[0].published_at} />
+        )}
       </div>
 
       {/* Content */}

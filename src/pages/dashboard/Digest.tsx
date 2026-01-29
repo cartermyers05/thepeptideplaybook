@@ -2,22 +2,23 @@ import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useTier } from "@/hooks/useTier";
 import { UpgradePrompt } from "@/components/dashboard/UpgradePrompt";
-import { Mail, Calendar, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import ReactMarkdown from "react-markdown";
+import { useDigests, type ResearchDigest } from "@/hooks/useDigests";
+import { DigestCard } from "@/components/dashboard/DigestCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FileText } from "lucide-react";
 
-const digests = [
+// Fallback hardcoded digests for when database is empty
+const fallbackDigests: ResearchDigest[] = [
   {
     id: "jan-2026",
     month: "January 2026",
-    date: "Jan 1, 2026",
+    date: "2026-01-01",
     highlights: [
       "New Phase 3 trial data on retatrutide shows 24% weight loss",
       "FDA removes ipamorelin and CJC-1295 from Category 2 list",
       "Study on BPC-157 mechanism reveals VEGF pathway modulation",
     ],
-    fullContent: `## FDA GLP-1 Compounding Guidance Update
+    full_content: `## FDA GLP-1 Compounding Guidance Update
 
 The FDA released updated guidance on January 15, 2026 regarding compounded semaglutide and tirzepatide. Key takeaways:
 
@@ -61,17 +62,19 @@ New research from the University of Zagreb reveals:
       { title: "FDA Guidance Document", url: "https://www.fda.gov" },
       { title: "TRIUMPH-3 Trial (ClinicalTrials.gov)", url: "https://clinicaltrials.gov" },
     ],
+    published_at: "2026-01-01T00:00:00Z",
+    created_at: "2026-01-01T00:00:00Z",
   },
   {
     id: "dec-2025",
     month: "December 2025",
-    date: "Dec 1, 2025",
+    date: "2025-12-01",
     highlights: [
       "Tirzepatide SURMOUNT-OSA trial shows sleep apnea improvements",
       "New safety data on long-term GLP-1 use published",
       "Research review: peptides for tendon repair",
     ],
-    fullContent: `## Tirzepatide SURMOUNT-OSA Results
+    full_content: `## Tirzepatide SURMOUNT-OSA Results
 
 Major findings from the sleep apnea trial:
 
@@ -114,64 +117,14 @@ Summary of current evidence:
       { title: "SURMOUNT-OSA Trial", url: "https://clinicaltrials.gov" },
       { title: "NEJM Long-term Safety", url: "https://nejm.org" },
     ],
-  },
-  {
-    id: "nov-2025",
-    month: "November 2025",
-    date: "Nov 1, 2025",
-    highlights: [
-      "FDA guidance update on compounding pharmacies",
-      "Semaglutide cardiovascular benefit confirmed in SELECT trial",
-      "Emerging research on SS-31 for mitochondrial health",
-    ],
-    fullContent: `## FDA Compounding Pharmacy Guidance
-
-Key regulatory updates:
-
-- 503A pharmacies face stricter limitations
-- 503B outsourcing facilities gain more flexibility
-- Interstate shipping rules clarified
-
-### Action Items
-
-1. Verify your pharmacy's 503A vs 503B status
-2. Confirm compliance with new guidelines
-3. Request updated documentation
-
----
-
-## SELECT Trial Cardiovascular Results
-
-Semaglutide shows 20% reduction in major cardiovascular events:
-
-- Heart attack, stroke, and cardiovascular death all reduced
-- Benefits independent of weight loss
-- FDA considering label expansion
-
-### Who Benefits Most
-
-Patients with established cardiovascular disease and obesity showed the greatest benefit.
-
----
-
-## SS-31 (Elamipretide) Research
-
-Emerging mitochondrial peptide showing promise:
-
-- Targets cardiolipin in mitochondrial membrane
-- Phase 2 trials in heart failure underway
-- Potential applications in aging research
-
-**Status**: Investigational only. Not available outside clinical trials.`,
-    sources: [
-      { title: "FDA Compounding Guidance", url: "https://www.fda.gov" },
-      { title: "SELECT Trial Results", url: "https://nejm.org" },
-    ],
+    published_at: "2025-12-01T00:00:00Z",
+    created_at: "2025-12-01T00:00:00Z",
   },
 ];
 
 export default function Digest() {
   const { isPaid } = useTier();
+  const { data: dbDigests, isLoading } = useDigests();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   if (!isPaid) {
@@ -181,6 +134,9 @@ export default function Digest() {
       </DashboardLayout>
     );
   }
+
+  // Use database digests if available, otherwise fall back to hardcoded
+  const digests = dbDigests && dbDigests.length > 0 ? dbDigests : fallbackDigests;
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -198,83 +154,46 @@ export default function Digest() {
           </p>
         </div>
 
-        <div className="space-y-6">
-          {digests.map((digest, i) => (
-            <div key={digest.id} className="rounded-xl border border-border bg-card overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Mail className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{digest.month} Digest</h3>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Calendar className="w-3 h-3" /> {digest.date}
-                      </p>
-                    </div>
+        {isLoading ? (
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-xl border border-border bg-card p-6">
+                <div className="flex items-start gap-3 mb-4">
+                  <Skeleton className="w-10 h-10 rounded-lg" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-5 w-40" />
+                    <Skeleton className="h-3 w-24" />
                   </div>
-                  {i === 0 && (
-                    <Badge className="bg-primary/10 text-primary">Latest</Badge>
-                  )}
                 </div>
-
-                <ul className="space-y-2 mb-4">
-                  {digest.highlights.map((highlight, j) => (
-                    <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span>
-                      {highlight}
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  variant="ghost"
-                  className="text-sm text-primary hover:text-primary p-0 h-auto"
-                  onClick={() => toggleExpand(digest.id)}
-                >
-                  {expandedId === digest.id ? (
-                    <>
-                      Hide full digest <ChevronUp className="w-4 h-4 ml-1" />
-                    </>
-                  ) : (
-                    <>
-                      Read full digest <ChevronDown className="w-4 h-4 ml-1" />
-                    </>
-                  )}
-                </Button>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-5/6" />
+                </div>
               </div>
-
-              {expandedId === digest.id && (
-                <div className="border-t border-border bg-muted/30 p-6">
-                  <div className="prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-li:text-muted-foreground">
-                    <ReactMarkdown>{digest.fullContent}</ReactMarkdown>
-                  </div>
-
-                  {digest.sources.length > 0 && (
-                    <div className="mt-6 pt-4 border-t border-border">
-                      <p className="text-xs font-medium text-muted-foreground mb-2">Sources</p>
-                      <div className="flex flex-wrap gap-2">
-                        {digest.sources.map((source, idx) => (
-                          <a
-                            key={idx}
-                            href={source.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-primary hover:underline flex items-center gap-1"
-                          >
-                            {source.title}
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : digests.length === 0 ? (
+          <div className="rounded-xl border border-border bg-card p-12 text-center">
+            <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="font-semibold text-lg mb-2">No digests yet</h3>
+            <p className="text-muted-foreground text-sm">
+              Monthly research digests will appear here once published.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {digests.map((digest, i) => (
+              <DigestCard
+                key={digest.id}
+                digest={digest}
+                isLatest={i === 0}
+                isExpanded={expandedId === digest.id}
+                onToggle={() => toggleExpand(digest.id)}
+              />
+            ))}
+          </div>
+        )}
 
         <div className="mt-8 p-6 rounded-xl bg-muted/50 text-center">
           <p className="text-sm text-muted-foreground">
