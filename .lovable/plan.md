@@ -1,82 +1,41 @@
 
-# Fix Streaming Response Bug in ChatbotDemo and ChatWidget
+# Remove Duplicate "Research Backed Answers" Text from Hero H1
 
-## Problem
+## The Issue
 
-Both `ChatbotDemo.tsx` and `ChatWidget.tsx` have the same bug:
+The hero H1 currently has duplicate text - "Get Research Backed Answers" appears twice:
+1. Once in black (plain text)
+2. Once with the gradient styling (inside a motion.span)
 
-```
-TypeError: res.data.getReader is not a function
-```
+## File to Modify
 
-## Root Cause
+### `src/components/landing/HeroSection.tsx`
 
-When the Supabase Edge Function returns a streaming response with `Content-Type: text/event-stream`, the `supabase.functions.invoke()` method returns the full `Response` object as `data` (see lines 182-183 in `@supabase/functions-js/src/FunctionsClient.ts`).
+**Lines 68-79** - Remove the plain text "Get Research Backed Answers" while keeping the gradient version:
 
-The code tries to call `res.data.getReader()`, but `Response` objects don't have a `getReader()` method - the `ReadableStream` is accessed via `Response.body`.
+```tsx
+// Current (broken):
+<motion.h1 ...>
+  Ask Anything About Peptides
+  Get Research Backed Answers        ← REMOVE THIS LINE
+  <motion.span className="block text-gradient mt-2">
+    Get Research Backed Answers      ← KEEP THIS (gradient version)
+  </motion.span>
+</motion.h1>
 
-**Current (broken):**
-```typescript
-const reader = res.data.getReader();
-```
-
-**Correct:**
-```typescript
-const reader = res.data.body.getReader();
-```
-
----
-
-## Files to Fix
-
-### 1. `src/components/landing/ChatbotDemo.tsx`
-
-**Line 57:**
-```typescript
-// Change from:
-const reader = res.data.getReader();
-
-// To:
-const reader = res.data.body.getReader();
+// Fixed:
+<motion.h1 ...>
+  Ask Anything About Peptides
+  <motion.span className="block text-gradient mt-2">
+    Get Research Backed Answers
+  </motion.span>
+</motion.h1>
 ```
 
-### 2. `src/components/chat/ChatWidget.tsx`
+## Result
 
-**Line 94:**
-```typescript
-// Change from:
-const reader = response.data.getReader();
+The H1 will display:
+- "Ask Anything About Peptides" (default text color)
+- "Get Research Backed Answers" (gradient text, animated in)
 
-// To:
-const reader = response.data.body.getReader();
-```
-
----
-
-## Technical Explanation
-
-The supabase-js library (`@supabase/functions-js`) handles streaming responses specially:
-
-```typescript
-// From FunctionsClient.ts lines 182-183
-} else if (responseType === 'text/event-stream') {
-  data = response  // Returns the full Response object
-}
-```
-
-The `Response` object has:
-- `response.ok` - boolean
-- `response.status` - HTTP status
-- `response.headers` - Headers object
-- `response.body` - ReadableStream ← **This is what we need**
-
-So to get the stream reader, we must access `res.data.body.getReader()`.
-
----
-
-## Summary
-
-| File | Line | Fix |
-|------|------|-----|
-| ChatbotDemo.tsx | 57 | `res.data.getReader()` → `res.data.body.getReader()` |
-| ChatWidget.tsx | 94 | `response.data.getReader()` → `response.data.body.getReader()` |
+No more duplicate black text.
