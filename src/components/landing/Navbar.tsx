@@ -35,7 +35,7 @@ export function Navbar() {
           <div className="flex items-center justify-between h-16 md:h-18">
             {/* Wordmark */}
             <Link to="/" className="font-semibold text-lg tracking-tight">
-              Peptide Playbook
+              Peptide Playbook AI
             </Link>
 
             {/* Desktop nav */}

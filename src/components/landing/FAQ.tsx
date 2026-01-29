@@ -9,11 +9,11 @@ import {
 const faqs = [
   {
     question: "Is this medical advice?",
-    answer: "No. Peptide Playbook is educational content based on published research. It explains what studies show about mechanisms, safety, and research status. It does not tell you what to take, how much to take, or where to buy. Always work with a healthcare provider for medical decisions.",
+    answer: "No. Peptide Playbook AI is educational content based on published research. It explains what studies show about mechanisms, safety, and research status. It does not tell you what to take, how much to take, or where to buy. Always work with a healthcare provider for medical decisions.",
   },
   {
     question: "How is this different from free information online?",
-    answer: "Free information is scattered, often wrong, and usually trying to sell you something. Peptide Playbook organizes verified research into one place, cites sources, stays updated with FDA changes, and doesn't have an agenda to sell you peptides.",
+    answer: "Free information is scattered, often wrong, and usually trying to sell you something. Peptide Playbook AI organizes verified research into one place, cites sources, stays updated with FDA changes, and doesn't have an agenda to sell you peptides.",
   },
   {
     question: "What if I'm not satisfied?",

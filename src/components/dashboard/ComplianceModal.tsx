@@ -104,7 +104,7 @@ export default function ComplianceModal({ onAccept }: ComplianceModalProps) {
           <DialogHeader>
             <DialogTitle className="text-xl">Before You Begin</DialogTitle>
             <DialogDescription className="text-base pt-2">
-              PeptideGPT is an educational research tool that provides information based on published scientific literature.
+              Peptide Playbook AI is an educational research tool that provides information based on published scientific literature.
             </DialogDescription>
           </DialogHeader>
 

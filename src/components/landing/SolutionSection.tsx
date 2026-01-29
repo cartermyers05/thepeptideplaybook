@@ -80,7 +80,7 @@ export function SolutionSection() {
               variants={itemVariants}
               className="text-foreground font-semibold text-xl"
             >
-              That's what Peptide Playbook gives you.
+              That's what Peptide Playbook AI gives you.
             </motion.p>
 
             <motion.p variants={itemVariants}>

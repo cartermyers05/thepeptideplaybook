@@ -20,7 +20,7 @@ export default function Blog() {
   return (
     <>
       <SEOHead
-        title="Peptide Research & Education Blog | Peptide Playbook"
+        title="Peptide Research & Education Blog | Peptide Playbook AI"
         description="Research-based articles on peptides, FDA regulations, and the latest in peptide science. No hype, no bro science — just peer-reviewed information."
         canonical="/blog"
       />

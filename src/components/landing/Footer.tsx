@@ -6,7 +6,7 @@ export function Footer() {
       <div className="container px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
           <div>
-            <p className="text-background font-semibold text-lg">Peptide Playbook</p>
+            <p className="text-background font-semibold text-lg">Peptide Playbook AI</p>
             <p className="text-sm text-muted-foreground">Educational content. Not medical advice.</p>
           </div>
 
@@ -31,11 +31,11 @@ export function Footer() {
 
         <div className="border-t border-muted-foreground/20 pt-8">
           <p className="text-xs text-muted-foreground text-center max-w-2xl mx-auto mb-4">
-            Peptide Playbook provides educational information based on published research. 
+            Peptide Playbook AI provides educational information based on published research. 
             It is not medical advice and does not replace consultation with a healthcare provider.
           </p>
           <p className="text-xs text-muted-foreground text-center">
-            © {new Date().getFullYear()} Peptide Playbook. All rights reserved.
+            © {new Date().getFullYear()} Peptide Playbook AI. All rights reserved.
           </p>
         </div>
       </div>

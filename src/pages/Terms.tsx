@@ -7,8 +7,8 @@ export default function Terms() {
   return (
     <>
       <SEOHead
-        title="Terms of Service | Peptide Playbook"
-        description="Terms of Service for Peptide Playbook digital products and website usage."
+        title="Terms of Service | Peptide Playbook AI"
+        description="Terms of Service for Peptide Playbook AI digital products and website usage."
         canonical="/terms"
         noIndex
       />
@@ -26,12 +26,12 @@ export default function Terms() {
 
               <h2>1. Agreement to Terms</h2>
               <p>
-                By accessing or using the Peptide Playbook website and digital products ("Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use the Service.
+                By accessing or using the Peptide Playbook AI website and digital products ("Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use the Service.
               </p>
 
               <h2>2. Description of Service</h2>
               <p>
-                Peptide Playbook provides educational digital content about peptide research, FDA regulations, and related topics. The Service includes:
+                Peptide Playbook AI provides educational digital content about peptide research, FDA regulations, and related topics. The Service includes:
               </p>
               <ul>
                 <li>Digital guide (PDF and online access)</li>
@@ -46,7 +46,7 @@ export default function Terms() {
 
               <h2>4. Digital Product Delivery</h2>
               <p>
-                Upon purchase, you will receive immediate digital access to the Peptide Playbook. This is a digital product; no physical items will be shipped. Access is provided through download links and/or online platform access.
+                Upon purchase, you will receive immediate digital access to the Peptide Playbook AI platform. This is a digital product; no physical items will be shipped. Access is provided through download links and/or online platform access.
               </p>
 
               <h2>5. Refund Policy</h2>
@@ -56,7 +56,7 @@ export default function Terms() {
 
               <h2>6. Intellectual Property</h2>
               <p>
-                All content included in the Service, including text, graphics, logos, and digital downloads, is the property of Peptide Playbook and is protected by copyright laws. You may not:
+                All content included in the Service, including text, graphics, logos, and digital downloads, is the property of Peptide Playbook AI and is protected by copyright laws. You may not:
               </p>
               <ul>
                 <li>Reproduce or distribute the content without permission</li>
@@ -81,7 +81,7 @@ export default function Terms() {
 
               <h2>9. Limitation of Liability</h2>
               <p>
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, PEPTIDE PLAYBOOK SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES.
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, PEPTIDE PLAYBOOK AI SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES.
               </p>
 
               <h2>10. Disclaimer of Warranties</h2>

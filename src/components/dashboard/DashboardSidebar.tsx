@@ -55,7 +55,7 @@ export function DashboardSidebar() {
         {/* Header */}
         <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
           {!collapsed && (
-            <span className="font-semibold text-sidebar-foreground">Peptide Playbook</span>
+            <span className="font-semibold text-sidebar-foreground">Peptide Playbook AI</span>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
