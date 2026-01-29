@@ -1,214 +1,234 @@
 
 
-# Dashboard Redesign Implementation Plan
+# Single Tier Pricing Implementation ($67 Full Access)
 
 ## Overview
 
-Replace the current basic dashboard with an enhanced, modern design featuring:
-- Hero welcome section with tier badge and quick stats
-- Visual feature cards with tier-based access indicators
-- Free user upgrade banner with gradient styling
-- Recent updates and suggested actions sections
+Simplify the entire pricing structure from 5 options (3 tiers + 2 subscriptions) down to **one $67 one-time payment** for full access. This removes decision paralysis and simplifies both the codebase and user experience.
 
 ---
 
-## Changes Summary
+## Current State vs. New State
 
-| Task | File | Effort |
-|------|------|--------|
-| Replace dashboard component | `src/pages/dashboard/Home.tsx` | Main work |
-| Add `profile` to useAuth | `src/hooks/useAuth.tsx` | Small update |
-| Update index.css | `src/index.css` | Add grain animation |
-
----
-
-## Implementation Details
-
-### 1. Update useAuth Hook
-
-**File:** `src/hooks/useAuth.tsx`
-
-The new dashboard expects `profile` from `useAuth()`, but currently useAuth only provides `user`, `session`, `isLoading`, and `signOut`. 
-
-**Solution:** Instead of modifying useAuth, the new dashboard should use the existing pattern with `useProfile()` and `useTier()` hooks separately. This maintains the current architecture.
-
-**Changes to the provided code:**
-- Import `useProfile` and `useTier` instead of expecting `profile` from `useAuth`
-- Use `profile?.tier` via the existing hooks
+| Current | New |
+|---------|-----|
+| 3 one-time tiers ($67, $197, $497) | 1 price ($67) |
+| 2 subscriptions ($29/mo, $247/yr) | None |
+| 4 tier levels (free, starter, pro, insider) | 2 tier levels (free, member) |
+| Tier-gated features in dashboard | All features unlocked for members |
+| "PRO" badges and lock icons | Clean UI, no badges |
 
 ---
 
-### 2. Replace Dashboard Component
+## Stripe Setup
 
+**Existing Price to Use:** `price_1SuiuLKivWYlZk5KLQmOGU1S` ($67, one-time)
+
+This is the current Starter price which is already $67. We'll repurpose it for "Full Access."
+
+No new Stripe products needed - we'll use the existing price ID.
+
+---
+
+## Files to Modify
+
+### 1. Landing Page Pricing Section
+**File:** `src/components/landing/PricingSection.tsx`
+
+Replace 3-tier grid with single centered card:
+- Header: "Full Access"
+- Price: $67 one-time
+- Features list: All 8 features combined (Guide, Database, AI, Scripts, Checklist, Digest, Lifetime Updates, Email Support)
+- Single CTA: "Get Instant Access" linking to `/checkout`
+- Trust badges: SSL, Stripe, 30-day refund
+- Remove subscription link at bottom
+
+### 2. Pricing Page
+**File:** `src/pages/Pricing.tsx`
+
+Complete redesign:
+- Single pricing card centered on page
+- Full feature breakdown with descriptions
+- FAQ section (Is this a subscription? What if not satisfied? Is this medical advice?)
+- Final CTA section
+- Remove all tier/subscription options
+
+### 3. FinalCTA Section
+**File:** `src/components/landing/FinalCTA.tsx`
+
+Replace 3-tier summary with single offer:
+- Simple headline: "Ready to Actually Understand Peptides?"
+- Single price display: $67
+- One CTA button: "Get Full Access — $67"
+- Trust line: "One-time payment • Lifetime access • 30-day guarantee"
+
+### 4. Checkout Flow
+**File:** `src/pages/Checkout.tsx`
+
+Simplify to single product checkout:
+- Remove `:tier` URL parameter logic
+- Always checkout for "member" tier
+- Show order summary with all features included
+- Clean, single-product checkout experience
+
+**File:** `src/App.tsx`
+
+Change route from `/checkout/:tier` to just `/checkout`
+
+### 5. useCheckout Hook
+**File:** `src/hooks/useCheckout.ts`
+
+Simplify checkout:
+- Remove `CheckoutTier` type with multiple options
+- Single `startCheckout()` function (no tier parameter)
+- Always use "member" tier
+
+### 6. Create Checkout Edge Function
+**File:** `supabase/functions/create-checkout/index.ts`
+
+Simplify:
+- Remove `PRICE_IDS` mapping (just one price)
+- Remove `TIER_MAP` (always "member")
+- Hardcode price ID: `price_1SuiuLKivWYlZk5KLQmOGU1S`
+- Always mode: "payment" (no subscriptions)
+- Metadata tier: "member"
+
+### 7. Stripe Webhook
+**File:** `supabase/functions/stripe-webhook/index.ts`
+
+Simplify:
+- Remove subscription handling (customer.subscription.updated, deleted)
+- checkout.session.completed → always set tier to "member"
+- Remove subscription_status updates
+
+### 8. useTier Hook
+**File:** `src/hooks/useTier.ts`
+
+Simplify tier system:
+- Change type from `"free" | "starter" | "pro" | "insider"` to `"free" | "member"`
+- Remove individual feature access flags (everyone gets everything)
+- Keep `isPaid` check: `tier === "member"`
+- Remove `hasAccess()` function (not needed)
+
+### 9. Dashboard Home
 **File:** `src/pages/dashboard/Home.tsx`
 
-Complete replacement with the new design featuring:
+Remove tier-gating:
+- All features accessible (no locked cards)
+- Remove tier badges from FeatureCard
+- Remove Lock icons
+- Remove tier-based styling differences
+- Simplify upgrade banner: just "Unlock full access for $67"
+- Update suggested actions (no tier-based logic)
 
-**Hero Section:**
-- Welcome message with user's first name and emoji wave
-- Tier badge (Free Account / Starter Member / Pro Member / Insider Member)
-- Quick stats row for paid users (Guide Progress, Peptides Explored, AI Questions Asked)
-- Note: Stats are currently placeholder values - will show static data for now
+### 10. Dashboard Sidebar
+**File:** `src/components/dashboard/DashboardSidebar.tsx`
 
-**Upgrade Banner (Free Users Only):**
-- Gradient purple/blue background with decorative circles
-- Sparkles icon
-- "Limited Time" badge
-- CTA button to pricing page
+Clean up:
+- Remove `requiredTier` from nav items
+- Remove tier badges next to nav items
+- Remove lock icons and opacity changes
+- Remove "Current Plan" display in footer
+- All navigation items always accessible
 
-**Feature Grid:**
-- 7 feature cards in responsive grid (3-2-2 layout on desktop)
-- Each card shows:
-  - Tier badge with checkmark (if accessible) or lock icon (if locked)
-  - Icon in colored circle
-  - Title and description
-  - Stats count where applicable
-  - Hover arrow indicator for accessible features
+### 11. Settings Page
+**File:** `src/pages/dashboard/Settings.tsx`
 
-**Feature Cards:**
-| Feature | Tier Required | Stats |
-|---------|---------------|-------|
-| The Guide | starter | 8 chapters |
-| Peptide Database | pro | 41 peptides |
-| AI Assistant | pro | Unlimited |
-| Doctor Scripts | starter | 5 templates |
-| Source Checklist | starter | 12 criteria |
-| Research Digest | pro | Monthly |
-| Community | insider | 500+ members |
+Simplify subscription section:
+- Show either "Free" or "Member"
+- Remove tier-based feature list strikethroughs
+- All features shown as included for members
+- Single upgrade CTA for free users
 
-**Bottom Section:**
-- "What's New" - 3 recent updates with "New" badges
-- "Suggested Next Steps" - personalized actions based on tier
+### 12. Remove Community Page
+**File:** Consideration
+
+Since Community was previously Insider-only ($497), and we're now giving everything for $67, we need to decide:
+- **Option A:** Remove Community feature entirely (no longer offered)
+- **Option B:** Include it for all members
+
+**Recommendation:** Remove from navigation for now (can be added back later). Update sidebar to remove Community item.
 
 ---
 
-### 3. Component Architecture
+## Database Consideration
 
-The new file includes 4 components:
-1. **Dashboard** (main) - The page component with layout
-2. **FeatureCard** - Reusable card for each feature
-3. **UpdateItem** - Individual update row
-4. **SuggestedAction** - Action link item
+Current `profiles.tier` can hold: 'free', 'starter', 'pro', 'insider'
 
----
+For simplicity, new members will be set to tier = 'member'. 
 
-### 4. Styling Considerations
-
-**CSS Classes Used:**
-- `bg-gradient-to-br from-primary/5 via-background to-background` - Hero gradient
-- `bg-gradient-to-br from-purple-600/20 via-primary/20 to-blue-600/20` - Upgrade banner
-- `shadow-lg shadow-primary/20` - Elevated CTA button
-- Tier-specific colors: slate (starter), emerald (pro), amber (insider)
-
-**Responsive Breakpoints:**
-- Mobile: 1 column grid
-- `sm:` 2 columns
-- `lg:` 3 columns for feature grid
+**Migration approach:** No schema change needed. Existing paid users (starter/pro/insider) will continue to work since we'll update the `useTier` hook to treat any non-free tier as having full access.
 
 ---
 
-### 5. Data Flow
+## Implementation Order
 
-**Current Data Available:**
-- `profile?.full_name` - From useProfile()
-- `profile?.tier` - User's current tier
-- `profile?.questions_asked` - AI questions count
+1. **Edge Functions** (backend first)
+   - Update `create-checkout` for single product
+   - Update `stripe-webhook` for "member" tier
 
-**Static/Placeholder Data:**
-- Guide Progress: "Chapter 3" (no tracking yet)
-- Peptides Explored: "12 of 41" (no tracking yet)
-- Updates list (hardcoded dates)
+2. **Hooks** (data layer)
+   - Simplify `useTier.ts`
+   - Simplify `useCheckout.ts`
 
-**Future Enhancement:** Could add `guide_chapter` and `peptides_viewed` columns to profiles table for real progress tracking.
+3. **Dashboard** (member experience)
+   - Update `DashboardSidebar.tsx` (remove gating)
+   - Update `Home.tsx` (remove gating)
+   - Update `Settings.tsx` (simplify)
 
----
+4. **Checkout** (purchase flow)
+   - Update `Checkout.tsx`
+   - Update `App.tsx` route
 
-### 6. Complete Code Structure
-
-The implementation will:
-
-1. Import required dependencies:
-   - React Router `Link`
-   - Lucide icons (BookOpen, MessageSquare, ClipboardCheck, Database, Bot, Mail, Users, ArrowRight, Sparkles, Lock, TrendingUp, Clock, CheckCircle2)
-   - DashboardLayout wrapper
-   - useProfile and useTier hooks
-   - Button and cn utility
-
-2. Define feature data array with tier requirements
-
-3. Main Dashboard component:
-   - Fetch profile and tier data
-   - Render hero, upgrade banner (conditional), feature grid, and bottom sections
-
-4. FeatureCard sub-component:
-   - Props: title, description, icon, href, tier, userTier, featured, stats, className
-   - Computes hasAccess based on tier hierarchy
-   - Renders tier badge, icon, content, and hover state
-
-5. Helper sub-components:
-   - UpdateItem for news items
-   - SuggestedAction for action buttons
+5. **Marketing Pages** (last)
+   - Update `PricingSection.tsx`
+   - Update `Pricing.tsx`
+   - Update `FinalCTA.tsx`
 
 ---
 
-## Visual Layout
+## Code Changes Summary
 
-```text
-+--------------------------------------------------+
-|  Welcome back, [Name]! 👋                        |
-|  Your peptide education hub is ready.            |
-|                                    [Tier Badge]  |
-|  +------------+ +------------+ +------------+    |  (Paid users only)
-|  |Guide Prog. | |Peptides    | |AI Questions|    |
-|  | Chapter 3  | | 12 of 41   | | 8          |    |
-|  +------------+ +------------+ +------------+    |
-+--------------------------------------------------+
-
-+--------------------------------------------------+
-|  🔮 Limited Time - Unlock the full Playbook      |  (Free users only)
-|  [View Plans →]                                  |
-+--------------------------------------------------+
-
-+--------+ +--------+ +--------+
-|📖 Guide| |🗄️ DB   | |🤖 AI  |
-+--------+ +--------+ +--------+
-+--------+ +--------+
-|Scripts | |Checklist|
-+--------+ +--------+
-+--------+ +--------+
-|Digest  | |Community|
-+--------+ +--------+
-
-+---------------------+ +---------------------+
-| What's New          | | Suggested Next Steps|
-| • Guide updated     | | → Read Chapter 3    |
-| • 3 peptides added  | | → Ask the AI        |
-| • New digest        | | → View database     |
-+---------------------+ +---------------------+
-```
-
----
-
-## Files Changed
-
-| File | Action |
-|------|--------|
-| `src/pages/dashboard/Home.tsx` | Replace entirely with new design |
-
-No other files need modification - the new design uses existing hooks (`useProfile`, `useTier`) and the existing `DashboardLayout` wrapper.
+| File | Action | Impact |
+|------|--------|--------|
+| `supabase/functions/create-checkout/index.ts` | Simplify to single price | Backend |
+| `supabase/functions/stripe-webhook/index.ts` | Always set tier='member' | Backend |
+| `src/hooks/useTier.ts` | Change types, remove gating | Core |
+| `src/hooks/useCheckout.ts` | Remove tier parameter | Core |
+| `src/components/dashboard/DashboardSidebar.tsx` | Remove all tier badges/locks | Dashboard |
+| `src/pages/dashboard/Home.tsx` | Remove tier-gating logic | Dashboard |
+| `src/pages/dashboard/Settings.tsx` | Simplify subscription display | Dashboard |
+| `src/pages/Checkout.tsx` | Single product checkout | Checkout |
+| `src/App.tsx` | Change route to `/checkout` | Routing |
+| `src/components/landing/PricingSection.tsx` | Single $67 card | Marketing |
+| `src/pages/Pricing.tsx` | Complete redesign | Marketing |
+| `src/components/landing/FinalCTA.tsx` | Single offer | Marketing |
 
 ---
 
 ## Testing Checklist
 
 After implementation:
-- [ ] Free user sees upgrade banner and locked features
-- [ ] Starter user sees Guide, Scripts, Checklist unlocked
-- [ ] Pro user sees Database, AI, Digest unlocked
-- [ ] Insider user sees Community unlocked
-- [ ] Feature cards link to correct dashboard pages
-- [ ] Tier badge shows correct plan name
-- [ ] Stats section only shows for paid users
-- [ ] Responsive layout works on mobile
-- [ ] Hover states work on feature cards
+- [ ] `/pricing` shows single $67 option
+- [ ] Landing page pricing section shows single card
+- [ ] FinalCTA shows $67 offer only
+- [ ] `/checkout` works without tier parameter
+- [ ] Stripe checkout creates session for $67 product
+- [ ] Webhook sets tier to "member" on payment
+- [ ] Dashboard shows all features unlocked for members
+- [ ] Sidebar has no lock icons or tier badges
+- [ ] Free users see upgrade banner linking to checkout
+- [ ] Settings shows "Member" plan for paid users
+- [ ] All dashboard pages accessible for members
+- [ ] No console errors or broken links
+
+---
+
+## Benefits
+
+1. **Simpler decision** — No "which tier do I need?" paralysis
+2. **Cleaner code** — Remove ~200 lines of tier-gating logic
+3. **Better value perception** — "$67 gets you everything"
+4. **Easier marketing** — One price, one pitch
+5. **Reduced support** — No "why can't I access X?" questions
 
