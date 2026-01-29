@@ -1,64 +1,225 @@
 
-# Fix Remaining Broken Buttons: ProductPreview and PricingCTA
+# Add Interactive Chatbot Demo to Landing Page
 
-## Problem
+## Overview
 
-Two "signup" buttons are not working:
-1. **ProductPreview** - "Get Full Access" button
-2. **PricingCTA** - "Get AI Access Now" button
-
-Both use the correct `<Link to="/signup">` wrapping pattern, but clicks don't navigate.
-
-## Root Cause
-
-The buttons are inside glass-card containers with:
-- `relative` positioning
-- Gradient overlay divs with `absolute inset-0`
-- Motion wrappers that may capture events
-
-## Solution
-
-Add explicit `z-index` and `relative` positioning to ensure the Link/Button is clickable above any overlays.
+Create a new `ChatbotDemo` component that allows visitors to ask **one free question** from a predefined list, receive a real AI response streamed from the backend, and then see a soft paywall prompting them to purchase.
 
 ---
 
-## File Changes
+## Placement
 
-### 1. `src/components/landing/ProductPreview.tsx` (Line 140-145)
+The demo will be inserted **after AgitationSection** and **before SolutionSection** in `src/pages/Index.tsx`:
 
-Add `relative z-10` to the Link wrapper:
-
-```tsx
-<Link to="/signup" className="relative z-10">
-  <Button className="btn-primary-clean group">
-    Get Full Access
-    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-  </Button>
-</Link>
-```
-
-### 2. `src/components/landing/PricingCTA.tsx` (Line 98-103)
-
-Add `relative z-10 block` to the Link wrapper:
-
-```tsx
-<Link to="/signup" className="w-full relative z-10 block">
-  <Button size="lg" className="w-full btn-primary-clean h-12 text-base">
-    <Sparkles className="w-4 h-4 mr-2" />
-    Get AI Access Now
-  </Button>
-</Link>
+```text
+HeroSection
+ProblemSection
+AgitationSection
+↓
+NEW: ChatbotDemo  ← Insert here
+↓
+SolutionSection
+ProductPreview
+...
 ```
 
 ---
 
-## Why This Works
+## New Component: `src/components/landing/ChatbotDemo.tsx`
 
-The `relative z-10` ensures the Link element is positioned above any `absolute inset-0` overlay elements (like gradient backgrounds) that may be capturing pointer events. The glass-card's gradient overlay has `pointer-events: none` but adding z-index provides additional insurance.
+### Structure
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  Section Header                                             │
+│  "See What Peptide Playbook AI Can Do"                      │
+│  "Ask one question free. Pick a topic below."               │
+├─────────────────────────────────────────────────────────────┤
+│  4 Question Buttons (styled to match brand)                 │
+│  • "What peptides are actually FDA approved?"               │
+│  • "Are peptides safe to use?"                              │
+│  • "What's the best peptide for fat loss?"                  │
+│  • "How do I know if a peptide source is legit?"            │
+├─────────────────────────────────────────────────────────────┤
+│  Chat Interface (appears after selection)                   │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │  User question bubble                                   ││
+│  │  AI response bubble (streamed with markdown)            ││
+│  └─────────────────────────────────────────────────────────┘│
+├─────────────────────────────────────────────────────────────┤
+│  Paywall Card (appears after response completes)            │
+│  "Want to keep exploring?"                                  │
+│  "Unlock unlimited questions + the complete guide"          │
+│  [Get Full Access — $67]                                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Functionality
+
+1. **Initial State**: Show 4 question buttons, no chat visible
+2. **On Question Click**:
+   - Check localStorage for `demo-question-used`
+   - If already used → Show paywall immediately, skip API call
+   - If not used → Add question as user message, call chat API, stream response
+3. **API Call**: Use the existing `chat` edge function via `supabase.functions.invoke()`
+4. **Streaming**: Parse SSE stream same as `ChatWidget.tsx` does
+5. **After Response**: 
+   - Set `localStorage.setItem("demo-question-used", "true")`
+   - Show paywall card below the response
+6. **Subsequent Clicks**: If user clicks another question → Paywall immediately
+
+### State Management
+
+```typescript
+const [hasUsedQuestion, setHasUsedQuestion] = useState(false);
+const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
+const [response, setResponse] = useState("");
+const [isLoading, setIsLoading] = useState(false);
+const [showPaywall, setShowPaywall] = useState(false);
+
+// On mount: check localStorage
+useEffect(() => {
+  const used = localStorage.getItem("demo-question-used") === "true";
+  setHasUsedQuestion(used);
+}, []);
+```
 
 ---
 
-## Files to Modify
+## Styling
 
-1. `src/components/landing/ProductPreview.tsx` - Add z-index to Link
-2. `src/components/landing/PricingCTA.tsx` - Add z-index to Link
+- Use existing `glass-card` class for the chat container
+- Question buttons: `bg-muted hover:bg-primary/10` with purple border on hover
+- Chat bubbles: Match `ChatWidget.tsx` styling
+  - User: `bg-primary text-primary-foreground rounded-2xl rounded-br-sm`
+  - AI: `bg-muted rounded-2xl rounded-bl-sm` with ReactMarkdown
+- Paywall card: Gradient border with primary color accent
+
+---
+
+## Files to Create/Modify
+
+### 1. Create: `src/components/landing/ChatbotDemo.tsx`
+
+New component with:
+- Section wrapper with id="demo" for anchor links
+- Headline and subheadline
+- 4 question buttons (grid layout)
+- Chat interface (hidden until question selected)
+- Paywall card (hidden until response complete or question already used)
+- Integration with chat edge function
+- localStorage persistence
+
+### 2. Modify: `src/pages/Index.tsx`
+
+- Import `ChatbotDemo`
+- Insert `<ChatbotDemo />` after `<AgitationSection />` and before `<SolutionSection />`
+
+---
+
+## Technical Details
+
+### Chat API Integration
+
+```typescript
+const handleQuestionClick = async (question: string) => {
+  // Check if already used
+  if (hasUsedQuestion) {
+    setShowPaywall(true);
+    return;
+  }
+
+  setSelectedQuestion(question);
+  setIsLoading(true);
+
+  try {
+    const response = await supabase.functions.invoke("chat", {
+      body: { messages: [{ role: "user", content: question }] },
+    });
+
+    if (response.error) throw response.error;
+
+    // Stream the response
+    const reader = response.data.getReader();
+    const decoder = new TextDecoder();
+    let fullContent = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split("\n");
+
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const data = line.slice(6);
+          if (data === "[DONE]") continue;
+
+          try {
+            const parsed = JSON.parse(data);
+            const content = parsed.choices?.[0]?.delta?.content || "";
+            fullContent += content;
+            setResponse(fullContent);
+          } catch {
+            // Skip invalid JSON
+          }
+        }
+      }
+    }
+
+    // Mark as used
+    localStorage.setItem("demo-question-used", "true");
+    setHasUsedQuestion(true);
+    setShowPaywall(true);
+  } catch (error) {
+    console.error("Demo chat error:", error);
+    setResponse("Sorry, something went wrong. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+```
+
+### Predefined Questions
+
+```typescript
+const DEMO_QUESTIONS = [
+  "What peptides are actually FDA approved?",
+  "Are peptides safe to use?",
+  "What's the best peptide for fat loss?",
+  "How do I know if a peptide source is legit?",
+];
+```
+
+### Paywall Component
+
+```tsx
+{showPaywall && (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="mt-6 p-6 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20"
+  >
+    <h4 className="text-lg font-semibold mb-1">Want to keep exploring?</h4>
+    <p className="text-muted-foreground text-sm mb-4">
+      Unlock unlimited questions + the complete guide
+    </p>
+    <Link to="/signup" className="relative z-10">
+      <Button className="btn-primary-clean">
+        Get Full Access — $67
+      </Button>
+    </Link>
+  </motion.div>
+)}
+```
+
+---
+
+## Animations
+
+- Section fade-in on scroll (using framer-motion viewport animation)
+- Question buttons: subtle hover scale effect
+- Chat messages: fade-in animation
+- Paywall: slide up + fade in after response completes
+- Loading state: bouncing dots animation (same as ChatWidget)
