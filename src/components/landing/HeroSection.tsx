@@ -49,12 +49,6 @@ export function HeroSection() {
         <div className="max-w-4xl mx-auto">
           {/* Centered content */}
           <motion.div className="text-center" variants={containerVariants} initial="hidden" animate="visible">
-            {/* AI Badge */}
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">AI-Powered Research Assistant</span>
-            </motion.div>
-
             {/* Headline */}
             <motion.h1 variants={itemVariants} className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6">
               Ask Anything About Peptides
