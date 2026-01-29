@@ -1,33 +1,48 @@
 
 
-# Fix Checkout Page Loading Issue
+# Fix Checkout Page - Redirect Not Working
 
-## Problem Identified
+## Problem Analysis
 
-The checkout process is working (network request succeeds, Stripe URL is returned), but there's a race condition causing the page to appear "stuck" loading.
+The network logs confirm the API call **succeeds** and returns a valid Stripe URL. The issue is the redirect (`window.location.href = url`) either:
+1. Isn't executing due to a `useCallback` dependency issue
+2. Is being blocked by the preview iframe sandbox
 
-### Root Causes:
+## Root Cause
 
-1. **Missing `startCheckout` in useEffect dependencies** - Can cause stale closures or multiple invocations
-2. **Race condition in loading state** - `setIsLoading(false)` in the `finally` block can trigger a re-render before the redirect completes
-3. **No "in-progress" tracking** - Nothing prevents `startCheckout` from being called multiple times during re-renders
+The `startCheckout` function has `isLoading` in its dependency array:
+
+```typescript
+const startCheckout = useCallback(async () => {
+  if (isLoading || redirectingRef.current) return;  // ← Checks isLoading
+  setIsLoading(true);  // ← Changes isLoading
+  // ...
+}, [isLoading, toast]);  // ← Depends on isLoading
+```
+
+This creates a problematic cycle:
+1. `startCheckout` is called
+2. `setIsLoading(true)` runs
+3. `startCheckout` gets a new reference (because isLoading changed)
+4. React may interrupt the async operation
 
 ## Solution
 
-### 1. Fix `useCheckout.ts` - Add redirect tracking
+### 1. Fix `useCheckout.ts` - Remove `isLoading` from dependencies
 
-Add a ref to track when redirect is in progress, so we don't reset loading state prematurely:
+Since we use `redirectingRef` to prevent double-calls, we don't need `isLoading` in the dependency check. Use a ref for the guard instead:
 
 ```typescript
-import { useState, useRef } from "react";
-
 export function useCheckout() {
   const [isLoading, setIsLoading] = useState(false);
   const redirectingRef = useRef(false);
+  const isProcessingRef = useRef(false);  // NEW: Track if already processing
   const { toast } = useToast();
 
-  const startCheckout = async () => {
-    if (isLoading || redirectingRef.current) return; // Prevent double calls
+  const startCheckout = useCallback(async () => {
+    // Use ref instead of state for the guard
+    if (isProcessingRef.current || redirectingRef.current) return;
+    isProcessingRef.current = true;
     setIsLoading(true);
     
     try {
@@ -36,53 +51,40 @@ export function useCheckout() {
       if (url) {
         redirectingRef.current = true;
         window.location.href = url;
-        return; // Don't set isLoading to false - we're redirecting
+        return;
       }
     } catch (error) {
-      // Only show error if we're not redirecting
-      if (!redirectingRef.current) {
-        // ... existing error handling ...
-        setIsLoading(false);
-      }
+      // ... error handling ...
+      isProcessingRef.current = false;
+      setIsLoading(false);
     }
-    // Remove finally block - we handle loading state explicitly
-  };
+  }, [toast]);  // Remove isLoading from dependencies
 ```
 
-### 2. Fix `Checkout.tsx` - Proper useEffect and state management
+### 2. Simplify `Checkout.tsx` - Remove `startCheckout` from dependencies
 
-Add `startCheckout` to dependencies and use a ref to prevent double-invocation:
+Since `startCheckout` will now have a stable reference, we can simplify:
 
 ```typescript
-import { useEffect, useRef } from "react";
-
-export default function Checkout() {
-  const { startCheckout, isLoading } = useCheckout();
-  const { user, isLoading: authLoading } = useAuth();
-  const hasStartedRef = useRef(false);
-
-  useEffect(() => {
-    if (!authLoading && user && !hasStartedRef.current) {
-      hasStartedRef.current = true;
-      startCheckout();
-    }
-  }, [authLoading, user, startCheckout]);
-  // ...
-}
+useEffect(() => {
+  if (!authLoading && user && !hasStartedRef.current) {
+    hasStartedRef.current = true;
+    startCheckout();
+  }
+}, [authLoading, user]); // startCheckout is now stable, can omit
 ```
 
 ## Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/hooks/useCheckout.ts` | Add redirect tracking, prevent double-calls, fix loading state |
-| `src/pages/Checkout.tsx` | Add ref to prevent double-invocation, fix useEffect dependencies |
+| `src/hooks/useCheckout.ts` | Add `isProcessingRef`, remove `isLoading` from dependency array |
+| `src/pages/Checkout.tsx` | Remove `startCheckout` from useEffect dependency array |
 
-## Technical Details
+## Why This Fixes It
 
-The fix ensures:
-- `startCheckout()` can only be called once per component mount
-- Loading state stays `true` while redirecting to Stripe
-- No race condition between `setIsLoading(false)` and the browser redirect
-- Proper React hook dependency tracking
+- `startCheckout` now has a **stable reference** that doesn't change when `isLoading` changes
+- The guard check uses a ref (`isProcessingRef`) instead of state, so it works correctly in async operations
+- The useEffect won't re-trigger unnecessarily when state changes
+- The redirect will execute without interference from React re-renders
 
