@@ -1,331 +1,157 @@
 
 
-# PEPTIDE PLAYBOOK — SITE AUDIT REPORT
+# Generate Pillar Page: Complete Guide to Peptide Therapy 2026
 
-## BUSINESS GOAL VALIDATION
+## Overview
 
-| Target | Details |
-|--------|---------|
-| Product Price | $67 one-time ✅ (correctly set in `create-checkout` and UI) |
-| Payment Mode | One-time payment ✅ (Stripe `mode: "payment"`) |
-| Paywall Enforcement | ✅ Strict — `ProtectedRoute` checks both `useAuth` AND `useTier.isPaid` |
+A **pillar page** is cornerstone SEO content that comprehensively covers a broad topic and links to all related "cluster" articles. This page will serve as the authoritative hub for peptide therapy content, designed to:
 
----
-
-## 1. SEO REQUIREMENTS
-
-### Technical SEO
-
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Unique title tags | ✅ | All pages use `SEOHead` with unique titles + `SITE_NAME` suffix |
-| Unique meta descriptions | ✅ | Set via `SEOHead` props on each page |
-| Canonical URLs | ✅ | Homepage and all pages now have canonicals via SEOHead |
-| XML sitemap | ✅ | Edge function generates dynamic sitemap with articles + static pages |
-| robots.txt | ✅ | Present and explicitly allows AI crawlers (GPTBot, PerplexityBot, ClaudeBot, etc.) |
-| Page speed | ⚠️ UNTESTED | Needs Lighthouse audit |
-| Mobile responsive | ⚠️ UNTESTED | Code uses responsive classes but needs manual testing |
-| HTTPS | ✅ | Lovable Cloud deploys to HTTPS |
-| Clean URL structure | ✅ | `/articles/[slug]`, `/blog/[slug]` format |
-| Internal linking | ⚠️ PARTIAL | Articles have `related_article_ids` but limited site-wide internal links |
-| Broken links | ⚠️ UNTESTED | Needs link checker |
-| Image alt text | ⚠️ PARTIAL | Not systematically reviewed |
-| Image optimization | ⚠️ PARTIAL | Lazy loading not explicitly implemented |
-
-### Schema Markup (JSON-LD)
-
-| Schema | Status | Location |
-|--------|--------|----------|
-| Organization | ✅ | `HomepageSchemas.tsx`, `OrganizationSchema.tsx` |
-| FAQPage | ✅ | `HomepageSchemas.tsx` (landing), `FAQSchema.tsx` (articles) |
-| Article | ✅ | `ArticleSchema.tsx` on article pages |
-| Product | ✅ | `HomepageSchemas.tsx` — price corrected to $67 |
-| BreadcrumbList | ✅ | `Breadcrumbs.tsx` + `BreadcrumbSchema.tsx` |
-| Author | ✅ | Embedded in `ArticleSchema` |
-| MedicalWebPage | ✅ | `MedicalWebPageSchema.tsx` on article pages |
-
-### Content Structure for SEO
-
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| H1 on every page | ✅ | Verified on landing, pricing, about, articles |
-| H2/H3 hierarchy | ✅ | Proper nesting in article content |
-| Content crawlable | ⚠️ | Client-side rendered (React SPA) — **NO PRE-RENDERING** |
-| 1,500+ word guides | ⚠️ PARTIAL | Some articles appear substantial but word count not verified |
-| Pillar page | ❌ **MISSING** | No "Complete Guide to Peptide Therapy 2026" pillar page exists |
-| Cluster pages link to pillar | ❌ N/A | Can't link without pillar |
-| Blog section | ✅ | `/blog` route exists |
+1. Rank for high-volume keywords like "peptide therapy guide", "peptides for beginners"
+2. Be cited by AI search engines (ChatGPT, Perplexity, Claude, Gemini)
+3. Link to all 10 existing articles, creating a strong internal link network
+4. Establish topical authority for the entire site
 
 ---
 
-## 2. AEO REQUIREMENTS (AI Search Citations)
+## Content Structure
 
-### Content Formatting for AI
+### Article Details
 
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Direct answer in first 100 words | ✅ | `DirectAnswerBlock` component on articles |
-| Quick Answer box styled | ✅ | Prominent styling with icon + border |
-| Clear H2 headings as queries | ✅ | Article H1s formatted as questions |
-| FAQ sections (accordion) | ✅ | `FAQ.tsx` on landing, structured FAQs in articles |
-| Tables for comparison | ⚠️ PARTIAL | Database page has tables; articles may or may not |
-| Bullet points | ✅ | Used throughout content |
-| Sources cited | ✅ | `CitationsSection` component in articles |
+| Field | Value |
+|-------|-------|
+| **Title** | Complete Guide to Peptide Therapy 2026: Everything You Need to Know |
+| **H1 Question** | What is Peptide Therapy and How Does It Work in 2026? |
+| **Slug** | `peptide-therapy-guide-2026` |
+| **Content Type** | `pillar` (new type, or use `guide`) |
+| **Target Keywords** | peptide therapy, peptides guide, peptide therapy 2026, peptides for beginners, therapeutic peptides |
+| **Word Count** | 3,000+ words (comprehensive pillar) |
 
-### Trust Signals for AI
+### Content Sections (H2 Headings)
 
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Author bylines | ✅ | `AuthorSection` with name + credentials |
-| Last Updated date | ✅ | Shown in `AuthorSection` |
-| Medical disclaimer | ✅ | Dedicated page, footer text, ComplianceModal |
-| About page | ✅ | `/about` with credentials |
-| Contact information | ✅ | `support@peptideplaybook.com` in footer |
-| No affiliate links to sellers | ✅ | About page explicitly states no peptide sales |
-
-### AI Crawler Access
-
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| No blocks on AI crawlers | ✅ | `robots.txt` explicitly allows GPTBot, PerplexityBot, ClaudeBot, etc. |
-| Pre-rendered content | ❌ **MISSING** | Pure React SPA — **AI crawlers may not execute JavaScript** |
-| Fast page loads | ⚠️ UNTESTED | Needs testing |
-
----
-
-## 3. CONVERSION REQUIREMENTS
-
-### Landing Page Flow
-
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Clear headline above fold | ✅ | "Ask Anything About Peptides" H1 |
-| Problem/pain points | ✅ | `ProblemSection` + `AgitationSection` |
-| Interactive chatbot demo | ✅ | `ChatbotDemo` with 4 pre-written questions |
-| Demo before pricing | ✅ | Order: Hero → Problem → Demo → Solution → Pricing |
-| Soft paywall after answer | ✅ | Shows after 1 free question |
-| Features/benefits | ✅ | `ProductPreview`, `HowItWorks`, pricing features |
-| Trust signals | ✅ | Money-back, no subscriptions, research-based |
-| Single pricing tier | ✅ | $67 only |
-| FAQ section | ✅ | 6 FAQs addressing objections |
-| Multiple CTAs | ✅ | Hero, after demo, pricing section, final CTA |
-
-### Chatbot Demo
-
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| 4 pre-written questions | ✅ | "What peptides are FDA approved?", "Are peptides safe?", "Best for fat loss?", "Legit sources?" |
-| 1 free question only | ✅ | `localStorage` tracking |
-| State persists on refresh | ✅ | Uses `localStorage` |
-| High-quality AI response | ⚠️ | Streams from chat edge function; formatting depends on AI output |
-| Soft paywall appears | ✅ | After answer + on subsequent question clicks |
-
-### Pricing Section
-
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| $67 price prominent | ✅ | Large text in `PricingCTA.tsx` |
-| "One-time payment" stated | ✅ | Explicit in multiple places |
-| What's included list | ✅ | 6 features with checkmarks |
-| 30-day guarantee visible | ✅ | With shield icon |
-| Payment method icons | ✅ | Visa/MC/Amex/Stripe icons added to PricingCTA |
-| CTA button stands out | ✅ | Primary color, prominent sizing |
-
-### Trust Elements
-
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Money-back guarantee | ✅ | Mentioned multiple times |
-| "No subscription" stated | ✅ | In hero trust signals + pricing |
-| "We don't sell peptides" | ✅ | About page, FAQ |
-| Medical disclaimer visible | ✅ | Footer, dedicated page |
-| Contact email visible | ✅ | Footer, pricing CTA |
+1. **What is Peptide Therapy?** - Definition and quick answer
+2. **How Do Peptides Work in the Body?** - Mechanism of action
+3. **Types of Therapeutic Peptides** - Categories (healing, metabolic, hormonal)
+4. **Popular Peptides Explained** - Links to cluster articles:
+   - BPC-157 → `/articles/what-is-bpc-157`
+   - TB-500 → `/articles/bpc-157-vs-tb-500`
+   - Semaglutide → `/articles/semaglutide-guide`
+   - Tirzepatide → `/articles/tirzepatide-vs-semaglutide`
+   - Ipamorelin/CJC-1295 → `/articles/ipamorelin-cjc-1295-guide`
+5. **FDA Regulations and Legal Status** - Links to:
+   - `/articles/fda-peptide-regulations`
+   - `/articles/fda-category-2-peptides`
+6. **Are Peptides Safe?** - Safety overview with links to:
+   - `/articles/peptides-for-recovery`
+7. **How to Find Legitimate Sources** - Links to:
+   - `/articles/peptide-source-red-flags`
+8. **Talking to Your Doctor** - Links to:
+   - `/articles/talk-to-doctor-about-peptides`
+9. **FAQ Section** - 8-10 common questions
+10. **Conclusion** - Summary with CTA
 
 ---
 
-## 4. PAYMENT/CHECKOUT
+## Implementation Plan
 
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Stripe integration | ✅ | `create-checkout` + `stripe-webhook` edge functions |
-| Checkout flow smooth | ✅ | Direct redirect to Stripe Checkout |
-| Price matches ($67) | ✅ | Price ID hardcoded: `price_1SuiuLKivWYlZk5KLQmOGU1S` |
-| Success page | ✅ | `/thank-you` page with next steps |
-| Email confirmation | ⚠️ ASSUMED | Stripe sends receipt; no custom email verified |
-| Instant access | ✅ | Webhook updates tier to "member" immediately |
-| Receipt provided | ✅ | Stripe provides automatically |
+### Step 1: Add "pillar" Content Type
 
----
+Update `src/lib/seo.ts` to include pillar in content type labels:
 
-## 5. PRODUCT DELIVERY
+```typescript
+export const CONTENT_TYPE_LABELS: Record<string, string> = {
+  "citation-magnet": "Research Overview",
+  "question-answer": "Q&A",
+  comparison: "Comparison",
+  guide: "Guide",
+  pillar: "Complete Guide",  // NEW
+};
+```
 
-### After Purchase Access
+### Step 2: Update Edge Function Prompt
 
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Immediate access | ✅ | Webhook sets tier instantly |
-| Dashboard/member area | ✅ | `/dashboard` with sidebar navigation |
-| PDF guide | ❌ **MISSING** | No PDF download functionality found |
-| Peptide database | ✅ | `/dashboard/database` with filters |
-| AI chatbot unlimited | ✅ | `ChatInterface` for paid users |
-| Doctor scripts | ⚠️ **NOT FOUND** | Mentioned in pricing but no dedicated page |
-| Source checklist | ✅ | `/dashboard/checklist` |
+Modify `supabase/functions/generate-article/index.ts` to support pillar content with enhanced instructions for:
+- Longer content (3,000+ words)
+- Internal links to related articles
+- Comprehensive topic coverage
+- More FAQs (8-10 instead of 5)
 
-### Member Experience
+### Step 3: Insert Pillar Article
 
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Clear navigation | ✅ | `DashboardSidebar` with all sections |
-| Chatbot works unlimited | ✅ | No limits for paid tier |
-| Content organized | ✅ | Tab-based dashboard with sections |
-| Mobile-friendly dashboard | ⚠️ | Uses responsive classes; needs testing |
+Insert a new article into the database with:
+- `content_type: "pillar"`
+- `related_article_ids`: Array of all 10 existing article IDs
+- Comprehensive HTML content with internal links
+- Schema-optimized structure
 
----
+### Step 4: Update Related Articles
 
-## 6. EMAIL CAPTURE
-
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Email capture form | ✅ | Exit-intent popup + `/free-guide` page |
-| Lead magnet offered | ✅ | "5 Red Flags" checklist |
-| Email integration | ❌ **MISSING** | Saves to `leads` table but **no email service connected** |
-| Welcome email | ❌ **MISSING** | No automated email sending |
-| GDPR compliant | ⚠️ PARTIAL | Privacy link shown; no explicit checkbox |
+Update all 10 existing articles to include the pillar page in their `related_article_ids` array, creating bidirectional links.
 
 ---
 
-## 7. ANALYTICS
+## Pillar Page Content Outline
 
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Google Analytics 4 | ❌ **MISSING** | No GA4/gtag code found |
-| Google Search Console | ❌ | No verification file/meta found |
-| Conversion tracking | ❌ | Not implemented |
-| Event tracking | ⚠️ PARTIAL | Page views tracked in DB; no GA events |
-| Track sources/conversions | ❌ | Missing |
+### Quick Answer (TL;DR - First 100 Words)
 
----
+> Peptide therapy uses short chains of amino acids to support specific biological functions like tissue repair, metabolism, and hormone regulation. In 2026, peptides like BPC-157, semaglutide, and TB-500 are widely discussed but exist in a complex regulatory landscape. Only a few peptides (like semaglutide) have FDA approval for specific uses. Most others are "research chemicals" that cannot be legally compounded. This guide covers what peptides are, how they work, which ones have research backing, and how to navigate the legal and safety considerations.
 
-## 8. LEGAL REQUIREMENTS
+### Section Breakdown
 
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Privacy Policy | ✅ | `/privacy` with comprehensive content |
-| Terms of Service | ✅ | `/terms` with detailed terms |
-| Medical disclaimer | ✅ | `/disclaimer` + ComplianceModal |
-| Cookie consent | ❌ **MISSING** | No cookie banner |
-| Refund policy stated | ✅ | In Terms + pricing sections |
-
----
-
-## 9. PERFORMANCE (UNTESTED)
-
-All performance requirements need Lighthouse audit. No specific optimizations like:
-- Lazy loading images
-- Bundle splitting
-- Image compression
+| Section | Content Focus | Internal Links |
+|---------|---------------|----------------|
+| What is Peptide Therapy? | Definition, history, why it matters | - |
+| How Do Peptides Work? | Mechanism, receptor binding, bioavailability | - |
+| Types of Peptides | Healing, metabolic, hormonal, cognitive | - |
+| Healing Peptides | BPC-157, TB-500 deep dive | `/articles/what-is-bpc-157`, `/articles/bpc-157-vs-tb-500` |
+| Metabolic Peptides | Semaglutide, Tirzepatide | `/articles/semaglutide-guide`, `/articles/tirzepatide-vs-semaglutide` |
+| Growth Hormone Peptides | Ipamorelin, CJC-1295 | `/articles/ipamorelin-cjc-1295-guide` |
+| FDA Regulations | Legal status explained | `/articles/fda-peptide-regulations`, `/articles/fda-category-2-peptides` |
+| Safety Considerations | What research shows | `/articles/peptides-for-recovery` |
+| Finding Legitimate Sources | Red flags, verification | `/articles/peptide-source-red-flags` |
+| Talking to Your Doctor | How to discuss | `/articles/talk-to-doctor-about-peptides` |
+| FAQ | 10 common questions | - |
 
 ---
 
-## 10. CONTENT REQUIREMENTS
+## Files to Modify
 
-### Launch Content
-
-| Content | Status |
-|---------|--------|
-| Homepage/landing | ✅ |
-| About page | ✅ |
-| Pillar: "Complete Guide to Peptide Therapy 2026" | ❌ **MISSING** |
-| Guide: "Are Peptides Legal in 2026" | ⚠️ | Have "FDA Peptide Regulations 2026" |
-| Guide: "BPC-157 Complete Guide" | ✅ | "What is BPC-157? Complete Research Guide 2026" |
-| Guide: "Peptide Side Effects Guide" | ❌ **MISSING** |
-| Privacy Policy | ✅ |
-| Terms of Service | ✅ |
-
-### Current Articles (10 found)
-1. What is BPC-157? Complete Research Guide 2026
-2. BPC-157 vs TB-500: Research Comparison
-3. Semaglutide Explained
-4. FDA Peptide Regulations 2026
-5. Peptides for Recovery
-6. How to Talk to Your Doctor About Peptides
-7. Red Flags When Buying Peptides
-8. Ipamorelin and CJC-1295 Guide
-9. Tirzepatide vs Semaglutide
-10. What Does FDA Category 2 Mean?
+| File | Change |
+|------|--------|
+| `src/lib/seo.ts` | Add "pillar" to `CONTENT_TYPE_LABELS` |
+| `supabase/functions/generate-article/index.ts` | Enhance prompt for pillar content type |
+| Database | Insert pillar article with all fields |
+| Database | Update 10 existing articles' `related_article_ids` |
 
 ---
 
-## 11. GUIDES/BLOG TEMPLATE
+## Schema Markup
 
-Article pages (`ArticleDetail.tsx`) include:
-
-| Element | Status |
-|---------|--------|
-| Breadcrumb navigation | ✅ |
-| H1 headline | ✅ |
-| Last Updated date | ✅ |
-| Author byline | ✅ |
-| Quick Answer box | ✅ |
-| Table of contents | ✅ | TableOfContents component integrated |
-| H2/H3 structure | ✅ |
-| FAQ accordion | ✅ |
-| FAQPage schema | ✅ |
-| Related articles | ✅ |
-| CTA to product | ✅ (`InlineAICTA`) |
-| Medical disclaimer | ⚠️ PARTIAL (in footer only) |
+The pillar page will automatically include:
+- `ArticleSchema` - Standard article markup
+- `FAQSchema` - For the 10 FAQ items
+- `MedicalWebPageSchema` - Medical content markup
+- `BreadcrumbSchema` - Navigation trail
+- `OrganizationSchema` - Site authority
 
 ---
 
-## CRITICAL ISSUES (MUST FIX BEFORE LAUNCH)
+## Expected SEO Impact
 
-### P0 — Revenue Blockers
-
-| Issue | Impact | Fix |
-|-------|--------|-----|
-| **Product schema price wrong** | Schema shows $167 instead of $67 | Update `HomepageSchemas.tsx` line 20: `"price": "67"` |
-| **No Google Analytics** | Cannot track traffic, conversions, or optimize | Add GA4 to `index.html` |
-| **No email service integration** | Leads captured but never emailed | Connect ConvertKit/Beehiiv |
-| **PDF guide not available** | Promised in pricing but missing | Add downloadable PDF to dashboard |
-| **Doctor scripts missing** | Listed as feature but not implemented | Create `/dashboard/scripts` page |
-
-### P1 — SEO/AEO Critical
-
-| Issue | Impact | Fix |
-|-------|--------|-----|
-| **No pre-rendering (SSR/SSG)** | AI crawlers can't see content | Implement pre-rendering or move to Cloudflare Workers SSR |
-| **No pillar page** | Missing cornerstone content for SEO | Create "Complete Guide to Peptide Therapy 2026" article |
-| **Missing canonical URLs** | Homepage and key pages lack canonicals | Add `canonical="/"` to homepage SEOHead |
-| **No Table of Contents** | Articles miss sticky ToC for UX/SEO | Add TableOfContents component to ArticleDetail |
-
-### P2 — Legal/Trust
-
-| Issue | Impact | Fix |
-|-------|--------|-----|
-| **No cookie consent banner** | GDPR/CCPA compliance risk | Add cookie consent component |
-| **No payment method icons** | Reduces trust on pricing | Add Stripe/card icons |
+| Metric | Expected Outcome |
+|--------|------------------|
+| Target Keywords | "peptide therapy guide", "peptides 2026", "what is peptide therapy" |
+| Internal Links Out | 10 (to all cluster articles) |
+| Internal Links In | 10 (from all cluster articles back) |
+| Word Count | 3,000+ |
+| AI Citability | High (direct answers, structured data, comprehensive) |
 
 ---
 
-## RECOMMENDED PRIORITY ORDER
+## Implementation Summary
 
-1. **Fix Product schema price** ($167 → $67) — 2 min fix
-2. **Add Google Analytics 4** — critical for tracking
-3. **Connect email service** — leads are being lost
-4. **Create pillar page** — foundational SEO content
-5. **Add canonical URLs** to all pages
-6. **Implement PDF download** for paid members
-7. **Create Doctor Scripts page** — promised feature
-8. **Add cookie consent** — legal compliance
-9. **Add Table of Contents** to articles
-10. **Set up pre-rendering** — for AI crawler access
-
----
-
-## QUICK WINS (Can do immediately)
-
-1. Fix schema price: Change line 20 in `HomepageSchemas.tsx` from `"price": "167"` to `"price": "67"`
-2. Add canonical to homepage: `<SEOHead canonical="/" ... />`
-3. Add payment icons to pricing section
-4. Run Lighthouse audit and address critical issues
+1. Add "pillar" content type to the codebase
+2. Enhance the article generator edge function for pillar content
+3. Generate the pillar article via the generator or direct database insert
+4. Update all existing articles to link back to the pillar
+5. Verify the article renders correctly with all schemas
 
