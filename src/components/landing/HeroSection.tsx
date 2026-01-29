@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Shield, Zap, Clock } from "lucide-react";
 import { FloatingOrbs } from "./FloatingOrbs";
+import { GridPattern } from "./GridPattern";
+import { AIAssistant } from "./AIAssistant";
 
 const trustItems = [
   { icon: Shield, text: "30-Day Money-Back Guarantee" },
@@ -33,83 +35,97 @@ export function HeroSection() {
   return (
     <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 gradient-mesh-bg grain-overlay overflow-hidden">
       <FloatingOrbs variant="hero" />
+      <GridPattern variant="dots" />
       
       <div className="container px-4 relative z-10">
-        <motion.div 
-          className="max-w-4xl mx-auto text-center"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Badge */}
-          <motion.div variants={itemVariants}>
-            <span className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground bg-secondary/80 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-border/50">
-              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-              Updated January 2026
-            </span>
-          </motion.div>
-
-          {/* Headline */}
-          <motion.h1
-            variants={itemVariants}
-            className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6"
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-7xl mx-auto">
+          {/* Left content */}
+          <motion.div 
+            className="text-center lg:text-left"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
           >
-            Everything You Need to Know About Peptides
-            <motion.span 
-              className="block text-gradient mt-2"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
+            {/* Badge */}
+            <motion.div variants={itemVariants}>
+              <span className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground bg-secondary/80 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-border/50">
+                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                Updated January 2026
+              </span>
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              variants={itemVariants}
+              className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6"
             >
-              — Without the TikTok BS
-            </motion.span>
-          </motion.h1>
-
-          {/* Subheadline */}
-          <motion.p
-            variants={itemVariants}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
-          >
-            An 80-page research guide, interactive database, and AI assistant that explains 
-            what the science actually says — so you can have real conversations with your 
-            doctor instead of guessing.
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
-          >
-            <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-              <a href="#pricing">
-                Get Full Access — $67
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm">
-              <a href="#product">See What's Inside</a>
-            </Button>
-          </motion.div>
-
-          {/* Trust signals */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-wrap justify-center gap-6 md:gap-10"
-          >
-            {trustItems.map((item, index) => (
-              <motion.div
-                key={index}
-                className="flex items-center gap-2 text-sm text-muted-foreground group"
-                whileHover={{ scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300 }}
+              Everything You Need to Know About Peptides
+              <motion.span 
+                className="block text-gradient mt-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
               >
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
-                  <item.icon className="w-4 h-4 text-primary" />
-                </div>
-                <span>{item.text}</span>
-              </motion.div>
-            ))}
+                — Without the TikTok BS
+              </motion.span>
+            </motion.h1>
+
+            {/* Subheadline */}
+            <motion.p
+              variants={itemVariants}
+              className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed"
+            >
+              An 80-page research guide, interactive database, and AI assistant that explains 
+              what the science actually says — so you can have real conversations with your 
+              doctor instead of guessing.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12"
+            >
+              <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
+                <a href="#pricing">
+                  Get Full Access — $67
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm">
+                <a href="#product">See What's Inside</a>
+              </Button>
+            </motion.div>
+
+            {/* Trust signals */}
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-wrap justify-center lg:justify-start gap-6"
+            >
+              {trustItems.map((item, index) => (
+                <motion.div
+                  key={index}
+                  className="flex items-center gap-2 text-sm text-muted-foreground group"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                    <item.icon className="w-4 h-4 text-primary" />
+                  </div>
+                  <span>{item.text}</span>
+                </motion.div>
+              ))}
+            </motion.div>
           </motion.div>
-        </motion.div>
+
+          {/* Right content - Chat demo */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="hidden lg:block"
+          >
+            <AIAssistant />
+          </motion.div>
+        </div>
       </div>
 
       {/* Bottom gradient fade */}

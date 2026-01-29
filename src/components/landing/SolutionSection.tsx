@@ -22,7 +22,31 @@ const itemVariants = {
 export function SolutionSection() {
   return (
     <section className="py-20 md:py-28 relative overflow-hidden">
-      <FloatingOrbs variant="subtle" />
+      <FloatingOrbs variant="rich" />
+      
+      {/* Gradient spotlight */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px]"
+          style={{
+            background: "radial-gradient(ellipse at center, hsl(263 70% 42% / 0.08) 0%, transparent 60%)",
+          }}
+        />
+      </div>
+      
+      {/* Decorative shapes */}
+      <motion.div
+        className="absolute -left-20 top-1/4 w-40 h-40 rounded-full"
+        style={{ background: "linear-gradient(135deg, hsl(263 70% 42% / 0.1), transparent)" }}
+        animate={{ y: [0, 20, 0], rotate: [0, 10, 0] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute -right-16 bottom-1/3 w-32 h-32 rounded-full"
+        style={{ background: "linear-gradient(135deg, hsl(280 70% 50% / 0.08), transparent)" }}
+        animate={{ y: [0, -15, 0], rotate: [0, -10, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      />
       
       <div className="container px-4 relative z-10">
         <motion.div

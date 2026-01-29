@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { BookOpen, Database, Bot, FileText, ShieldCheck, Mail } from "lucide-react";
+import { FloatingOrbs } from "./FloatingOrbs";
 
 const products = [
   {
@@ -29,7 +30,7 @@ const products = [
   {
     icon: ShieldCheck,
     title: "Source Evaluation Checklist",
-    description: "Before you buy anything from anyone, run them through this checklist. Know exactly what legitimate sources look like — and what sketchy ones do to trick you.",
+    description: "Before you buy anything from anyone, run them through this checklist. Know exactly what legitimate sources look like — and what sketchy ones do.",
     stats: "5 red flags • Verification steps",
   },
   {
@@ -62,8 +63,22 @@ const cardVariants = {
 
 export function ProductPreview() {
   return (
-    <section id="product" className="py-20 md:py-28 bg-secondary/30 relative section-gradient-top">
-      <div className="container px-4">
+    <section id="product" className="py-20 md:py-28 bg-secondary/30 relative section-gradient-top overflow-hidden">
+      <FloatingOrbs variant="subtle" />
+      
+      {/* Accent line */}
+      <motion.div
+        className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-1/2"
+        style={{
+          background: "linear-gradient(90deg, transparent, hsl(263 70% 42% / 0.4), transparent)",
+        }}
+        initial={{ scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      />
+      
+      <div className="container px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -90,12 +105,16 @@ export function ProductPreview() {
               key={index}
               variants={cardVariants}
               className="glass-card p-6 glow-border group"
-              whileHover={{ y: -4 }}
+              whileHover={{ 
+                y: -6,
+                boxShadow: "0 20px 40px -10px rgba(124, 58, 237, 0.2)",
+              }}
               transition={{ type: "spring", stiffness: 300 }}
             >
               <motion.div 
-                className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/15 transition-colors"
-                whileHover={{ scale: 1.05 }}
+                className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 400 }}
               >
                 <product.icon className="w-6 h-6 text-primary" />
               </motion.div>
