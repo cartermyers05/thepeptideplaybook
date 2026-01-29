@@ -117,6 +117,31 @@ export default function Settings() {
             )}
           </div>
 
+          {/* Feature Access List */}
+          <div className="space-y-2 mb-4">
+            <p className="text-sm font-medium">Your Features:</p>
+            <ul className="text-sm space-y-1">
+              <li className={tier !== "free" ? "text-foreground" : "text-muted-foreground line-through"}>
+                ✓ Complete PDF Guide
+              </li>
+              <li className={tier !== "free" ? "text-foreground" : "text-muted-foreground line-through"}>
+                ✓ Doctor Scripts & Checklist
+              </li>
+              <li className={tier === "pro" || tier === "insider" ? "text-foreground" : "text-muted-foreground line-through"}>
+                ✓ Peptide Database (40+ peptides)
+              </li>
+              <li className={tier === "pro" || tier === "insider" ? "text-foreground" : "text-muted-foreground line-through"}>
+                ✓ AI Research Assistant
+              </li>
+              <li className={tier === "pro" || tier === "insider" ? "text-foreground" : "text-muted-foreground line-through"}>
+                ✓ Monthly Research Digest
+              </li>
+              <li className={tier === "insider" ? "text-foreground" : "text-muted-foreground line-through"}>
+                ✓ Private Community Access
+              </li>
+            </ul>
+          </div>
+
           {isPaid && (
             <p className="text-sm text-muted-foreground">
               To manage your subscription or request a refund, please contact{" "}

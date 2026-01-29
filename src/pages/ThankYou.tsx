@@ -84,7 +84,7 @@ export default function ThankYou() {
 
           {/* CTA */}
           <Button asChild size="lg" className="btn-primary-clean h-12 px-8 mb-4">
-            <Link to="/chat">
+            <Link to="/dashboard">
               Start Exploring
               <ArrowRight className="ml-2 w-4 h-4" />
             </Link>

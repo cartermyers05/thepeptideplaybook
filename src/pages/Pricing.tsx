@@ -58,7 +58,7 @@ const subscriptions = [
     name: "Monthly",
     price: 29,
     period: "month",
-    features: ["Peptide Database", "AI Assistant", "Research Digest", "Community Access"],
+    features: ["Peptide Database", "AI Assistant", "Research Digest"],
   },
   {
     id: "annual",
@@ -66,7 +66,7 @@ const subscriptions = [
     price: 247,
     period: "year",
     savings: "Save $101/year",
-    features: ["Peptide Database", "AI Assistant", "Research Digest", "Community Access"],
+    features: ["Peptide Database", "AI Assistant", "Research Digest"],
   },
 ];
 
@@ -166,7 +166,7 @@ export default function Pricing() {
             <div className="text-center mb-12">
               <h2 className="text-2xl font-semibold mb-2">Prefer Monthly Access?</h2>
               <p className="text-muted-foreground">
-                Get database, AI assistant, digest, and community for one low price
+                Get database, AI assistant, and research digest for one low price
               </p>
             </div>
 
