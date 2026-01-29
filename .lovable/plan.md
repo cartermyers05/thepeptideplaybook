@@ -1,68 +1,88 @@
 
 
-# Update Hero CTA Buttons
+# Fix Checkout Page Loading Issue
 
-## Current State
+## Problem Identified
 
-| Button | Text | Action |
-|--------|------|--------|
-| Primary | "Try AI Assistant Free" | Links to /signup |
-| Secondary | "See It In Action" | Scrolls to #ai-demo |
+The checkout process is working (network request succeeds, Stripe URL is returned), but there's a race condition causing the page to appear "stuck" loading.
 
-## Problem
+### Root Causes:
 
-Both buttons suggest "trying" or "seeing" the product. They feel like the same action. Users need a clear distinction between:
-- **Exploring** (watching the demo)
-- **Converting** (purchasing/getting access)
+1. **Missing `startCheckout` in useEffect dependencies** - Can cause stale closures or multiple invocations
+2. **Race condition in loading state** - `setIsLoading(false)` in the `finally` block can trigger a re-render before the redirect completes
+3. **No "in-progress" tracking** - Nothing prevents `startCheckout` from being called multiple times during re-renders
 
-## Proposed Change
+## Solution
 
-| Button | New Text | Action | Purpose |
-|--------|----------|--------|---------|
-| Primary | "Get Full Access - $67" | Links to /pricing | Direct purchase CTA with price anchoring |
-| Secondary | "See It In Action" | Scrolls to #ai-demo (keep as-is) | Let visitors preview before buying |
+### 1. Fix `useCheckout.ts` - Add redirect tracking
 
-### Primary Button Options (pick your preference):
-- "Get Full Access - $67" (price anchoring)
-- "Get Instant Access"
-- "Unlock Full Access"
-- "Start Learning Now"
+Add a ref to track when redirect is in progress, so we don't reset loading state prematurely:
 
-## File to Modify
+```typescript
+import { useState, useRef } from "react";
 
-### `src/components/landing/HeroSection.tsx`
+export function useCheckout() {
+  const [isLoading, setIsLoading] = useState(false);
+  const redirectingRef = useRef(false);
+  const { toast } = useToast();
 
-**Changes:**
-- Update primary button text from "Try AI Assistant Free" to "Get Full Access - $67"
-- Change link from `/signup` to `/pricing`
-- Swap the `Sparkles` icon for `ArrowRight` (more action-oriented)
-- Keep secondary button as "See It In Action" scrolling to `#ai-demo`
-
-**Before:**
-```tsx
-<Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-  <Link to="/signup">
-    <Sparkles className="w-4 h-4 mr-2" />
-    Try AI Assistant Free
-  </Link>
-</Button>
+  const startCheckout = async () => {
+    if (isLoading || redirectingRef.current) return; // Prevent double calls
+    setIsLoading(true);
+    
+    try {
+      // ... existing code ...
+      
+      if (url) {
+        redirectingRef.current = true;
+        window.location.href = url;
+        return; // Don't set isLoading to false - we're redirecting
+      }
+    } catch (error) {
+      // Only show error if we're not redirecting
+      if (!redirectingRef.current) {
+        // ... existing error handling ...
+        setIsLoading(false);
+      }
+    }
+    // Remove finally block - we handle loading state explicitly
+  };
 ```
 
-**After:**
-```tsx
-<Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-  <Link to="/pricing">
-    Get Full Access - $67
-    <ArrowRight className="w-4 h-4 ml-2" />
-  </Link>
-</Button>
+### 2. Fix `Checkout.tsx` - Proper useEffect and state management
+
+Add `startCheckout` to dependencies and use a ref to prevent double-invocation:
+
+```typescript
+import { useEffect, useRef } from "react";
+
+export default function Checkout() {
+  const { startCheckout, isLoading } = useCheckout();
+  const { user, isLoading: authLoading } = useAuth();
+  const hasStartedRef = useRef(false);
+
+  useEffect(() => {
+    if (!authLoading && user && !hasStartedRef.current) {
+      hasStartedRef.current = true;
+      startCheckout();
+    }
+  }, [authLoading, user, startCheckout]);
+  // ...
+}
 ```
 
-## Visual Result
+## Files to Modify
 
-The hero will have two clearly distinct CTAs:
-- **Primary (filled):** "Get Full Access - $67" → goes to pricing page
-- **Secondary (outline):** "See It In Action" → scrolls to demo section
+| File | Changes |
+|------|---------|
+| `src/hooks/useCheckout.ts` | Add redirect tracking, prevent double-calls, fix loading state |
+| `src/pages/Checkout.tsx` | Add ref to prevent double-invocation, fix useEffect dependencies |
 
-This creates a clear conversion funnel: visitors can either buy directly or scroll down to see the demo first.
+## Technical Details
+
+The fix ensures:
+- `startCheckout()` can only be called once per component mount
+- Loading state stays `true` while redirecting to Stripe
+- No race condition between `setIsLoading(false)` and the browser redirect
+- Proper React hook dependency tracking
 
