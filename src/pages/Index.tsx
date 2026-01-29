@@ -3,7 +3,6 @@ import { HeroSection } from "@/components/landing/HeroSection";
 import { ProblemSection } from "@/components/landing/ProblemSection";
 import { AgitationSection } from "@/components/landing/AgitationSection";
 import { SolutionSection } from "@/components/landing/SolutionSection";
-import { AIShowcase } from "@/components/landing/AIShowcase";
 import { ProductPreview } from "@/components/landing/ProductPreview";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { SocialProof } from "@/components/landing/SocialProof";
@@ -32,7 +31,6 @@ const Index = () => {
           <ProblemSection />
           <AgitationSection />
           <SolutionSection />
-          <AIShowcase />
           <ProductPreview />
           <HowItWorks />
           <SocialProof />

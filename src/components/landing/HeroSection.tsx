@@ -108,15 +108,17 @@ export function HeroSection() {
               variants={itemVariants}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12"
             >
-              <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-                <Link to="/signup">
+              <Link to="/signup">
+                <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group">
                   <Sparkles className="w-4 h-4 mr-2" />
                   Try AI Assistant Free
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm">
-                <a href="#ai-demo">See It In Action</a>
-              </Button>
+                </Button>
+              </Link>
+              <a href="#product">
+                <Button variant="outline" size="lg" className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm">
+                  See What's Included
+                </Button>
+              </a>
             </motion.div>
 
             {/* Trust signals */}
