@@ -95,12 +95,12 @@ export function PricingCTA() {
               ))}
             </motion.ul>
 
-            <Button asChild size="lg" className="w-full btn-primary-clean h-12 text-base">
-              <Link to="/signup">
+            <Link to="/signup" className="w-full">
+              <Button size="lg" className="w-full btn-primary-clean h-12 text-base">
                 <Sparkles className="w-4 h-4 mr-2" />
                 Get AI Access Now
-              </Link>
-            </Button>
+              </Button>
+            </Link>
 
             <motion.div 
               className="flex items-center justify-center gap-2 mt-6 text-sm text-muted-foreground"
