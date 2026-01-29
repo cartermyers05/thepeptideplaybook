@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Navigate } from "react-router-dom";
 import { useCheckout } from "@/hooks/useCheckout";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,12 +7,14 @@ import { Shield, CreditCard, RefreshCcw } from "lucide-react";
 export default function Checkout() {
   const { startCheckout, isLoading } = useCheckout();
   const { user, isLoading: authLoading } = useAuth();
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && !hasStartedRef.current) {
+      hasStartedRef.current = true;
       startCheckout();
     }
-  }, [authLoading, user]);
+  }, [authLoading, user, startCheckout]);
 
   if (authLoading || isLoading) {
     return (
