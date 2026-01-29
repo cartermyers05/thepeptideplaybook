@@ -105,7 +105,7 @@ export function ChatbotDemo() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
             <Bot className="w-4 h-4" />
-            Try It Free
+            Live Demo
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
             See What Peptide Playbook AI Can Do
