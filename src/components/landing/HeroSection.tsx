@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Shield, Zap, Clock, Sparkles } from "lucide-react";
 import { FloatingOrbs } from "./FloatingOrbs";
 import { GridPattern } from "./GridPattern";
-import { AIAssistant } from "./AIAssistant";
 import { Link } from "react-router-dom";
 const trustItems = [{
   icon: Shield,
@@ -47,9 +46,9 @@ export function HeroSection() {
       <GridPattern variant="dots" />
       
       <div className="container px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-7xl mx-auto">
-          {/* Left content */}
-          <motion.div className="text-center lg:text-left" variants={containerVariants} initial="hidden" animate="visible">
+        <div className="max-w-4xl mx-auto">
+          {/* Centered content */}
+          <motion.div className="text-center" variants={containerVariants} initial="hidden" animate="visible">
             {/* AI Badge */}
             <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
               <Sparkles className="w-4 h-4 text-primary" />
@@ -74,28 +73,28 @@ export function HeroSection() {
             </motion.h1>
 
             {/* Subheadline */}
-            <motion.p variants={itemVariants} className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">Your 24/7 AI research assistant that knows 41+ peptides, their FDA status, mechanisms, and the latest studies. No more TikToks or Reddit speculation. Just ask.</motion.p>
+            <motion.p variants={itemVariants} className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">Your 24/7 AI research assistant that knows 41+ peptides, their FDA status, mechanisms, and the latest studies. No more TikToks or Reddit speculation. Just ask.</motion.p>
 
             {/* Stats row */}
-            <motion.div variants={itemVariants} className="flex flex-wrap justify-center lg:justify-start gap-6 mb-8">
-              <div className="text-center lg:text-left">
+            <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-6 mb-8">
+              <div className="text-center">
                 <p className="text-2xl font-bold text-gradient">41+</p>
                 <p className="text-xs text-muted-foreground">Peptides</p>
               </div>
               <div className="h-10 w-px bg-border" />
-              <div className="text-center lg:text-left">
+              <div className="text-center">
                 <p className="text-2xl font-bold text-gradient">500+</p>
                 <p className="text-xs text-muted-foreground">Studies Referenced</p>
               </div>
               <div className="h-10 w-px bg-border" />
-              <div className="text-center lg:text-left">
+              <div className="text-center">
                 <p className="text-2xl font-bold text-gradient">24/7</p>
                 <p className="text-xs text-muted-foreground">Instant Answers</p>
               </div>
             </motion.div>
 
             {/* CTAs */}
-            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
                 <Link to="/signup">
                   <Sparkles className="w-4 h-4 mr-2" />
@@ -108,7 +107,7 @@ export function HeroSection() {
             </motion.div>
 
             {/* Trust signals */}
-            <motion.div variants={itemVariants} className="flex flex-wrap justify-center lg:justify-start gap-6">
+            <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-6">
               {trustItems.map((item, index) => <motion.div key={index} className="flex items-center gap-2 text-sm text-muted-foreground group" whileHover={{
               scale: 1.02
             }} transition={{
@@ -121,20 +120,6 @@ export function HeroSection() {
                   <span>{item.text}</span>
                 </motion.div>)}
             </motion.div>
-          </motion.div>
-
-          {/* Right content - Chat demo (visible on all screens now) */}
-          <motion.div initial={{
-          opacity: 0,
-          x: 30
-        }} animate={{
-          opacity: 1,
-          x: 0
-        }} transition={{
-          delay: 0.3,
-          duration: 0.6
-        }} className="hidden md:block">
-            <AIAssistant />
           </motion.div>
         </div>
       </div>
