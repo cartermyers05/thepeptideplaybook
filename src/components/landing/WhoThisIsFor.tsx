@@ -2,50 +2,37 @@ import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
 
 const forYou = [
-  "You've seen peptides on TikTok and want the real story",
-  "You're considering peptides but don't know where to start safely",
-  "You've already started but feel like you're guessing",
-  "You want to have an informed conversation with your doctor",
-  "You're tired of conflicting advice from random internet strangers",
+  "You're curious about peptides but tired of conflicting information",
+  "You want to understand what the research actually says, not opinions",
+  "You plan to work with a doctor but want to be an informed patient",
+  "You're tired of TikTok and Reddit being your primary sources",
+  "You want to know how to evaluate sources before buying anything",
 ];
 
 const notForYou = [
-  "You're looking for someone to tell you exactly what to inject (I won't do that)",
-  "You want medical advice (this is educational, not prescriptive)",
-  "You're already working with a knowledgeable physician who's guiding you",
-  "You think the TikTok bros have it all figured out",
+  "You want someone to tell you exactly what to take and how much",
+  "You're looking for peptide sources or where to buy",
+  "You want to bypass working with a healthcare provider",
+  "You think this will replace actual medical advice",
 ];
 
 export function WhoThisIsFor() {
   return (
     <section className="py-20 md:py-28 bg-secondary/30">
       <div className="container px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            This Is For You <span className="text-gradient">If...</span>
-          </h2>
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {/* Perfect for you */}
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* For you */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="glass-card p-6 md:p-8"
+            className="bg-card border border-border rounded-xl p-6 md:p-8"
           >
-            <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+            <h3 className="text-xl font-semibold mb-6 flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
                 <Check className="w-4 h-4 text-success" />
               </div>
-              Perfect for you if...
+              This Is For You If...
             </h3>
             <ul className="space-y-4">
               {forYou.map((item, index) => (
@@ -64,14 +51,13 @@ export function WhoThisIsFor() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="glass-card p-6 md:p-8"
+            className="bg-card border border-border rounded-xl p-6 md:p-8"
           >
-            <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+            <h3 className="text-xl font-semibold mb-6 flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
                 <X className="w-4 h-4 text-destructive" />
               </div>
-              Not for you if...
+              Not For You If...
             </h3>
             <ul className="space-y-4">
               {notForYou.map((item, index) => (
@@ -85,15 +71,6 @@ export function WhoThisIsFor() {
             </ul>
           </motion.div>
         </div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="text-center text-sm text-muted-foreground mt-8 max-w-lg mx-auto"
-        >
-          If you're in the "not for you" camp, no hard feelings. This just isn't the right fit.
-        </motion.p>
       </div>
     </section>
   );
