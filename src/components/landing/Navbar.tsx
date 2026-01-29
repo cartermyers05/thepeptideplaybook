@@ -60,9 +60,9 @@ export function Navbar() {
               >
                 Log In
               </Link>
-              <Button asChild size="sm" className="btn-primary-clean">
-                <a href="#pricing">Get Access</a>
-              </Button>
+              <a href="#pricing">
+                <Button size="sm" className="btn-primary-clean">Get Access</Button>
+              </a>
             </div>
 
             {/* Mobile menu button */}
@@ -105,11 +105,9 @@ export function Navbar() {
               Log In
             </Link>
             <div className="pt-4 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}>
-              <Button asChild className="w-full btn-primary-clean">
-                <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)}>
-                  Get Access
-                </a>
-              </Button>
+              <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full btn-primary-clean">Get Access</Button>
+              </a>
             </div>
           </nav>
         </div>

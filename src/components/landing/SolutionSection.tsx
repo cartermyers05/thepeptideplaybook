@@ -91,9 +91,11 @@ export function SolutionSection() {
           </div>
 
           <motion.div variants={itemVariants}>
-            <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base">
-              <a href="#pricing">Get Full Access</a>
-            </Button>
+            <a href="#pricing">
+              <Button size="lg" className="btn-primary-clean h-12 px-8 text-base">
+                Get Full Access
+              </Button>
+            </a>
           </motion.div>
         </motion.div>
       </div>

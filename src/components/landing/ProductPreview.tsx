@@ -137,12 +137,12 @@ export function ProductPreview() {
                   ))}
                 </ul>
 
-                <Button asChild className="btn-primary-clean group">
-                  <Link to="/signup">
-                    Try AI Assistant
+                <Link to="/signup">
+                  <Button className="btn-primary-clean group">
+                    Get Full Access
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               </div>
 
               <div className="hidden md:block">
