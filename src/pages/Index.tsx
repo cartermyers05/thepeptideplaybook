@@ -1,11 +1,13 @@
 import { Navbar } from "@/components/landing/Navbar";
-import { Hero } from "@/components/landing/Hero";
+import { HeroSection } from "@/components/landing/HeroSection";
 import { ProblemSection } from "@/components/landing/ProblemSection";
-import { WhatsIncluded } from "@/components/landing/WhatsIncluded";
-import { Testimonials } from "@/components/landing/Testimonials";
-import { PricingSection } from "@/components/landing/PricingSection";
+import { AgitationSection } from "@/components/landing/AgitationSection";
+import { SolutionSection } from "@/components/landing/SolutionSection";
+import { ProductPreview } from "@/components/landing/ProductPreview";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { WhoThisIsFor } from "@/components/landing/WhoThisIsFor";
 import { FAQ } from "@/components/landing/FAQ";
-import { FinalCTA } from "@/components/landing/FinalCTA";
+import { PricingCTA } from "@/components/landing/PricingCTA";
 import { Footer } from "@/components/landing/Footer";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { HomepageSchemas } from "@/components/seo/HomepageSchemas";
@@ -21,16 +23,18 @@ const Index = () => {
         description="Stop taking peptide advice from TikTok. Get the research-based guide covering BPC-157, semaglutide, TB-500 and more. Know what's FDA-approved, what's experimental, and what to ask your doctor."
       />
       <HomepageSchemas />
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <main>
-          <Hero />
+          <HeroSection />
           <ProblemSection />
-          <WhatsIncluded />
-          <Testimonials />
-          <PricingSection />
+          <AgitationSection />
+          <SolutionSection />
+          <ProductPreview />
+          <HowItWorks />
+          <WhoThisIsFor />
           <FAQ />
-          <FinalCTA />
+          <PricingCTA />
         </main>
         <Footer />
         <FloatingChatButton />

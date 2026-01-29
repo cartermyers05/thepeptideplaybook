@@ -5,8 +5,7 @@ import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "About", href: "#about" },
+  { label: "What's Inside", href: "#product" },
   { label: "FAQ", href: "#faq" },
 ];
 
@@ -62,7 +61,7 @@ export function Navbar() {
                 Log In
               </Link>
               <Button asChild size="sm" className="btn-primary-clean">
-                <Link to="/signup">Get Started</Link>
+                <a href="#pricing">Get Access</a>
               </Button>
             </div>
 

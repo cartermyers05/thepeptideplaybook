@@ -9,33 +9,33 @@ import {
 const faqs = [
   {
     question: "Is this medical advice?",
-    answer: "No. The Peptide Playbook provides educational information about peptide research and regulations. It does not replace consultation with a qualified healthcare provider. Always discuss health decisions with your doctor.",
+    answer: "No. Peptide Playbook is educational content based on published research. It explains what studies show about mechanisms, safety, and research status. It does not tell you what to take, how much to take, or where to buy. Always work with a healthcare provider for medical decisions.",
   },
   {
-    question: "What peptides does this cover?",
-    answer: "We cover FDA-approved peptides (semaglutide, tirzepatide, liraglutide, bremelanotide) and research peptides (BPC-157, TB-500, Ipamorelin, CJC-1295, GHK-Cu, and more). Each gets a complete breakdown of research status, regulatory classification, and what we know vs. don't know.",
-  },
-  {
-    question: "How is this different from free info online?",
-    answer: "Free information is scattered, contradictory, and often wrong. We've synthesized peer-reviewed research, FDA documents, and regulatory filings into one clear, organized resource. No TikTok bro science. No Reddit speculation. Just research.",
+    question: "How is this different from free information online?",
+    answer: "Free information is scattered, often wrong, and usually trying to sell you something. Peptide Playbook organizes verified research into one place, cites sources, stays updated with FDA changes, and doesn't have an agenda to sell you peptides.",
   },
   {
     question: "What if I'm not satisfied?",
-    answer: "30-day money-back guarantee, no questions asked. If the Peptide Playbook doesn't deliver value, email us for a full refund.",
+    answer: "You have 30 days to request a full refund. No questions asked. Email us and we'll process it immediately.",
   },
   {
-    question: "How do I access it?",
-    answer: "Instant digital delivery. After purchase, you'll get immediate access to download the PDF and access the online version. No waiting.",
+    question: "Is this a subscription?",
+    answer: "No. You pay once ($67) and get lifetime access to everything, including all future updates.",
   },
   {
-    question: "Will this tell me what to take?",
-    answer: "No. We don't recommend specific peptides, dosages, or protocols. That's medical advice, which requires a healthcare provider who knows your situation. We give you the information to have an informed conversation with your doctor.",
+    question: "Will this tell me what peptides to take?",
+    answer: "No. It explains what the research shows so you can have informed conversations with your doctor. The decision of what's right for you is between you and your healthcare provider.",
+  },
+  {
+    question: "I'm not interested in taking peptides. Is this still useful?",
+    answer: "Yes — if you want to understand what peptides are, how they work, and what the research landscape looks like. Many people use this to have better conversations with their doctors or simply to understand a topic they keep hearing about.",
   },
 ];
 
 export function FAQ() {
   return (
-    <section id="faq" className="py-24 md:py-32">
+    <section id="faq" className="py-20 md:py-28">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -44,7 +44,7 @@ export function FAQ() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Frequently Asked Questions
+            Questions You're Probably Asking
           </h2>
         </motion.div>
 
