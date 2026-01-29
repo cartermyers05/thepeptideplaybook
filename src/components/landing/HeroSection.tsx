@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Shield, Zap, Clock, Sparkles } from "lucide-react";
+import { Shield, Zap, Clock, ArrowRight } from "lucide-react";
 import { FloatingOrbs } from "./FloatingOrbs";
 import { GridPattern } from "./GridPattern";
 import { Link } from "react-router-dom";
@@ -90,9 +90,9 @@ export function HeroSection() {
             {/* CTAs */}
             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-                <Link to="/signup">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Try AI Assistant Free
+                <Link to="/pricing">
+                  Get Full Access - $67
+                  <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm">
