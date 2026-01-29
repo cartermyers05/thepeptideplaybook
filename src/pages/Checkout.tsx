@@ -14,7 +14,7 @@ export default function Checkout() {
       hasStartedRef.current = true;
       startCheckout();
     }
-  }, [authLoading, user, startCheckout]);
+  }, [authLoading, user]);
 
   if (authLoading || isLoading) {
     return (
