@@ -63,7 +63,7 @@ export default function Signup() {
   };
 
   const handleContinue = () => {
-    navigate("/chat");
+    navigate("/dashboard");
   };
 
   return (
@@ -113,10 +113,10 @@ export default function Signup() {
               exit={{ opacity: 0, x: -20 }}
             >
               <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                Start your free trial
+                Create your account
               </h1>
               <p className="text-muted-foreground mb-8">
-                Enter your email to get started
+                Get instant access to peptide research
               </p>
 
               <form onSubmit={handleEmailSubmit} className="space-y-6">
@@ -279,9 +279,9 @@ export default function Signup() {
           </p>
           <div className="space-y-4">
             {[
-              "Unlimited peptide questions",
-              "Research citations included",
-              "7-day trial for just $1",
+              "Research-backed peptide answers",
+              "40+ peptide database",
+              "AI-powered research assistant",
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-primary-foreground/20 flex items-center justify-center">

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Star } from "lucide-react";
+import { Check, Star, Shield, CreditCard, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCheckout } from "@/hooks/useCheckout";
 import { useAuth } from "@/hooks/useAuth";
@@ -141,7 +141,27 @@ export function PricingSection() {
           ))}
         </div>
 
-        <div className="text-center mt-12">
+        {/* Trust badges */}
+        <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            <span>SSL Secured</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4" />
+            <span>Stripe Payments</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <RefreshCcw className="w-4 h-4" />
+            <span>30-Day Refund</span>
+          </div>
+        </div>
+
+        <p className="text-center text-muted-foreground mt-6">
+          Join 4,200+ members who trust Peptide Playbook
+        </p>
+
+        <div className="text-center mt-8">
           <p className="text-muted-foreground mb-2">Prefer monthly access?</p>
           <Link to="/pricing" className="text-primary hover:underline">
             View subscription options →

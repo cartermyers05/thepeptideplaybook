@@ -1,27 +1,43 @@
 import { useState, useEffect } from "react";
-import { Rocket } from "lucide-react";
+import { X } from "lucide-react";
 
 export function UrgencyBanner() {
+  const [isVisible, setIsVisible] = useState(true);
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
-  const [spotsClaimed, setSpotsClaimed] = useState(127);
 
   useEffect(() => {
-    // Get or set end date in localStorage
-    let endDate = localStorage.getItem('pp-launch-end');
-    if (!endDate) {
-      // Set to 48 hours from now
-      endDate = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
-      localStorage.setItem('pp-launch-end', endDate);
+    // Check if dismissed
+    const dismissed = sessionStorage.getItem("urgency_dismissed");
+    if (dismissed) {
+      setIsVisible(false);
+      return;
     }
 
+    // Get or set end date in localStorage
+    const getEndTime = () => {
+      const stored = localStorage.getItem("urgency_end");
+      if (stored) return new Date(stored);
+      
+      const end = new Date();
+      end.setHours(end.getHours() + 24);
+      localStorage.setItem("urgency_end", end.toISOString());
+      return end;
+    };
+
+    const endTime = getEndTime();
+
     const timer = setInterval(() => {
-      const diff = new Date(endDate as string).getTime() - Date.now();
+      const now = new Date();
+      const diff = endTime.getTime() - now.getTime();
+
       if (diff <= 0) {
-        // Reset timer if expired
-        const newEnd = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
-        localStorage.setItem('pp-launch-end', newEnd);
+        // Reset for another 24 hours
+        const newEnd = new Date();
+        newEnd.setHours(newEnd.getHours() + 24);
+        localStorage.setItem("urgency_end", newEnd.toISOString());
         return;
       }
+
       setTimeLeft({
         hours: Math.floor(diff / (1000 * 60 * 60)),
         minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
@@ -32,23 +48,34 @@ export function UrgencyBanner() {
     return () => clearInterval(timer);
   }, []);
 
-  const formatTime = (num: number) => num.toString().padStart(2, '0');
+  const handleDismiss = () => {
+    sessionStorage.setItem("urgency_dismissed", "true");
+    setIsVisible(false);
+  };
+
+  if (!isVisible) return null;
 
   return (
-    <div className="urgency-banner">
-      <div className="container px-4">
-        <div className="flex items-center justify-center gap-2 text-sm md:text-base flex-wrap">
-          <Rocket className="w-4 h-4" />
-          <span className="font-medium">
-            Launch Price: <span className="font-bold">$47</span> → Increases to $67 in
+    <div className="bg-primary text-primary-foreground py-2.5 px-4 relative">
+      <div className="container flex items-center justify-center gap-2 text-sm">
+        <span>🎉</span>
+        <span>
+          New Year Special: Get 20% off Pro with code{" "}
+          <span className="font-bold">PEPTIDE2026</span> — Ends in{" "}
+          <span className="font-mono font-semibold">
+            {String(timeLeft.hours).padStart(2, "0")}:
+            {String(timeLeft.minutes).padStart(2, "0")}:
+            {String(timeLeft.seconds).padStart(2, "0")}
           </span>
-          <span className="countdown-timer">
-            {formatTime(timeLeft.hours)}:{formatTime(timeLeft.minutes)}:{formatTime(timeLeft.seconds)}
-          </span>
-          <span className="hidden sm:inline">—</span>
-          <span className="hidden sm:inline font-medium">{spotsClaimed} spots claimed</span>
-        </div>
+        </span>
       </div>
+      <button
+        onClick={handleDismiss}
+        className="absolute right-4 top-1/2 -translate-y-1/2 hover:opacity-70 transition-opacity"
+        aria-label="Dismiss banner"
+      >
+        <X className="w-4 h-4" />
+      </button>
     </div>
   );
 }
