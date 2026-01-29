@@ -23,6 +23,7 @@ const Index = () => {
       <SEOHead
         title="Peptide Playbook AI | The #1 AI Research Assistant for Peptides"
         description="Ask anything about peptides. Get instant, research-backed answers from an AI trained on 41+ peptides and 500+ studies. Know FDA status, compare peptides, and understand the science."
+        canonical="/"
       />
       <HomepageSchemas />
       <div className="min-h-screen bg-background">

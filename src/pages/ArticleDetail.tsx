@@ -15,6 +15,7 @@ import { ArticleContent } from "@/components/articles/ArticleContent";
 import { CitationsSection } from "@/components/articles/CitationsSection";
 import { RelatedArticles } from "@/components/articles/RelatedArticles";
 import { InlineAICTA } from "@/components/articles/InlineAICTA";
+import { TableOfContents } from "@/components/blog/TableOfContents";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -238,6 +239,9 @@ export default function ArticleDetail() {
 
             {/* Inline CTA after quick answer */}
             <InlineAICTA articleTitle={article.title} variant="compact" />
+
+            {/* Table of Contents */}
+            <TableOfContents content={article.full_content} />
 
             {/* Main Content */}
             <div className="mt-8">

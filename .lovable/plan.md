@@ -20,7 +20,7 @@
 |------------|--------|-------|
 | Unique title tags | ✅ | All pages use `SEOHead` with unique titles + `SITE_NAME` suffix |
 | Unique meta descriptions | ✅ | Set via `SEOHead` props on each page |
-| Canonical URLs | ⚠️ PARTIAL | Set on some pages (About, Privacy, etc.) but **not on homepage or many key pages** |
+| Canonical URLs | ✅ | Homepage and all pages now have canonicals via SEOHead |
 | XML sitemap | ✅ | Edge function generates dynamic sitemap with articles + static pages |
 | robots.txt | ✅ | Present and explicitly allows AI crawlers (GPTBot, PerplexityBot, ClaudeBot, etc.) |
 | Page speed | ⚠️ UNTESTED | Needs Lighthouse audit |
@@ -39,7 +39,7 @@
 | Organization | ✅ | `HomepageSchemas.tsx`, `OrganizationSchema.tsx` |
 | FAQPage | ✅ | `HomepageSchemas.tsx` (landing), `FAQSchema.tsx` (articles) |
 | Article | ✅ | `ArticleSchema.tsx` on article pages |
-| Product | ⚠️ **WRONG PRICE** | `HomepageSchemas.tsx` shows **$167** instead of **$67** |
+| Product | ✅ | `HomepageSchemas.tsx` — price corrected to $67 |
 | BreadcrumbList | ✅ | `Breadcrumbs.tsx` + `BreadcrumbSchema.tsx` |
 | Author | ✅ | Embedded in `ArticleSchema` |
 | MedicalWebPage | ✅ | `MedicalWebPageSchema.tsx` on article pages |
@@ -128,7 +128,7 @@
 | "One-time payment" stated | ✅ | Explicit in multiple places |
 | What's included list | ✅ | 6 features with checkmarks |
 | 30-day guarantee visible | ✅ | With shield icon |
-| Payment method icons | ⚠️ **MISSING** | No Visa/MC/Amex icons shown |
+| Payment method icons | ✅ | Visa/MC/Amex/Stripe icons added to PricingCTA |
 | CTA button stands out | ✅ | Primary color, prominent sizing |
 
 ### Trust Elements
@@ -267,7 +267,7 @@ Article pages (`ArticleDetail.tsx`) include:
 | Last Updated date | ✅ |
 | Author byline | ✅ |
 | Quick Answer box | ✅ |
-| Table of contents | ❌ **MISSING** |
+| Table of contents | ✅ | TableOfContents component integrated |
 | H2/H3 structure | ✅ |
 | FAQ accordion | ✅ |
 | FAQPage schema | ✅ |
