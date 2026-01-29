@@ -11,8 +11,8 @@ export function ProblemSection() {
           className="max-w-3xl mx-auto"
         >
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-center mb-10">
-            You're Not Confused Because You're Stupid.{" "}
-            <span className="block mt-2">You're Confused Because the Information Is a Mess.</span>
+            It's Not You.{" "}
+            <span className="block mt-2">It's the Information.</span>
           </h2>
 
           <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
