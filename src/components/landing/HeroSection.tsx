@@ -75,9 +75,9 @@ export function HeroSection() {
               variants={itemVariants}
               className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed"
             >
-              An 80-page research guide, interactive database, and AI assistant that explains 
-              what the science actually says — so you can have real conversations with your 
-              doctor instead of guessing.
+              Your personal AI research assistant that stays on top of the latest peptide science 
+              — breaking news, study updates, and instant answers to any question. No more 
+              endless scrolling. Just ask.
             </motion.p>
 
             {/* CTAs */}
