@@ -1,225 +1,128 @@
 
-# Add Interactive Chatbot Demo to Landing Page
+# Fix Misleading "Try Free" Language on Landing Page
 
-## Overview
+## The Problem
 
-Create a new `ChatbotDemo` component that allows visitors to ask **one free question** from a predefined list, receive a real AI response streamed from the backend, and then see a soft paywall prompting them to purchase.
+The landing page has confusing messaging around "free" that makes it seem like users can try the full product for free:
+
+1. **Hero button says "Try AI Assistant Free"** → Goes to `/signup` (a paid page)
+2. **ChatbotDemo badge says "Try It Free"** → This IS the controlled demo, but the language is misleading
+
+Users seeing "Try AI Assistant Free" expect to actually try it free, not land on a signup/payment page.
 
 ---
 
-## Placement
+## The Solution
 
-The demo will be inserted **after AgitationSection** and **before SolutionSection** in `src/pages/Index.tsx`:
+### 1. Update Hero CTA Button
 
-```text
-HeroSection
-ProblemSection
-AgitationSection
-↓
-NEW: ChatbotDemo  ← Insert here
-↓
-SolutionSection
-ProductPreview
-...
+Change from:
+```
+"Try AI Assistant Free" → links to /signup
+```
+
+To:
+```
+"Get Full Access" → links to /signup
+```
+
+OR point to the demo section:
+```
+"Try Demo" → links to #demo
+```
+
+**Recommended approach:** Change the primary CTA to point to the demo section (`#demo`) so users can actually "try" something, then update the text to match.
+
+| Current | Proposed |
+|---------|----------|
+| "Try AI Assistant Free" → `/signup` | "See It In Action" → `#demo` |
+
+The second button "See What's Included" stays as is, pointing to `#product`.
+
+### 2. Update ChatbotDemo Badge
+
+Change the badge from:
+```
+"Try It Free"
+```
+
+To:
+```
+"Live Demo"
+```
+
+This correctly sets expectations - it's a demo, not the full product for free.
+
+---
+
+## Files to Modify
+
+### 1. `src/components/landing/HeroSection.tsx`
+
+**Line 111-116:**
+```tsx
+// Change from:
+<Link to="/signup">
+  <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group">
+    <Sparkles className="w-4 h-4 mr-2" />
+    Try AI Assistant Free
+  </Button>
+</Link>
+
+// To:
+<a href="#demo">
+  <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group">
+    <Sparkles className="w-4 h-4 mr-2" />
+    See It In Action
+  </Button>
+</a>
+```
+
+This makes the primary CTA scroll to the demo section where users can actually interact with the bot.
+
+### 2. `src/components/landing/ChatbotDemo.tsx`
+
+**Line 106-109:**
+```tsx
+// Change from:
+<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+  <Bot className="w-4 h-4" />
+  Try It Free
+</div>
+
+// To:
+<div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+  <Bot className="w-4 h-4" />
+  Live Demo
+</div>
 ```
 
 ---
 
-## New Component: `src/components/landing/ChatbotDemo.tsx`
+## Updated User Flow
 
-### Structure
-
-```text
+```
 ┌─────────────────────────────────────────────────────────────┐
-│  Section Header                                             │
-│  "See What Peptide Playbook AI Can Do"                      │
-│  "Ask one question free. Pick a topic below."               │
-├─────────────────────────────────────────────────────────────┤
-│  4 Question Buttons (styled to match brand)                 │
-│  • "What peptides are actually FDA approved?"               │
-│  • "Are peptides safe to use?"                              │
-│  • "What's the best peptide for fat loss?"                  │
-│  • "How do I know if a peptide source is legit?"            │
-├─────────────────────────────────────────────────────────────┤
-│  Chat Interface (appears after selection)                   │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │  User question bubble                                   ││
-│  │  AI response bubble (streamed with markdown)            ││
-│  └─────────────────────────────────────────────────────────┘│
-├─────────────────────────────────────────────────────────────┤
-│  Paywall Card (appears after response completes)            │
-│  "Want to keep exploring?"                                  │
-│  "Unlock unlimited questions + the complete guide"          │
-│  [Get Full Access — $67]                                    │
+│  HERO SECTION                                               │
+│                                                             │
+│  [See It In Action] ─────────────► Scrolls to #demo         │
+│  [See What's Included] ──────────► Scrolls to #product      │
+└─────────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│  DEMO SECTION (ChatbotDemo)                                 │
+│                                                             │
+│  Badge: "Live Demo"                                         │
+│  User picks 1 of 4 questions → Gets real AI response        │
+│  After response → Paywall: "Get Full Access — $67"          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Functionality
-
-1. **Initial State**: Show 4 question buttons, no chat visible
-2. **On Question Click**:
-   - Check localStorage for `demo-question-used`
-   - If already used → Show paywall immediately, skip API call
-   - If not used → Add question as user message, call chat API, stream response
-3. **API Call**: Use the existing `chat` edge function via `supabase.functions.invoke()`
-4. **Streaming**: Parse SSE stream same as `ChatWidget.tsx` does
-5. **After Response**: 
-   - Set `localStorage.setItem("demo-question-used", "true")`
-   - Show paywall card below the response
-6. **Subsequent Clicks**: If user clicks another question → Paywall immediately
-
-### State Management
-
-```typescript
-const [hasUsedQuestion, setHasUsedQuestion] = useState(false);
-const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
-const [response, setResponse] = useState("");
-const [isLoading, setIsLoading] = useState(false);
-const [showPaywall, setShowPaywall] = useState(false);
-
-// On mount: check localStorage
-useEffect(() => {
-  const used = localStorage.getItem("demo-question-used") === "true";
-  setHasUsedQuestion(used);
-}, []);
-```
-
 ---
 
-## Styling
+## Result
 
-- Use existing `glass-card` class for the chat container
-- Question buttons: `bg-muted hover:bg-primary/10` with purple border on hover
-- Chat bubbles: Match `ChatWidget.tsx` styling
-  - User: `bg-primary text-primary-foreground rounded-2xl rounded-br-sm`
-  - AI: `bg-muted rounded-2xl rounded-bl-sm` with ReactMarkdown
-- Paywall card: Gradient border with primary color accent
-
----
-
-## Files to Create/Modify
-
-### 1. Create: `src/components/landing/ChatbotDemo.tsx`
-
-New component with:
-- Section wrapper with id="demo" for anchor links
-- Headline and subheadline
-- 4 question buttons (grid layout)
-- Chat interface (hidden until question selected)
-- Paywall card (hidden until response complete or question already used)
-- Integration with chat edge function
-- localStorage persistence
-
-### 2. Modify: `src/pages/Index.tsx`
-
-- Import `ChatbotDemo`
-- Insert `<ChatbotDemo />` after `<AgitationSection />` and before `<SolutionSection />`
-
----
-
-## Technical Details
-
-### Chat API Integration
-
-```typescript
-const handleQuestionClick = async (question: string) => {
-  // Check if already used
-  if (hasUsedQuestion) {
-    setShowPaywall(true);
-    return;
-  }
-
-  setSelectedQuestion(question);
-  setIsLoading(true);
-
-  try {
-    const response = await supabase.functions.invoke("chat", {
-      body: { messages: [{ role: "user", content: question }] },
-    });
-
-    if (response.error) throw response.error;
-
-    // Stream the response
-    const reader = response.data.getReader();
-    const decoder = new TextDecoder();
-    let fullContent = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value);
-      const lines = chunk.split("\n");
-
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          const data = line.slice(6);
-          if (data === "[DONE]") continue;
-
-          try {
-            const parsed = JSON.parse(data);
-            const content = parsed.choices?.[0]?.delta?.content || "";
-            fullContent += content;
-            setResponse(fullContent);
-          } catch {
-            // Skip invalid JSON
-          }
-        }
-      }
-    }
-
-    // Mark as used
-    localStorage.setItem("demo-question-used", "true");
-    setHasUsedQuestion(true);
-    setShowPaywall(true);
-  } catch (error) {
-    console.error("Demo chat error:", error);
-    setResponse("Sorry, something went wrong. Please try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
-```
-
-### Predefined Questions
-
-```typescript
-const DEMO_QUESTIONS = [
-  "What peptides are actually FDA approved?",
-  "Are peptides safe to use?",
-  "What's the best peptide for fat loss?",
-  "How do I know if a peptide source is legit?",
-];
-```
-
-### Paywall Component
-
-```tsx
-{showPaywall && (
-  <motion.div
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="mt-6 p-6 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20"
-  >
-    <h4 className="text-lg font-semibold mb-1">Want to keep exploring?</h4>
-    <p className="text-muted-foreground text-sm mb-4">
-      Unlock unlimited questions + the complete guide
-    </p>
-    <Link to="/signup" className="relative z-10">
-      <Button className="btn-primary-clean">
-        Get Full Access — $67
-      </Button>
-    </Link>
-  </motion.div>
-)}
-```
-
----
-
-## Animations
-
-- Section fade-in on scroll (using framer-motion viewport animation)
-- Question buttons: subtle hover scale effect
-- Chat messages: fade-in animation
-- Paywall: slide up + fade in after response completes
-- Loading state: bouncing dots animation (same as ChatWidget)
+- **No more "free" confusion** - Language accurately describes what happens
+- **Better conversion funnel** - Hero CTA leads to demo where users experience the product, then see the paywall
+- **Controlled demo intact** - Users can only ask 1 of 4 questions, then hit the paywall
