@@ -1,7 +1,5 @@
 import { 
   Home, 
-  BookOpen, 
-  MessageSquare, 
   ClipboardCheck, 
   Database, 
   Bot, 
@@ -25,8 +23,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
-  { icon: BookOpen, label: "The Guide", path: "/dashboard/guide" },
-  { icon: MessageSquare, label: "Doctor Scripts", path: "/dashboard/scripts" },
   { icon: ClipboardCheck, label: "Source Checklist", path: "/dashboard/checklist" },
   { icon: Database, label: "Peptide Database", path: "/dashboard/database" },
   { icon: Bot, label: "AI Assistant", path: "/dashboard/chat" },

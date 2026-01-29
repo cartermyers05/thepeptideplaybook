@@ -8,13 +8,13 @@ const steps = [
   },
   {
     step: "2",
-    title: "Start With the Guide",
-    description: "Read through the sections relevant to you. Use the database to look up specific peptides.",
+    title: "Explore the Database",
+    description: "Browse 41+ peptides with research status, mechanisms, and safety info at your fingertips.",
   },
   {
     step: "3",
-    title: "Have Informed Conversations",
-    description: "Use the scripts and your research to discuss options with your healthcare provider.",
+    title: "Ask the AI Assistant",
+    description: "Get instant, research-backed answers to your peptide questions anytime.",
   },
 ];
 

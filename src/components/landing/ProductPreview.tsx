@@ -1,14 +1,8 @@
 import { motion } from "framer-motion";
-import { BookOpen, Database, Bot, FileText, ShieldCheck, Mail } from "lucide-react";
+import { Database, Bot, ShieldCheck, Mail } from "lucide-react";
 import { FloatingOrbs } from "./FloatingOrbs";
 
 const products = [
-  {
-    icon: BookOpen,
-    title: "The Complete Guide",
-    description: "80+ pages covering every major peptide category: GLP-1s, recovery peptides, growth hormone secretagogues, and more. Each section explains mechanisms, research status, FDA classification, and what the studies actually show.",
-    stats: "8 chapters • 82 pages • Downloadable PDF",
-  },
   {
     icon: Database,
     title: "Peptide Database",
@@ -20,12 +14,6 @@ const products = [
     title: "AI Research Assistant",
     description: "Ask questions about peptide mechanisms, research findings, or safety considerations and get clear, research-based answers. Available 24/7.",
     stats: "Instant answers • Educational only",
-  },
-  {
-    icon: FileText,
-    title: "Doctor Conversation Scripts",
-    description: "Know exactly what to say when you bring up peptides with your doctor. Templates for starting conversations, requesting referrals, and handling dismissal.",
-    stats: "5 scripts • Copy & paste",
   },
   {
     icon: ShieldCheck,
@@ -94,7 +82,7 @@ export function ProductPreview() {
         </motion.div>
 
         <motion.div 
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
+          className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"

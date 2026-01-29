@@ -11,10 +11,9 @@ import { CreditCard, Mail, User, Shield, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const allFeatures = [
-  "Complete PDF Guide (80+ pages)",
-  "Doctor Scripts & Checklist",
   "Peptide Database (41 peptides)",
   "AI Research Assistant",
+  "Source Evaluation Checklist",
   "Monthly Research Digest",
   "Lifetime Updates",
   "Email Support",
