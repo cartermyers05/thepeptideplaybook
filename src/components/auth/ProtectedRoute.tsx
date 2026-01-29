@@ -1,15 +1,18 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useTier } from "@/hooks/useTier";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const { isPaid, isLoading: tierLoading } = useTier();
   const location = useLocation();
 
-  if (isLoading) {
+  // Show loading while checking auth or tier
+  if (authLoading || tierLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-pulse-soft">
@@ -19,9 +22,16 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
+  // Not logged in → go to login
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Logged in but hasn't paid → go to checkout
+  if (!isPaid) {
+    return <Navigate to="/checkout" replace />;
+  }
+
+  // Logged in AND paid → show content
   return <>{children}</>;
 }
