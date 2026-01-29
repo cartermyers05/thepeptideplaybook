@@ -191,13 +191,52 @@ Before publishing, verify:
 
 ## Implementation Steps
 
-1. **Database**: Create `research_digests` table
-2. **Backend**: Build `generate-news` edge function
-3. **Backend**: Build `generate-digest` edge function
-4. **Cron**: Enable pg_cron and pg_net extensions
-5. **Cron**: Set up daily and monthly schedules
-6. **Frontend**: Update Digest.tsx to use database
-7. **Testing**: Manually trigger functions to verify
+1. ✅ **Database**: Create `research_digests` table
+2. ✅ **Backend**: Build `generate-news` edge function
+3. ✅ **Backend**: Build `generate-digest` edge function
+4. ⏳ **Cron**: Enable pg_cron and pg_net extensions (requires manual setup)
+5. ⏳ **Cron**: Set up daily and monthly schedules (requires manual setup)
+6. ✅ **Frontend**: Update Digest.tsx to use database
+7. ✅ **Frontend**: Add freshness indicator to QuickNewsPanel
+8. ⏳ **Testing**: Manually trigger functions to verify
+
+---
+
+## Cron Setup (Manual Step Required)
+
+To enable automated scheduling, run this SQL in your backend:
+
+```sql
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_net;
+
+-- Daily news generation (runs at 8 AM UTC)
+SELECT cron.schedule(
+  'daily-news-generation',
+  '0 8 * * *',
+  $$
+  SELECT net.http_post(
+    url:='https://xsanfxyahxcsjsrlfopq.supabase.co/functions/v1/generate-news',
+    headers:='{"Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzYW5meHlhaHhjc2pzcmxmb3BxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1Njg5MjcsImV4cCI6MjA4NTE0NDkyN30.ify7d2WuDY-t4aUeQLWx8s-QYSnJ5dPPrcYri4G_5VM"}'::jsonb,
+    body:='{}'::jsonb
+  );
+  $$
+);
+
+-- Monthly digest (runs on 1st at 6 AM UTC)
+SELECT cron.schedule(
+  'monthly-digest',
+  '0 6 1 * *',
+  $$
+  SELECT net.http_post(
+    url:='https://xsanfxyahxcsjsrlfopq.supabase.co/functions/v1/generate-digest',
+    headers:='{"Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzYW5meHlhaHhjc2pzcmxmb3BxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1Njg5MjcsImV4cCI6MjA4NTE0NDkyN30.ify7d2WuDY-t4aUeQLWx8s-QYSnJ5dPPrcYri4G_5VM"}'::jsonb,
+    body:='{}'::jsonb
+  );
+  $$
+);
+```
 
 ---
 
