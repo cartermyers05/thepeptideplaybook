@@ -20,6 +20,17 @@ export function WhoThisIsFor() {
   return (
     <section className="py-20 md:py-28 bg-secondary/30">
       <div className="container px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
+            Is This Right for You?
+          </h2>
+        </motion.div>
+        
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* For you */}
           <motion.div

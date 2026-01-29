@@ -13,8 +13,8 @@ const steps = [
   },
   {
     step: "3",
-    title: "Talk to Your Doctor",
-    description: "Use the scripts and your new knowledge to have real conversations about what's right for you.",
+    title: "Have Informed Conversations",
+    description: "Use the scripts and your research to discuss options with your healthcare provider.",
   },
 ];
 

@@ -106,9 +106,9 @@ export function Navbar() {
             </Link>
             <div className="pt-4 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}>
               <Button asChild className="w-full btn-primary-clean">
-                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                  Get Started
-                </Link>
+                <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)}>
+                  Get Access
+                </a>
               </Button>
             </div>
           </nav>
