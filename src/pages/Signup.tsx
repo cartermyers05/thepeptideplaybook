@@ -63,7 +63,7 @@ export default function Signup() {
   };
 
   const handleContinue = () => {
-    navigate("/dashboard");
+    navigate("/checkout");
   };
 
   return (
@@ -256,11 +256,11 @@ export default function Signup() {
                 Welcome to PeptideGPT!
               </h1>
               <p className="text-muted-foreground mb-8">
-                Your account is ready. Let's ask your first peptide question.
+                Your account is ready. Complete your purchase to unlock full access.
               </p>
 
               <Button size="lg" className="w-full h-12" onClick={handleContinue}>
-                Start Exploring
+                Complete Purchase
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </motion.div>

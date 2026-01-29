@@ -5,12 +5,15 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import ChatInterface from "@/components/dashboard/ChatInterface";
 import QuickNewsPanel from "@/components/dashboard/QuickNewsPanel";
 import WelcomeBanner from "@/components/dashboard/WelcomeBanner";
+import { UpgradePrompt } from "@/components/dashboard/UpgradePrompt";
+import { useTier } from "@/hooks/useTier";
 import { cn } from "@/lib/utils";
 
 type Tab = "chat" | "news";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
+  const { isPaid } = useTier();
 
   return (
     <DashboardLayout>
@@ -43,7 +46,7 @@ export default function Dashboard() {
             {/* AI Panel - 60% */}
             <div className="flex-1 min-w-0">
               <div className="h-full rounded-xl border border-border bg-card overflow-hidden">
-                <ChatInterface />
+                {isPaid ? <ChatInterface /> : <UpgradePrompt feature="AI Research Assistant" />}
               </div>
             </div>
 
@@ -65,7 +68,7 @@ export default function Dashboard() {
                   transition={{ duration: 0.2 }}
                   className="h-full rounded-xl border border-border bg-card overflow-hidden"
                 >
-                  <ChatInterface />
+                  {isPaid ? <ChatInterface /> : <UpgradePrompt feature="AI Research Assistant" />}
                 </motion.div>
               ) : (
                 <motion.div
