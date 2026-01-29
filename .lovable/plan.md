@@ -1,79 +1,87 @@
 
-# Fix: "Get Access" Button Not Working on Homepage
+# Footer Redesign: Match Purple Brand Identity
 
 ## Problem
 
-The "Get AI Access Now" button in the PricingCTA section at the bottom of the homepage is not responding to clicks.
+The footer uses `bg-foreground` class which maps to a dark navy/slate blue color (`#1e293b`). This clashes with the purple-centric brand identity that uses `#7C3AED` as the primary accent on warm off-white backgrounds.
 
-## Root Cause
-
-In `src/components/landing/PricingCTA.tsx`, the button is wrapped in a `motion.div` with hover/tap animations:
-
-```tsx
-<motion.div
-  whileHover={{ scale: 1.02 }}
-  whileTap={{ scale: 0.98 }}
->
-  <Button asChild ...>
-    <Link to="/signup">Get AI Access Now</Link>
-  </Button>
-</motion.div>
-```
-
-This causes two issues:
-1. The `motion.div` wrapper can interfere with click event propagation to the child `Link` component
-2. The CSS `.btn-primary-clean:hover` already applies `transform: translateY(-1px)` and custom hover effects, which conflict with the motion animations
+---
 
 ## Solution
 
-Remove the `motion.div` wrapper from around the Button. The button already has premium hover animations via CSS (`.btn-primary-clean` class), so the Framer Motion wrapper is redundant and causing the click issue.
+Redesign the footer to use the purple brand colors with a sophisticated gradient treatment, matching the premium health-tech aesthetic.
 
 ---
 
-## File Changes
+## Design Approach
 
-### File: `src/components/landing/PricingCTA.tsx`
+**Option: Dark Purple Gradient Footer**
 
-**Change:** Remove the `motion.div` wrapper around the Button (lines 98-108)
+Replace the navy blue with a rich, branded dark purple gradient:
 
-**Before:**
-```tsx
-<motion.div
-  whileHover={{ scale: 1.02 }}
-  whileTap={{ scale: 0.98 }}
->
-  <Button asChild size="lg" className="w-full btn-primary-clean h-12 text-base">
-    <Link to="/signup">
-      <Sparkles className="w-4 h-4 mr-2" />
-      Get AI Access Now
-    </Link>
-  </Button>
-</motion.div>
-```
-
-**After:**
-```tsx
-<Button asChild size="lg" className="w-full btn-primary-clean h-12 text-base">
-  <Link to="/signup">
-    <Sparkles className="w-4 h-4 mr-2" />
-    Get AI Access Now
-  </Link>
-</Button>
+```text
+┌─────────────────────────────────────────────────────┐
+│  Gradient: Deep Purple (#1a0a2e) → Dark Violet      │
+│                                                     │
+│  ⚡ Peptide Playbook AI                             │
+│  Educational content. Not medical advice.           │
+│                                                     │
+│  Terms | Privacy | Disclaimer | Contact             │
+│                                                     │
+│  ─────────────────────────────────────              │
+│  © 2025 Peptide Playbook AI. All rights reserved.   │
+└─────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Why This Works
+## Changes
 
-1. The `Link` component will now receive click events directly without the motion wrapper intercepting them
-2. The `.btn-primary-clean` CSS class already provides premium hover animations:
-   - Shimmer effect on hover
-   - Slight lift (`translateY(-1px)`)
-   - Glow shadow
-3. No visual degradation - the button will still look and animate beautifully
+### File: `src/components/landing/Footer.tsx`
+
+**Background Styling:**
+
+Replace:
+```tsx
+<footer className="bg-foreground text-muted py-12">
+```
+
+With a custom gradient that uses the purple brand colors:
+```tsx
+<footer className="bg-gradient-to-b from-[#1a0a2e] to-[#0f051a] text-white py-12 relative overflow-hidden">
+```
+
+**Add Subtle Visual Interest:**
+- Add a subtle radial glow effect behind content
+- Use purple-tinted text colors instead of gray muted colors
+- Add a decorative gradient line at the top to connect with the page
+
+**Text Colors:**
+- Main brand text: `text-white`
+- Secondary text: `text-purple-200/80` or `text-white/60`
+- Links hover: `text-purple-300`
+
+**Optional Enhancement:**
+- Add a subtle gradient divider at the top of the footer to create a smooth transition from the page content
 
 ---
 
-## Technical Note
+## Color Palette for Footer
 
-The `Button asChild` pattern uses Radix's `Slot` component to pass props to the child element. When wrapped in a `motion.div`, the motion component can capture pointer events before they reach the actual clickable `Link` element, especially when combined with `whileTap` which listens for pointer down/up events.
+| Element | Current | New |
+|---------|---------|-----|
+| Background | `#1e293b` (navy) | Gradient: `#1a0a2e` → `#0f051a` (deep purple) |
+| Brand name | `text-background` | `text-white` |
+| Disclaimer | `text-muted-foreground` | `text-purple-200/70` |
+| Links | `text-muted-foreground` | `text-purple-200/60` → hover: `text-purple-300` |
+| Border | `border-muted-foreground/20` | `border-purple-500/20` |
+
+---
+
+## Visual Result
+
+The footer will now feature:
+- A rich, deep purple gradient that aligns with the primary brand color
+- Smooth color transition matching the site's premium aesthetic
+- Better visual cohesion with the purple accents used throughout the landing page
+- Subtle glow effects for added depth
