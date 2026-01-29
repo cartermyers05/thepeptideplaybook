@@ -149,7 +149,42 @@
   }
 
   /* ========================================
-     SUBTLE GLASS CARD - Premium Health-Tech
+     GRADIENT MESH BACKGROUND
+     ======================================== */
+
+  .gradient-mesh-bg {
+    position: relative;
+    background: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(var(--primary) / 0.08), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, hsl(var(--primary) / 0.05), transparent),
+      radial-gradient(ellipse 50% 30% at 0% 100%, hsl(var(--primary) / 0.04), transparent),
+      hsl(var(--background));
+  }
+
+  .dark .gradient-mesh-bg {
+    background: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsl(var(--primary) / 0.15), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 0%, hsl(var(--primary) / 0.1), transparent),
+      radial-gradient(ellipse 50% 30% at 0% 100%, hsl(var(--primary) / 0.08), transparent),
+      hsl(var(--background));
+  }
+
+  /* ========================================
+     GRAIN TEXTURE OVERLAY
+     ======================================== */
+
+  .grain-overlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ========================================
+     GLASS MORPHISM - Enhanced
      ======================================== */
 
   .glass-card-subtle {
@@ -166,7 +201,6 @@
     border-color: rgba(139, 92, 246, 0.15);
   }
 
-  /* Legacy glass-card - kept for compatibility */
   .glass-card {
     @apply rounded-xl relative;
     background: rgba(255, 255, 255, 0.7);
@@ -174,6 +208,15 @@
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(139, 92, 246, 0.15);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    border-color: rgba(139, 92, 246, 0.25);
+    box-shadow: 
+      0 8px 30px rgba(0, 0, 0, 0.06),
+      0 0 0 1px rgba(139, 92, 246, 0.1);
+    transform: translateY(-2px);
   }
 
   .dark .glass-card {
@@ -181,8 +224,50 @@
     border-color: rgba(139, 92, 246, 0.2);
   }
 
+  .dark .glass-card:hover {
+    border-color: rgba(139, 92, 246, 0.35);
+  }
+
+  /* Glass card with colored accents */
+  .glass-card-success {
+    @apply glass-card;
+    border-left: 3px solid hsl(var(--success));
+  }
+
+  .glass-card-destructive {
+    @apply glass-card;
+    border-left: 3px solid hsl(var(--destructive));
+  }
+
   /* ========================================
-     CLEAN BUTTON - Premium, Less Glow
+     GLOW EFFECTS
+     ======================================== */
+
+  .glow-border {
+    position: relative;
+  }
+
+  .glow-border::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.3), transparent, hsl(var(--primary) / 0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .glow-border:hover::after {
+    opacity: 1;
+  }
+
+  /* ========================================
+     CLEAN BUTTON - Premium
      ======================================== */
 
   .btn-primary-clean {
@@ -191,6 +276,21 @@
     border-radius: 8px;
     font-weight: 500;
     transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary-clean::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+
+  .btn-primary-clean:hover::before {
+    transform: translateX(100%);
   }
 
   .btn-primary-clean:hover {
@@ -199,7 +299,6 @@
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
   }
 
-  /* Legacy glow button - reduced intensity */
   .btn-primary-glow {
     background: hsl(263 70% 50%);
     color: white;
@@ -233,6 +332,13 @@
     background-image: linear-gradient(135deg, hsl(263 70% 50%) 0%, hsl(263 80% 60%) 100%);
   }
 
+  .text-gradient-animated {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(90deg, hsl(263 70% 50%), hsl(280 70% 60%), hsl(263 70% 50%));
+    background-size: 200% auto;
+    animation: shimmer 3s linear infinite;
+  }
+
   /* ========================================
      SHADOWS - Soft, Premium
      ======================================== */
@@ -247,6 +353,68 @@
       0 2px 4px -2px rgba(0, 0, 0, 0.03);
   }
 
+  .shadow-glow {
+    box-shadow: 
+      0 4px 20px -5px rgba(139, 92, 246, 0.2),
+      0 0 0 1px rgba(139, 92, 246, 0.05);
+  }
+
+  /* ========================================
+     ICON ANIMATIONS
+     ======================================== */
+
+  .icon-hover-bounce {
+    transition: transform 0.2s ease;
+  }
+
+  .icon-hover-bounce:hover {
+    animation: bounce-subtle 0.4s ease;
+  }
+
+  @keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  .icon-pulse {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { 
+      opacity: 1;
+      box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+    }
+    50% { 
+      opacity: 0.8;
+      box-shadow: 0 0 0 8px rgba(139, 92, 246, 0);
+    }
+  }
+
+  /* ========================================
+     STEP CONNECTOR LINE
+     ======================================== */
+
+  .step-line {
+    position: absolute;
+    top: 50%;
+    left: calc(50% + 28px);
+    width: calc(100% - 56px);
+    height: 2px;
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.1));
+  }
+
+  .step-line-animated {
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.5));
+    transform-origin: left;
+    animation: draw-line 1s ease-out forwards;
+  }
+
+  @keyframes draw-line {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
   /* ========================================
      ANIMATIONS
      ======================================== */
@@ -257,6 +425,14 @@
 
   .animate-fade-up {
     animation: fadeUp 0.4s ease-out forwards;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.5s ease-out forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.5s ease-out forwards;
   }
 
   @keyframes fadeIn {
@@ -275,6 +451,32 @@
     }
   }
 
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes shimmer {
+    to { background-position: 200% center; }
+  }
+
   /* Typing cursor */
   .typing-cursor::after {
     content: '|';
@@ -284,6 +486,45 @@
   @keyframes blink {
     from, to { opacity: 1; }
     50% { opacity: 0; }
+  }
+
+  /* ========================================
+     HOVER INTERACTIONS
+     ======================================== */
+
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+  }
+
+  .hover-scale {
+    transition: transform 0.2s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  /* ========================================
+     SECTION DIVIDER
+     ======================================== */
+
+  .section-gradient-top {
+    position: relative;
+  }
+
+  .section-gradient-top::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.2), transparent);
   }
 }
 

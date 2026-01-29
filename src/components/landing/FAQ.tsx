@@ -33,6 +33,25 @@ const faqs = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.3, ease: "easeOut" as const }
+  },
+};
+
 export function FAQ() {
   return (
     <section id="faq" className="py-20 md:py-28">
@@ -49,23 +68,18 @@ export function FAQ() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
           className="max-w-2xl mx-auto"
         >
           <Accordion type="single" collapsible className="space-y-3">
             {faqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
+              <motion.div key={index} variants={itemVariants}>
                 <AccordionItem
                   value={`item-${index}`}
-                  className="border border-border rounded-xl px-6 data-[state=open]:bg-muted/30 transition-all duration-200 hover:border-primary/30 hover:shadow-sm"
+                  className="glass-card px-6 data-[state=open]:shadow-glow transition-all duration-300"
                 >
                   <AccordionTrigger className="text-left font-medium hover:no-underline py-5 [&[data-state=open]>svg]:rotate-180">
                     {faq.question}

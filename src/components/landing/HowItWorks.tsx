@@ -18,9 +18,29 @@ const steps = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const stepVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.5, ease: "easeOut" as const }
+  },
+};
+
 export function HowItWorks() {
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-20 md:py-28 relative">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -33,24 +53,34 @@ export function HowItWorks() {
           </h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <motion.div 
+          className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto relative"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
+          {/* Connecting line - desktop only */}
+          <div className="hidden md:block absolute top-7 left-[calc(16.67%+28px)] right-[calc(16.67%+28px)] h-0.5 bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30" />
+          
           {steps.map((item, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.15 }}
-              className="text-center"
+              variants={stepVariants}
+              className="text-center relative z-10"
             >
-              <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground text-xl font-semibold flex items-center justify-center mx-auto mb-5">
+              <motion.div 
+                className="w-14 h-14 rounded-full bg-primary text-primary-foreground text-xl font-semibold flex items-center justify-center mx-auto mb-5 shadow-glow"
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
                 {item.step}
-              </div>
+              </motion.div>
               <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
               <p className="text-muted-foreground leading-relaxed">{item.description}</p>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

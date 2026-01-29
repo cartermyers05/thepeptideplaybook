@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Shield, Zap, Clock } from "lucide-react";
+import { FloatingOrbs } from "./FloatingOrbs";
 
 const trustItems = [
   { icon: Shield, text: "30-Day Money-Back Guarantee" },
@@ -8,38 +9,65 @@ const trustItems = [
   { icon: Clock, text: "No Subscription" },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" as const }
+  },
+};
+
 export function HeroSection() {
   return (
-    <section className="pt-28 pb-20 md:pt-36 md:pb-28">
-      <div className="container px-4">
-        <div className="max-w-4xl mx-auto text-center">
+    <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 gradient-mesh-bg grain-overlay overflow-hidden">
+      <FloatingOrbs variant="hero" />
+      
+      <div className="container px-4 relative z-10">
+        <motion.div 
+          className="max-w-4xl mx-auto text-center"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <span className="inline-block text-xs font-medium text-muted-foreground bg-secondary px-3 py-1.5 rounded-full mb-6">
+          <motion.div variants={itemVariants}>
+            <span className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground bg-secondary/80 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-border/50">
+              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
               Updated January 2026
             </span>
           </motion.div>
 
           {/* Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            variants={itemVariants}
             className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6"
           >
             Everything You Need to Know About Peptides
-            <span className="block text-primary mt-2">— Without the TikTok BS</span>
+            <motion.span 
+              className="block text-gradient mt-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+            >
+              — Without the TikTok BS
+            </motion.span>
           </motion.h1>
 
           {/* Subheadline */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            variants={itemVariants}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
           >
             An 80-page research guide, interactive database, and AI assistant that explains 
@@ -49,38 +77,43 @@ export function HeroSection() {
 
           {/* CTAs */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
           >
-            <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base">
-              <a href="#pricing">Get Full Access — $67</a>
+            <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
+              <a href="#pricing">
+                Get Full Access — $67
+              </a>
             </Button>
-            <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base">
+            <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm">
               <a href="#product">See What's Inside</a>
             </Button>
           </motion.div>
 
           {/* Trust signals */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            variants={itemVariants}
             className="flex flex-wrap justify-center gap-6 md:gap-10"
           >
             {trustItems.map((item, index) => (
-              <div
+              <motion.div
                 key={index}
-                className="flex items-center gap-2 text-sm text-muted-foreground"
+                className="flex items-center gap-2 text-sm text-muted-foreground group"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
               >
-                <item.icon className="w-4 h-4 text-primary" />
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                  <item.icon className="w-4 h-4 text-primary" />
+                </div>
                 <span>{item.text}</span>
-              </div>
+              </motion.div>
             ))}
           </motion.div>
-        </div>
+        </motion.div>
       </div>
+
+      {/* Bottom gradient fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
     </section>
   );
 }
