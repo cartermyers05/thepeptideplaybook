@@ -1,250 +1,284 @@
 
 
-# Automated News & Research Digest System
+# AI Search & SEO Revenue Maximization Strategy
 
-## Summary
-
-Build an automated content pipeline that keeps your users updated with fresh peptide news and monthly research digests - all generated and published automatically without manual intervention.
-
----
-
-## Current State Analysis
-
-| Feature | Status | Issue |
-|---------|--------|-------|
-| News Articles | Database ✓ | Manual entry only |
-| Research Digests | Hardcoded ✓ | Not in database, static content |
-| Auto-publishing | Missing ✗ | No scheduled jobs |
-| External sources | Missing ✗ | No news aggregation |
+## Goal
+Position Peptide Playbook AI to be cited by ChatGPT, Perplexity, Claude, and Gemini for peptide-related queries, driving organic traffic that converts to $67 purchases.
 
 ---
 
-## What We'll Build
+## Current Strengths (Already Built)
 
-### 1. Automated News Generation Pipeline
-
-A backend function that runs daily to:
-- Search for latest peptide research and industry news
-- Generate AI-powered summaries
-- Automatically publish to the news feed
-- Categorize by type (research, clinical, regulatory, industry)
-
-### 2. Monthly Research Digest System
-
-Store digests in the database with:
-- Automatic generation on the 1st of each month
-- AI-compiled highlights from the past month's news
-- Email notification to paid subscribers (optional)
-
-### 3. Scheduled Jobs
-
-Set up automated triggers:
-- **Daily**: Scan for new research/news
-- **Monthly**: Compile and publish digest
-- **Weekly**: Review and feature top stories
+| Component | Status | Notes |
+|-----------|--------|-------|
+| Article system with AI-optimized structure | ✅ Built | TL;DR boxes, FAQ schema, citations |
+| Citation tracking | ✅ Built | Tracks which AI engines cite which articles |
+| robots.txt for AI crawlers | ✅ Built | Allows GPTBot, PerplexityBot, ClaudeBot |
+| Sitemap generation | ✅ Built | Dynamic edge function |
+| JSON-LD schemas | ✅ Built | Article, FAQ, Organization, Product |
+| Article generator | ✅ Built | AI generates SEO-optimized content |
+| News automation | ✅ Built | Firecrawl + AI summaries |
+| Research digests | ✅ Built | Monthly compilation |
 
 ---
 
-## Technical Implementation
+## Revenue Strategy Overview
 
-### Part 1: Database Updates
-
-**New table: `research_digests`**
-```sql
-CREATE TABLE research_digests (
-  id UUID PRIMARY KEY,
-  month TEXT NOT NULL,           -- "January 2026"
-  date DATE NOT NULL,            -- 2026-01-01
-  highlights JSONB NOT NULL,     -- Array of highlight strings
-  full_content TEXT NOT NULL,    -- Markdown content
-  sources JSONB,                 -- Array of source objects
-  published_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
+```text
+AI Search Query → Cite Peptide Playbook → User Visits Article → CTA to Sign Up → $67 Purchase
 ```
 
-### Part 2: New Backend Function
-
-**`supabase/functions/generate-news/index.ts`**
-
-Automated news generation that:
-1. Uses web search to find latest peptide news
-2. Filters for relevance (peptides, FDA, research, clinical trials)
-3. Generates AI summaries for each story
-4. Saves to `news_articles` table
-5. Marks one story as "featured" daily
-
-**Sources to monitor:**
-- PubMed for new peptide research
-- FDA announcements
-- ClinicalTrials.gov updates
-- Major science news outlets
-
-### Part 3: Digest Generation Function
-
-**`supabase/functions/generate-digest/index.ts`**
-
-Monthly digest compiler:
-1. Pulls all news from the past month
-2. Uses AI to identify top 3-5 most important stories
-3. Generates comprehensive analysis
-4. Saves to `research_digests` table
-5. Optionally triggers email notification
-
-### Part 4: Scheduled Jobs (pg_cron)
-
-Enable `pg_cron` extension and create jobs:
-
-```sql
--- Daily news generation (runs at 8 AM UTC)
-SELECT cron.schedule(
-  'daily-news-generation',
-  '0 8 * * *',
-  $$ SELECT net.http_post(...) $$
-);
-
--- Monthly digest (runs on 1st at 6 AM UTC)
-SELECT cron.schedule(
-  'monthly-digest',
-  '0 6 1 * *',
-  $$ SELECT net.http_post(...) $$
-);
-```
-
-### Part 5: Frontend Updates
-
-**Update `Digest.tsx`**:
-- Fetch digests from database instead of hardcoded array
-- Add loading states
-- Show empty state if no digests yet
-
-**Update `QuickNewsPanel.tsx`**:
-- Add "Last updated" timestamp
-- Show freshness indicator
+The key is to become the **most-cited source** for peptide queries across all AI search engines.
 
 ---
 
-## New Files to Create
+## Part 1: Content Strategy (High-Volume Citation Magnets)
+
+### 1.1 Question-First Content Architecture
+
+Every AI search starts with a question. We need articles that directly answer the questions people ask.
+
+**High-Value Query Clusters to Target:**
+
+| Cluster | Example Questions | Priority |
+|---------|------------------|----------|
+| FDA Status | "Is BPC-157 FDA approved?", "Are peptides legal?" | 🔴 Critical |
+| Comparisons | "BPC-157 vs TB-500", "Semaglutide vs Tirzepatide" | 🔴 Critical |
+| Safety | "Are peptides safe?", "Peptide side effects" | 🔴 Critical |
+| Mechanisms | "How does GHK-Cu work?", "What does TB-500 do?" | 🟡 High |
+| Use Cases | "Best peptide for injury recovery" | 🟡 High |
+| Buying | "Where to buy peptides", "How to verify peptide quality" | 🟢 Medium |
+
+**Implementation:**
+- Create a "Content Calendar" table in the database to track which queries need articles
+- Bulk-generate 50-100 articles targeting specific high-value queries
+- Each article structured for AI extraction (TL;DR in first 100 words)
+
+### 1.2 Article Structure Optimization
+
+Current articles already have good structure. Enhancements:
+
+**Add "Direct Answer Block":**
+```html
+<div class="direct-answer" itemscope itemtype="https://schema.org/Answer">
+  <meta itemprop="text" content="BPC-157 is NOT FDA approved..." />
+  <p><strong>Quick Answer:</strong> BPC-157 is NOT FDA approved. It remains...</p>
+</div>
+```
+
+**Add "Key Facts" structured data:**
+- AI engines love extractable facts
+- Add numbered facts at the top of each article
+- Format: "Fact 1: ...", "Fact 2: ..."
+
+### 1.3 Internal Linking Strategy
+
+AI engines follow links. Create a dense network:
+- Every peptide article links to 3-5 related peptides
+- Every comparison links to individual peptide pages
+- Every safety article links to specific peptide safety sections
+
+---
+
+## Part 2: Technical SEO Enhancements
+
+### 2.1 Enhanced Schema Markup
+
+**Add to each article:**
+
+```json
+{
+  "@type": "MedicalWebPage",
+  "about": {
+    "@type": "Drug",
+    "name": "BPC-157",
+    "drugClass": "Peptide",
+    "legalStatus": "Research chemical - not FDA approved"
+  },
+  "audience": {
+    "@type": "MedicalAudience",
+    "audienceType": "Patient"
+  },
+  "lastReviewed": "2026-01-29"
+}
+```
+
+**Add HowTo schema where applicable:**
+```json
+{
+  "@type": "HowTo",
+  "name": "How to Evaluate Peptide Quality",
+  "step": [...]
+}
+```
+
+### 2.2 Sitemap Enhancements
+
+**Current sitemap:** Only includes articles and static pages
+
+**Enhancement:**
+- Add news articles to sitemap
+- Add "news sitemap" format for Google News
+- Add lastmod timestamps from actual content updates
+- Add image sitemap for any article images
+
+### 2.3 Page Speed Optimization
+
+AI crawlers prioritize fast-loading pages:
+- Ensure articles load in under 2 seconds
+- Lazy load images
+- Preconnect to Supabase
+- Static generation for articles (future: SSG)
+
+---
+
+## Part 3: Citation Tracking & Analytics
+
+### 3.1 Enhanced Citation Detection
+
+**Current:** Detects referrer from known AI domains
+
+**Enhancement:**
+- Add URL parameter detection: `?ref=chatgpt&q=query`
+- Track citation position (was our content cited first, second, etc.)
+- Log the exact query that triggered the citation
+
+### 3.2 Citation Dashboard
+
+**Create `/admin/citations` dashboard showing:**
+- Total citations by AI engine (pie chart)
+- Citations over time (line graph)
+- Top-cited articles (table)
+- Queries that triggered citations (list)
+- Revenue attribution: citations → signups → purchases
+
+### 3.3 Proactive Citation Monitoring
+
+**New Edge Function: `monitor-citations`**
+- Daily cron job that queries AI engines with our target keywords
+- Checks if Peptide Playbook is cited
+- Logs which queries we're winning vs. losing
+- Alerts when we lose citation position
+
+---
+
+## Part 4: Content Gap Analysis
+
+### 4.1 Query Research System
+
+**New Feature: Query Researcher**
+
+Edge function that:
+1. Uses Perplexity to search "peptide" + variations
+2. Extracts the questions AI is answering
+3. Checks if we have articles covering those questions
+4. Generates a "content gap" report
+
+### 4.2 Competitor Citation Analysis
+
+Track which sources AI engines cite for peptide queries:
+- If they cite Healthline, WebMD, or Reddit, we need better content
+- If they cite us, track consistently
+- Use this to prioritize content creation
+
+---
+
+## Part 5: Conversion Optimization
+
+### 5.1 Article CTAs
+
+**Current:** Articles may not have strong CTAs
+
+**Enhancement:**
+- Add "Continue Learning" box after TL;DR with signup CTA
+- Add floating "Ask the AI" button on all articles
+- Add "Get Full Access" CTA after 50% scroll
+- A/B test different CTA placements
+
+### 5.2 AI Chat as Conversion Tool
+
+Users who find us via AI search should see the AI immediately:
+- Add inline chat widget on articles
+- "Have more questions? Ask our AI"
+- Free tier gets 3 questions, then upgrade prompt
+
+### 5.3 Email Capture on Exit
+
+**Current:** Exit intent popup exists
+
+**Enhancement:**
+- Track which article they were reading
+- Customize popup: "Get more insights on [peptide name]"
+- Segment by interest for email sequences
+
+---
+
+## Part 6: Files to Create/Modify
+
+### New Files
 
 | File | Purpose |
 |------|---------|
-| `supabase/functions/generate-news/index.ts` | Daily news generation |
-| `supabase/functions/generate-digest/index.ts` | Monthly digest compilation |
-| `src/hooks/useDigests.ts` | Fetch digests from database |
+| `src/pages/admin/CitationsDashboard.tsx` | Analytics dashboard for AI citations |
+| `supabase/functions/monitor-citations/index.ts` | Daily citation monitoring |
+| `supabase/functions/content-gap-analysis/index.ts` | Find missing content |
+| `src/components/articles/DirectAnswerBlock.tsx` | Structured answer component |
+| `src/components/articles/InlineAICTA.tsx` | Conversion CTA for articles |
+| Database: `content_calendar` table | Track planned articles |
+| Database: `citation_monitoring` table | Store daily citation checks |
 
-## Files to Modify
+### Modified Files
 
 | File | Changes |
 |------|---------|
-| `src/pages/dashboard/Digest.tsx` | Use database instead of hardcoded |
-| `src/components/dashboard/QuickNewsPanel.tsx` | Add freshness indicator |
+| `supabase/functions/sitemap/index.ts` | Add news articles, improve structure |
+| `src/components/seo/ArticleSchema.tsx` | Add MedicalWebPage schema |
+| `src/pages/ArticleDetail.tsx` | Add DirectAnswerBlock, InlineAICTA |
+| `supabase/functions/generate-article/index.ts` | Add "Direct Answer" and "Key Facts" to output |
 
 ---
 
-## Content Generation Strategy
+## Part 7: Implementation Phases
 
-### News Sources (Automated Search)
+### Phase 1: Foundation (Week 1)
+1. Create `content_calendar` table
+2. Build Citation Dashboard
+3. Enhance ArticleSchema with MedicalWebPage
+4. Add DirectAnswerBlock to articles
+5. Update sitemap to include news
 
-The AI will search for content matching:
-- "peptide research" + current date
-- "FDA peptide" OR "FDA compounding"
-- "clinical trial peptide"
-- Specific peptide names from database (BPC-157, semaglutide, etc.)
+### Phase 2: Content Expansion (Week 2-3)
+1. Generate 30+ high-priority articles:
+   - All 41 peptides need individual pages
+   - Top 20 comparison queries
+   - Top 10 safety queries
+   - Top 10 legal/FDA queries
+2. Set up content gap analysis
 
-### Quality Filters
-
-Before publishing, verify:
-- Source credibility (peer-reviewed, FDA, major outlets)
-- Relevance to peptide research
-- Not duplicate of existing content
-- Factual accuracy check
-
-### Content Categories
-
-| Category | Search Terms | Frequency |
-|----------|-------------|-----------|
-| Research | PubMed, journals | Daily |
-| Clinical | ClinicalTrials.gov | Daily |
-| Regulatory | FDA announcements | As published |
-| Industry | Business news | Weekly |
+### Phase 3: Monitoring & Optimization (Week 4+)
+1. Deploy citation monitoring
+2. Track which articles get cited
+3. Iterate on structure based on what works
+4. A/B test CTAs
 
 ---
 
-## User Experience
+## Success Metrics
 
-### What Users Will See
-
-1. **Fresh news daily** in dashboard
-2. **"Last updated: Today"** indicator
-3. **Monthly digest** on 1st of each month
-4. **Email notification** (paid users) for digests
-5. **Featured story** rotates daily
-
-### Admin Controls
-
-- Override automated content if needed
-- Mark stories as featured manually
-- Edit AI-generated content before publish
-- Pause automation if issues arise
+| Metric | Target | How to Track |
+|--------|--------|--------------|
+| AI Citations/week | 100+ | Citation tracking dashboard |
+| Organic traffic from AI | 5,000+ visits/month | Analytics |
+| Citation → Signup rate | 5% | Funnel tracking |
+| Monthly revenue from AI traffic | $10,000+ | Stripe + attribution |
 
 ---
 
-## Implementation Steps
+## Quick Wins (Can Implement Today)
 
-1. ✅ **Database**: Create `research_digests` table
-2. ✅ **Backend**: Build `generate-news` edge function
-3. ✅ **Backend**: Build `generate-digest` edge function
-4. ⏳ **Cron**: Enable pg_cron and pg_net extensions (requires manual setup)
-5. ⏳ **Cron**: Set up daily and monthly schedules (requires manual setup)
-6. ✅ **Frontend**: Update Digest.tsx to use database
-7. ✅ **Frontend**: Add freshness indicator to QuickNewsPanel
-8. ⏳ **Testing**: Manually trigger functions to verify
-
----
-
-## Cron Setup (Manual Step Required)
-
-To enable automated scheduling, run this SQL in your backend:
-
-```sql
--- Enable required extensions
-CREATE EXTENSION IF NOT EXISTS pg_cron;
-CREATE EXTENSION IF NOT EXISTS pg_net;
-
--- Daily news generation (runs at 8 AM UTC)
-SELECT cron.schedule(
-  'daily-news-generation',
-  '0 8 * * *',
-  $$
-  SELECT net.http_post(
-    url:='https://xsanfxyahxcsjsrlfopq.supabase.co/functions/v1/generate-news',
-    headers:='{"Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzYW5meHlhaHhjc2pzcmxmb3BxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1Njg5MjcsImV4cCI6MjA4NTE0NDkyN30.ify7d2WuDY-t4aUeQLWx8s-QYSnJ5dPPrcYri4G_5VM"}'::jsonb,
-    body:='{}'::jsonb
-  );
-  $$
-);
-
--- Monthly digest (runs on 1st at 6 AM UTC)
-SELECT cron.schedule(
-  'monthly-digest',
-  '0 6 1 * *',
-  $$
-  SELECT net.http_post(
-    url:='https://xsanfxyahxcsjsrlfopq.supabase.co/functions/v1/generate-digest',
-    headers:='{"Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzYW5meHlhaHhjc2pzcmxmb3BxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1Njg5MjcsImV4cCI6MjA4NTE0NDkyN30.ify7d2WuDY-t4aUeQLWx8s-QYSnJ5dPPrcYri4G_5VM"}'::jsonb,
-    body:='{}'::jsonb
-  );
-  $$
-);
-```
-
----
-
-## Benefits
-
-- Users get fresh content daily without you lifting a finger
-- Research digests compile automatically each month
-- News feed stays current with industry developments
-- Positions Peptide Playbook AI as the go-to source
-- Reduces manual content creation burden
+1. **Generate 10 "FDA Status" articles** for top peptides
+2. **Add key facts block** to article template
+3. **Enhance existing articles** with stronger TL;DRs
+4. **Create comparison articles** for top peptide pairs
+5. **Add inline CTAs** to all existing articles
 
