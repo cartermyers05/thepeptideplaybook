@@ -1,53 +1,81 @@
 
 
-# Fix: Problem Section Headline
+# Landing Page Flow Refinements
 
-## The Issue
+## Overview
 
-The current headline "You're Not Confused Because You're Stupid" is too aggressive and potentially offensive, even though the intent is to reassure visitors.
-
----
-
-## Better Alternatives
-
-**Option A (Recommended):**
-> "It's Not You. It's the Information."
-
-**Option B:**
-> "You're Not the Problem. The Information Is."
-
-**Option C:**
-> "The Problem Isn't You. It's Where You're Looking."
-
-**Recommendation:** Option A — short, clear, and makes the same point without any negative language.
+Three quick fixes to improve consistency and polish across the landing page.
 
 ---
 
-## File to Modify
+## Changes
 
-**File:** `src/components/landing/ProblemSection.tsx`
+### 1. Navbar Mobile Menu CTA Fix
 
-**Change:** Update the h2 headline from the current aggressive version to the cleaner alternative.
+**File:** `src/components/landing/Navbar.tsx`
 
-**Current:**
+**Issue:** Mobile menu button says "Get Started" but desktop says "Get Access"
+
+**Fix:** Update line 110 from:
 ```tsx
-<h2>
-  You're Not Confused Because You're Stupid.{" "}
-  <span>You're Confused Because the Information Is a Mess.</span>
-</h2>
+<Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+  Get Started
+</Link>
 ```
 
-**New:**
+To:
 ```tsx
-<h2>
-  It's Not You.{" "}
-  <span>It's the Information.</span>
-</h2>
+<a href="#pricing" onClick={() => setIsMobileMenuOpen(false)}>
+  Get Access
+</a>
+```
+
+This also fixes the link destination — mobile should go to `#pricing` like desktop, not `/signup`.
+
+---
+
+### 2. WhoThisIsFor Section Header
+
+**File:** `src/components/landing/WhoThisIsFor.tsx`
+
+**Issue:** Section jumps straight into the two cards without context
+
+**Fix:** Add a centered headline above the grid:
+
+```tsx
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  className="text-center mb-12"
+>
+  <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
+    Is This Right for You?
+  </h2>
+</motion.div>
 ```
 
 ---
 
-## Additional Consideration
+### 3. HowItWorks Step 3 Refinement
 
-The intro paragraph can also be softened slightly if needed, but the current body copy is fine — it correctly blames TikTok, Reddit, and scattered sources without insulting the reader.
+**File:** `src/components/landing/HowItWorks.tsx`
+
+**Issue:** "Talk to Your Doctor" is fine, but could be more outcome-focused
+
+**Fix:** Update step 3 copy:
+- **Title:** "Have Informed Conversations"
+- **Description:** "Use the scripts and your research to discuss options with your healthcare provider."
+
+This keeps the doctor-involvement message but emphasizes the user's informed role.
+
+---
+
+## Summary
+
+| File | Change |
+|------|--------|
+| `Navbar.tsx` | Mobile CTA: "Get Started" → "Get Access", link to #pricing |
+| `WhoThisIsFor.tsx` | Add "Is This Right for You?" section header |
+| `HowItWorks.tsx` | Step 3: "Talk to Your Doctor" → "Have Informed Conversations" |
 
