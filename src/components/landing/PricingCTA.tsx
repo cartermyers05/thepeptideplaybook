@@ -1,14 +1,15 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, Shield } from "lucide-react";
+import { Check, Shield, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const features = [
-  "Interactive peptide database (41 peptides)",
-  "AI research assistant",
-  "Source evaluation checklist",
-  "Monthly research digest",
-  "Lifetime access + updates",
+  { text: "Unlimited AI conversations", highlight: true },
+  { text: "AI trained on 41+ peptides", highlight: true },
+  { text: "Interactive peptide database", highlight: false },
+  { text: "Real-time research updates", highlight: false },
+  { text: "Source evaluation checklist", highlight: false },
+  { text: "Lifetime access + updates", highlight: false },
 ];
 
 const featureVariants = {
@@ -30,11 +31,15 @@ export function PricingCTA() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">AI-Powered Research</span>
+          </div>
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
-            Get Complete Access
+            Get Your AI Research Assistant
           </h2>
           <p className="text-lg text-muted-foreground">
-            Everything you need to understand peptides. One price, lifetime access.
+            Ask anything about peptides. Get instant, research-backed answers.
           </p>
         </motion.div>
 
@@ -55,6 +60,7 @@ export function PricingCTA() {
             >
               <span className="text-5xl font-bold text-gradient">$67</span>
               <span className="text-muted-foreground ml-2">one-time</span>
+              <p className="text-sm text-muted-foreground mt-2">Lifetime access. No subscriptions.</p>
             </motion.div>
 
             <motion.ul 
@@ -71,12 +77,20 @@ export function PricingCTA() {
                   variants={featureVariants}
                 >
                   <motion.div 
-                    className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0"
+                    className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      feature.highlight ? "bg-primary/20" : "bg-success/10"
+                    }`}
                     whileHover={{ scale: 1.2 }}
                   >
-                    <Check className="w-3 h-3 text-success" />
+                    {feature.highlight ? (
+                      <Sparkles className="w-3 h-3 text-primary" />
+                    ) : (
+                      <Check className="w-3 h-3 text-success" />
+                    )}
                   </motion.div>
-                  <span className="text-foreground">{feature}</span>
+                  <span className={`${feature.highlight ? "font-medium text-foreground" : "text-foreground"}`}>
+                    {feature.text}
+                  </span>
                 </motion.li>
               ))}
             </motion.ul>
@@ -86,7 +100,10 @@ export function PricingCTA() {
               whileTap={{ scale: 0.98 }}
             >
               <Button asChild size="lg" className="w-full btn-primary-clean h-12 text-base">
-                <Link to="/signup">Get Full Access</Link>
+                <Link to="/signup">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Get AI Access Now
+                </Link>
               </Button>
             </motion.div>
 

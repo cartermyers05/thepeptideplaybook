@@ -8,6 +8,12 @@ import {
   BookmarkPlus,
   Bookmark,
   AlertTriangle,
+  Scale,
+  Shield,
+  Activity,
+  Brain,
+  Moon,
+  Dumbbell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,11 +35,61 @@ interface Message {
   isSaved?: boolean;
 }
 
-const suggestedQuestions = [
-  "What does published research say about BPC-157?",
-  "What is the regulatory status of growth hormone peptides?",
-  "How do researchers study peptide mechanisms?",
-  "What human clinical trials exist for TB-500?",
+const questionCategories = [
+  {
+    icon: Scale,
+    label: "Compare",
+    questions: [
+      "What's the difference between BPC-157 and TB-500?",
+      "Compare semaglutide vs tirzepatide for weight loss",
+    ],
+    color: "text-blue-500",
+  },
+  {
+    icon: Shield,
+    label: "FDA Status",
+    questions: [
+      "Is semaglutide FDA approved?",
+      "Which peptides are actually FDA approved?",
+    ],
+    color: "text-green-500",
+  },
+  {
+    icon: Activity,
+    label: "Recovery",
+    questions: [
+      "What peptides are studied for tissue repair?",
+      "What does research say about BPC-157 for healing?",
+    ],
+    color: "text-orange-500",
+  },
+  {
+    icon: Dumbbell,
+    label: "Performance",
+    questions: [
+      "What are growth hormone secretagogues?",
+      "What's the research on MK-677?",
+    ],
+    color: "text-purple-500",
+  },
+  {
+    icon: Moon,
+    label: "Sleep",
+    questions: [
+      "Does MK-677 affect sleep quality?",
+      "What peptides are studied for sleep?",
+    ],
+    color: "text-indigo-500",
+  },
+  {
+    icon: Brain,
+    label: "Cognitive",
+    questions: [
+      "What are nootropic peptides?",
+      "What does research say about Semax and Selank?",
+    ],
+    color: "text-pink-500",
+  },
 ];
 
 function TypingIndicator() {
@@ -60,6 +116,7 @@ export default function ChatInterface() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
@@ -238,6 +295,7 @@ export default function ChatInterface() {
 
   const handleSuggestedQuestion = (question: string) => {
     setInput(question);
+    setSelectedCategory(null);
     textareaRef.current?.focus();
   };
 
@@ -296,7 +354,7 @@ export default function ChatInterface() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="text-center py-12"
+                className="text-center py-8"
               >
                 {/* Logo */}
                 <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6">
@@ -304,29 +362,62 @@ export default function ChatInterface() {
                 </div>
 
                 <h2 className="text-2xl font-bold mb-2">
-                  Welcome to PeptideGPT
+                  Peptide Playbook AI
                 </h2>
                 <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                  Your AI research assistant for evidence-based peptide information
+                  Your AI research assistant for evidence-based peptide information. Ask anything.
                 </p>
 
-                {/* Suggested questions */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto">
-                  {suggestedQuestions.map((question, index) => (
+                {/* Category chips */}
+                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                  {questionCategories.map((cat, index) => (
                     <motion.button
-                      key={question}
+                      key={cat.label}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 + index * 0.05 }}
-                      onClick={() => handleSuggestedQuestion(question)}
-                      className="p-3 text-left rounded-lg border border-border bg-card hover:border-primary/30 hover:bg-accent transition-colors"
+                      onClick={() => setSelectedCategory(selectedCategory === index ? null : index)}
+                      className={cn(
+                        "inline-flex items-center gap-2 px-4 py-2 rounded-full border transition-all",
+                        selectedCategory === index
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/30 hover:bg-accent"
+                      )}
                     >
-                      <p className="text-sm text-muted-foreground">
-                        {question}
-                      </p>
+                      <cat.icon className={cn("w-4 h-4", cat.color)} />
+                      <span className="text-sm font-medium">{cat.label}</span>
                     </motion.button>
                   ))}
                 </div>
+
+                {/* Questions grid */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={selectedCategory ?? "default"}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto"
+                  >
+                    {(selectedCategory !== null
+                      ? questionCategories[selectedCategory].questions
+                      : questionCategories.slice(0, 4).map((c) => c.questions[0])
+                    ).map((question, index) => (
+                      <motion.button
+                        key={question}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => handleSuggestedQuestion(question)}
+                        className="p-3 text-left rounded-lg border border-border bg-card hover:border-primary/30 hover:bg-accent transition-colors group"
+                      >
+                        <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                          {question}
+                        </p>
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                </AnimatePresence>
               </motion.div>
             ) : (
               <div className="space-y-4">
@@ -366,7 +457,7 @@ export default function ChatInterface() {
                               <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center">
                                 <Sparkles className="w-3 h-3 text-primary-foreground" />
                               </div>
-                              <span className="text-xs font-medium text-muted-foreground">PeptideGPT</span>
+                              <span className="text-xs font-medium text-muted-foreground">Peptide Playbook AI</span>
                             </div>
                           </>
                         )}
@@ -439,7 +530,7 @@ export default function ChatInterface() {
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a peptide research question..."
+              placeholder="Ask about any peptide..."
               className="min-h-[52px] max-h-32 pr-12 resize-none rounded-xl border-border"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {

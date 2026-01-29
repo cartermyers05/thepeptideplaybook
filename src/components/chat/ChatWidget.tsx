@@ -14,19 +14,25 @@ interface ChatWidgetProps {
   onClose: () => void;
 }
 
-const MAX_MESSAGES = 25;
+const MAX_MESSAGES = 10;
 const COOLDOWN_MS = 2000;
 const SESSION_KEY = "peptide-chat-messages";
 
-const WELCOME_MESSAGE = `Hey! I'm your Peptide Playbook AI assistant, here to help you understand peptide research.
+const WELCOME_MESSAGE = `👋 Hey! I'm your Peptide Playbook AI—the smartest peptide research assistant on the planet.
 
-I can help you:
-• Understand what different peptides do
-• Separate TikTok hype from actual research
-• Know what's FDA-approved vs. research-only
-• Prepare for conversations with your doctor
+**I can help you:**
+• Compare any peptides side-by-side
+• Check FDA approval status instantly
+• Understand mechanisms and research
+• Separate real science from TikTok hype
 
-I can't give medical advice or tell you what to take, but I can help you cut through the confusion. What would you like to know?`;
+Ask me anything about peptides. What would you like to know?`;
+
+const EXAMPLE_QUESTIONS = [
+  "What's the difference between BPC-157 and TB-500?",
+  "Is semaglutide FDA approved?",
+  "What peptides are studied for recovery?",
+];
 
 export function ChatWidget({ onClose }: ChatWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([
@@ -217,9 +223,16 @@ export function ChatWidget({ onClose }: ChatWidgetProps) {
 
       {remainingMessages <= 0 && (
         <div className="px-4 pb-2">
-          <div className="flex items-center gap-2 text-xs text-destructive">
-            <AlertCircle className="w-3 h-3" />
-            <span>Message limit reached. Refresh to start a new session.</span>
+          <div className="bg-primary/10 rounded-lg p-3 text-center">
+            <p className="text-xs text-foreground font-medium mb-2">
+              Want unlimited AI conversations?
+            </p>
+            <a 
+              href="/signup" 
+              className="text-xs text-primary hover:underline font-medium"
+            >
+              Get Full Access →
+            </a>
           </div>
         </div>
       )}
