@@ -1,37 +1,42 @@
+import { BookOpen, MessageSquare, ClipboardCheck, Database, Bot, Mail } from "lucide-react";
 import { motion } from "framer-motion";
-import { BookOpen, Scale, Stethoscope, ShieldAlert, FlaskConical } from "lucide-react";
 
 const features = [
   {
     icon: BookOpen,
-    title: "Complete Peptide Breakdown",
-    description: "What each peptide actually does (mechanism of action in plain English). The real research: animal studies vs. human trials, study sizes, findings. FDA status: what's approved, what's Category 2, what's in legal gray areas.",
+    title: "The Complete Guide",
+    description: "80+ pages covering every major peptide category — GLP-1s, recovery peptides, growth hormone secretagogues, and more. Research status, mechanisms, and what we actually know.",
   },
   {
-    icon: ShieldAlert,
-    title: "The TikTok Fact-Check",
-    description: "Common claims vs. what peer-reviewed research actually shows. Red flags that indicate bad advice. How to evaluate sources yourself.",
-  },
-  {
-    icon: Stethoscope,
+    icon: MessageSquare,
     title: "Doctor Conversation Scripts",
-    description: "Exact questions to ask your healthcare provider. How to bring up peptides without getting dismissed. What to do if your doctor isn't knowledgeable.",
+    description: "Word-for-word templates for bringing up peptides with your healthcare provider. Never feel awkward or dismissed again.",
   },
   {
-    icon: Scale,
-    title: "Source Evaluation Guide",
-    description: "Red flags for sketchy peptide sources. What quality testing actually means. Legal realities you need to understand.",
+    icon: ClipboardCheck,
+    title: "Source Evaluation Checklist",
+    description: "A printable one-pager with the exact red flags that reveal sketchy sources. Use it before you buy anything.",
   },
   {
-    icon: FlaskConical,
-    title: "Peptide-by-Peptide Deep Dives",
-    description: "BPC-157, TB-500, Semaglutide, Tirzepatide, Ipamorelin, CJC-1295, and more. Research status, regulatory classification, known risks, unknowns.",
+    icon: Database,
+    title: "Interactive Peptide Database",
+    description: "Sortable, searchable database of 40+ peptides. Filter by goal, research status, FDA classification, and more.",
+  },
+  {
+    icon: Bot,
+    title: "AI Research Assistant",
+    description: "Ask questions about peptide research, mechanisms, and safety. Get instant, research-backed answers 24/7.",
+  },
+  {
+    icon: Mail,
+    title: "Monthly Research Digest",
+    description: "Stay current with new studies, regulatory changes, and emerging research. Delivered to your inbox every month.",
   },
 ];
 
 export function WhatsIncluded() {
   return (
-    <section id="features" className="py-24 md:py-32">
+    <section id="features" className="py-20 bg-[#FAFBFC]">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -40,15 +45,15 @@ export function WhatsIncluded() {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
-            Finally — A Resource You Can Actually Trust
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Everything you need to understand peptides and have informed conversations with your doctor
+          <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-4">
+            WHAT'S INSIDE
           </p>
+          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
+            Everything You Need to Navigate Peptides With Confidence
+          </h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
@@ -56,21 +61,13 @@ export function WhatsIncluded() {
                 key={feature.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ 
-                  scale: 1.02, 
-                  boxShadow: "0 8px 30px rgba(139, 92, 246, 0.12)" 
-                }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1, duration: 0.4 }}
-                className="glass-card-subtle p-6 cursor-pointer group"
+                className="bg-white rounded-xl p-8 shadow-sm border border-border"
               >
-                <motion.div 
-                  className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                  <Icon className="w-5 h-5 text-primary transition-transform group-hover:scale-110" />
-                </motion.div>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <Icon className="w-6 h-6 text-primary" />
+                </div>
                 <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                 <p className="text-muted-foreground leading-relaxed text-sm">
                   {feature.description}

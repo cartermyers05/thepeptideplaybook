@@ -213,6 +213,30 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          created_at: string | null
+          email: string
+          first_name: string | null
+          id: string
+          source: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          first_name?: string | null
+          id?: string
+          source?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          source?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -299,6 +323,54 @@ export type Database = {
         }
         Relationships: []
       }
+      peptides: {
+        Row: {
+          category: string
+          created_at: string | null
+          fda_status: string
+          id: string
+          mechanism: string
+          name: string
+          primary_use: string
+          related_peptides: string[] | null
+          research_status: string
+          safety: string
+          slug: string
+          studies: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          fda_status: string
+          id?: string
+          mechanism: string
+          name: string
+          primary_use: string
+          related_peptides?: string[] | null
+          research_status: string
+          safety: string
+          slug: string
+          studies: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          fda_status?: string
+          id?: string
+          mechanism?: string
+          name?: string
+          primary_use?: string
+          related_peptides?: string[] | null
+          research_status?: string
+          safety?: string
+          slug?: string
+          studies?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -308,8 +380,10 @@ export type Database = {
           id: string
           last_active_at: string | null
           questions_asked: number | null
+          stripe_customer_id: string | null
           subscription_status: string | null
           terms_accepted_at: string | null
+          tier: string | null
           trial_ends_at: string | null
           updated_at: string
           user_id: string
@@ -322,8 +396,10 @@ export type Database = {
           id?: string
           last_active_at?: string | null
           questions_asked?: number | null
+          stripe_customer_id?: string | null
           subscription_status?: string | null
           terms_accepted_at?: string | null
+          tier?: string | null
           trial_ends_at?: string | null
           updated_at?: string
           user_id: string
@@ -336,10 +412,42 @@ export type Database = {
           id?: string
           last_active_at?: string | null
           questions_asked?: number | null
+          stripe_customer_id?: string | null
           subscription_status?: string | null
           terms_accepted_at?: string | null
+          tier?: string | null
           trial_ends_at?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          stripe_payment_id: string | null
+          stripe_subscription_id: string | null
+          tier: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          stripe_payment_id?: string | null
+          stripe_subscription_id?: string | null
+          tier: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          stripe_payment_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
           user_id?: string
         }
         Relationships: []

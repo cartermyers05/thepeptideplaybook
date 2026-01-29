@@ -28,6 +28,20 @@ import CitationsDashboard from "./pages/admin/CitationsDashboard";
 import NewsDetail from "./pages/NewsDetail";
 import NotFound from "./pages/NotFound";
 
+// New pages
+import Pricing from "./pages/Pricing";
+import FreeGuide from "./pages/FreeGuide";
+import Checkout from "./pages/Checkout";
+import Dashboard from "./pages/dashboard/Home";
+import DashboardGuide from "./pages/dashboard/Guide";
+import DashboardScripts from "./pages/dashboard/Scripts";
+import DashboardChecklist from "./pages/dashboard/Checklist";
+import DashboardDatabase from "./pages/dashboard/Database";
+import DashboardChat from "./pages/dashboard/ChatPage";
+import DashboardDigest from "./pages/dashboard/Digest";
+import DashboardCommunity from "./pages/dashboard/Community";
+import DashboardSettings from "./pages/dashboard/Settings";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -38,9 +52,13 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/free-guide" element={<FreeGuide />} />
+            <Route path="/checkout/:tier" element={<Checkout />} />
             <Route path="/about" element={<About />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
@@ -50,6 +68,19 @@ const App = () => (
             <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/articles/:slug" element={<ArticleDetail />} />
+            
+            {/* Protected routes - Dashboard */}
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/guide" element={<ProtectedRoute><DashboardGuide /></ProtectedRoute>} />
+            <Route path="/dashboard/scripts" element={<ProtectedRoute><DashboardScripts /></ProtectedRoute>} />
+            <Route path="/dashboard/checklist" element={<ProtectedRoute><DashboardChecklist /></ProtectedRoute>} />
+            <Route path="/dashboard/database" element={<ProtectedRoute><DashboardDatabase /></ProtectedRoute>} />
+            <Route path="/dashboard/chat" element={<ProtectedRoute><DashboardChat /></ProtectedRoute>} />
+            <Route path="/dashboard/digest" element={<ProtectedRoute><DashboardDigest /></ProtectedRoute>} />
+            <Route path="/dashboard/community" element={<ProtectedRoute><DashboardCommunity /></ProtectedRoute>} />
+            <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardSettings /></ProtectedRoute>} />
+            
+            {/* Legacy protected routes */}
             <Route path="/news/:slug" element={<ProtectedRoute><NewsDetail /></ProtectedRoute>} />
             <Route path="/admin/generate" element={<ProtectedRoute><ArticleGenerator /></ProtectedRoute>} />
             <Route path="/admin/citations" element={<ProtectedRoute><CitationsDashboard /></ProtectedRoute>} />
@@ -59,6 +90,8 @@ const App = () => (
             <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
             <Route path="/referral" element={<ProtectedRoute><Referral /></ProtectedRoute>} />
             <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+            
+            {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

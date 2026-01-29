@@ -1,72 +1,127 @@
 import { Link } from "react-router-dom";
+import { Twitter, Instagram } from "lucide-react";
+
+const footerLinks = {
+  product: [
+    { label: "Features", href: "/#features" },
+    { label: "Pricing", href: "/pricing" },
+    { label: "Blog", href: "/blog" },
+    { label: "Free Guide", href: "/free-guide" },
+  ],
+  company: [
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "mailto:hello@peptideplaybook.com" },
+    { label: "Affiliates", href: "mailto:affiliates@peptideplaybook.com" },
+  ],
+  legal: [
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Medical Disclaimer", href: "/disclaimer" },
+  ],
+};
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-white">
-      <div className="container px-4 py-12">
-        {/* Three column layout */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-          {/* Wordmark */}
-          <p className="font-semibold tracking-tight">Peptide Playbook</p>
-          
-          {/* Links */}
-          <div className="flex flex-wrap justify-center gap-6">
-            <Link
-              to="/about"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              About
-            </Link>
-            <Link
-              to="/blog"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Blog
-            </Link>
-            <a
-              href="#features"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#faq"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              FAQ
-            </a>
-            <Link
-              to="/terms"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Terms of Service
-            </Link>
-            <Link
-              to="/privacy"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              to="/disclaimer"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Medical Disclaimer
-            </Link>
+    <footer className="bg-[#1a1a1a] text-gray-400 py-16">
+      <div className="container px-4">
+        <div className="grid md:grid-cols-4 gap-12 mb-12">
+          {/* Brand */}
+          <div>
+            <p className="text-white font-semibold tracking-tight text-lg mb-2">
+              Peptide Playbook
+            </p>
+            <p className="text-sm">Research-based peptide education</p>
+            <div className="flex gap-4 mt-4">
+              <a 
+                href="https://twitter.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                <Twitter className="w-5 h-5" />
+              </a>
+              <a 
+                href="https://instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                <Instagram className="w-5 h-5" />
+              </a>
+            </div>
           </div>
-          
-          {/* Copyright */}
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Peptide Playbook
-          </p>
+
+          {/* Product */}
+          <div>
+            <p className="text-white font-medium mb-4">Product</p>
+            <ul className="space-y-2">
+              {footerLinks.product.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    to={link.href}
+                    className="text-sm hover:text-white transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div>
+            <p className="text-white font-medium mb-4">Company</p>
+            <ul className="space-y-2">
+              {footerLinks.company.map((link) => (
+                <li key={link.label}>
+                  {link.href.startsWith("mailto:") ? (
+                    <a
+                      href={link.href}
+                      className="text-sm hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={link.href}
+                      className="text-sm hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <p className="text-white font-medium mb-4">Legal</p>
+            <ul className="space-y-2">
+              {footerLinks.legal.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    to={link.href}
+                    className="text-sm hover:text-white transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        
-        {/* Disclaimer */}
-        <div className="pt-8 border-t border-border">
-          <p className="text-xs text-muted-foreground text-center max-w-2xl mx-auto leading-relaxed">
-            This website provides educational information only. It is not medical advice. 
-            Consult a healthcare provider before making any health decisions.
-          </p>
+
+        {/* Bottom bar */}
+        <div className="pt-8 border-t border-gray-800">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm">
+              © {new Date().getFullYear()} Peptide Playbook. All rights reserved.
+            </p>
+            <p className="text-xs text-center md:text-right max-w-md">
+              Peptide Playbook provides educational information only. Always consult a healthcare provider.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

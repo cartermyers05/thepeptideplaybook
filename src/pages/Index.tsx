@@ -2,8 +2,8 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { ProblemSection } from "@/components/landing/ProblemSection";
 import { WhatsIncluded } from "@/components/landing/WhatsIncluded";
-import { AIAssistant } from "@/components/landing/AIAssistant";
-import { SocialProof } from "@/components/landing/SocialProof";
+import { Testimonials } from "@/components/landing/Testimonials";
+import { PricingSection } from "@/components/landing/PricingSection";
 import { FAQ } from "@/components/landing/FAQ";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { Footer } from "@/components/landing/Footer";
@@ -25,8 +25,8 @@ const Index = () => {
           <Hero />
           <ProblemSection />
           <WhatsIncluded />
-          <AIAssistant />
-          <SocialProof />
+          <Testimonials />
+          <PricingSection />
           <FAQ />
           <FinalCTA />
         </main>

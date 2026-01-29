@@ -48,22 +48,23 @@ export function Hero() {
     return () => clearInterval(interval);
   }, []);
 
-  const headlineWords = "Stop Taking Peptide Advice From 19-Year-Olds on TikTok".split(" ");
+  const headlineWords = "Finally Understand Peptides Without the TikTok Confusion".split(" ");
 
   return (
-    <section className="pt-24 pb-16 md:pt-32 md:pb-24 relative overflow-hidden">
+    <section className="pt-24 pb-16 md:pt-32 md:pb-24 relative overflow-hidden bg-[#FAFBFC]">
+      {/* Subtle grain texture */}
+      <div className="absolute inset-0 opacity-50" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+      }} />
+
       {/* Floating background orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div 
-          className="absolute -top-20 -left-20 w-[500px] h-[500px] rounded-full bg-primary/10 blur-3xl animate-orb-float"
+          className="absolute -top-20 -left-20 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl animate-orb-float"
         />
         <div 
-          className="absolute -bottom-32 -right-20 w-[350px] h-[350px] rounded-full bg-primary/15 blur-3xl animate-orb-float"
+          className="absolute -bottom-32 -right-20 w-[350px] h-[350px] rounded-full bg-primary/10 blur-3xl animate-orb-float"
           style={{ animationDelay: "-4s" }}
-        />
-        <div 
-          className="absolute top-1/2 right-0 w-[250px] h-[250px] rounded-full bg-primary/10 blur-3xl animate-orb-float"
-          style={{ animationDelay: "-8s" }}
         />
       </div>
 
@@ -75,6 +76,11 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
+            {/* Trust badge */}
+            <div className="inline-flex items-center gap-2 bg-foreground text-background text-xs uppercase tracking-wide font-semibold px-4 py-2 rounded-full mb-6">
+              TRUSTED BY 4,200+ MEMBERS
+            </div>
+
             <h1 className="text-4xl sm:text-5xl md:text-[3.25rem] font-semibold tracking-tight leading-[1.1] mb-6">
               {headlineWords.map((word, i) => (
                 <motion.span
@@ -91,24 +97,28 @@ export function Hero() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8">
-              The research-based guide that tells you what peptides actually do, what's FDA-approved vs. experimental, and exactly what to ask your doctor.
+              The research-backed system that turns overwhelming peptide information into clear, actionable knowledge you can actually use with your doctor.
             </p>
 
-            <div className="space-y-4">
+            <div className="flex flex-wrap gap-4 mb-8">
               <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base">
-                <Link to="/signup">
-                  Get Instant Access — $167
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                <a href="#pricing">
+                  Get Instant Access →
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base">
+                <Link to="/free-guide">
+                  Get Free Guide
                 </Link>
               </Button>
+            </div>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                <span>30-Day Money-Back Guarantee</span>
-                <span className="hidden sm:inline">•</span>
-                <span>Instant Digital Download</span>
-                <span className="hidden sm:inline">•</span>
-                <span>Updated for 2026</span>
-              </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+              <span>✓ 30-Day Money-Back Guarantee</span>
+              <span className="hidden sm:inline">•</span>
+              <span>✓ Instant Digital Access</span>
+              <span className="hidden sm:inline">•</span>
+              <span>✓ Updated January 2026</span>
             </div>
           </motion.div>
 
@@ -123,17 +133,17 @@ export function Hero() {
             <motion.div
               animate={{ y: [-3, 3, -3] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="glass-card-subtle p-6"
+              className="bg-white rounded-xl p-6 shadow-lg border border-border"
             >
               {/* Chat header */}
-              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border/50">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <Bot className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <p className="font-medium text-sm">Peptide Assistant</p>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                     <p className="text-xs text-muted-foreground">Online</p>
                   </div>
                 </div>
@@ -170,7 +180,7 @@ export function Hero() {
               </div>
 
               {/* Input field */}
-              <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-2 bg-muted rounded-xl px-4 py-3">
                 <input
                   type="text"
                   placeholder="Ask anything about peptides..."
