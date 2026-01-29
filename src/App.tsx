@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AdminRoute } from "@/components/auth/AdminRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -73,8 +74,8 @@ const App = () => (
             {/* Legacy protected routes - redirects to new dashboard */}
             <Route path="/chat" element={<ProtectedRoute><DashboardChat /></ProtectedRoute>} />
             <Route path="/news/:slug" element={<ProtectedRoute><NewsDetail /></ProtectedRoute>} />
-            <Route path="/admin/generate" element={<ProtectedRoute><ArticleGenerator /></ProtectedRoute>} />
-            <Route path="/admin/citations" element={<ProtectedRoute><CitationsDashboard /></ProtectedRoute>} />
+            <Route path="/admin/generate" element={<AdminRoute><ArticleGenerator /></AdminRoute>} />
+            <Route path="/admin/citations" element={<AdminRoute><CitationsDashboard /></AdminRoute>} />
             
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
