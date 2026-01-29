@@ -95,17 +95,12 @@ export function PricingCTA() {
               ))}
             </motion.ul>
 
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button asChild size="lg" className="w-full btn-primary-clean h-12 text-base">
-                <Link to="/signup">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Get AI Access Now
-                </Link>
-              </Button>
-            </motion.div>
+            <Button asChild size="lg" className="w-full btn-primary-clean h-12 text-base">
+              <Link to="/signup">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Get AI Access Now
+              </Link>
+            </Button>
 
             <motion.div 
               className="flex items-center justify-center gap-2 mt-6 text-sm text-muted-foreground"
