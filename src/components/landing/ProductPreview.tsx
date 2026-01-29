@@ -137,7 +137,7 @@ export function ProductPreview() {
                   ))}
                 </ul>
 
-                <Link to="/signup">
+                <Link to="/signup" className="relative z-10">
                   <Button className="btn-primary-clean group">
                     Get Full Access
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
