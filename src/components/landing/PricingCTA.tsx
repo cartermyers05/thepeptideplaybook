@@ -36,7 +36,7 @@ export function PricingCTA() {
             Get Complete Access
           </h2>
           <p className="text-lg text-muted-foreground">
-            Everything you need to understand peptides — one price, lifetime access.
+            Everything you need to understand peptides. One price, lifetime access.
           </p>
         </motion.div>
 

@@ -46,7 +46,7 @@ const faqs = [
   },
   {
     question: "What if I'm not satisfied?",
-    answer: "We offer a 30-day money-back guarantee. If you're not happy, email us and we'll refund you — no questions asked.",
+    answer: "We offer a 30-day money-back guarantee. If you're not happy, email us and we'll refund you. No questions asked.",
   },
   {
     question: "Is this medical advice?",
@@ -58,7 +58,7 @@ const faqs = [
   },
   {
     question: "Will this tell me what peptides to take?",
-    answer: "No. We explain what the research shows — mechanisms, studies, safety profiles — so you can have informed conversations with your doctor. We don't recommend, prescribe, or tell you what to take.",
+    answer: "No. We explain what the research shows: mechanisms, studies, safety profiles. This helps you have informed conversations with your doctor. We don't recommend, prescribe, or tell you what to take.",
   },
 ];
 
@@ -77,7 +77,7 @@ export default function Pricing() {
   return (
     <>
       <SEOHead
-        title="Pricing — Peptide Playbook"
+        title="Pricing | Peptide Playbook"
         description="Get full access to Peptide Playbook for $67. One-time payment, lifetime access, 30-day money-back guarantee."
       />
       <div className="min-h-screen bg-background">
@@ -189,7 +189,7 @@ export default function Pricing() {
                 size="lg"
                 className="btn-primary-clean h-12"
               >
-                Get Full Access — $67
+                Get Full Access
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>

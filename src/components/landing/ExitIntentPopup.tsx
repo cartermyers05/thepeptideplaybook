@@ -93,7 +93,7 @@ export function ExitIntentPopup() {
           </h3>
 
           <p className="text-muted-foreground">
-            Get our free "5 Red Flags" checklist — learn exactly what to watch for before buying anything.
+            Get our free "5 Red Flags" checklist. Learn exactly what to watch for before buying anything.
           </p>
         </div>
 

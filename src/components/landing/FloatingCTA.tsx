@@ -22,7 +22,7 @@ export function FloatingCTA() {
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 md:hidden animate-fade-up">
       <Button asChild size="lg" className="btn-primary-clean h-12 px-6 shadow-lg">
         <a href="#pricing">
-          Get Full Access — $67
+          Get Full Access
           <ArrowRight className="ml-2 w-4 h-4" />
         </a>
       </Button>

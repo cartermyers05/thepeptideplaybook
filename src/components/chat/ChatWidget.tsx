@@ -18,7 +18,7 @@ const MAX_MESSAGES = 25;
 const COOLDOWN_MS = 2000;
 const SESSION_KEY = "peptide-chat-messages";
 
-const WELCOME_MESSAGE = `Hey! I'm your Peptide Playbook assistant — an AI tool here to help you understand peptide research.
+const WELCOME_MESSAGE = `Hey! I'm your Peptide Playbook assistant, an AI tool here to help you understand peptide research.
 
 I can help you:
 • Understand what different peptides do
@@ -26,7 +26,7 @@ I can help you:
 • Know what's FDA-approved vs. research-only
 • Prepare for conversations with your doctor
 
-I can't give medical advice or tell you what to take — but I can help you cut through the confusion. What would you like to know?`;
+I can't give medical advice or tell you what to take, but I can help you cut through the confusion. What would you like to know?`;
 
 export function ChatWidget({ onClose }: ChatWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([

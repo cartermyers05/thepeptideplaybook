@@ -21,13 +21,13 @@ export function BlogCTA() {
             Want the complete breakdown of all peptides?
           </h3>
           <p className="text-muted-foreground mb-4 md:mb-0">
-            Get the Peptide Playbook — the research-based guide covering BPC-157, semaglutide, TB-500, and more. Know what's FDA-approved, what's experimental, and what to ask your doctor.
+            Get the Peptide Playbook, the research-based guide covering BPC-157, semaglutide, TB-500, and more. Know what's FDA-approved, what's experimental, and what to ask your doctor.
           </p>
         </div>
 
         <Button asChild size="lg" className="btn-primary-clean flex-shrink-0">
           <Link to="/signup">
-            Get the Peptide Playbook — $167
+            Get the Peptide Playbook
             <ArrowRight className="ml-2 w-4 h-4" />
           </Link>
         </Button>
