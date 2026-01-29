@@ -54,7 +54,7 @@ export function ChatbotDemo() {
 
       if (res.error) throw res.error;
 
-      const reader = res.data.getReader();
+      const reader = res.data.body.getReader();
       const decoder = new TextDecoder();
       let fullContent = "";
 
