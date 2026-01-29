@@ -5,10 +5,12 @@ import { useToast } from "@/hooks/use-toast";
 export function useCheckout() {
   const [isLoading, setIsLoading] = useState(false);
   const redirectingRef = useRef(false);
+  const isProcessingRef = useRef(false);
   const { toast } = useToast();
 
   const startCheckout = useCallback(async () => {
-    if (isLoading || redirectingRef.current) return;
+    if (isProcessingRef.current || redirectingRef.current) return;
+    isProcessingRef.current = true;
     setIsLoading(true);
     
     try {
@@ -20,6 +22,7 @@ export function useCheckout() {
           description: "You need to be signed in to make a purchase.",
           variant: "destructive",
         });
+        isProcessingRef.current = false;
         setIsLoading(false);
         return;
       }
@@ -52,10 +55,11 @@ export function useCheckout() {
           description: error instanceof Error ? error.message : "Something went wrong",
           variant: "destructive",
         });
+        isProcessingRef.current = false;
         setIsLoading(false);
       }
     }
-  }, [isLoading, toast]);
+  }, [toast]);
 
   return {
     startCheckout,
