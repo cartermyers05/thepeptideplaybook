@@ -1,306 +1,175 @@
 
 
-# Peptide Playbook Complete Rebuild
+# Site Audit: Issues Found and Fixes Required
 
-## Overview
+## Summary
 
-This is a comprehensive rebuild to transform the current Peptide Playbook into a premium digital product platform with tiered pricing ($67 Starter, $197 Pro, $497 Insider, $29/mo, $247/yr), Stripe payments, interactive peptide database, and a full member dashboard.
-
----
-
-## Current State Analysis
-
-**Already Built:**
-- Landing page with Hero, Problem, Features, FAQ, Footer
-- Authentication (Login/Signup) with Supabase
-- AI Chat with streaming and comprehensive system prompt
-- Blog/Articles system with 10 seed posts
-- News feed with in-app reading
-- Dashboard with news/chat tabs
-- Legal pages (Terms, Privacy, Disclaimer)
-- SEO components and sitemap
-
-**Needs to Be Built/Modified:**
-- Tiered pricing structure (5 tiers replacing single $167)
-- Full pricing comparison page
-- Free guide lead capture page
-- Stripe checkout integration
-- Member dashboard with tier-based access control
-- Peptide database (40+ peptides with filters)
-- Dashboard sidebar navigation
-- Guide viewer, Scripts, Checklist pages
-- Research Digest section
-- Updated landing page sections per specification
+I've completed a comprehensive scan of the entire codebase. The core implementation is **solid**, but I found **15 issues** that need to be fixed to ensure users get exactly what they pay for.
 
 ---
 
-## Implementation Phases
+## Issues Found
 
-### Phase 1: Database Schema Updates
+### Critical Issues (Must Fix)
 
-**New Tables:**
+| # | Issue | Location | Impact |
+|---|-------|----------|--------|
+| 1 | **ThankYou page links to `/chat` instead of `/dashboard`** | `src/pages/ThankYou.tsx:87` | Users taken to old chat page instead of their new dashboard |
+| 2 | **Subscription tier mapping gives Pro instead of "Full Access"** | `create-checkout/index.ts:20-26` | Monthly/Annual subscribers get Pro tier but pricing page promises Community Access (Insider only) |
+| 3 | **Pricing page subscription features are incorrect** | `src/pages/Pricing.tsx:61-62` | Claims "Community Access" included in $29/mo but Community requires Insider ($497) |
+| 4 | **Database only has 20 peptides, marketing claims 40+** | Database query | Landing page promises "40+ peptides" but only 20 exist |
+| 5 | **RLS overly permissive policies** | Database | 3 tables with `USING (true)` INSERT/UPDATE policies - security risk |
 
-| Table | Purpose |
-|-------|---------|
-| `leads` | Store free guide signups |
-| `purchases` | Track one-time purchases |
-| `peptides` | Store 40+ peptides with metadata |
+### Moderate Issues (Should Fix)
 
-**Profile Updates:**
-- Add `tier` field (free, starter, pro, insider)
-- Add `stripe_customer_id` field
-- Modify `subscription_status` usage
+| # | Issue | Location | Impact |
+|---|-------|----------|--------|
+| 6 | **Old `/chat` route still accessible** | `src/App.tsx` | Legacy chat page exists alongside new dashboard chat - confusing |
+| 7 | **Profile default tier is "trial" not "free"** | Database column default | `subscription_status` defaults to "trial" which may cause confusion |
+| 8 | **No consent modal on new Dashboard Chat** | `src/pages/dashboard/ChatPage.tsx` | Old Chat page has compliance modal, new one doesn't |
+| 9 | **Settings page shows generic "subscription"** | `src/pages/dashboard/Settings.tsx` | Doesn't show which tier user has or what features they have access to |
+| 10 | **Missing stripe_subscription_id handling** | Webhook handler | Subscriptions store subscription ID but no way to check/cancel |
 
-### Phase 2: Stripe Integration
+### Minor Issues (Nice to Fix)
 
-**Setup:**
-1. Enable Stripe connector to get API keys
-2. Create edge function for checkout session creation
-3. Create webhook handler for payment events
-4. Create products/prices in Stripe
+| # | Issue | Location | Impact |
+|---|-------|----------|--------|
+| 11 | **PDF Download button does nothing** | `src/pages/dashboard/Guide.tsx:41` | Button exists but no actual PDF to download |
+| 12 | **Print PDF button does nothing** | `src/pages/dashboard/Checklist.tsx:70` | Button exists but no print functionality |
+| 13 | **Read full digest button does nothing** | `src/pages/dashboard/Digest.tsx:89` | Button exists but no actual digest content |
+| 14 | **Legacy routes still in App.tsx** | `src/App.tsx` | Old routes like `/history`, `/saved`, `/stats` still exist but unused |
+| 15 | **Grain texture variable undefined** | `src/index.css` | Hero uses grain texture but CSS animation may not be defined |
 
-**Products to Create:**
-- Starter ($67 one-time)
-- Pro ($197 one-time)
-- Insider ($497 one-time)
-- Monthly Subscription ($29/month)
-- Annual Subscription ($247/year)
+---
 
-**Edge Functions:**
-| Function | Purpose |
-|----------|---------|
-| `create-checkout` | Create Stripe checkout sessions |
-| `stripe-webhook` | Handle checkout.session.completed, subscription events |
+## Detailed Fixes
 
-### Phase 3: Landing Page Updates
+### Fix 1: ThankYou Page Link (Critical)
 
-**Components to Update:**
-| Component | Changes |
-|-----------|---------|
-| `Hero.tsx` | New headline, trust badge, updated CTAs |
-| `ProblemSection.tsx` | Updated copy per specification |
-| `WhatsIncluded.tsx` | 6 feature cards with icons |
-| `Footer.tsx` | 4-column layout with social links |
+**Problem:** After purchase, users are sent to `/chat` (old page) instead of `/dashboard` (new dashboard)
 
-**New Sections:**
-| Section | Description |
-|---------|-------------|
-| `Testimonials.tsx` | 3 testimonial cards |
-| `PricingSection.tsx` | 3-tier pricing cards (inline on landing) |
+**File:** `src/pages/ThankYou.tsx`
 
-### Phase 4: New Pages
+**Change:** Line 87 - Change link from `/chat` to `/dashboard`
 
-| Page | Route | Description |
-|------|-------|-------------|
-| `Pricing.tsx` | `/pricing` | Full pricing comparison with subscription options |
-| `FreeGuide.tsx` | `/free-guide` | Lead magnet opt-in form |
-| `Checkout.tsx` | `/checkout/:tier` | Stripe checkout redirect |
-| `Dashboard.tsx` | `/dashboard` | Member home with sidebar |
-| `DashboardGuide.tsx` | `/dashboard/guide` | PDF guide viewer |
-| `DashboardScripts.tsx` | `/dashboard/scripts` | Doctor conversation scripts |
-| `DashboardChecklist.tsx` | `/dashboard/checklist` | Source evaluation checklist |
-| `DashboardDatabase.tsx` | `/dashboard/database` | Peptide database |
-| `DashboardDigest.tsx` | `/dashboard/digest` | Research digest |
-| `DashboardSettings.tsx` | `/dashboard/settings` | Account settings |
+---
 
-### Phase 5: Dashboard Layout System
+### Fix 2 & 3: Subscription Tier Mapping (Critical)
 
-**Layout Features:**
-- Fixed sidebar (280px) with navigation icons
-- Collapsible on mobile with hamburger
-- Active state highlighting
-- Tier-based menu visibility (e.g., Database only for Pro+)
-- User menu in sidebar footer
+**Problem:** The pricing page claims Monthly/Annual subscriptions include "Community Access" but:
+- Community Access requires `insider` tier
+- Monthly/Annual are mapped to `pro` tier
 
-**Sidebar Navigation:**
-| Item | Icon | Route | Required Tier |
-|------|------|-------|---------------|
-| Dashboard | Home | /dashboard | All |
-| The Guide | BookOpen | /dashboard/guide | Starter+ |
-| Doctor Scripts | MessageSquare | /dashboard/scripts | Starter+ |
-| Source Checklist | ClipboardCheck | /dashboard/checklist | Starter+ |
-| Peptide Database | Database | /dashboard/database | Pro+ |
-| AI Assistant | Bot | /dashboard/chat | Pro+ |
-| Research Digest | Mail | /dashboard/digest | Pro+ |
-| Community | Users | /dashboard/community | Insider |
-| Settings | Settings | /dashboard/settings | All |
+**Options:**
+1. Change subscription tier to `insider` (gives more access than price suggests)
+2. Remove "Community Access" from subscription features (reduces promised value)
+3. Create new subscription-specific tier with database, AI, digest, but not community
 
-### Phase 6: Peptide Database
+**Recommended:** Option 2 - Remove "Community Access" from subscription features on pricing page
+
+**Files:**
+- `src/pages/Pricing.tsx:61-62` - Remove "Community Access" from subscription features
+- `src/components/landing/PricingSection.tsx` - Already correct (subscriptions listed separately)
+
+---
+
+### Fix 4: Add More Peptides (Critical)
+
+**Problem:** Only 20 peptides exist, marketing claims 40+
+
+**Solution:** Add 20+ more peptides to database to match marketing claims
+
+---
+
+### Fix 5: RLS Policies (Critical Security)
+
+**Problem:** Some tables have overly permissive RLS policies
+
+**Solution:** Review and tighten INSERT/UPDATE policies on affected tables
+
+---
+
+### Fix 6: Remove Legacy Chat Route
+
+**Problem:** `/chat` route exists alongside `/dashboard/chat`, causing confusion
+
+**Solution:** Redirect `/chat` to `/dashboard/chat` or remove route entirely
+
+---
+
+### Fix 7: Dashboard ChatPage Missing Consent Modal
+
+**Problem:** Original Chat page had compliance modal, new dashboard chat doesn't
+
+**Solution:** Add ChatConsentModal to dashboard ChatPage or create shared consent state
+
+---
+
+### Fix 8: Settings Page Enhancement
+
+**Problem:** Settings doesn't show tier-specific feature access
+
+**Solution:** Add feature access list showing what user can access with their tier
+
+---
+
+## Feature Alignment Matrix
+
+| Feature | Starter $67 | Pro $197 | Insider $497 | Monthly $29 | Annual $247 |
+|---------|-------------|----------|--------------|-------------|-------------|
+| PDF Guide | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Doctor Scripts | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Source Checklist | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Peptide Database | ✗ | ✓ | ✓ | ✓ | ✓ |
+| AI Assistant | ✗ | ✓ | ✓ | ✓ | ✓ |
+| Research Digest | ✗ | ✓ | ✓ | ✓ | ✓ |
+| Community | ✗ | ✗ | ✓ | **CLAIMED** | **CLAIMED** |
+| 1:1 Strategy Call | ✗ | ✗ | ✓ | ✗ | ✗ |
+
+**Issue:** Monthly/Annual claim Community but are mapped to Pro tier
+
+---
+
+## What's Working Correctly
+
+| Component | Status |
+|-----------|--------|
+| Stripe Products & Prices | ✓ All 5 products created with correct prices |
+| Create Checkout Edge Function | ✓ Working |
+| Stripe Webhook Handler | ✓ Handles all events |
+| Tier Access Control (useTier) | ✓ Hierarchy correct |
+| Dashboard Sidebar | ✓ Shows locked features correctly |
+| UpgradePrompt Component | ✓ Links to pricing |
+| Peptide Database UI | ✓ Filters and search work |
+| Free Guide Lead Capture | ✓ Saves to database |
+| Auth Flow | ✓ Login/Signup working |
+
+---
+
+## Priority Order for Fixes
+
+1. **Fix subscription feature claims** (Critical - legal/trust issue)
+2. **Fix ThankYou redirect** (Critical - UX issue)
+3. **Add more peptides** (Critical - marketing claim)
+4. **Add consent modal to dashboard chat** (Compliance)
+5. **Clean up legacy routes** (Code hygiene)
+6. **Fix RLS policies** (Security)
+7. **Implement download/print buttons** (Feature completeness)
+
+---
+
+## Technical Notes
+
+**Stripe Integration Verification:**
+- Starter: price_1SuiuLKivWYlZk5KLQmOGU1S ($67) ✓
+- Pro: price_1SuiuNKivWYlZk5Kr1aUqa3f ($197) ✓
+- Insider: price_1SuiuPKivWYlZk5KCPoxauTv ($497) ✓
+- Monthly: price_1SuiuRKivWYlZk5KQzUQTyCe ($29/mo) ✓
+- Annual: price_1SuiuSKivWYlZk5KvoO7s82u ($247/yr) ✓
 
 **Database Schema:**
-```text
-peptides table:
-- id (uuid)
-- name (text)
-- slug (text)
-- category (text)
-- primary_use (text)
-- research_status (text): strong, moderate, limited, emerging
-- fda_status (text): FDA Approved, Category 2, Under Review, Not Regulated
-- mechanism (text)
-- studies (text)
-- safety (text)
-- related_peptides (text[])
-- created_at, updated_at
-```
-
-**UI Features:**
-- Search input
-- Filter dropdowns (Goal, Research Status, FDA Status)
-- Sortable table with expandable rows
-- Status badges with color coding
-- Related peptides as tags
-
-**Seed Data:**
-30+ peptides including Semaglutide, Tirzepatide, BPC-157, TB-500, Ipamorelin, CJC-1295, Sermorelin, GHK-Cu, PT-141, and more.
-
-### Phase 7: Access Control System
-
-**Implementation:**
-- Check user's tier on protected pages
-- Show upgrade prompts for locked features
-- Tier hierarchy: free < starter < pro < insider
-
-**Upgrade Prompt Component:**
-- Shown when user tries to access locked feature
-- Displays what tier is required
-- CTA to pricing page
-
-### Phase 8: Design Refinements
-
-**Keep:**
-- White and violet (#8B5CF6) color scheme
-- Inter font family
-- Clean, modern aesthetic
-
-**Add:**
-- Subtle grain texture on hero
-- Improved card shadows
-- More editorial feel
-- Trust-forward design elements
-
----
-
-## File Changes Summary
-
-### New Files to Create
-
-**Pages (12):**
-- `src/pages/Pricing.tsx`
-- `src/pages/FreeGuide.tsx`
-- `src/pages/Checkout.tsx`
-- `src/pages/Dashboard.tsx` (new layout version)
-- `src/pages/dashboard/Guide.tsx`
-- `src/pages/dashboard/Scripts.tsx`
-- `src/pages/dashboard/Checklist.tsx`
-- `src/pages/dashboard/Database.tsx`
-- `src/pages/dashboard/Digest.tsx`
-- `src/pages/dashboard/ChatPage.tsx`
-- `src/pages/dashboard/Community.tsx`
-- `src/pages/dashboard/Settings.tsx`
-
-**Components (8):**
-- `src/components/landing/Testimonials.tsx`
-- `src/components/landing/PricingSection.tsx`
-- `src/components/dashboard/DashboardLayout.tsx`
-- `src/components/dashboard/DashboardSidebar.tsx`
-- `src/components/dashboard/UpgradePrompt.tsx`
-- `src/components/database/PeptideTable.tsx`
-- `src/components/database/PeptideFilters.tsx`
-- `src/components/database/PeptideRow.tsx`
-
-**Edge Functions (2):**
-- `supabase/functions/create-checkout/index.ts`
-- `supabase/functions/stripe-webhook/index.ts`
-
-**Hooks (2):**
-- `src/hooks/usePeptides.ts`
-- `src/hooks/useCheckout.ts`
-
-### Files to Update
-
-| File | Changes |
-|------|---------|
-| `src/App.tsx` | Add all new routes |
-| `src/components/landing/Hero.tsx` | New headline, trust badge, CTAs |
-| `src/components/landing/ProblemSection.tsx` | Updated copy |
-| `src/components/landing/WhatsIncluded.tsx` | 6 feature cards |
-| `src/components/landing/Footer.tsx` | 4-column layout |
-| `src/pages/Index.tsx` | Add Testimonials, PricingSection |
-| `src/pages/Signup.tsx` | Update copy, remove pricing |
-| `src/index.css` | Add grain texture utility |
-
-### Database Changes
-
-**New Tables:**
-- `leads` (email, first_name, source, created_at)
-- `purchases` (user_id, tier, amount, stripe_payment_id, created_at)
-- `peptides` (full peptide data schema)
-
-**Profile Updates:**
-- Add `tier` column (default: 'free')
-- Add `stripe_customer_id` column
-
----
-
-## Stripe Integration Details
-
-### Checkout Flow
-
-```text
-1. User clicks tier on pricing page
-2. Frontend calls create-checkout edge function
-3. Edge function creates Stripe checkout session
-4. User redirected to Stripe hosted checkout
-5. On success, webhook fires
-6. Webhook updates user profile with tier
-7. User redirected to /thank-you
-```
-
-### Webhook Events Handled
-
-| Event | Action |
-|-------|--------|
-| checkout.session.completed | Set user tier, create purchase record |
-| customer.subscription.created | Update subscription_status |
-| customer.subscription.updated | Update tier if plan changed |
-| customer.subscription.deleted | Downgrade tier, update status |
-
----
-
-## Technical Considerations
-
-1. **Tier Checking**: Create a `useTier` hook that returns current tier and helper functions like `hasAccess(requiredTier)`
-
-2. **Protected Dashboard**: All `/dashboard/*` routes wrapped in ProtectedRoute, with additional tier checks per page
-
-3. **Sidebar State**: Use React context for sidebar collapsed state, persist to localStorage
-
-4. **Peptide Search**: Client-side filtering for MVP, can add database full-text search later
-
-5. **Guide Viewer**: Embed PDF or render markdown content for the guide
-
----
-
-## Implementation Order
-
-1. Enable Stripe integration (requires user input for API keys)
-2. Database migrations (leads, purchases, peptides, profile updates)
-3. Edge functions (create-checkout, stripe-webhook)
-4. New pages structure and routing
-5. Dashboard layout with sidebar
-6. Landing page updates
-7. Pricing page with tier cards
-8. Free guide lead capture
-9. Checkout flow
-10. Peptide database with seed data
-11. Dashboard content pages
-12. Access control and upgrade prompts
-13. Final polish and testing
-
----
-
-## Next Step
-
-To proceed, I need to enable Stripe integration. This will prompt you to enter your Stripe secret key. Once connected, I'll have access to the full Stripe tools to implement checkout and webhooks.
+- profiles table: ✓ Has tier, stripe_customer_id
+- peptides table: ✓ Has all required fields
+- leads table: ✓ Working for free guide
+- purchases table: ✓ Tracks purchases
 
