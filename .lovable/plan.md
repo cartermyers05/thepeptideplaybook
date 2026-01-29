@@ -1,63 +1,33 @@
 
 
-# Remove AI-Powered Research Assistant from Homepage
+# Remove "AI-Powered Research Assistant" Badge from Hero
 
 ## What Will Be Removed
 
-The animated AI chat demo that appears on the right side of the hero section. This is the `AIAssistant` component that shows cycling example questions and answers.
+The small badge at the very top of the hero section that says "AI-Powered Research Assistant" with a sparkle icon:
 
-## Files to Modify
-
-### 1. `src/components/landing/HeroSection.tsx`
-
-**Changes:**
-- Remove the `AIAssistant` import (line 6)
-- Remove the entire right column that renders `<AIAssistant />` (lines 127-138)
-- Update the grid layout from 2 columns to a centered single column
-
-**Before:**
 ```tsx
-<div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-7xl mx-auto">
-  {/* Left content */}
-  <motion.div className="text-center lg:text-left" ...>
-    ...
-  </motion.div>
-
-  {/* Right content - Chat demo */}
-  <motion.div className="hidden md:block">
-    <AIAssistant />
-  </motion.div>
-</div>
+<motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+  <Sparkles className="w-4 h-4 text-primary" />
+  <span className="text-sm font-medium text-primary">AI-Powered Research Assistant</span>
+</motion.div>
 ```
 
-**After:**
-```tsx
-<div className="max-w-4xl mx-auto">
-  {/* Centered content */}
-  <motion.div className="text-center" ...>
-    ...
-  </motion.div>
-</div>
-```
+## File to Modify
 
-### 2. Layout Adjustments
+### `src/components/landing/HeroSection.tsx`
 
-- Change from 2-column grid to centered single column
-- Update text alignment from `lg:text-left` to `text-center` throughout
-- Center the stats row, CTAs, and trust signals
+**Change:** Delete lines 51-54 (the AI Badge motion.div block)
 
 ## Visual Result
 
-The hero section will become a centered, single-column layout with:
-- AI badge at top (still says "AI-Powered Research Assistant" as a label - let me know if you want this removed too)
-- Headline and subheadline centered
-- Stats centered
-- CTAs centered
-- Trust signals centered
+The hero section will start directly with the main headline "Ask Anything About Peptides" without the badge above it.
 
-No animated chat demo will appear on the right side.
+## What Remains
 
-## Files NOT Deleted
-
-The `AIAssistant.tsx` file will remain in the codebase (not deleted) in case you want to use it elsewhere later. If you want it fully removed from the project, let me know.
+- Main headline and subheadline
+- Stats row (41+ Peptides, 500+ Studies, 24/7)
+- CTA buttons
+- Trust signals (Money-back guarantee, Instant Access, No Subscription)
+- Full ChatbotDemo section below (scrollable)
 
