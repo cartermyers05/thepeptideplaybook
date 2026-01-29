@@ -5,12 +5,12 @@ import ChatInterface from "@/components/dashboard/ChatInterface";
 import ComplianceModal from "@/components/dashboard/ComplianceModal";
 
 export default function ChatPage() {
-  const { canAccessChat } = useTier();
+  const { isPaid } = useTier();
 
-  if (!canAccessChat) {
+  if (!isPaid) {
     return (
       <DashboardLayout>
-        <UpgradePrompt requiredTier="pro" feature="AI Research Assistant" />
+        <UpgradePrompt feature="AI Research Assistant" />
       </DashboardLayout>
     );
   }

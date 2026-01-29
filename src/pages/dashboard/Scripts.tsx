@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useTier } from "@/hooks/useTier";
 import { UpgradePrompt } from "@/components/dashboard/UpgradePrompt";
-import { MessageSquare, Copy, Check } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
@@ -34,13 +34,13 @@ const scripts = [
 ];
 
 export default function Scripts() {
-  const { canAccessGuide } = useTier();
+  const { isPaid } = useTier();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  if (!canAccessGuide) {
+  if (!isPaid) {
     return (
       <DashboardLayout>
-        <UpgradePrompt requiredTier="starter" feature="Doctor Scripts" />
+        <UpgradePrompt feature="Doctor Scripts" />
       </DashboardLayout>
     );
   }

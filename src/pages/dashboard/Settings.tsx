@@ -7,8 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, Mail, User, Shield } from "lucide-react";
+import { CreditCard, Mail, User, Shield, Check } from "lucide-react";
 import { Link } from "react-router-dom";
+
+const allFeatures = [
+  "Complete PDF Guide (80+ pages)",
+  "Doctor Scripts & Checklist",
+  "Peptide Database (41 peptides)",
+  "AI Research Assistant",
+  "Monthly Research Digest",
+  "Lifetime Updates",
+  "Email Support",
+];
 
 export default function Settings() {
   const { user } = useAuth();
@@ -49,7 +59,7 @@ export default function Settings() {
             Account Settings
           </h1>
           <p className="text-muted-foreground">
-            Manage your profile and subscription
+            Manage your profile and account
           </p>
         </div>
 
@@ -100,51 +110,46 @@ export default function Settings() {
         <div className="rounded-xl border border-border bg-card p-6 mb-6">
           <h2 className="font-semibold mb-4 flex items-center gap-2">
             <CreditCard className="w-5 h-5" />
-            Subscription
+            Membership
           </h2>
 
           <div className="flex items-center justify-between p-4 bg-muted rounded-lg mb-4">
             <div>
-              <p className="font-medium capitalize">{tier} Plan</p>
+              <p className="font-medium">{isPaid ? "Member" : "Free"}</p>
               <p className="text-sm text-muted-foreground">
-                {isPaid ? "Active" : "Upgrade to unlock all features"}
+                {isPaid ? "Lifetime access to all features" : "Upgrade to unlock all features"}
               </p>
             </div>
             {!isPaid && (
               <Button asChild variant="outline" size="sm">
-                <Link to="/pricing">Upgrade</Link>
+                <Link to="/checkout">Upgrade — $67</Link>
               </Button>
             )}
           </div>
 
           {/* Feature Access List */}
-          <div className="space-y-2 mb-4">
-            <p className="text-sm font-medium">Your Features:</p>
-            <ul className="text-sm space-y-1">
-              <li className={tier !== "free" ? "text-foreground" : "text-muted-foreground line-through"}>
-                ✓ Complete PDF Guide
-              </li>
-              <li className={tier !== "free" ? "text-foreground" : "text-muted-foreground line-through"}>
-                ✓ Doctor Scripts & Checklist
-              </li>
-              <li className={tier === "pro" || tier === "insider" ? "text-foreground" : "text-muted-foreground line-through"}>
-                ✓ Peptide Database (40+ peptides)
-              </li>
-              <li className={tier === "pro" || tier === "insider" ? "text-foreground" : "text-muted-foreground line-through"}>
-                ✓ AI Research Assistant
-              </li>
-              <li className={tier === "pro" || tier === "insider" ? "text-foreground" : "text-muted-foreground line-through"}>
-                ✓ Monthly Research Digest
-              </li>
-              <li className={tier === "insider" ? "text-foreground" : "text-muted-foreground line-through"}>
-                ✓ Private Community Access
-              </li>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">
+              {isPaid ? "Your features:" : "Included with membership:"}
+            </p>
+            <ul className="space-y-2">
+              {allFeatures.map((feature, i) => (
+                <li 
+                  key={i} 
+                  className={`flex items-center gap-2 text-sm ${
+                    isPaid ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  <Check className={`w-4 h-4 ${isPaid ? "text-primary" : "text-muted-foreground"}`} />
+                  {feature}
+                </li>
+              ))}
             </ul>
           </div>
 
           {isPaid && (
-            <p className="text-sm text-muted-foreground">
-              To manage your subscription or request a refund, please contact{" "}
+            <p className="text-sm text-muted-foreground mt-4">
+              To request a refund, please contact{" "}
               <a href="mailto:support@peptideplaybook.com" className="text-primary hover:underline">
                 support@peptideplaybook.com
               </a>

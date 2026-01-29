@@ -2,13 +2,11 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-export type CheckoutTier = "starter" | "pro" | "insider" | "monthly" | "annual";
-
 export function useCheckout() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const startCheckout = async (tier: CheckoutTier) => {
+  const startCheckout = async () => {
     setIsLoading(true);
     
     try {
@@ -25,7 +23,6 @@ export function useCheckout() {
 
       const response = await supabase.functions.invoke("create-checkout", {
         body: {
-          tier,
           successUrl: `${window.location.origin}/thank-you`,
           cancelUrl: `${window.location.origin}/pricing`,
         },

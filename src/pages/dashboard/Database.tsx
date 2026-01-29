@@ -118,14 +118,14 @@ function PeptideRow({ peptide }: { peptide: Peptide }) {
 }
 
 export default function Database() {
-  const { canAccessDatabase } = useTier();
+  const { isPaid } = useTier();
   const [filters, setFilters] = useState<PeptideFilters>({});
   const { data: peptides, isLoading } = usePeptides(filters);
 
-  if (!canAccessDatabase) {
+  if (!isPaid) {
     return (
       <DashboardLayout>
-        <UpgradePrompt requiredTier="pro" feature="Peptide Database" />
+        <UpgradePrompt feature="Peptide Database" />
       </DashboardLayout>
     );
   }

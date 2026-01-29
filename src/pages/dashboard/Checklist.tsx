@@ -44,19 +44,19 @@ const verificationSteps = [
 ];
 
 export default function Checklist() {
-  const { canAccessGuide } = useTier();
+  const { isPaid } = useTier();
 
-  if (!canAccessGuide) {
+  if (!isPaid) {
     return (
       <DashboardLayout>
-        <UpgradePrompt requiredTier="starter" feature="Source Checklist" />
+        <UpgradePrompt feature="Source Checklist" />
       </DashboardLayout>
     );
   }
 
   return (
-      <DashboardLayout>
-        <div className="max-w-4xl print-content">
+    <DashboardLayout>
+      <div className="max-w-4xl print-content">
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight mb-2">

@@ -7,23 +7,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Price IDs from Stripe
-const PRICE_IDS: Record<string, string> = {
-  starter: "price_1SuiuLKivWYlZk5KLQmOGU1S",
-  pro: "price_1SuiuNKivWYlZk5Kr1aUqa3f",
-  insider: "price_1SuiuPKivWYlZk5KCPoxauTv",
-  monthly: "price_1SuiuRKivWYlZk5KQzUQTyCe",
-  annual: "price_1SuiuSKivWYlZk5KvoO7s82u",
-};
-
-// Tier mapping for products
-const TIER_MAP: Record<string, string> = {
-  starter: "starter",
-  pro: "pro",
-  insider: "insider",
-  monthly: "pro",
-  annual: "pro",
-};
+// Single price for full access
+const PRICE_ID = "price_1SuiuLKivWYlZk5KLQmOGU1S"; // $67 one-time
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -55,11 +40,7 @@ serve(async (req) => {
       throw new Error("Invalid user token");
     }
 
-    const { tier, successUrl, cancelUrl } = await req.json();
-    
-    if (!tier || !PRICE_IDS[tier]) {
-      throw new Error("Invalid tier specified");
-    }
+    const { successUrl, cancelUrl } = await req.json();
 
     const stripe = new Stripe(stripeKey, {
       apiVersion: "2023-10-16",
@@ -91,21 +72,19 @@ serve(async (req) => {
         .eq("user_id", user.id);
     }
 
-    const isSubscription = tier === "monthly" || tier === "annual";
-
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
-          price: PRICE_IDS[tier],
+          price: PRICE_ID,
           quantity: 1,
         },
       ],
-      mode: isSubscription ? "subscription" : "payment",
+      mode: "payment",
       success_url: successUrl || `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${req.headers.get("origin")}/pricing`,
       metadata: {
-        tier: TIER_MAP[tier],
+        tier: "member",
         user_id: user.id,
       },
     });

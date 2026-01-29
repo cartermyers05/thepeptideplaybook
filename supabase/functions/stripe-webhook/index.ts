@@ -52,77 +52,29 @@ serve(async (req) => {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.user_id;
-        const tier = session.metadata?.tier;
 
-        if (!userId || !tier) {
-          console.error("Missing metadata in checkout session");
+        if (!userId) {
+          console.error("Missing user_id in checkout session metadata");
           break;
         }
 
-        // Update user tier
+        // Set user to "member" tier (full access)
         await supabase
           .from("profiles")
           .update({ 
-            tier,
-            subscription_status: session.mode === "subscription" ? "active" : null,
+            tier: "member",
           })
           .eq("user_id", userId);
 
         // Record purchase
         await supabase.from("purchases").insert({
           user_id: userId,
-          tier,
+          tier: "member",
           amount: session.amount_total || 0,
           stripe_payment_id: session.payment_intent as string,
-          stripe_subscription_id: session.subscription as string,
         });
 
-        console.log(`Updated user ${userId} to tier ${tier}`);
-        break;
-      }
-
-      case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription;
-        const customerId = subscription.customer as string;
-
-        // Find user by stripe customer ID
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("user_id")
-          .eq("stripe_customer_id", customerId)
-          .single();
-
-        if (profile) {
-          const status = subscription.status === "active" ? "active" : subscription.status;
-          await supabase
-            .from("profiles")
-            .update({ subscription_status: status })
-            .eq("user_id", profile.user_id);
-        }
-        break;
-      }
-
-      case "customer.subscription.deleted": {
-        const subscription = event.data.object as Stripe.Subscription;
-        const customerId = subscription.customer as string;
-
-        // Find user by stripe customer ID
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("user_id")
-          .eq("stripe_customer_id", customerId)
-          .single();
-
-        if (profile) {
-          // Downgrade to free tier
-          await supabase
-            .from("profiles")
-            .update({ 
-              tier: "free",
-              subscription_status: "canceled",
-            })
-            .eq("user_id", profile.user_id);
-        }
+        console.log(`Updated user ${userId} to member tier`);
         break;
       }
 

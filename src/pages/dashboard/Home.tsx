@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { 
   BookOpen, ClipboardCheck, Database, 
-  Bot, Mail, Users, ArrowRight, Sparkles, Lock,
-  TrendingUp, Clock, CheckCircle2, FileText
+  Bot, Mail, ArrowRight, Sparkles,
+  TrendingUp, Clock, FileText
 } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
-import { useTier, type Tier } from "@/hooks/useTier";
+import { useTier } from "@/hooks/useTier";
 import { cn } from "@/lib/utils";
 
 const features = [
@@ -16,7 +16,6 @@ const features = [
     description: "Complete peptide education from basics to advanced",
     icon: BookOpen,
     href: "/dashboard/guide",
-    tier: "starter" as Tier,
     stats: "8 chapters",
     featured: true,
   },
@@ -25,7 +24,6 @@ const features = [
     description: "Search and filter 41+ research peptides",
     icon: Database,
     href: "/dashboard/database",
-    tier: "pro" as Tier,
     stats: "41 peptides",
   },
   {
@@ -33,7 +31,6 @@ const features = [
     description: "Get research-backed answers instantly",
     icon: Bot,
     href: "/dashboard/chat",
-    tier: "pro" as Tier,
     stats: "Unlimited",
   },
   {
@@ -41,7 +38,6 @@ const features = [
     description: "Conversation templates for your physician",
     icon: FileText,
     href: "/dashboard/scripts",
-    tier: "starter" as Tier,
     stats: "5 templates",
   },
   {
@@ -49,7 +45,6 @@ const features = [
     description: "Evaluate vendors like a pro",
     icon: ClipboardCheck,
     href: "/dashboard/checklist",
-    tier: "starter" as Tier,
     stats: "12 criteria",
   },
   {
@@ -57,16 +52,7 @@ const features = [
     description: "Monthly curated research updates",
     icon: Mail,
     href: "/dashboard/digest",
-    tier: "pro" as Tier,
     stats: "Monthly",
-  },
-  {
-    title: "Community",
-    description: "Connect with other researchers",
-    icon: Users,
-    href: "/dashboard/community",
-    tier: "insider" as Tier,
-    stats: "500+ members",
   },
 ];
 
@@ -78,17 +64,10 @@ const updates = [
 
 export default function Dashboard() {
   const { data: profile } = useProfile();
-  const { tier, hasAccess, isPaid } = useTier();
+  const { tier, isPaid } = useTier();
 
   const firstName = profile?.full_name?.split(" ")[0] || "there";
   const questionsAsked = profile?.questions_asked || 0;
-
-  const tierLabels: Record<Tier, string> = {
-    free: "Free Account",
-    starter: "Starter Member",
-    pro: "Pro Member",
-    insider: "Insider Member",
-  };
 
   return (
     <DashboardLayout>
@@ -109,21 +88,20 @@ export default function Dashboard() {
                 </p>
               </div>
               
-              {/* Tier badge */}
+              {/* Member badge */}
               <div className="flex-shrink-0">
                 <span className={cn(
                   "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium",
-                  tier === "free" && "bg-muted text-muted-foreground",
-                  tier === "starter" && "bg-slate-100 text-slate-700",
-                  tier === "pro" && "bg-emerald-100 text-emerald-700",
-                  tier === "insider" && "bg-amber-100 text-amber-700"
+                  isPaid 
+                    ? "bg-emerald-100 text-emerald-700" 
+                    : "bg-muted text-muted-foreground"
                 )}>
-                  {tierLabels[tier]}
+                  {isPaid ? "Member" : "Free Account"}
                 </span>
               </div>
             </div>
             
-            {/* Quick stats for paid users */}
+            {/* Quick stats for members */}
             {isPaid && (
               <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
                 <div className="text-center sm:text-left">
@@ -144,7 +122,7 @@ export default function Dashboard() {
         </div>
 
         {/* Free user upgrade banner */}
-        {tier === "free" && (
+        {!isPaid && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600/20 via-primary/20 to-blue-600/20 border border-primary/20 p-8">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
@@ -155,20 +133,17 @@ export default function Dashboard() {
               </div>
               
               <div className="flex-1">
-                <span className="inline-block px-2 py-0.5 bg-primary/20 text-primary text-xs font-medium rounded mb-2">
-                  Limited Time
-                </span>
                 <h2 className="text-xl font-semibold mb-1">
-                  Unlock the full Peptide Playbook
+                  Unlock full access for $67
                 </h2>
                 <p className="text-muted-foreground text-sm">
-                  Get instant access to the complete guide, interactive database, AI assistant, and more. Join 4,200+ members who stopped guessing.
+                  Get instant access to the complete guide, interactive database, AI assistant, and more. One-time payment, lifetime access.
                 </p>
               </div>
               
               <Button asChild className="shadow-lg shadow-primary/20 flex-shrink-0">
-                <Link to="/pricing">
-                  View Plans <ArrowRight className="w-4 h-4 ml-1" />
+                <Link to="/checkout">
+                  Get Full Access <ArrowRight className="w-4 h-4 ml-1" />
                 </Link>
               </Button>
             </div>
@@ -184,10 +159,9 @@ export default function Dashboard() {
               description={feature.description}
               icon={feature.icon}
               href={feature.href}
-              tier={feature.tier}
-              userTier={tier}
               featured={feature.featured}
               stats={feature.stats}
+              isPaid={isPaid}
               className={feature.featured ? "sm:col-span-2 lg:col-span-1" : ""}
             />
           ))}
@@ -215,16 +189,16 @@ export default function Dashboard() {
               <h3 className="font-semibold">Suggested Next Steps</h3>
             </div>
             <div className="space-y-2">
-              {tier === "free" ? (
-                <>
-                  <SuggestedAction text="Read the free guide preview" href="/dashboard/guide" primary />
-                  <SuggestedAction text="View pricing options" href="/pricing" />
-                </>
-              ) : (
+              {isPaid ? (
                 <>
                   <SuggestedAction text="Continue reading: Chapter 3" href="/dashboard/guide" primary />
                   <SuggestedAction text="Ask the AI assistant" href="/dashboard/chat" />
                   <SuggestedAction text="Explore the peptide database" href="/dashboard/database" />
+                </>
+              ) : (
+                <>
+                  <SuggestedAction text="Unlock full access" href="/checkout" primary />
+                  <SuggestedAction text="View what's included" href="/pricing" />
                 </>
               )}
             </div>
@@ -241,58 +215,29 @@ interface FeatureCardProps {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   href: string;
-  tier: Tier;
-  userTier: Tier;
   featured?: boolean;
   stats?: string;
+  isPaid: boolean;
   className?: string;
 }
 
 function FeatureCard({ 
-  title, description, icon: Icon, href, tier, userTier, featured, stats, className 
+  title, description, icon: Icon, href, featured, stats, isPaid, className 
 }: FeatureCardProps) {
-  const tierOrder: Tier[] = ["free", "starter", "pro", "insider"];
-  const userHasAccess = tierOrder.indexOf(userTier) >= tierOrder.indexOf(tier);
-  
-  const tierColors: Record<Exclude<Tier, "free">, string> = {
-    starter: "bg-slate-100 text-slate-600",
-    pro: "bg-emerald-100 text-emerald-700",
-    insider: "bg-amber-100 text-amber-700",
-  };
-
+  // Free users can still browse but see limited content on feature pages
   return (
     <Link
       to={href}
       className={cn(
         "group relative p-6 rounded-xl border border-border bg-card transition-all duration-200",
-        userHasAccess 
-          ? "hover:border-primary/50 hover:shadow-md" 
-          : "opacity-70 hover:opacity-80",
+        "hover:border-primary/50 hover:shadow-md",
         featured && "ring-1 ring-primary/20",
         className
       )}
     >
-      {/* Tier badge */}
-      {tier !== "free" && (
-        <div className="absolute top-4 right-4">
-          {userHasAccess ? (
-            <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium", tierColors[tier])}>
-              <CheckCircle2 className="w-3 h-3" /> {tier}
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-              <Lock className="w-3 h-3" /> {tier}
-            </span>
-          )}
-        </div>
-      )}
-      
       {/* Icon */}
-      <div className={cn(
-        "w-10 h-10 rounded-lg flex items-center justify-center mb-4",
-        userHasAccess ? "bg-primary/10" : "bg-muted"
-      )}>
-        <Icon className={cn("w-5 h-5", userHasAccess ? "text-primary" : "text-muted-foreground")} />
+      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+        <Icon className="w-5 h-5 text-primary" />
       </div>
       
       {/* Content */}
@@ -311,11 +256,9 @@ function FeatureCard({
       )}
       
       {/* Hover arrow */}
-      {userHasAccess && (
-        <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          <ArrowRight className="w-4 h-4 text-primary" />
-        </div>
-      )}
+      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <ArrowRight className="w-4 h-4 text-primary" />
+      </div>
     </Link>
   );
 }
