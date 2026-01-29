@@ -18,7 +18,7 @@ const MAX_MESSAGES = 25;
 const COOLDOWN_MS = 2000;
 const SESSION_KEY = "peptide-chat-messages";
 
-const WELCOME_MESSAGE = `Hey! I'm your Peptide Playbook assistant, an AI tool here to help you understand peptide research.
+const WELCOME_MESSAGE = `Hey! I'm your Peptide Playbook AI assistant, here to help you understand peptide research.
 
 I can help you:
 • Understand what different peptides do

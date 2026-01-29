@@ -1,6 +1,6 @@
 // SEO utilities and constants
 
-export const SITE_NAME = "Peptide Playbook";
+export const SITE_NAME = "Peptide Playbook AI";
 export const SITE_URL = "https://peptideplaybook.com";
 export const SITE_DESCRIPTION = "Stop taking peptide advice from TikTok. Get the research-based guide covering BPC-157, semaglutide, TB-500 and more. Know what's FDA-approved, what's experimental, and what to ask your doctor.";
 export const DEFAULT_AUTHOR = {

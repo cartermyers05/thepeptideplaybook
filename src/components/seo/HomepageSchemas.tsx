@@ -7,11 +7,11 @@ export function HomepageSchemas() {
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: "Peptide Playbook",
+    name: "Peptide Playbook AI",
     description: "The complete research-based guide to understanding peptides, FDA regulations, and how to have informed conversations with your doctor.",
     brand: {
       "@type": "Brand",
-      name: "Peptide Playbook",
+      name: "Peptide Playbook AI",
     },
     offers: {
       "@type": "Offer",

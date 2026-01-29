@@ -8,8 +8,8 @@ export default function About() {
   return (
     <>
       <SEOHead
-        title="About Peptide Playbook | Our Mission"
-        description="Peptide Playbook exists because the peptide information landscape is broken. We provide research-based education to help people make informed decisions with their doctors."
+        title="About Peptide Playbook AI | Our Mission"
+        description="Peptide Playbook AI exists because the peptide information landscape is broken. We provide research-based education to help people make informed decisions with their doctors."
         canonical="/about"
       />
       <div className="min-h-screen bg-white">
@@ -22,7 +22,7 @@ export default function About() {
               className="max-w-3xl mx-auto"
             >
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-8">
-                Why Peptide Playbook Exists
+                Why Peptide Playbook AI Exists
               </h1>
               
               <div className="prose prose-lg max-w-none">
@@ -39,7 +39,7 @@ export default function About() {
                 </p>
                 
                 <p className="text-xl font-medium mb-12">
-                  We built Peptide Playbook because we believe you deserve better.
+                  We built Peptide Playbook AI because we believe you deserve better.
                 </p>
               </div>
 

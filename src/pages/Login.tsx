@@ -50,7 +50,7 @@ export default function Login() {
           <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-primary-foreground" />
           </div>
-          <span className="font-bold text-lg">PeptideGPT</span>
+          <span className="font-bold text-lg">Peptide Playbook AI</span>
         </Link>
 
         <div className="bg-card border border-border rounded-2xl p-8 shadow-elevated">

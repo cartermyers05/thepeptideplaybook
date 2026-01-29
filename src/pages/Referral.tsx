@@ -53,7 +53,7 @@ export default function Referral() {
   }, [isLoading, referralStats, user]);
 
   const referralCode = referralStats?.referralCode || "";
-  const referralLink = referralCode ? `https://peptidegpt.com/ref/${referralCode}` : "";
+  const referralLink = referralCode ? `https://peptideplaybook.ai/ref/${referralCode}` : "";
 
   const handleCopyLink = () => {
     if (!referralLink) return;
@@ -94,7 +94,7 @@ export default function Referral() {
               <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
-              <span className="font-bold">PeptideGPT</span>
+              <span className="font-bold">Peptide Playbook AI</span>
             </Link>
             <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-1">
               <X className="w-5 h-5" />
@@ -164,7 +164,7 @@ export default function Referral() {
                 Give 14 Days, Get 1 Month Free
               </h2>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Share PeptideGPT with friends. When they subscribe, you both win.
+                Share Peptide Playbook AI with friends. When they subscribe, you both win.
               </p>
             </motion.div>
 
@@ -191,7 +191,7 @@ export default function Referral() {
               <div className="flex gap-3 mt-4">
                 <Button variant="outline" size="sm" className="flex-1" asChild disabled={!referralLink}>
                   <a
-                    href={`https://twitter.com/intent/tweet?text=Check out PeptideGPT - the AI-powered peptide research assistant! Use my link for a 14-day free trial: ${referralLink}`}
+                    href={`https://twitter.com/intent/tweet?text=Check out Peptide Playbook AI - the AI-powered peptide research assistant! Use my link for a 14-day free trial: ${referralLink}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -201,7 +201,7 @@ export default function Referral() {
                 </Button>
                 <Button variant="outline" size="sm" className="flex-1" asChild disabled={!referralLink}>
                   <a
-                    href={`mailto:?subject=Check out PeptideGPT&body=I've been using PeptideGPT for peptide research and it's amazing! Use my link for a 14-day free trial: ${referralLink}`}
+                    href={`mailto:?subject=Check out Peptide Playbook AI&body=I've been using Peptide Playbook AI for peptide research and it's amazing! Use my link for a 14-day free trial: ${referralLink}`}
                   >
                     <Mail className="w-4 h-4 mr-2" />
                     Email

@@ -7,8 +7,8 @@ export default function Privacy() {
   return (
     <>
       <SEOHead
-        title="Privacy Policy | Peptide Playbook"
-        description="Privacy Policy for Peptide Playbook. Learn how we collect, use, and protect your information."
+        title="Privacy Policy | Peptide Playbook AI"
+        description="Privacy Policy for Peptide Playbook AI. Learn how we collect, use, and protect your information."
         canonical="/privacy"
         noIndex
       />

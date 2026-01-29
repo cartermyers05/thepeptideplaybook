@@ -50,7 +50,7 @@ const faqs = [
   },
   {
     question: "Is this medical advice?",
-    answer: "No. Peptide Playbook provides educational information based on published research. It's not a substitute for professional medical advice. Always consult a healthcare provider.",
+    answer: "No. Peptide Playbook AI provides educational information based on published research. It's not a substitute for professional medical advice. Always consult a healthcare provider.",
   },
   {
     question: "How do I access the content?",
@@ -77,8 +77,8 @@ export default function Pricing() {
   return (
     <>
       <SEOHead
-        title="Pricing | Peptide Playbook"
-        description="Get full access to Peptide Playbook for $67. One-time payment, lifetime access, 30-day money-back guarantee."
+        title="Pricing | Peptide Playbook AI"
+        description="Get full access to Peptide Playbook AI for $67. One-time payment, lifetime access, 30-day money-back guarantee."
       />
       <div className="min-h-screen bg-background">
         <Navbar />

@@ -33,7 +33,7 @@ export default function DashboardHeader({ activeTab, onTabChange }: DashboardHea
               <Sparkles className="w-4 h-4 text-primary-foreground" />
             </div>
             <span className="font-semibold hidden sm:block">
-              PeptideGPT
+              Peptide Playbook AI
             </span>
           </Link>
 
