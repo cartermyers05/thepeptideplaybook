@@ -1,175 +1,243 @@
 
 
-# Site Audit: Issues Found and Fixes Required
+# Peptide Playbook — Critical Conversion Fixes
 
-## Summary
+## Overview
 
-I've completed a comprehensive scan of the entire codebase. The core implementation is **solid**, but I found **15 issues** that need to be fixed to ensure users get exactly what they pay for.
-
----
-
-## Issues Found
-
-### Critical Issues (Must Fix)
-
-| # | Issue | Location | Impact |
-|---|-------|----------|--------|
-| 1 | **ThankYou page links to `/chat` instead of `/dashboard`** | `src/pages/ThankYou.tsx:87` | Users taken to old chat page instead of their new dashboard |
-| 2 | **Subscription tier mapping gives Pro instead of "Full Access"** | `create-checkout/index.ts:20-26` | Monthly/Annual subscribers get Pro tier but pricing page promises Community Access (Insider only) |
-| 3 | **Pricing page subscription features are incorrect** | `src/pages/Pricing.tsx:61-62` | Claims "Community Access" included in $29/mo but Community requires Insider ($497) |
-| 4 | **Database only has 20 peptides, marketing claims 40+** | Database query | Landing page promises "40+ peptides" but only 20 exist |
-| 5 | **RLS overly permissive policies** | Database | 3 tables with `USING (true)` INSERT/UPDATE policies - security risk |
-
-### Moderate Issues (Should Fix)
-
-| # | Issue | Location | Impact |
-|---|-------|----------|--------|
-| 6 | **Old `/chat` route still accessible** | `src/App.tsx` | Legacy chat page exists alongside new dashboard chat - confusing |
-| 7 | **Profile default tier is "trial" not "free"** | Database column default | `subscription_status` defaults to "trial" which may cause confusion |
-| 8 | **No consent modal on new Dashboard Chat** | `src/pages/dashboard/ChatPage.tsx` | Old Chat page has compliance modal, new one doesn't |
-| 9 | **Settings page shows generic "subscription"** | `src/pages/dashboard/Settings.tsx` | Doesn't show which tier user has or what features they have access to |
-| 10 | **Missing stripe_subscription_id handling** | Webhook handler | Subscriptions store subscription ID but no way to check/cancel |
-
-### Minor Issues (Nice to Fix)
-
-| # | Issue | Location | Impact |
-|---|-------|----------|--------|
-| 11 | **PDF Download button does nothing** | `src/pages/dashboard/Guide.tsx:41` | Button exists but no actual PDF to download |
-| 12 | **Print PDF button does nothing** | `src/pages/dashboard/Checklist.tsx:70` | Button exists but no print functionality |
-| 13 | **Read full digest button does nothing** | `src/pages/dashboard/Digest.tsx:89` | Button exists but no actual digest content |
-| 14 | **Legacy routes still in App.tsx** | `src/App.tsx` | Old routes like `/history`, `/saved`, `/stats` still exist but unused |
-| 15 | **Grain texture variable undefined** | `src/index.css` | Hero uses grain texture but CSS animation may not be defined |
+This plan implements 10 high-impact fixes to maximize conversions, improve user experience, and add trust elements throughout the site.
 
 ---
 
-## Detailed Fixes
+## Changes Summary
 
-### Fix 1: ThankYou Page Link (Critical)
-
-**Problem:** After purchase, users are sent to `/chat` (old page) instead of `/dashboard` (new dashboard)
-
-**File:** `src/pages/ThankYou.tsx`
-
-**Change:** Line 87 - Change link from `/chat` to `/dashboard`
-
----
-
-### Fix 2 & 3: Subscription Tier Mapping (Critical)
-
-**Problem:** The pricing page claims Monthly/Annual subscriptions include "Community Access" but:
-- Community Access requires `insider` tier
-- Monthly/Annual are mapped to `pro` tier
-
-**Options:**
-1. Change subscription tier to `insider` (gives more access than price suggests)
-2. Remove "Community Access" from subscription features (reduces promised value)
-3. Create new subscription-specific tier with database, AI, digest, but not community
-
-**Recommended:** Option 2 - Remove "Community Access" from subscription features on pricing page
-
-**Files:**
-- `src/pages/Pricing.tsx:61-62` - Remove "Community Access" from subscription features
-- `src/components/landing/PricingSection.tsx` - Already correct (subscriptions listed separately)
+| Fix | Priority | Effort |
+|-----|----------|--------|
+| 1. FinalCTA tiered pricing | Critical | 15 min |
+| 2. Login redirect to /dashboard | Critical | 2 min |
+| 3. Urgency banner with countdown | High | 15 min |
+| 4. Exit intent popup | High | 20 min |
+| 5. Floating mobile CTA | High | 10 min |
+| 6. Print checklist functionality | Medium | 10 min |
+| 7. Expand digest content | Medium | 30 min |
+| 8. Enhanced testimonials | Medium | 15 min |
+| 9. Trust badges/elements | Medium | 20 min |
+| 10. Signup page redirect fix | Critical | 2 min |
 
 ---
 
-### Fix 4: Add More Peptides (Critical)
+## Fix 1: Update FinalCTA Section
 
-**Problem:** Only 20 peptides exist, marketing claims 40+
+**File:** `src/components/landing/FinalCTA.tsx`
 
-**Solution:** Add 20+ more peptides to database to match marketing claims
+Replace the single $167 pricing card with a 3-tier summary:
+- Starter ($67) - Guide + Scripts + Checklist
+- Pro ($197) - marked as "MOST POPULAR" - adds Database + AI + Digest  
+- Insider ($497) - adds Community + 1:1 Call
 
----
+Include two CTAs:
+- "View Full Pricing" linking to /pricing
+- "Get Free Guide First" linking to /free-guide
 
-### Fix 5: RLS Policies (Critical Security)
-
-**Problem:** Some tables have overly permissive RLS policies
-
-**Solution:** Review and tighten INSERT/UPDATE policies on affected tables
-
----
-
-### Fix 6: Remove Legacy Chat Route
-
-**Problem:** `/chat` route exists alongside `/dashboard/chat`, causing confusion
-
-**Solution:** Redirect `/chat` to `/dashboard/chat` or remove route entirely
+Update bottom CTA text to remove $167 reference and link to /pricing.
 
 ---
 
-### Fix 7: Dashboard ChatPage Missing Consent Modal
+## Fix 2: Login Redirect
 
-**Problem:** Original Chat page had compliance modal, new dashboard chat doesn't
+**File:** `src/pages/Login.tsx`
 
-**Solution:** Add ChatConsentModal to dashboard ChatPage or create shared consent state
+Change line 29:
+```text
+navigate("/chat")  →  navigate("/dashboard")
+```
 
----
-
-### Fix 8: Settings Page Enhancement
-
-**Problem:** Settings doesn't show tier-specific feature access
-
-**Solution:** Add feature access list showing what user can access with their tier
+Also update the "Start free trial" link text to "Create account" since free trial was removed.
 
 ---
 
-## Feature Alignment Matrix
+## Fix 3: Urgency Banner
 
-| Feature | Starter $67 | Pro $197 | Insider $497 | Monthly $29 | Annual $247 |
-|---------|-------------|----------|--------------|-------------|-------------|
-| PDF Guide | ✓ | ✓ | ✓ | ✗ | ✗ |
-| Doctor Scripts | ✓ | ✓ | ✓ | ✗ | ✗ |
-| Source Checklist | ✓ | ✓ | ✓ | ✗ | ✗ |
-| Peptide Database | ✗ | ✓ | ✓ | ✓ | ✓ |
-| AI Assistant | ✗ | ✓ | ✓ | ✓ | ✓ |
-| Research Digest | ✗ | ✓ | ✓ | ✓ | ✓ |
-| Community | ✗ | ✗ | ✓ | **CLAIMED** | **CLAIMED** |
-| 1:1 Strategy Call | ✗ | ✗ | ✓ | ✗ | ✗ |
+**New File:** Create updated `src/components/landing/UrgencyBanner.tsx`
 
-**Issue:** Monthly/Annual claim Community but are mapped to Pro tier
+Features:
+- Sticky banner at top of page with primary background
+- 24-hour countdown timer (persisted in localStorage)
+- Dismissible with X button
+- "New Year Special: Get 20% off Pro with code PEPTIDE2026"
+- Clean, non-spammy design
+
+**Update:** `src/pages/Index.tsx` to include banner above Navbar
 
 ---
 
-## What's Working Correctly
+## Fix 4: Exit Intent Popup
 
-| Component | Status |
-|-----------|--------|
-| Stripe Products & Prices | ✓ All 5 products created with correct prices |
-| Create Checkout Edge Function | ✓ Working |
-| Stripe Webhook Handler | ✓ Handles all events |
-| Tier Access Control (useTier) | ✓ Hierarchy correct |
-| Dashboard Sidebar | ✓ Shows locked features correctly |
-| UpgradePrompt Component | ✓ Links to pricing |
-| Peptide Database UI | ✓ Filters and search work |
-| Free Guide Lead Capture | ✓ Saves to database |
-| Auth Flow | ✓ Login/Signup working |
+**New File:** `src/components/landing/ExitIntentPopup.tsx`
 
----
+Features:
+- Triggers when mouse leaves viewport (clientY <= 0)
+- Only shows once per session (stored in sessionStorage)
+- 5-second delay before activating listener
+- Offers free "5 Red Flags" checklist
+- Email capture form → inserts to `leads` table with source: "exit-intent"
+- Clean modal design with Gift icon
 
-## Priority Order for Fixes
-
-1. **Fix subscription feature claims** (Critical - legal/trust issue)
-2. **Fix ThankYou redirect** (Critical - UX issue)
-3. **Add more peptides** (Critical - marketing claim)
-4. **Add consent modal to dashboard chat** (Compliance)
-5. **Clean up legacy routes** (Code hygiene)
-6. **Fix RLS policies** (Security)
-7. **Implement download/print buttons** (Feature completeness)
+**Update:** `src/pages/Index.tsx` to include popup component
 
 ---
 
-## Technical Notes
+## Fix 5: Floating Mobile CTA
 
-**Stripe Integration Verification:**
-- Starter: price_1SuiuLKivWYlZk5KLQmOGU1S ($67) ✓
-- Pro: price_1SuiuNKivWYlZk5Kr1aUqa3f ($197) ✓
-- Insider: price_1SuiuPKivWYlZk5KCPoxauTv ($497) ✓
-- Monthly: price_1SuiuRKivWYlZk5KQzUQTyCe ($29/mo) ✓
-- Annual: price_1SuiuSKivWYlZk5KvoO7s82u ($247/yr) ✓
+**New File:** `src/components/landing/FloatingCTA.tsx`
 
-**Database Schema:**
-- profiles table: ✓ Has tier, stripe_customer_id
-- peptides table: ✓ Has all required fields
-- leads table: ✓ Working for free guide
-- purchases table: ✓ Tracks purchases
+Features:
+- Fixed button at bottom of screen on mobile
+- Only appears after scrolling past 600px
+- Links to /pricing
+- "Get Instant Access" with arrow icon
+- Subtle shadow and animation
+
+**Update:** `src/pages/Index.tsx` to include floating CTA
+
+---
+
+## Fix 6: Print Checklist Functionality
+
+**File:** `src/pages/dashboard/Checklist.tsx`
+
+Changes:
+- Add onClick handler to Print button: `window.print()`
+- Add `print-content` class to main content wrapper
+
+**File:** `src/index.css`
+
+Add print media query:
+```css
+@media print {
+  nav, .sidebar, button, .no-print { display: none !important; }
+  .print-content { width: 100% !important; margin: 0 !important; padding: 20px !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+```
+
+---
+
+## Fix 7: Expand Digest Content
+
+**File:** `src/pages/dashboard/Digest.tsx`
+
+Changes:
+- Add `fullContent` and `sources` fields to each digest object
+- Add expandable state management with useState
+- When "Read full digest" is clicked, expand to show:
+  - Full markdown content (rendered with react-markdown)
+  - Source links
+- Collapse functionality to hide content again
+
+---
+
+## Fix 8: Enhanced Testimonials
+
+**File:** `src/components/landing/Testimonials.tsx`
+
+Updates to testimonials array:
+- Add `title` field (e.g., "Marketing Director, Austin TX")
+- Add `date` field (e.g., "January 2026")
+- Enhance quotes with more specific details
+
+Update component:
+- Display job title below name
+- Show verification date
+- Add avatar placeholder styling
+
+---
+
+## Fix 9: Trust Badges/Elements
+
+**File:** `src/components/landing/PricingSection.tsx`
+
+Add below pricing cards:
+- Security badges: "SSL Secured", "Stripe Payments", "30-Day Refund"
+- Member count: "Join 4,200+ members"
+
+**File:** `src/pages/Checkout.tsx`
+
+Add trust elements near checkout button:
+- Lock icon with "256-bit SSL encryption"
+- Credit card icons
+- Money-back guarantee text
+
+---
+
+## Fix 10: Signup Page Redirect
+
+**File:** `src/pages/Signup.tsx`
+
+Change line 66 in `handleContinue`:
+```text
+navigate("/chat")  →  navigate("/dashboard")
+```
+
+Also update marketing copy:
+- Remove "7-day trial for just $1" (line 284)
+- Update to match new pricing model
+
+---
+
+## Implementation Order
+
+1. Login & Signup redirects (Critical path fixes)
+2. FinalCTA tiered pricing (Landing page accuracy)
+3. Urgency banner (Conversion lift)
+4. Exit intent popup (Lead capture)
+5. Floating mobile CTA (Mobile conversion)
+6. Enhanced testimonials (Social proof)
+7. Trust badges (Reduce friction)
+8. Print checklist (Feature completion)
+9. Expand digest content (Feature completion)
+10. Print CSS styles (Finish print feature)
+
+---
+
+## Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/components/landing/ExitIntentPopup.tsx` | Lead capture popup |
+| `src/components/landing/FloatingCTA.tsx` | Mobile sticky CTA |
+
+---
+
+## Files to Update
+
+| File | Changes |
+|------|---------|
+| `src/pages/Login.tsx` | Redirect to /dashboard |
+| `src/pages/Signup.tsx` | Redirect to /dashboard, update copy |
+| `src/components/landing/FinalCTA.tsx` | Complete rewrite with tiered pricing |
+| `src/components/landing/UrgencyBanner.tsx` | Update with dismiss functionality |
+| `src/components/landing/Testimonials.tsx` | Enhanced data and display |
+| `src/components/landing/PricingSection.tsx` | Add trust badges |
+| `src/pages/Index.tsx` | Add UrgencyBanner, ExitIntentPopup, FloatingCTA |
+| `src/pages/dashboard/Checklist.tsx` | Add print functionality |
+| `src/pages/dashboard/Digest.tsx` | Add expandable content |
+| `src/pages/Checkout.tsx` | Add trust elements |
+| `src/index.css` | Add print media query |
+
+---
+
+## Testing Checklist
+
+After implementation, verify:
+- Login redirects to /dashboard (not /chat)
+- Signup flow ends at /dashboard
+- FinalCTA shows 3 tiers with correct prices
+- Urgency banner shows countdown, dismisses on X
+- Exit intent fires when mouse leaves viewport (after 5s delay)
+- Mobile floating CTA appears on scroll (test on mobile viewport)
+- Print checklist opens browser print dialog
+- Digest cards expand to show full content
+- All testimonials show name, title, and date
+- Trust badges visible on pricing section
+- No console errors
 
