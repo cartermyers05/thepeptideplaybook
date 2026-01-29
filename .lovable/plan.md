@@ -1,108 +1,93 @@
 
-
-# Remove Guide and Doctor Scripts Features
+# Rename to Peptide Playbook AI
 
 ## Summary
 
-Remove "The Guide" and "Doctor Scripts" features from the dashboard and all related references across the codebase.
-
----
-
-## Files to Delete
-
-| File | Reason |
-|------|--------|
-| `src/pages/dashboard/Guide.tsx` | Guide page component |
-| `src/pages/dashboard/Scripts.tsx` | Doctor Scripts page component |
+Update all brand name references from "Peptide Playbook" and "PeptideGPT" to "Peptide Playbook AI" to emphasize the AI-powered nature of the platform.
 
 ---
 
 ## Files to Modify
 
-### 1. `src/App.tsx`
-**Remove imports and routes:**
-- Line 30: Remove `DashboardGuide` import
-- Line 31: Remove `DashboardScripts` import
-- Line 68: Remove `/dashboard/guide` route
-- Line 69: Remove `/dashboard/scripts` route
+### Core SEO & Meta Files
 
-### 2. `src/components/dashboard/DashboardSidebar.tsx`
-**Remove navigation items:**
-- Line 3: Remove `BookOpen` and `MessageSquare` from imports
-- Lines 28-29: Remove "The Guide" and "Doctor Scripts" from `navItems` array
+| File | Changes |
+|------|---------|
+| `src/lib/seo.ts` | Update `SITE_NAME` constant and `DEFAULT_AUTHOR.name` |
+| `index.html` | Update title, meta tags, and Open Graph tags |
 
-### 3. `src/pages/dashboard/Home.tsx`
-**Remove from feature grid and suggestions:**
-- Remove `BookOpen` and `FileText` from imports (line 3)
-- Remove "The Guide" feature object (lines 14-21)
-- Remove "Doctor Scripts" feature object (lines 37-42)
-- Line 60: Update "Guide updated" in updates array (rename or remove)
-- Line 109: Remove "Guide Progress" from quick stats
-- Line 194: Remove "Continue reading: Chapter 3" suggested action
+### Landing Page Components
 
-### 4. `src/pages/dashboard/Settings.tsx`
-**Remove from feature list:**
-- Line 14: Remove "Complete PDF Guide (80+ pages)"
-- Line 15: Change "Doctor Scripts & Checklist" to just "Source Checklist"
+| File | Changes |
+|------|---------|
+| `src/components/landing/Navbar.tsx` | Line 38: Update wordmark text |
+| `src/components/landing/Footer.tsx` | Lines 9, 34, 38: Update footer brand references |
+| `src/components/landing/HeroSection.tsx` | Line 55: Update hero title |
+| `src/components/landing/FAQ.tsx` | Line 12: Update FAQ answer |
+| `src/components/landing/SolutionSection.tsx` | Line 83: Update solution text |
 
-### 5. `src/components/landing/ProductPreview.tsx`
-**Remove from product grid:**
-- Remove "The Complete Guide" product object (lines 5-11)
-- Remove "Doctor Conversation Scripts" product object (lines 24-29)
-- Remove `BookOpen` and `FileText` from imports
+### Dashboard Components
 
-### 6. `src/components/landing/PricingCTA.tsx`
-**Remove from features list:**
-- Line 7: Remove "80+ page research guide"
-- Line 10: Remove "Doctor conversation scripts"
+| File | Changes |
+|------|---------|
+| `src/components/dashboard/DashboardSidebar.tsx` | Line 58: Update sidebar header |
+| `src/components/dashboard/DashboardHeader.tsx` | Line 36: "PeptideGPT" to "Peptide Playbook AI" |
+| `src/components/dashboard/ComplianceModal.tsx` | Line 107: "PeptideGPT" to "Peptide Playbook AI" |
 
-### 7. `src/components/landing/HowItWorks.tsx`
-**Update step descriptions:**
-- Line 11: Change "Start With the Guide" to something else (e.g., "Explore the Database")
-- Line 17: Remove reference to "scripts"
+### Page Files
 
-### 8. `src/components/landing/WhyIMadeThis.tsx`
-**Update copy:**
-- Line 22: Change "Guide" to "resource" or similar
-- Line 50: Change "guide" to "resource"
+| File | Changes |
+|------|---------|
+| `src/pages/Login.tsx` | Line 53: "PeptideGPT" to "Peptide Playbook AI" |
+| `src/pages/Saved.tsx` | Line 92: "PeptideGPT" to "Peptide Playbook AI" |
+| `src/pages/Stats.tsx` | Line 91: "PeptideGPT" to "Peptide Playbook AI" |
+| `src/pages/History.tsx` | Line 107: "PeptideGPT" to "Peptide Playbook AI" |
+| `src/pages/Referral.tsx` | Update brand references |
+| `src/pages/About.tsx` | Lines 11-12, 25, 42: Update page title and content |
+| `src/pages/Blog.tsx` | Line 23: Update SEO title |
+| `src/pages/Pricing.tsx` | Lines 53, 80-81: Update FAQ and SEO |
+| `src/pages/Terms.tsx` | Update all legal references |
+| `src/pages/Privacy.tsx` | Lines 10-11: Update SEO tags |
 
-### 9. `src/components/landing/SocialProof.tsx`
-**Update copy:**
-- Line 64: Change "This guide" to "This resource" or "Peptide Playbook"
+### Other Components
+
+| File | Changes |
+|------|---------|
+| `src/components/chat/ChatWidget.tsx` | Line 21: Update welcome message |
+| `src/components/blog/BlogCTA.tsx` | Lines 24, 30: Update CTA text |
+| `src/components/seo/HomepageSchemas.tsx` | Lines 10, 14: Update Product schema |
+| `src/components/seo/OrganizationSchema.tsx` | Uses SITE_NAME constant (auto-updated) |
 
 ---
 
-## Updated Feature Set (After Removal)
+## Technical Details
 
-The remaining features will be:
-1. **Peptide Database** - 41 peptides searchable
-2. **AI Research Assistant** - Unlimited questions
-3. **Source Evaluation Checklist** - Vendor evaluation
-4. **Monthly Research Digest** - Monthly updates
+### Primary Constant Update
+The `SITE_NAME` in `src/lib/seo.ts` will be updated:
+```typescript
+// Before
+export const SITE_NAME = "Peptide Playbook";
+
+// After
+export const SITE_NAME = "Peptide Playbook AI";
+```
+
+This automatically updates:
+- All SEO components using the constant
+- Organization schema
+- Homepage schemas
+
+### Manual Updates Required
+Hardcoded strings in ~20 files need direct replacement:
+- "Peptide Playbook" -> "Peptide Playbook AI"
+- "PeptideGPT" -> "Peptide Playbook AI"
 
 ---
 
-## Navigation Changes
+## Result
 
-**Current sidebar:**
-```text
-Dashboard
-The Guide          ← REMOVE
-Doctor Scripts     ← REMOVE
-Source Checklist
-Peptide Database
-AI Assistant
-Research Digest
-Settings
-```
-
-**Updated sidebar:**
-```text
-Dashboard
-Source Checklist
-Peptide Database
-AI Assistant
-Research Digest
-Settings
-```
-
+After this update:
+- All navigation headers will show "Peptide Playbook AI"
+- SEO meta tags will reflect the AI branding
+- Landing page and dashboard will consistently use the new name
+- Users will immediately understand AI is a core feature
