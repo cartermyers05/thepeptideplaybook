@@ -79,23 +79,24 @@ function Particles({ count, variant }: { count: number; variant: string }) {
   );
 }
 
-// Aurora gradient shapes
+// Aurora gradient shapes with faster, more dynamic motion
 function AuroraGradients({ variant }: { variant: string }) {
   const gradients: Record<string, AuroraGradient[]> = {
     hero: [
-      { id: 1, position: "-top-32 -right-20", size: "w-[600px] h-[300px]", color: "from-primary/10 via-purple-500/5 to-transparent", blur: "blur-[80px]", delay: 0 },
-      { id: 2, position: "-bottom-40 -left-32", size: "w-[500px] h-[250px]", color: "from-blue-500/8 via-primary/5 to-transparent", blur: "blur-[100px]", delay: 2 },
-      { id: 3, position: "top-1/3 left-1/4", size: "w-[400px] h-[200px]", color: "from-pink-500/6 via-primary/4 to-transparent", blur: "blur-[70px]", delay: 4 },
+      { id: 1, position: "-top-32 -right-20", size: "w-[600px] h-[300px]", color: "from-primary/15 via-purple-500/8 to-transparent", blur: "blur-[80px]", delay: 0 },
+      { id: 2, position: "-bottom-40 -left-32", size: "w-[500px] h-[250px]", color: "from-blue-500/12 via-primary/8 to-transparent", blur: "blur-[100px]", delay: 1.5 },
+      { id: 3, position: "top-1/3 left-1/4", size: "w-[400px] h-[200px]", color: "from-pink-500/10 via-primary/6 to-transparent", blur: "blur-[70px]", delay: 3 },
+      { id: 4, position: "bottom-1/4 right-1/3", size: "w-[350px] h-[180px]", color: "from-indigo-400/8 via-purple-400/5 to-transparent", blur: "blur-[60px]", delay: 4.5 },
     ],
     rich: [
-      { id: 1, position: "-top-40 -right-32", size: "w-[700px] h-[350px]", color: "from-primary/12 via-purple-600/8 to-transparent", blur: "blur-[100px]", delay: 0 },
-      { id: 2, position: "-bottom-48 -left-40", size: "w-[600px] h-[300px]", color: "from-blue-600/10 via-primary/6 to-transparent", blur: "blur-[120px]", delay: 1.5 },
-      { id: 3, position: "top-1/4 left-1/3", size: "w-[450px] h-[220px]", color: "from-pink-600/8 via-purple-500/5 to-transparent", blur: "blur-[80px]", delay: 3 },
-      { id: 4, position: "bottom-1/3 right-1/4", size: "w-[350px] h-[180px]", color: "from-indigo-500/6 via-primary/4 to-transparent", blur: "blur-[60px]", delay: 4.5 },
+      { id: 1, position: "-top-40 -right-32", size: "w-[700px] h-[350px]", color: "from-primary/18 via-purple-600/12 to-transparent", blur: "blur-[100px]", delay: 0 },
+      { id: 2, position: "-bottom-48 -left-40", size: "w-[600px] h-[300px]", color: "from-blue-600/15 via-primary/10 to-transparent", blur: "blur-[120px]", delay: 1 },
+      { id: 3, position: "top-1/4 left-1/3", size: "w-[450px] h-[220px]", color: "from-pink-600/12 via-purple-500/8 to-transparent", blur: "blur-[80px]", delay: 2 },
+      { id: 4, position: "bottom-1/3 right-1/4", size: "w-[350px] h-[180px]", color: "from-indigo-500/10 via-primary/6 to-transparent", blur: "blur-[60px]", delay: 3 },
     ],
     subtle: [
-      { id: 1, position: "-top-20 -right-16", size: "w-[400px] h-[200px]", color: "from-primary/6 via-purple-500/3 to-transparent", blur: "blur-[60px]", delay: 0 },
-      { id: 2, position: "-bottom-24 -left-20", size: "w-[350px] h-[180px]", color: "from-blue-500/4 via-primary/3 to-transparent", blur: "blur-[70px]", delay: 3 },
+      { id: 1, position: "-top-20 -right-16", size: "w-[400px] h-[200px]", color: "from-primary/8 via-purple-500/4 to-transparent", blur: "blur-[60px]", delay: 0 },
+      { id: 2, position: "-bottom-24 -left-20", size: "w-[350px] h-[180px]", color: "from-blue-500/6 via-primary/4 to-transparent", blur: "blur-[70px]", delay: 2 },
     ],
   };
 
@@ -109,14 +110,14 @@ function AuroraGradients({ variant }: { variant: string }) {
           className={`absolute ${aurora.position} ${aurora.size} ${aurora.blur} rounded-[100%] bg-gradient-to-br ${aurora.color}`}
           style={{ transform: "rotate(-15deg)" }}
           animate={{
-            scale: [1, 1.1, 0.95, 1.05, 1],
-            x: [0, 20, -10, 15, 0],
-            y: [0, -15, 10, -5, 0],
-            rotate: [-15, -10, -20, -12, -15],
+            scale: [1, 1.15, 0.9, 1.1, 1],
+            x: [0, 30, -20, 25, 0],
+            y: [0, -25, 20, -10, 0],
+            rotate: [-15, -5, -25, -8, -15],
           }}
           transition={{
-            duration: 20 + aurora.delay * 2,
-            delay: aurora.delay,
+            duration: 12 + aurora.delay,
+            delay: aurora.delay * 0.5,
             repeat: Infinity,
             ease: "easeInOut",
           }}
@@ -172,7 +173,7 @@ function LightBeams({ variant }: { variant: string }) {
 }
 
 export function FloatingOrbs({ variant = "hero" }: FloatingOrbsProps) {
-  const particleCount = variant === "hero" ? 35 : variant === "rich" ? 45 : 20;
+  const particleCount = variant === "hero" ? 50 : variant === "rich" ? 65 : 30;
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -185,19 +186,40 @@ export function FloatingOrbs({ variant = "hero" }: FloatingOrbsProps) {
       {/* Diagonal light beams */}
       <LightBeams variant={variant} />
       
-      {/* Animated glow pulse for hero */}
+      {/* Animated glow pulse for hero - faster and more noticeable */}
       {variant === "hero" && (
         <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-[100%]"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[450px] rounded-[100%]"
           style={{
-            background: "radial-gradient(ellipse, hsl(var(--primary) / 0.03) 0%, transparent 60%)",
+            background: "radial-gradient(ellipse, hsl(var(--primary) / 0.05) 0%, transparent 60%)",
           }}
           animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.5, 0.8, 0.5],
+            scale: [1, 1.2, 0.95, 1.15, 1],
+            opacity: [0.4, 0.7, 0.5, 0.8, 0.4],
           }}
           transition={{
-            duration: 10,
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      )}
+
+      {/* Secondary breathing pulse */}
+      {(variant === "hero" || variant === "rich") && (
+        <motion.div
+          className="absolute top-1/3 left-2/3 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] rounded-[100%]"
+          style={{
+            background: "radial-gradient(ellipse, hsl(var(--primary) / 0.04) 0%, transparent 50%)",
+          }}
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0.6, 0.3],
+            x: [0, 50, 0],
+          }}
+          transition={{
+            duration: 12,
+            delay: 2,
             repeat: Infinity,
             ease: "easeInOut",
           }}
