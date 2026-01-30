@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Shield, Zap, Clock, ArrowRight } from "lucide-react";
 import { FloatingOrbs } from "./FloatingOrbs";
 import { GridPattern } from "./GridPattern";
-import { HeroDemoCard } from "./HeroDemoCard";
 import { Link } from "react-router-dom";
 const trustItems = [{
   icon: Shield,
@@ -69,11 +68,6 @@ export function HeroSection() {
 
             {/* Subheadline */}
             <motion.p variants={itemVariants} className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">Your 24/7 AI research assistant that knows 41+ peptides, their FDA status, mechanisms, and the latest studies. No more TikToks or Reddit speculation. Just ask.</motion.p>
-
-            {/* Hero Demo Card */}
-            <motion.div variants={itemVariants} className="mb-8">
-              <HeroDemoCard />
-            </motion.div>
 
             {/* Stats row */}
             <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-6 mb-8">
