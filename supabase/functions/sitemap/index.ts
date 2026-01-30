@@ -46,6 +46,12 @@ serve(async (req) => {
       { path: "/terms", priority: "0.3", changefreq: "yearly" },
       { path: "/privacy", priority: "0.3", changefreq: "yearly" },
       { path: "/disclaimer", priority: "0.3", changefreq: "yearly" },
+      // SEO Guide pages
+      { path: "/guides", priority: "0.9", changefreq: "weekly" },
+      { path: "/guides/bpc-157-complete-guide", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/peptides-fda-legal-status-2026", priority: "0.9", changefreq: "weekly" },
+      { path: "/guides/are-peptides-safe", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/bpc-157-vs-tb-500", priority: "0.7", changefreq: "monthly" },
     ];
 
     // Generate XML sitemap with enhanced structure
