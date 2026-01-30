@@ -1,79 +1,101 @@
 
-# Fix: Promo Code Tier Update Failing
 
-## Problem Identified
+# Weekly Peptide Digest - Automated Monday Updates
 
-The promo code redemption is failing because of a database constraint mismatch:
+## Overview
+
+Transform the Research Digest from a monthly manual system to an **automated weekly digest** that posts every Monday with the top peptide stories, new research, and exciting developments.
+
+## What You'll Get
+
+Every Monday, your members will see a fresh digest with:
+- Top 5 peptide stories from the past week
+- What's new in GLP-1s, BPC-157, and other trending peptides
+- FDA/regulatory updates
+- Exciting research breakthroughs
+- AI-generated summary making it easy to digest
+
+## How It Works
 
 ```text
-Error: "new row for relation 'profiles' violates check constraint 'profiles_tier_check'"
+Every Monday at 8 AM UTC:
+┌─────────────────┐     ┌──────────────────────┐     ┌─────────────────────┐
+│ Cron Job Fires  │ --> │ Scrape Latest News   │ --> │ AI Summarizes Top   │
+│ (pg_cron)       │     │ (Firecrawl)          │     │ Stories (Lovable AI)│
+└─────────────────┘     └──────────────────────┘     └─────────────────────┘
+                                                              │
+                                                              v
+                                                    ┌─────────────────────┐
+                                                    │ Weekly Digest Posted│
+                                                    │ to /dashboard/digest│
+                                                    └─────────────────────┘
 ```
 
-The `profiles` table has a CHECK constraint that only allows these tier values:
-- `free`
-- `starter` 
-- `pro`
-- `insider`
+## Implementation
 
-However, the `redeem-promo-code` edge function is trying to set `tier: "member"`, which violates this constraint.
+### 1. Create New Edge Function: `generate-weekly-digest`
 
-## Root Cause
+A new function that:
+- Fetches news articles from the past 7 days
+- Uses Lovable AI to generate an engaging summary with highlights
+- Creates a weekly digest entry in the database
+- Labels it "Week of [Date]" instead of monthly
 
-The redemptions ARE being recorded (we have 2 redemption records), but the profile tier update silently fails due to the constraint violation. The edge function returns success because the redemption was recorded, but the tier never changes.
+### 2. Update Database Schema
 
-## Solution
+Add a `digest_type` column to `research_digests` table to distinguish:
+- `weekly` - New automated weekly digests
+- `monthly` - Legacy monthly digests (if any)
 
-Update the `redeem-promo-code` edge function to use a valid tier value. Based on the existing tiers, we should use `"insider"` (the highest tier) for VIP promo code recipients.
+### 3. Schedule Weekly Cron Job
 
-## Implementation Steps
-
-### 1. Update Edge Function
-
-| File | Change |
-|------|--------|
-| `supabase/functions/redeem-promo-code/index.ts` | Change `tier: "member"` to `tier: "insider"` |
-
-**Before:**
-```typescript
-.update({ 
-  tier: "member",
-  subscription_status: "active"
-})
-```
-
-**After:**
-```typescript
-.update({ 
-  tier: "insider",
-  subscription_status: "active"
-})
-```
-
-### 2. Fix Existing Users
-
-Run a one-time database migration to upgrade the two users who already redeemed codes but didn't get their tier updated:
-
+Set up `pg_cron` to run every Monday at 8 AM UTC:
 ```sql
-UPDATE profiles 
-SET tier = 'insider', subscription_status = 'active'
-WHERE user_id IN (
-  SELECT user_id FROM promo_code_redemptions
-) AND tier = 'free';
+SELECT cron.schedule(
+  'weekly-peptide-digest',
+  '0 8 * * 1',  -- Every Monday at 8 AM
+  $$ ... $$
+);
 ```
 
-## Why This Works
+### 4. Update UI
 
-The `useTier` hook already maps any non-free tier to `isPaid = true`:
+- Change "Monthly updates" text to "Weekly updates every Monday"
+- Show "Week of January 27, 2026" format for weekly digests
+- Keep the same expandable card format
 
-```typescript
-const currentTier: Tier = rawTier === "free" ? "free" : "member";
-const isPaid = currentTier === "member";
-```
+## Files to Create/Modify
 
-So setting `tier: "insider"` will correctly show as a paid member in the UI.
+| File | Action | Purpose |
+|------|--------|---------|
+| `supabase/functions/generate-weekly-digest/index.ts` | **Create** | New weekly digest generator with AI |
+| Database migration | **Create** | Add `digest_type` column, set up cron job |
+| `src/pages/dashboard/Digest.tsx` | **Modify** | Update text and date formatting |
+| `src/components/dashboard/DigestCard.tsx` | **Modify** | Support weekly date format |
+| `supabase/config.toml` | **Modify** | Register new function |
 
 ## Technical Details
 
-- The `insider` tier is the premium tier in the existing tier hierarchy
-- No frontend changes are needed since `useTier` already handles the mapping
-- We'll also fix the two affected users who have redemption records but `tier: "free"`
+### Weekly Digest Generation Flow
+
+1. **Fetch Recent News** - Query `news_articles` from last 7 days
+2. **AI Summary** - Use Lovable AI (Gemini Flash) to:
+   - Pick the top 5 most interesting stories
+   - Write engaging highlight bullets
+   - Generate a "what's hot this week" narrative
+3. **Save Digest** - Insert into `research_digests` with `digest_type: 'weekly'`
+
+### AI Prompt Strategy
+
+The AI will be prompted to act as a peptide research curator, focusing on:
+- What's genuinely exciting or impactful
+- Regulatory changes that affect readers
+- New research that changes understanding
+- Practical takeaways for the reader
+
+### Cron Schedule
+
+Using PostgreSQL's `pg_cron` extension:
+- Schedule: `0 8 * * 1` (Every Monday at 8:00 AM UTC)
+- The function first fetches fresh news via `generate-news`, then creates the weekly digest
+
