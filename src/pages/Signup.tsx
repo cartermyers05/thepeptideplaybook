@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, Sparkles, Mail, Lock, User, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PromoCodeInput } from "@/components/auth/PromoCodeInput";
 
 const steps = [
   { id: 1, title: "Email" },
@@ -16,12 +17,17 @@ const steps = [
 ];
 
 export default function Signup() {
+  const [searchParams] = useSearchParams();
+  const initialPromoCode = searchParams.get("code") || "";
+  
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [validPromoCode, setValidPromoCode] = useState<string | null>(null);
+  const [promoCodeType, setPromoCodeType] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -38,7 +44,7 @@ export default function Signup() {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -50,6 +56,27 @@ export default function Signup() {
       });
 
       if (error) throw error;
+
+      // If user has a valid promo code, redeem it
+      if (validPromoCode && signUpData.session) {
+        try {
+          const { data: redeemData, error: redeemError } = await supabase.functions.invoke("redeem-promo-code", {
+            body: { code: validPromoCode },
+          });
+
+          if (redeemError || !redeemData?.success) {
+            console.error("Failed to redeem promo code:", redeemError || redeemData?.error);
+            // Still proceed to step 3, but they'll go to checkout
+            setValidPromoCode(null);
+            setPromoCodeType(null);
+          }
+        } catch (redeemErr) {
+          console.error("Error redeeming promo code:", redeemErr);
+          setValidPromoCode(null);
+          setPromoCodeType(null);
+        }
+      }
+
       setStep(3);
     } catch (error: any) {
       toast({
@@ -63,7 +90,12 @@ export default function Signup() {
   };
 
   const handleContinue = () => {
-    navigate("/checkout");
+    // If promo code was successfully applied, go to dashboard
+    if (validPromoCode && promoCodeType === "free_access") {
+      navigate("/dashboard");
+    } else {
+      navigate("/checkout");
+    }
   };
 
   return (
@@ -228,6 +260,19 @@ export default function Signup() {
                   </Label>
                 </div>
 
+                <PromoCodeInput
+                  initialCode={initialPromoCode}
+                  onValidCode={(code, type) => {
+                    setValidPromoCode(code);
+                    setPromoCodeType(type);
+                  }}
+                  onInvalidCode={() => {
+                    setValidPromoCode(null);
+                    setPromoCodeType(null);
+                  }}
+                  disabled={isLoading}
+                />
+
                 <Button
                   type="submit"
                   size="lg"
@@ -256,11 +301,15 @@ export default function Signup() {
                 Welcome to PeptideGPT!
               </h1>
               <p className="text-muted-foreground mb-8">
-                Your account is ready. Complete your purchase to unlock full access.
+                {validPromoCode && promoCodeType === "free_access"
+                  ? "Your VIP access has been activated. You're all set!"
+                  : "Your account is ready. Complete your purchase to unlock full access."}
               </p>
 
               <Button size="lg" className="w-full h-12" onClick={handleContinue}>
-                Complete Purchase
+                {validPromoCode && promoCodeType === "free_access"
+                  ? "Go to Dashboard"
+                  : "Complete Purchase"}
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </motion.div>
