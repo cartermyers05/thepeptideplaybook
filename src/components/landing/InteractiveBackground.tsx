@@ -1,48 +1,12 @@
-import { motion, useMotionValue, useSpring } from "framer-motion";
-import { useEffect, useState, useCallback, ReactNode } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useState, ReactNode } from "react";
 import { FloatingOrbs } from "./FloatingOrbs";
 import { GridPattern } from "./GridPattern";
-import { ClickBurstManager } from "./ClickBurst";
 
 interface InteractiveBackgroundProps {
   children: ReactNode;
   variant?: "hero" | "subtle" | "rich";
   className?: string;
-}
-
-function MouseGlow() {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const springConfig = { damping: 25, stiffness: 150 };
-  const glowX = useSpring(mouseX, springConfig);
-  const glowY = useSpring(mouseY, springConfig);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX, mouseY]);
-
-  return (
-    <motion.div
-      className="fixed pointer-events-none z-0"
-      style={{
-        x: glowX,
-        y: glowY,
-        width: 400,
-        height: 400,
-        marginLeft: -200,
-        marginTop: -200,
-        background: "radial-gradient(circle, hsl(var(--primary) / 0.08) 0%, transparent 60%)",
-        borderRadius: "50%",
-      }}
-    />
-  );
 }
 
 function ScanningLine() {
@@ -120,24 +84,19 @@ export function InteractiveBackground({
   className = "",
 }: InteractiveBackgroundProps) {
   return (
-    <ClickBurstManager>
-      <div className={`relative ${className}`}>
-        {/* Background layers */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <FloatingOrbs variant={variant} />
-          <GridPattern variant="dots" />
-          <EnergyPulse />
-        </div>
-
-        {/* Mouse glow */}
-        <MouseGlow />
-
-        {/* Scanning line */}
-        <ScanningLine />
-
-        {/* Content */}
-        <div className="relative z-10">{children}</div>
+    <div className={`relative ${className}`}>
+      {/* Background layers */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <FloatingOrbs variant={variant} />
+        <GridPattern variant="dots" />
+        <EnergyPulse />
       </div>
-    </ClickBurstManager>
+
+      {/* Scanning line */}
+      <ScanningLine />
+
+      {/* Content */}
+      <div className="relative z-10">{children}</div>
+    </div>
   );
 }
