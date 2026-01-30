@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot } from "lucide-react";
+import { Bot, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const DEMO_CONVERSATIONS = [
@@ -134,11 +134,21 @@ export function HeroDemo() {
       className="glass-card rounded-2xl p-5 border border-border/50"
     >
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+      <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border/50">
+        <motion.div 
+          className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center"
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
           <Bot className="w-4 h-4 text-primary" />
+        </motion.div>
+        <div>
+          <p className="font-medium text-sm">Peptide Playbook AI</p>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            <p className="text-xs text-muted-foreground">Ready to help</p>
+          </div>
         </div>
-        <span className="text-sm font-medium text-muted-foreground">Peptide Playbook AI</span>
       </div>
 
       {/* Question bubble */}
@@ -192,18 +202,31 @@ export function HeroDemo() {
                 />
               </div>
             ) : phase === "typing-question" ? (
-              <div className="h-[180px]" />
+              <div className="h-[160px]" />
             ) : (
-              <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
-                <ReactMarkdown>{displayedAnswer}</ReactMarkdown>
-                {phase === "typing-answer" && (
-                  <span className="inline-block w-2 h-4 bg-primary/70 animate-pulse ml-0.5" />
-                )}
+              <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3">
+                <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
+                  <ReactMarkdown>{displayedAnswer}</ReactMarkdown>
+                  {phase === "typing-answer" && (
+                    <span className="inline-block w-2 h-4 bg-primary/70 animate-pulse ml-0.5" />
+                  )}
+                </div>
               </div>
             )}
           </div>
         </motion.div>
       </AnimatePresence>
+
+      {/* Fake Input Field */}
+      <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-3 py-2.5 mt-4">
+        <input
+          type="text"
+          placeholder="Ask about any peptide..."
+          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          disabled
+        />
+        <Send className="w-4 h-4 text-muted-foreground" />
+      </div>
 
       {/* Progress dots */}
       <div className="flex justify-center gap-1.5 mt-4 pt-3 border-t border-border/30">
