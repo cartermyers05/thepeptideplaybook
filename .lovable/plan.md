@@ -1,101 +1,93 @@
 
 
-# Weekly Peptide Digest - Automated Monday Updates
+# Fix: Chat Authentication Using Wrong Token
 
-## Overview
+## Problem Identified
 
-Transform the Research Digest from a monthly manual system to an **automated weekly digest** that posts every Monday with the top peptide stories, new research, and exciting developments.
+The AI chat is failing with `401 Unauthorized - Invalid token` because the frontend is sending the **wrong authorization token**.
 
-## What You'll Get
-
-Every Monday, your members will see a fresh digest with:
-- Top 5 peptide stories from the past week
-- What's new in GLP-1s, BPC-157, and other trending peptides
-- FDA/regulatory updates
-- Exciting research breakthroughs
-- AI-generated summary making it easy to digest
-
-## How It Works
-
-```text
-Every Monday at 8 AM UTC:
-┌─────────────────┐     ┌──────────────────────┐     ┌─────────────────────┐
-│ Cron Job Fires  │ --> │ Scrape Latest News   │ --> │ AI Summarizes Top   │
-│ (pg_cron)       │     │ (Firecrawl)          │     │ Stories (Lovable AI)│
-└─────────────────┘     └──────────────────────┘     └─────────────────────┘
-                                                              │
-                                                              v
-                                                    ┌─────────────────────┐
-                                                    │ Weekly Digest Posted│
-                                                    │ to /dashboard/digest│
-                                                    └─────────────────────┘
+**Current (broken):**
+```typescript
+Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
 ```
+
+The `VITE_SUPABASE_PUBLISHABLE_KEY` is the anon key (a service-level API key), NOT the user's JWT session token. This causes the `missing sub claim` error because the anon key has no user identity attached.
+
+**Should be:**
+```typescript
+Authorization: `Bearer ${session.access_token}`,
+```
+
+## Good News
+
+The promo code tier fix worked! All users who redeemed codes now have:
+- `tier: insider`
+- `subscription_status: active`
+
+The chat will work immediately once we fix this token issue.
+
+## Solution
+
+Update `ChatInterface.tsx` to get the user's session token from Supabase auth and pass that instead of the anon key.
 
 ## Implementation
 
-### 1. Create New Edge Function: `generate-weekly-digest`
+### Update `src/components/dashboard/ChatInterface.tsx`
 
-A new function that:
-- Fetches news articles from the past 7 days
-- Uses Lovable AI to generate an engaging summary with highlights
-- Creates a weekly digest entry in the database
-- Labels it "Week of [Date]" instead of monthly
+| Line | Change |
+|------|--------|
+| Import | Add `supabase` import from integrations |
+| Line ~194-209 | Get user session and use `access_token` for Authorization header |
 
-### 2. Update Database Schema
-
-Add a `digest_type` column to `research_digests` table to distinguish:
-- `weekly` - New automated weekly digests
-- `monthly` - Legacy monthly digests (if any)
-
-### 3. Schedule Weekly Cron Job
-
-Set up `pg_cron` to run every Monday at 8 AM UTC:
-```sql
-SELECT cron.schedule(
-  'weekly-peptide-digest',
-  '0 8 * * 1',  -- Every Monday at 8 AM
-  $$ ... $$
+**Before:**
+```typescript
+const response = await fetch(
+  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    },
+    ...
+  }
 );
 ```
 
-### 4. Update UI
+**After:**
+```typescript
+// Get user's auth token
+const { data: { session } } = await supabase.auth.getSession();
+if (!session?.access_token) {
+  throw new Error("Not authenticated");
+}
 
-- Change "Monthly updates" text to "Weekly updates every Monday"
-- Show "Week of January 27, 2026" format for weekly digests
-- Keep the same expandable card format
+const response = await fetch(
+  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    ...
+  }
+);
+```
 
-## Files to Create/Modify
+## Why This Happened
 
-| File | Action | Purpose |
-|------|--------|---------|
-| `supabase/functions/generate-weekly-digest/index.ts` | **Create** | New weekly digest generator with AI |
-| Database migration | **Create** | Add `digest_type` column, set up cron job |
-| `src/pages/dashboard/Digest.tsx` | **Modify** | Update text and date formatting |
-| `src/components/dashboard/DigestCard.tsx` | **Modify** | Support weekly date format |
-| `supabase/config.toml` | **Modify** | Register new function |
+This is a common pattern issue where the anon key and user session token get confused:
 
-## Technical Details
+| Key | Purpose | Has User Identity |
+|-----|---------|-------------------|
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | API access key (anon) | No |
+| `session.access_token` | User's JWT token | Yes (includes user_id, email, etc.) |
 
-### Weekly Digest Generation Flow
+## Testing
 
-1. **Fetch Recent News** - Query `news_articles` from last 7 days
-2. **AI Summary** - Use Lovable AI (Gemini Flash) to:
-   - Pick the top 5 most interesting stories
-   - Write engaging highlight bullets
-   - Generate a "what's hot this week" narrative
-3. **Save Digest** - Insert into `research_digests` with `digest_type: 'weekly'`
-
-### AI Prompt Strategy
-
-The AI will be prompted to act as a peptide research curator, focusing on:
-- What's genuinely exciting or impactful
-- Regulatory changes that affect readers
-- New research that changes understanding
-- Practical takeaways for the reader
-
-### Cron Schedule
-
-Using PostgreSQL's `pg_cron` extension:
-- Schedule: `0 8 * * 1` (Every Monday at 8:00 AM UTC)
-- The function first fetches fresh news via `generate-news`, then creates the weekly digest
+After this fix, promo code users should be able to:
+1. Log in to their account
+2. Navigate to the AI chat
+3. Ask questions and get responses
 
