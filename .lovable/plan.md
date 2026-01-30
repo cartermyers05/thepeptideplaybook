@@ -1,50 +1,114 @@
 
 
-# Shorten Demo AI Responses
+# Influencer Promo Code System
 
-## The Problem
+## Overview
 
-The chatbot demo responses are too long and detailed. Users want quick, summarized answers that give them a taste of the AI's capabilities without overwhelming them.
+Create a promo code system that allows influencers to sign up and get **free full access** without going through the checkout flow.
 
-## Solution
-
-Update the system prompt and reduce `max_tokens` to force shorter, summary-style responses.
-
-## Changes Required
-
-### File: `supabase/functions/chat-demo/index.ts`
-
-**1. Update System Prompt** - Add explicit instructions to keep responses brief:
+## How It Works
 
 ```text
-Current style: Full explanations with context
-New style: 2-3 sentence summaries with key takeaway
+User Flow:
+┌──────────────┐     ┌───────────────────┐     ┌─────────────────┐
+│  /signup     │     │  Enter promo code │     │  Account created│
+│  ?code=VIP25 │ --> │  during signup    │ --> │  tier = member  │
+└──────────────┘     └───────────────────┘     │  (skip checkout)│
+                                               └─────────────────┘
 ```
 
-**2. Reduce max_tokens** - Change from 1000 to 300 to enforce brevity
+## Database Changes
 
-### Updated System Prompt Approach
+### New Table: `promo_codes`
 
-Add these constraints to the prompt:
-- Keep responses to 2-3 sentences maximum
-- Lead with the direct answer
-- Use bullet points only for quick lists (max 3 items)
-- End with a teaser: "Want to learn more? Get full access."
-- No lengthy explanations or context
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| code | text | Unique promo code (e.g., "VIP25", "INFLUENCER50") |
+| type | text | "free_access" (grants full membership) |
+| max_uses | integer | How many times code can be used (null = unlimited) |
+| times_used | integer | Current usage count |
+| expires_at | timestamp | Expiration date (null = never expires) |
+| is_active | boolean | Enable/disable the code |
+| created_at | timestamp | When code was created |
 
-### Example Response Comparison
+### New Table: `promo_code_redemptions`
 
-**Current (too long):**
-> "Semaglutide (Ozempic, Wegovy) is FDA APPROVED for Type 2 diabetes and weight management. It works by mimicking GLP-1, a hormone that regulates appetite and blood sugar. Clinical trials showed significant weight loss results of 15-20% body weight. The FDA approved it in 2021 for chronic weight management... [continues for several paragraphs]"
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| promo_code_id | uuid | Reference to promo_codes |
+| user_id | uuid | User who redeemed |
+| redeemed_at | timestamp | When they redeemed |
 
-**New (summary):**
-> "Yes! **Semaglutide** (Ozempic/Wegovy) and **Tirzepatide** (Mounjaro/Zepbound) are FDA-approved for weight management. Both have strong clinical evidence for 15-20% weight loss. Want the full breakdown? Get access below."
+## Frontend Changes
 
-## Technical Changes
+### Signup Page Updates
 
-| Setting | Current | New |
-|---------|---------|-----|
-| max_tokens | 1000 | 300 |
-| Prompt style | Detailed explanations | Brief summaries |
-| Response length | 4-6 paragraphs | 2-3 sentences |
+1. **Accept promo code from URL** - `/signup?code=VIP25`
+2. **Show promo code input field** - Users can enter a code if they have one
+3. **Validate code on submission** - Check if code is valid via edge function
+4. **Skip checkout if valid** - Go directly to dashboard instead of `/checkout`
+
+### UI Addition
+
+Add a collapsible "Have a promo code?" section on the signup page:
+
+```text
+┌─────────────────────────────────────┐
+│ Have a promo code?                  │
+│ ┌─────────────────┐ ┌─────────────┐ │
+│ │ Enter code...   │ │   Apply     │ │
+│ └─────────────────┘ └─────────────┘ │
+│ ✓ Code applied: VIP Access          │
+└─────────────────────────────────────┘
+```
+
+## Backend Changes
+
+### New Edge Function: `validate-promo-code`
+
+- Accepts a promo code
+- Checks if code exists, is active, not expired, and has uses remaining
+- Returns validation result and code type
+
+### New Edge Function: `redeem-promo-code`
+
+- Called after successful signup when user has a valid promo code
+- Records the redemption
+- Updates the user's profile tier to "member"
+- Increments the usage count
+
+## Implementation Files
+
+| File | Action |
+|------|--------|
+| Database migration | **Create** `promo_codes` and `promo_code_redemptions` tables |
+| `supabase/functions/validate-promo-code/index.ts` | **Create** - Validate promo codes |
+| `supabase/functions/redeem-promo-code/index.ts` | **Create** - Redeem code and upgrade user |
+| `src/pages/Signup.tsx` | **Modify** - Add promo code input and logic |
+| `supabase/config.toml` | **Modify** - Register new functions |
+
+## Admin Usage
+
+To create a promo code for an influencer, you'll run an SQL query:
+
+```sql
+INSERT INTO promo_codes (code, type, max_uses, is_active)
+VALUES ('INFLUENCER2025', 'free_access', 1, true);
+```
+
+For a code that can be used by multiple people:
+
+```sql
+INSERT INTO promo_codes (code, type, max_uses, is_active)
+VALUES ('YOUTUBE50', 'free_access', 50, true);
+```
+
+## Security Considerations
+
+- Codes are case-insensitive (converted to uppercase)
+- Each user can only redeem one promo code
+- RLS policies prevent unauthorized access to promo tables
+- Only admin can create/manage codes (via database)
 
