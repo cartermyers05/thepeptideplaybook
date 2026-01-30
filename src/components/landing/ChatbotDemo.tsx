@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Bot, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 
@@ -14,6 +13,7 @@ const DEMO_QUESTIONS = [
 ];
 
 const STORAGE_KEY = "demo-question-used";
+const CHAT_DEMO_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-demo`;
 
 export function ChatbotDemo() {
   const [hasUsedQuestion, setHasUsedQuestion] = useState(false);
@@ -21,6 +21,7 @@ export function ChatbotDemo() {
   const [response, setResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const responseRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,15 +47,34 @@ export function ChatbotDemo() {
     setSelectedQuestion(question);
     setIsLoading(true);
     setResponse("");
+    setErrorMessage(null);
 
     try {
-      const res = await supabase.functions.invoke("chat", {
-        body: { messages: [{ role: "user", content: question }] },
+      const res = await fetch(CHAT_DEMO_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: [{ role: "user", content: question }] }),
       });
 
-      if (res.error) throw res.error;
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        if (res.status === 429) {
+          setErrorMessage(errorData.error || "You've asked too many questions. Please wait and try again.");
+          return;
+        }
+        if (res.status === 402) {
+          setErrorMessage(errorData.error || "Demo temporarily unavailable. Get full access below!");
+          setShowPaywall(true);
+          return;
+        }
+        throw new Error(errorData.error || "Something went wrong");
+      }
 
-      const reader = res.data.body.getReader();
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No response body");
+      
       const decoder = new TextDecoder();
       let fullContent = "";
 
@@ -87,7 +107,7 @@ export function ChatbotDemo() {
       setShowPaywall(true);
     } catch (error) {
       console.error("Demo chat error:", error);
-      setResponse("Sorry, something went wrong. Please try again.");
+      setErrorMessage("Our AI is taking a break. Please try again in a moment.");
     } finally {
       setIsLoading(false);
     }
@@ -164,6 +184,8 @@ export function ChatbotDemo() {
                         <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                         <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                       </div>
+                    ) : errorMessage ? (
+                      <p className="text-sm text-destructive">{errorMessage}</p>
                     ) : (
                       <div ref={responseRef} className="prose prose-sm dark:prose-invert max-w-none">
                         <ReactMarkdown>{response || "..."}</ReactMarkdown>

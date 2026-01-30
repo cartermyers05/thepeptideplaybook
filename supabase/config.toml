@@ -3,6 +3,9 @@ project_id = "xsanfxyahxcsjsrlfopq"
 [functions.chat]
 verify_jwt = false
 
+[functions.chat-demo]
+verify_jwt = false
+
 [functions.sitemap]
 verify_jwt = false
 
