@@ -1,159 +1,86 @@
 
 
-# Enhance Hero Chatbot Demo - Video-Like Experience
+# Enhance Hero Demo with Chat Bubbles
 
-## The Vision
+## Current Issue
 
-Transform the static, one-time typing animation into a cinematic, looping demo that feels like watching a product video. The demo will cycle through multiple questions, reset smoothly, and create an engaging "always moving" experience.
+The HeroDemo component looks bare because the AI response area displays raw markdown text without a chat bubble wrapper, making it feel incomplete compared to a real chat interface.
+
+## Visual Changes
 
 ```text
-Animation Timeline (loops every ~12s):
-┌─────────────────────────────────────────────────────────┐
-│ 0s    │ 1.5s     │ 6s      │ 8s      │ 12s    │ 0s     │
-│ Load  │ Q1 Types │ A1 Done │ Fade    │ Q2     │ Loop   │
-│ dots  │ Answer   │ Pause   │ Out     │ Starts │ Back   │
-└─────────────────────────────────────────────────────────┘
+Current Layout:
+┌──────────────────────────────────┐
+│ 🤖 Peptide Playbook AI           │  ← Header looks plain
+├──────────────────────────────────┤
+│            [User question] →     │  ← Has bubble ✓
+│                                  │
+│ 🤖 Raw text here without         │  ← Missing bubble wrapper
+│    any background...             │
+│                                  │
+│ ● ○ ○                           │
+└──────────────────────────────────┘
+
+Enhanced Layout:
+┌──────────────────────────────────┐
+│ 🤖 Peptide Playbook AI  ● Ready  │  ← Status indicator added
+├──────────────────────────────────┤
+│            [User question] →     │  ← Keeps bubble
+│                                  │
+│ 🤖 ┌─────────────────────────┐   │  ← Muted background bubble
+│    │ Several peptides have   │   │
+│    │ full FDA approval:      │   │
+│    │ ✅ Semaglutide...       │   │
+│    └─────────────────────────┘   │
+│                                  │
+│ [Ask about any peptide... ✈️]    │  ← Fake input field
+│                                  │
+│ ● ○ ○                           │
+└──────────────────────────────────┘
 ```
 
 ---
 
-## Key Enhancements
+## Technical Changes
 
-### 1. Multiple Question/Answer Cycles
-Instead of one static demo, rotate through 2-3 compelling Q&As:
-- "What peptides are FDA approved?" → FDA list
-- "Is BPC-157 safe?" → Safety overview  
-- "Best peptide for recovery?" → Healing recommendations
+### 1. Enhanced Header
+Add a pulsing green status dot with "Ready to help" text below the title, matching the AIAssistant component style.
 
-### 2. Smooth Transitions Between Questions
-- Current answer fades out
-- Brief pause (feels natural)
-- New question slides in
-- New answer types out
-- Loops infinitely
+### 2. AI Response Bubble
+Wrap the AI response in a styled muted background bubble with rounded corners, similar to how the AIAssistant component does it.
 
-### 3. Video-Like Visual Polish
-- **Question typing effect** - User question also types in (like someone is asking)
-- **Subtle card "breathing"** - Very gentle scale pulse while idle
-- **Progress indicator** - Small dots at bottom showing which Q&A is active
-- **Smoother typing** - Faster, more consistent character speed
+### 3. Add Fake Input Field
+Include a disabled input field with placeholder text and send icon at the bottom, making it feel like a complete chat interface.
 
-### 4. Performance Optimizations
-- Use `requestAnimationFrame` for smoother typing
-- Cleanup all timeouts on unmount
-- Pause animation when tab is not visible
+### 4. Visual Polish
+- Add subtle breathing animation to the bot icon
+- Improve spacing and padding consistency
+- Better visual hierarchy with the bubble backgrounds
 
 ---
 
-## Implementation Details
+## File to Modify
 
-### Animation Sequence Per Question
-
-1. **0.0s** - Question starts typing in (character by character)
-2. **0.8s** - Question complete, pause
-3. **1.2s** - Thinking dots appear
-4. **1.5s** - Answer starts streaming
-5. **~5s** - Answer complete
-6. **7s** - Hold for reading
-7. **7.5s** - Fade out both Q&A
-8. **8s** - Next question starts
-
-### Data Structure
-
-```typescript
-const DEMO_CONVERSATIONS = [
-  {
-    question: "What peptides are FDA approved?",
-    answer: `Several peptides have full FDA approval...`
-  },
-  {
-    question: "Is BPC-157 safe to use?",
-    answer: `BPC-157 shows a strong safety profile in studies...`
-  },
-  {
-    question: "Best peptide for injury recovery?",
-    answer: `For recovery, researchers commonly study...`
-  }
-];
-```
-
-### State Management
-
-```typescript
-// Track current conversation index
-const [conversationIndex, setConversationIndex] = useState(0);
-
-// Track animation phase
-type Phase = 'typing-question' | 'thinking' | 'typing-answer' | 'holding' | 'fading';
-const [phase, setPhase] = useState<Phase>('typing-question');
-```
-
----
-
-## Visual Enhancements
-
-| Element | Current | Enhanced |
-|---------|---------|----------|
-| Question | Static text | Types in character by character |
-| Transition | One-time only | Smooth fade between Q&As |
-| Typing speed | 15-40ms random | 12-25ms (faster, smoother) |
-| Loop | None | Infinite with 3 Q&As |
-| Progress | None | Dot indicators at bottom |
-| Idle state | Static | Subtle breathing animation |
-
----
-
-## Files to Modify
-
-| File | Action |
+| File | Change |
 |------|--------|
-| `src/components/landing/HeroDemo.tsx` | Enhance with multi-conversation loop, question typing, phase management, dot indicators |
+| `src/components/landing/HeroDemo.tsx` | Add chat bubble styling, status indicator, and fake input field |
 
 ---
 
-## Technical Approach
+## Specific Code Changes
 
-### Phase-Based Animation Controller
+**Header Enhancement:**
+- Add secondary line with green pulse dot and "Ready to help" text
+- Add subtle scale animation to the bot icon
 
-```text
-Phase Flow:
-┌──────────────────┐
-│ typing-question  │ → Types user question character by character
-└────────┬─────────┘
-         ▼
-┌──────────────────┐
-│     thinking     │ → Shows bouncing dots (0.5s)
-└────────┬─────────┘
-         ▼
-┌──────────────────┐
-│  typing-answer   │ → Streams AI response
-└────────┬─────────┘
-         ▼
-┌──────────────────┐
-│     holding      │ → Pause for reading (2s)
-└────────┬─────────┘
-         ▼
-┌──────────────────┐
-│     fading       │ → Fade out animation (0.5s)
-└────────┬─────────┘
-         ▼
-    Next conversation (loops back)
-```
+**AI Response Area:**
+- Wrap `ReactMarkdown` content in a `bg-muted rounded-2xl rounded-bl-sm px-4 py-3` container
+- This creates a proper chat bubble appearance for the AI response
 
-### Framer Motion Animations
+**New Input Field:**
+- Add a disabled input with `bg-muted/50 rounded-xl` styling
+- Include a Send icon on the right
+- Placeholder: "Ask about any peptide..."
 
-- **Question bubble**: `AnimatePresence` with fade + slide
-- **Answer area**: Smooth opacity transitions between phases
-- **Entire card**: Optional subtle scale breathing
-
----
-
-## Expected Result
-
-The demo will feel like watching a product demo video:
-- Always animated, never static
-- Shows variety of capabilities
-- Creates urgency (keep watching to see more)
-- Professional, polished transitions
-- Runs indefinitely without user interaction
+This will transform the bare demo into a polished, professional-looking chat interface that immediately conveys the product's value.
 
