@@ -35,6 +35,13 @@ import DashboardDigest from "./pages/dashboard/Digest";
 import DashboardCommunity from "./pages/dashboard/Community";
 import DashboardSettings from "./pages/dashboard/Settings";
 
+// SEO Guide pages
+import Guides from "./pages/Guides";
+import BPC157Guide from "./pages/guides/BPC157Guide";
+import FDALegalStatusGuide from "./pages/guides/FDALegalStatusGuide";
+import ArePeptidesSafeGuide from "./pages/guides/ArePeptidesSafeGuide";
+import BPC157vsTB500Guide from "./pages/guides/BPC157vsTB500Guide";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -61,6 +68,13 @@ const App = () => (
             <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/articles/:slug" element={<ArticleDetail />} />
+            
+            {/* SEO Guide pages */}
+            <Route path="/guides" element={<Guides />} />
+            <Route path="/guides/bpc-157-complete-guide" element={<BPC157Guide />} />
+            <Route path="/guides/peptides-fda-legal-status-2026" element={<FDALegalStatusGuide />} />
+            <Route path="/guides/are-peptides-safe" element={<ArePeptidesSafeGuide />} />
+            <Route path="/guides/bpc-157-vs-tb-500" element={<BPC157vsTB500Guide />} />
             
             {/* Protected routes - Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
