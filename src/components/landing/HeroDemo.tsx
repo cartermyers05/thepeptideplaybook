@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Bot } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
-const DEMO_QUESTION = "What peptides are FDA approved?";
-
-const DEMO_RESPONSE = `Several peptides have full FDA approval:
+const DEMO_CONVERSATIONS = [
+  {
+    question: "What peptides are FDA approved?",
+    answer: `Several peptides have full FDA approval:
 
 ✅ **Semaglutide** (Ozempic, Wegovy) - Diabetes & weight management
 
@@ -13,41 +14,117 @@ const DEMO_RESPONSE = `Several peptides have full FDA approval:
 
 ✅ **Tesamorelin** (Egrifta) - HIV lipodystrophy
 
-Most peptides like BPC-157 and TB-500 remain **research-only** with no FDA approval for human use.`;
+Most peptides like BPC-157 and TB-500 remain **research-only**.`,
+  },
+  {
+    question: "Is BPC-157 safe to use?",
+    answer: `BPC-157 shows a strong safety profile in studies:
+
+🔬 **No reported toxicity** in animal models at high doses
+
+📊 **Well-tolerated** in preliminary human trials
+
+⚠️ **Not FDA approved** - still considered research-only
+
+Always consult a physician before use.`,
+  },
+  {
+    question: "Best peptide for recovery?",
+    answer: `For recovery, researchers commonly study:
+
+💪 **BPC-157** - Gut-derived, promotes tissue healing
+
+🦴 **TB-500** - Thymosin beta-4, supports regeneration
+
+🔥 **GHK-Cu** - Copper peptide for skin & wound repair
+
+Stacking protocols vary by injury type.`,
+  },
+];
+
+type Phase = "typing-question" | "thinking" | "typing-answer" | "holding" | "fading";
 
 export function HeroDemo() {
-  const [displayedText, setDisplayedText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
+  const [conversationIndex, setConversationIndex] = useState(0);
+  const [phase, setPhase] = useState<Phase>("typing-question");
+  const [displayedQuestion, setDisplayedQuestion] = useState("");
+  const [displayedAnswer, setDisplayedAnswer] = useState("");
 
-  useEffect(() => {
-    const startDelay = window.setTimeout(() => {
-      setHasStarted(true);
-      setIsTyping(true);
-    }, 1500);
-    return () => window.clearTimeout(startDelay);
-  }, []);
+  const currentConversation = DEMO_CONVERSATIONS[conversationIndex];
 
-  useEffect(() => {
-    if (!hasStarted) return;
-
+  // Type question character by character
+  const typeQuestion = useCallback(() => {
+    const question = currentConversation.question;
     let index = 0;
-    let timeoutId: number;
 
-    const typeNextChar = () => {
-      if (index < DEMO_RESPONSE.length) {
-        setDisplayedText(DEMO_RESPONSE.slice(0, index + 1));
+    const typeNext = () => {
+      if (index < question.length) {
+        setDisplayedQuestion(question.slice(0, index + 1));
         index++;
-        const delay = 15 + Math.random() * 25;
-        timeoutId = window.setTimeout(typeNextChar, delay);
+        window.setTimeout(typeNext, 30 + Math.random() * 20);
       } else {
-        setIsTyping(false);
+        // Question complete, pause then show thinking
+        window.setTimeout(() => setPhase("thinking"), 400);
       }
     };
 
-    typeNextChar();
-    return () => window.clearTimeout(timeoutId);
-  }, [hasStarted]);
+    typeNext();
+  }, [currentConversation.question]);
+
+  // Type answer character by character
+  const typeAnswer = useCallback(() => {
+    const answer = currentConversation.answer;
+    let index = 0;
+
+    const typeNext = () => {
+      if (index < answer.length) {
+        setDisplayedAnswer(answer.slice(0, index + 1));
+        index++;
+        window.setTimeout(typeNext, 12 + Math.random() * 15);
+      } else {
+        // Answer complete, hold for reading
+        window.setTimeout(() => setPhase("holding"), 100);
+      }
+    };
+
+    typeNext();
+  }, [currentConversation.answer]);
+
+  // Phase controller
+  useEffect(() => {
+    let timeoutId: number;
+
+    switch (phase) {
+      case "typing-question":
+        setDisplayedQuestion("");
+        setDisplayedAnswer("");
+        typeQuestion();
+        break;
+
+      case "thinking":
+        timeoutId = window.setTimeout(() => setPhase("typing-answer"), 800);
+        break;
+
+      case "typing-answer":
+        typeAnswer();
+        break;
+
+      case "holding":
+        timeoutId = window.setTimeout(() => setPhase("fading"), 2500);
+        break;
+
+      case "fading":
+        timeoutId = window.setTimeout(() => {
+          setConversationIndex((prev) => (prev + 1) % DEMO_CONVERSATIONS.length);
+          setPhase("typing-question");
+        }, 600);
+        break;
+    }
+
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [phase, typeQuestion, typeAnswer]);
 
   return (
     <motion.div
@@ -65,33 +142,83 @@ export function HeroDemo() {
       </div>
 
       {/* Question bubble */}
-      <div className="flex justify-end mb-4">
-        <div className="max-w-[85%] bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2.5">
-          <p className="text-sm">{DEMO_QUESTION}</p>
-        </div>
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`question-${conversationIndex}`}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: phase === "fading" ? 0 : 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3 }}
+          className="flex justify-end mb-4"
+        >
+          <div className="max-w-[85%] bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2.5">
+            <p className="text-sm">
+              {displayedQuestion}
+              {phase === "typing-question" && (
+                <span className="inline-block w-0.5 h-4 bg-primary-foreground/70 animate-pulse ml-0.5" />
+              )}
+            </p>
+          </div>
+        </motion.div>
+      </AnimatePresence>
 
       {/* AI Response */}
-      <div className="flex gap-3">
-        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <Bot className="w-3.5 h-3.5 text-primary" />
-        </div>
-        <div className="flex-1 min-h-[180px]">
-          {!hasStarted ? (
-            <div className="flex gap-1 py-2">
-              <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-            </div>
-          ) : (
-            <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
-              <ReactMarkdown>{displayedText}</ReactMarkdown>
-              {isTyping && (
-                <span className="inline-block w-2 h-4 bg-primary/70 animate-pulse ml-0.5" />
-              )}
-            </div>
-          )}
-        </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`answer-${conversationIndex}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: phase === "fading" ? 0 : 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex gap-3"
+        >
+          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <Bot className="w-3.5 h-3.5 text-primary" />
+          </div>
+          <div className="flex-1 min-h-[180px]">
+            {(phase === "thinking" || phase === "typing-question") && phase !== "typing-question" ? (
+              <div className="flex gap-1 py-2">
+                <span
+                  className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                />
+                <span
+                  className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                />
+                <span
+                  className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                />
+              </div>
+            ) : phase === "typing-question" ? (
+              <div className="h-[180px]" />
+            ) : (
+              <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
+                <ReactMarkdown>{displayedAnswer}</ReactMarkdown>
+                {phase === "typing-answer" && (
+                  <span className="inline-block w-2 h-4 bg-primary/70 animate-pulse ml-0.5" />
+                )}
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Progress dots */}
+      <div className="flex justify-center gap-1.5 mt-4 pt-3 border-t border-border/30">
+        {DEMO_CONVERSATIONS.map((_, index) => (
+          <motion.div
+            key={index}
+            className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+              index === conversationIndex ? "bg-primary" : "bg-muted-foreground/30"
+            }`}
+            animate={{
+              scale: index === conversationIndex ? 1.2 : 1,
+            }}
+            transition={{ duration: 0.2 }}
+          />
+        ))}
       </div>
     </motion.div>
   );
