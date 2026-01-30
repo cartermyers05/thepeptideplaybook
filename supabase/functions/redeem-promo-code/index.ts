@@ -148,7 +148,7 @@ serve(async (req) => {
       const { error: profileError } = await supabaseAdmin
         .from("profiles")
         .update({ 
-          tier: "member",
+          tier: "insider",
           subscription_status: "active"
         })
         .eq("user_id", userId);
