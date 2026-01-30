@@ -20,6 +20,10 @@ function formatDate(dateString: string) {
 }
 
 export function DigestCard({ digest, isLatest, isExpanded, onToggle }: DigestCardProps) {
+  // Check if this is a weekly digest (starts with "Week of")
+  const isWeekly = digest.month.startsWith("Week of");
+  const displayTitle = isWeekly ? digest.month : `${digest.month} Digest`;
+  
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="p-6">
@@ -29,15 +33,20 @@ export function DigestCard({ digest, isLatest, isExpanded, onToggle }: DigestCar
               <Mail className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold">{digest.month} Digest</h3>
+              <h3 className="font-semibold">{displayTitle}</h3>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Calendar className="w-3 h-3" /> {formatDate(digest.date)}
               </p>
             </div>
           </div>
-          {isLatest && (
-            <Badge className="bg-primary/10 text-primary">Latest</Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {isWeekly && (
+              <Badge variant="outline" className="text-xs">Weekly</Badge>
+            )}
+            {isLatest && (
+              <Badge className="bg-primary/10 text-primary">Latest</Badge>
+            )}
+          </div>
         </div>
 
         <ul className="space-y-2 mb-4">

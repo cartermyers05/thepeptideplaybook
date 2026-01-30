@@ -147,10 +147,10 @@ export default function Digest() {
       <div className="max-w-4xl">
         <div className="mb-8">
           <h1 className="text-3xl font-semibold tracking-tight mb-2">
-            Research Digest
+            Weekly Peptide Digest
           </h1>
           <p className="text-muted-foreground">
-            Monthly updates on peptide research, regulations, and emerging studies
+            Fresh updates every Monday on peptide research, new breakthroughs, and what's hot
           </p>
         </div>
 
@@ -197,8 +197,8 @@ export default function Digest() {
 
         <div className="mt-8 p-6 rounded-xl bg-muted/50 text-center">
           <p className="text-sm text-muted-foreground">
-            New digests are published on the 1st of each month. 
-            You'll also receive them via email.
+            New digests drop every Monday at 8 AM UTC. 
+            Stay ahead of the peptide curve 🚀
           </p>
         </div>
       </div>

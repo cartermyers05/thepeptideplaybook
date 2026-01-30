@@ -633,6 +633,7 @@ export type Database = {
         Row: {
           created_at: string
           date: string
+          digest_type: string
           full_content: string
           highlights: Json
           id: string
@@ -644,6 +645,7 @@ export type Database = {
         Insert: {
           created_at?: string
           date: string
+          digest_type?: string
           full_content: string
           highlights?: Json
           id?: string
@@ -655,6 +657,7 @@ export type Database = {
         Update: {
           created_at?: string
           date?: string
+          digest_type?: string
           full_content?: string
           highlights?: Json
           id?: string
