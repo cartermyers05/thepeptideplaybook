@@ -32,6 +32,24 @@ const guides = [
       "Different mechanisms, same regulatory status. What the evidence actually shows.",
     href: "/guides/bpc-157-vs-tb-500",
   },
+  {
+    title: "Semaglutide Complete Guide",
+    description:
+      "FDA-approved GLP-1 medication. Clinical trials, side effects, costs, and compounding controversy.",
+    href: "/guides/semaglutide-complete-guide",
+  },
+  {
+    title: "Tirzepatide vs Semaglutide",
+    description:
+      "Head-to-head comparison. Which GLP-1 medication produces better weight loss results?",
+    href: "/guides/tirzepatide-vs-semaglutide",
+  },
+  {
+    title: "Growth Hormone Peptides Guide",
+    description:
+      "Sermorelin, ipamorelin, CJC-1295, GHRP-2/6. Mechanisms, research, and regulatory status.",
+    href: "/guides/growth-hormone-peptides-guide",
+  },
 ];
 
 export default function Guides() {
