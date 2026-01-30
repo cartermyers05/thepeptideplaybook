@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Shield, Zap, Clock, ArrowRight } from "lucide-react";
-import { FloatingOrbs } from "./FloatingOrbs";
-import { GridPattern } from "./GridPattern";
 import { HeroDemo } from "./HeroDemo";
 import { Link } from "react-router-dom";
 
@@ -35,8 +33,6 @@ const itemVariants = {
 export function HeroSection() {
   return (
     <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 gradient-mesh-bg grain-overlay overflow-hidden">
-      <FloatingOrbs variant="hero" />
-      <GridPattern variant="dots" />
 
       <div className="container px-4 relative z-10">
         <div className="lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center max-w-6xl mx-auto">

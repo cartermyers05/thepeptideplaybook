@@ -13,6 +13,7 @@ import { PricingCTA } from "@/components/landing/PricingCTA";
 import { Footer } from "@/components/landing/Footer";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { HomepageSchemas } from "@/components/seo/HomepageSchemas";
+import { InteractiveBackground } from "@/components/landing/InteractiveBackground";
 
 import { ExitIntentPopup } from "@/components/landing/ExitIntentPopup";
 import { FloatingCTA } from "@/components/landing/FloatingCTA";
@@ -26,7 +27,7 @@ const Index = () => {
         canonical="/"
       />
       <HomepageSchemas />
-      <div className="min-h-screen bg-background">
+      <InteractiveBackground variant="hero" className="min-h-screen bg-background">
         <Navbar />
         <main>
           <HeroSection />
@@ -45,7 +46,7 @@ const Index = () => {
         
         <FloatingCTA />
         <ExitIntentPopup />
-      </div>
+      </InteractiveBackground>
     </>
   );
 };
