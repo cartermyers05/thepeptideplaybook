@@ -1,153 +1,231 @@
 
 
-# Webhook-less Payment Verification Implementation
+# Hero AI Typing Demo Implementation
 
-## Overview
+## The "Wow Moment" Vision
 
-Replace the current `stripe-webhook` approach with a cleaner, more secure `verify-payment` Edge Function that gets called when users land on the success page. This eliminates the critical security vulnerability and simplifies the payment flow.
+When visitors land on the page, they'll immediately see the AI answering a compelling peptide question in real-time. The response streams in character-by-character with a typing effect, demonstrating the product's core value within 3 seconds of arrival.
+
+```text
++------------------------------------------+
+|           Ask Anything About Peptides    |
+|           Get Research Backed Answers    |
+|                                          |
+|    +----------------------------------+  |
+|    | "What peptides are FDA approved?"|  |
+|    +----------------------------------+  |
+|    |                                  |  |
+|    | Several peptides have FDA        |  |
+|    | approval:                        |  |
+|    |                                  |  |
+|    | ✅ Semaglutide (Ozempic, Wego... |  |
+|    | ✅ Tirzepatide (Mounjaro)...     |  |
+|    |          ▊ (typing cursor)       |  |
+|    +----------------------------------+  |
+|                                          |
+|      [Get Full Access - $67]             |
++------------------------------------------+
+```
 
 ---
 
-## Current Flow (Problematic)
+## Technical Architecture
 
-```text
-User → Checkout → Stripe → /thank-you → (hope webhook fires) → tier updated
-                    ↓
-              Webhook (insecure fallback allows spoofing)
-```
+### Option A: Pre-cached Response (Recommended)
 
-## New Flow (Secure)
+Since the demo question is always the same ("What peptides are FDA approved?"), we can pre-cache the response and simulate streaming on the client. This eliminates API calls and rate limit concerns.
 
-```text
-User → Checkout → Stripe → /thank-you?session_id=xxx → verify-payment → tier updated
-                                                             ↓
-                                                   Direct Stripe API check
-```
+**Pros:**
+- Zero API costs for demo
+- Instant, reliable playback
+- No rate limiting issues
+- Works even if AI service is down
+
+**Cons:**
+- Response is static (but that's fine for a demo)
+
+### Option B: Live API Call
+
+Create a public demo endpoint with strict rate limiting.
+
+**Pros:**
+- Fresh, dynamic responses
+
+**Cons:**
+- API costs for every visitor
+- Rate limit risk under traffic
+- Latency on first load
+
+**Recommendation: Option A** - The demo should feel instant and polished. A pre-cached response with realistic typing animation creates a better first impression.
 
 ---
 
 ## Implementation Steps
 
-### Step 1: Create `verify-payment` Edge Function
+### Step 1: Create `HeroDemoCard` Component
 
-Create `supabase/functions/verify-payment/index.ts`:
+A new component that displays a mini chat interface in the hero section:
 
-**Logic:**
-1. Receive `session_id` from request body
-2. Validate user is authenticated (JWT)
-3. Call Stripe API to retrieve the checkout session
-4. Verify payment_status is "paid"
-5. Verify the session's user_id metadata matches authenticated user
-6. Update profiles table to set tier = "member"
-7. Record purchase in purchases table (if not already recorded)
-8. Return success/failure status
+```typescript
+// src/components/landing/HeroDemoCard.tsx
 
-**Security features:**
-- Requires valid JWT (user must be logged in)
-- Verifies payment directly with Stripe (no spoofing possible)
-- Checks metadata matches to prevent cross-user attacks
-- Idempotent (can be called multiple times safely)
+Features:
+- Glassmorphism card styled to match design system
+- Pre-written question displayed
+- AI response that types out on page load (after 1.5s delay)
+- Blinking cursor during typing
+- Fade-in animation when complete
+- Compact design that fits above the CTAs
+```
+
+### Step 2: Pre-cache the Demo Response
+
+Store a high-quality, pre-written response that demonstrates the AI's capabilities:
+
+```typescript
+const DEMO_RESPONSE = `Several peptides have full FDA approval:
+
+✅ **Semaglutide** (Ozempic, Wegovy) - For diabetes & weight management
+
+✅ **Tirzepatide** (Mounjaro, Zepbound) - Dual GIP/GLP-1 agonist
+
+✅ **Tesamorelin** (Egrifta) - For HIV lipodystrophy
+
+Most other peptides like BPC-157 and TB-500 are **research-only** with no FDA approval for human use.
+
+*Always verify current FDA status before making decisions.*`;
+```
+
+### Step 3: Typing Animation Logic
+
+Create a smooth, realistic typing effect:
+
+```typescript
+// Typing speed: 20-40ms per character (random for realism)
+// Start delay: 1.5s after component mounts
+// Cursor blinks during and briefly after typing
+// Uses requestAnimationFrame for smooth performance
+```
+
+### Step 4: Update HeroSection Layout
+
+Modify the hero section to include the demo card:
+
+```text
+Current Layout:
+- Headline
+- Subheadline  
+- Stats row
+- CTAs
+- Trust signals
+
+New Layout:
+- Headline
+- Subheadline
+- Demo Card (NEW - between subhead and stats)
+- Stats row (moved below demo)
+- CTAs
+- Trust signals
+```
 
 ---
 
-### Step 2: Update ThankYou Page
+## File Changes
 
-Modify `src/pages/ThankYou.tsx`:
-
-**Changes:**
-1. Extract `session_id` from URL query params
-2. Call `verify-payment` Edge Function on mount
-3. Show loading state during verification
-4. Handle success → show current UI
-5. Handle failure → show error with retry option
-6. Invalidate profile query to refresh tier status
-
----
-
-### Step 3: Add Backup Tier Check on Login
-
-Modify `src/hooks/useAuth.tsx`:
-
-**Changes:**
-1. After successful auth state change (login/signup)
-2. Check if user has `stripe_customer_id` in profile
-3. If yes, call `verify-payment` with empty session_id to trigger a Stripe customer payment check
-4. This catches edge cases where verification failed on thank-you page
-
----
-
-### Step 4: Delete stripe-webhook Function
-
-Remove the entire `supabase/functions/stripe-webhook/` directory and update `supabase/config.toml` to remove webhook configuration.
+| File | Action |
+|------|--------|
+| `src/components/landing/HeroDemoCard.tsx` | Create - New demo card component |
+| `src/components/landing/HeroSection.tsx` | Modify - Add HeroDemoCard |
+| `src/index.css` | No changes - existing styles work |
 
 ---
 
 ## Technical Details
 
-### verify-payment Edge Function Code Structure
+### HeroDemoCard Component Structure
 
 ```typescript
-// supabase/functions/verify-payment/index.ts
-
-// 1. CORS headers
-// 2. Auth validation
-// 3. Get session_id from body
-// 4. Retrieve checkout session from Stripe
-// 5. Verify payment_status === "paid"
-// 6. Verify metadata.user_id matches auth user
-// 7. Check if purchase already recorded (idempotency)
-// 8. Update profile tier to "member"
-// 9. Insert purchase record
-// 10. Return success
+function HeroDemoCard() {
+  const [displayedText, setDisplayedText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+  
+  // Start typing after 1.5s delay
+  useEffect(() => {
+    const startDelay = setTimeout(() => {
+      setHasStarted(true);
+      setIsTyping(true);
+    }, 1500);
+    return () => clearTimeout(startDelay);
+  }, []);
+  
+  // Typing animation
+  useEffect(() => {
+    if (!hasStarted) return;
+    
+    let index = 0;
+    const typeNextChar = () => {
+      if (index < DEMO_RESPONSE.length) {
+        setDisplayedText(DEMO_RESPONSE.slice(0, index + 1));
+        index++;
+        // Random delay for realistic typing
+        const delay = 15 + Math.random() * 25;
+        setTimeout(typeNextChar, delay);
+      } else {
+        setIsTyping(false);
+      }
+    };
+    typeNextChar();
+  }, [hasStarted]);
+  
+  return (
+    <motion.div className="glass-card max-w-xl mx-auto p-5">
+      {/* Question bubble */}
+      <div className="flex justify-end mb-3">
+        <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-2 text-sm">
+          What peptides are FDA approved?
+        </div>
+      </div>
+      
+      {/* AI Response */}
+      <div className="flex items-start gap-2">
+        <Bot className="w-5 h-5 text-primary mt-1" />
+        <div className="flex-1 text-sm">
+          <ReactMarkdown>{displayedText}</ReactMarkdown>
+          {isTyping && <span className="typing-cursor" />}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 ```
 
-### ThankYou Page Changes
+### Animation Timing
 
-```typescript
-// Extract session_id
-const searchParams = new URLSearchParams(location.search);
-const sessionId = searchParams.get('session_id');
-
-// Verify payment on mount
-useEffect(() => {
-  if (sessionId) {
-    verifyPayment(sessionId);
-  }
-}, [sessionId]);
-
-// Show appropriate UI based on verification state
-```
-
-### Config.toml Updates
-
-```toml
-# Add new function
-[functions.verify-payment]
-verify_jwt = false
-
-# Remove stripe-webhook entry
-```
+- Page loads
+- Headlines animate in (0-0.5s)
+- Subheadline fades in (0.3-0.6s)
+- Demo card slides up (0.5-0.8s)
+- Typing starts (1.5s mark)
+- Full response typed (~4-5s)
+- CTAs visible throughout
 
 ---
 
-## Files to Create/Modify
+## Visual Polish
 
-| File | Action |
-|------|--------|
-| `supabase/functions/verify-payment/index.ts` | Create |
-| `src/pages/ThankYou.tsx` | Modify |
-| `src/hooks/useAuth.tsx` | Modify (add backup check) |
-| `supabase/config.toml` | Modify (add verify-payment) |
-| `supabase/functions/stripe-webhook/index.ts` | Delete |
+1. **Glassmorphism card** - Uses existing `glass-card` class
+2. **Bot icon** - Purple icon with subtle glow
+3. **Typing cursor** - Uses existing `.typing-cursor::after` CSS
+4. **Question bubble** - Styled like chat interface
+5. **Responsive** - Stacks nicely on mobile
 
 ---
 
-## Benefits
+## Performance Considerations
 
-1. **No webhook secret needed** - Eliminates critical security vulnerability
-2. **Direct verification** - Can't be spoofed (calls Stripe API directly)
-3. **Simpler infrastructure** - No need to configure webhook endpoints
-4. **Better UX** - User sees immediate confirmation
-5. **Idempotent** - Safe to retry if initial verification fails
-6. **Backup verification** - Login-time check catches edge cases
+- No API calls = zero latency
+- Typing animation uses `setTimeout` (not interval)
+- Cleanup on unmount prevents memory leaks
+- `ReactMarkdown` only renders visible text
 
