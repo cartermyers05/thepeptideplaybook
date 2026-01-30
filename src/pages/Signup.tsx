@@ -272,7 +272,7 @@ export default function Signup() {
       <div className="hidden lg:flex flex-1 bg-gradient-primary items-center justify-center p-16">
         <div className="max-w-md text-center text-primary-foreground">
           <h2 className="text-3xl font-bold mb-4">
-            Join 2,847+ researchers
+            Everything peptides, one place
           </h2>
           <p className="text-primary-foreground/80 mb-8">
             Get instant access to research-backed peptide answers with citations.
