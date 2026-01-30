@@ -1,231 +1,136 @@
 
 
-# Hero AI Typing Demo Implementation
+# Split Hero Layout with Live Chatbot Demo
 
-## The "Wow Moment" Vision
+## The Vision
 
-When visitors land on the page, they'll immediately see the AI answering a compelling peptide question in real-time. The response streams in character-by-character with a typing effect, demonstrating the product's core value within 3 seconds of arrival.
-
-```text
-+------------------------------------------+
-|           Ask Anything About Peptides    |
-|           Get Research Backed Answers    |
-|                                          |
-|    +----------------------------------+  |
-|    | "What peptides are FDA approved?"|  |
-|    +----------------------------------+  |
-|    |                                  |  |
-|    | Several peptides have FDA        |  |
-|    | approval:                        |  |
-|    |                                  |  |
-|    | ✅ Semaglutide (Ozempic, Wego... |  |
-|    | ✅ Tirzepatide (Mounjaro)...     |  |
-|    |          ▊ (typing cursor)       |  |
-|    +----------------------------------+  |
-|                                          |
-|      [Get Full Access - $67]             |
-+------------------------------------------+
-```
-
----
-
-## Technical Architecture
-
-### Option A: Pre-cached Response (Recommended)
-
-Since the demo question is always the same ("What peptides are FDA approved?"), we can pre-cache the response and simulate streaming on the client. This eliminates API calls and rate limit concerns.
-
-**Pros:**
-- Zero API costs for demo
-- Instant, reliable playback
-- No rate limiting issues
-- Works even if AI service is down
-
-**Cons:**
-- Response is static (but that's fine for a demo)
-
-### Option B: Live API Call
-
-Create a public demo endpoint with strict rate limiting.
-
-**Pros:**
-- Fresh, dynamic responses
-
-**Cons:**
-- API costs for every visitor
-- Rate limit risk under traffic
-- Latency on first load
-
-**Recommendation: Option A** - The demo should feel instant and polished. A pre-cached response with realistic typing animation creates a better first impression.
-
----
-
-## Implementation Steps
-
-### Step 1: Create `HeroDemoCard` Component
-
-A new component that displays a mini chat interface in the hero section:
-
-```typescript
-// src/components/landing/HeroDemoCard.tsx
-
-Features:
-- Glassmorphism card styled to match design system
-- Pre-written question displayed
-- AI response that types out on page load (after 1.5s delay)
-- Blinking cursor during typing
-- Fade-in animation when complete
-- Compact design that fits above the CTAs
-```
-
-### Step 2: Pre-cache the Demo Response
-
-Store a high-quality, pre-written response that demonstrates the AI's capabilities:
-
-```typescript
-const DEMO_RESPONSE = `Several peptides have full FDA approval:
-
-✅ **Semaglutide** (Ozempic, Wegovy) - For diabetes & weight management
-
-✅ **Tirzepatide** (Mounjaro, Zepbound) - Dual GIP/GLP-1 agonist
-
-✅ **Tesamorelin** (Egrifta) - For HIV lipodystrophy
-
-Most other peptides like BPC-157 and TB-500 are **research-only** with no FDA approval for human use.
-
-*Always verify current FDA status before making decisions.*`;
-```
-
-### Step 3: Typing Animation Logic
-
-Create a smooth, realistic typing effect:
-
-```typescript
-// Typing speed: 20-40ms per character (random for realism)
-// Start delay: 1.5s after component mounts
-// Cursor blinks during and briefly after typing
-// Uses requestAnimationFrame for smooth performance
-```
-
-### Step 4: Update HeroSection Layout
-
-Modify the hero section to include the demo card:
+A side-by-side hero layout that immediately demonstrates value - content on the left, live chatbot on the right. Visitors see the AI in action within seconds of landing.
 
 ```text
-Current Layout:
-- Headline
-- Subheadline  
-- Stats row
-- CTAs
-- Trust signals
+Desktop Layout:
++------------------------+------------------------+
+|                        |                        |
+|  Ask Anything About    |  ┌──────────────────┐  |
+|  Peptides              |  │ What peptides    │  |
+|  Get Research Backed   |  │ are FDA approved?│  |
+|  Answers               |  ├──────────────────┤  |
+|                        |  │ Several peptides │  |
+|  [Get Full Access]     |  │ have FDA approval│  |
+|  [See It In Action]    |  │ ✅ Semaglutide...│  |
+|                        |  │ ▊ (typing)       │  |
+|  ✓ 30-Day Guarantee    |  └──────────────────┘  |
+|                        |                        |
++------------------------+------------------------+
 
-New Layout:
-- Headline
-- Subheadline
-- Demo Card (NEW - between subhead and stats)
-- Stats row (moved below demo)
-- CTAs
-- Trust signals
+Mobile Layout:
++------------------------+
+|  Ask Anything About    |
+|  Peptides              |
+|  Get Research Backed   |
+|  Answers               |
+|                        |
+|  [Get Full Access]     |
+|                        |
+|  ┌──────────────────┐  |
+|  │ What peptides... │  |
+|  └──────────────────┘  |
++------------------------+
 ```
 
 ---
 
-## File Changes
+## Implementation
+
+### Step 1: Create `HeroDemo` Component
+
+A compact, self-contained chatbot demo for the hero section:
+
+- **Pre-cached response** - No API call, types out automatically on page load
+- **Glassmorphism card** - Matches design system with glass effect
+- **Typing animation** - Starts after 1.5s delay, types at realistic speed
+- **Interactive question buttons** - 2-3 quick questions above the chat
+- **Compact design** - Sized to fit alongside hero content
+
+### Step 2: Restructure `HeroSection` Layout
+
+Change from centered single-column to a two-column grid:
+
+```text
+Current:
+- max-w-4xl mx-auto (centered)
+- text-center
+
+New:
+- lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center
+- Left column: text-left (H1, subhead, CTAs, trust signals)
+- Right column: HeroDemo component
+- Mobile: stacks vertically (content first, demo below)
+```
+
+### Step 3: Adjust Content Alignment
+
+- H1, subhead, CTAs: Left-aligned on desktop, centered on mobile
+- Stats row: Moves to left alignment on desktop
+- Trust signals: Horizontal row under CTAs
+- Remove redundant "See It In Action" button (demo is already visible)
+
+---
+
+## Files to Modify
 
 | File | Action |
 |------|--------|
-| `src/components/landing/HeroDemoCard.tsx` | Create - New demo card component |
-| `src/components/landing/HeroSection.tsx` | Modify - Add HeroDemoCard |
-| `src/index.css` | No changes - existing styles work |
+| `src/components/landing/HeroDemo.tsx` | Create - Compact chatbot demo |
+| `src/components/landing/HeroSection.tsx` | Modify - Two-column layout |
 
 ---
 
 ## Technical Details
 
-### HeroDemoCard Component Structure
+### HeroDemo Component
 
-```typescript
-function HeroDemoCard() {
-  const [displayedText, setDisplayedText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
-  
-  // Start typing after 1.5s delay
-  useEffect(() => {
-    const startDelay = setTimeout(() => {
-      setHasStarted(true);
-      setIsTyping(true);
-    }, 1500);
-    return () => clearTimeout(startDelay);
-  }, []);
-  
-  // Typing animation
-  useEffect(() => {
-    if (!hasStarted) return;
-    
-    let index = 0;
-    const typeNextChar = () => {
-      if (index < DEMO_RESPONSE.length) {
-        setDisplayedText(DEMO_RESPONSE.slice(0, index + 1));
-        index++;
-        // Random delay for realistic typing
-        const delay = 15 + Math.random() * 25;
-        setTimeout(typeNextChar, delay);
-      } else {
-        setIsTyping(false);
-      }
-    };
-    typeNextChar();
-  }, [hasStarted]);
-  
-  return (
-    <motion.div className="glass-card max-w-xl mx-auto p-5">
-      {/* Question bubble */}
-      <div className="flex justify-end mb-3">
-        <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-2 text-sm">
-          What peptides are FDA approved?
-        </div>
-      </div>
-      
-      {/* AI Response */}
-      <div className="flex items-start gap-2">
-        <Bot className="w-5 h-5 text-primary mt-1" />
-        <div className="flex-1 text-sm">
-          <ReactMarkdown>{displayedText}</ReactMarkdown>
-          {isTyping && <span className="typing-cursor" />}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
+```text
+Features:
+- Pre-written demo question + response
+- Typing animation with realistic timing
+- Blinking cursor during typing
+- Bot icon + header styling
+- Glassmorphism card background
+- Optional: 2 quick-pick question pills at top
 ```
 
-### Animation Timing
+### Responsive Behavior
 
-- Page loads
-- Headlines animate in (0-0.5s)
-- Subheadline fades in (0.3-0.6s)
-- Demo card slides up (0.5-0.8s)
-- Typing starts (1.5s mark)
-- Full response typed (~4-5s)
-- CTAs visible throughout
+```text
+Desktop (lg+):
+- Two columns, 50/50 split
+- Content left-aligned
+- Demo card on right with slight upward offset
+
+Tablet (md):
+- Same two-column but tighter spacing
+
+Mobile (<md):
+- Single column, stacked
+- Content centered
+- Demo below CTAs (smaller version)
+```
+
+### Animation Sequence
+
+1. **0s**: Page loads, left content starts animating in
+2. **0.3s**: H1 visible
+3. **0.5s**: Subheadline visible
+4. **0.7s**: Demo card slides in from right
+5. **1.5s**: Typing animation begins in demo
+6. **~5s**: Full response typed out
 
 ---
 
-## Visual Polish
+## Key Differences from Previous Attempt
 
-1. **Glassmorphism card** - Uses existing `glass-card` class
-2. **Bot icon** - Purple icon with subtle glow
-3. **Typing cursor** - Uses existing `.typing-cursor::after` CSS
-4. **Question bubble** - Styled like chat interface
-5. **Responsive** - Stacks nicely on mobile
-
----
-
-## Performance Considerations
-
-- No API calls = zero latency
-- Typing animation uses `setTimeout` (not interval)
-- Cleanup on unmount prevents memory leaks
-- `ReactMarkdown` only renders visible text
+1. **Split layout** - Demo beside content, not below headline
+2. **Left-aligned content** - Creates visual balance with demo on right
+3. **More polished demo card** - Better styling, header with bot icon
+4. **Proper responsive stacking** - Demo below on mobile, not crammed above stats
 
