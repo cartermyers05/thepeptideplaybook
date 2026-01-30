@@ -41,7 +41,9 @@ import BPC157Guide from "./pages/guides/BPC157Guide";
 import FDALegalStatusGuide from "./pages/guides/FDALegalStatusGuide";
 import ArePeptidesSafeGuide from "./pages/guides/ArePeptidesSafeGuide";
 import BPC157vsTB500Guide from "./pages/guides/BPC157vsTB500Guide";
-
+import SemaglutideGuide from "./pages/guides/SemaglutideGuide";
+import TirzepatideVsSemaglutideGuide from "./pages/guides/TirzepatideVsSemaglutideGuide";
+import GrowthHormonePeptidesGuide from "./pages/guides/GrowthHormonePeptidesGuide";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -75,6 +77,9 @@ const App = () => (
             <Route path="/guides/peptides-fda-legal-status-2026" element={<FDALegalStatusGuide />} />
             <Route path="/guides/are-peptides-safe" element={<ArePeptidesSafeGuide />} />
             <Route path="/guides/bpc-157-vs-tb-500" element={<BPC157vsTB500Guide />} />
+            <Route path="/guides/semaglutide-complete-guide" element={<SemaglutideGuide />} />
+            <Route path="/guides/tirzepatide-vs-semaglutide" element={<TirzepatideVsSemaglutideGuide />} />
+            <Route path="/guides/growth-hormone-peptides-guide" element={<GrowthHormonePeptidesGuide />} />
             
             {/* Protected routes - Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
