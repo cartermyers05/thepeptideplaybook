@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { X, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export function ExitIntentPopup() {
   const [isOpen, setIsOpen] = useState(false);
   const [email, setEmail] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -39,32 +39,48 @@ export function ExitIntentPopup() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase
-        .from("leads")
-        .insert({ email, source: "exit-intent" });
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-lead`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            email,
+            source: "exit-intent",
+            honeypot,
+          }),
+        }
+      );
 
-      if (error) throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          toast({
+            title: "Too many attempts",
+            description: "Please try again later.",
+            variant: "destructive",
+          });
+        } else {
+          throw new Error(data.error || "Failed to submit");
+        }
+        return;
+      }
 
       toast({
-        title: "You're in!",
-        description: "Check your email for the free guide.",
+        title: data.message === "You're already signed up!" ? "You're already signed up!" : "You're in!",
+        description: data.message === "You're already signed up!" ? "Check your email for the guide." : "Check your email for the free guide.",
       });
       setIsOpen(false);
     } catch (error: any) {
-      // Handle duplicate email gracefully
-      if (error.code === "23505") {
-        toast({
-          title: "You're already signed up!",
-          description: "Check your email for the guide.",
-        });
-        setIsOpen(false);
-      } else {
-        toast({
-          title: "Something went wrong",
-          description: "Please try again.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Something went wrong",
+        description: error.message || "Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -98,6 +114,17 @@ export function ExitIntentPopup() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Honeypot field - hidden from users, bots will fill it */}
+          <input
+            type="text"
+            name="website"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            className="absolute -left-[9999px] opacity-0 pointer-events-none"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+          />
           <Input
             type="email"
             placeholder="Enter your email"
