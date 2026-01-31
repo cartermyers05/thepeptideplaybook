@@ -5,7 +5,6 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, FileText } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const benefits = [
@@ -19,6 +18,7 @@ const benefits = [
 export default function FreeGuide() {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
@@ -28,23 +28,47 @@ export default function FreeGuide() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from("leads").insert({
-        email,
-        first_name: firstName || null,
-        source: "free-guide",
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-lead`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            email,
+            first_name: firstName || undefined,
+            source: "free-guide",
+            honeypot,
+          }),
+        }
+      );
 
-      if (error) throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          toast({
+            title: "Too many attempts",
+            description: `Please try again in ${data.retryAfter || 60} seconds.`,
+            variant: "destructive",
+          });
+        } else {
+          throw new Error(data.error || "Failed to submit");
+        }
+        return;
+      }
 
       setIsSuccess(true);
       toast({
         title: "Check your email!",
         description: "We've sent the free guide to your inbox.",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Something went wrong",
-        description: "Please try again later.",
+        description: error.message || "Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -84,6 +108,17 @@ export default function FreeGuide() {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4 mb-8">
+                  {/* Honeypot field - hidden from users, bots will fill it */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    className="absolute -left-[9999px] opacity-0 pointer-events-none"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                  />
                   <Input
                     type="email"
                     placeholder="Enter your email"

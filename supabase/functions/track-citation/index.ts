@@ -6,6 +6,46 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// In-memory rate limiter
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+
+const rateLimitStore = new Map<string, RateLimitEntry>();
+
+function checkRateLimit(
+  identifier: string,
+  maxRequests: number,
+  windowSeconds: number
+): { allowed: boolean; remaining: number; resetIn: number } {
+  const now = Date.now();
+  const windowMs = windowSeconds * 1000;
+  
+  let entry = rateLimitStore.get(identifier);
+  
+  if (!entry || entry.resetAt < now) {
+    entry = { count: 1, resetAt: now + windowMs };
+    rateLimitStore.set(identifier, entry);
+    return { allowed: true, remaining: maxRequests - 1, resetIn: windowSeconds };
+  }
+  
+  if (entry.count < maxRequests) {
+    entry.count++;
+    return { allowed: true, remaining: maxRequests - entry.count, resetIn: Math.ceil((entry.resetAt - now) / 1000) };
+  }
+  
+  return { allowed: false, remaining: 0, resetIn: Math.ceil((entry.resetAt - now) / 1000) };
+}
+
+function getClientIP(req: Request): string {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0].trim();
+  const realIP = req.headers.get("x-real-ip");
+  if (realIP) return realIP;
+  return "unknown";
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -13,6 +53,25 @@ serve(async (req) => {
   }
 
   try {
+    const clientIP = getClientIP(req);
+    
+    // Rate limit: 100 citations per minute per IP (reasonable for analytics)
+    const rateLimit = checkRateLimit(`citation:${clientIP}`, 100, 60);
+    
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded" }),
+        {
+          status: 429,
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json",
+            "Retry-After": rateLimit.resetIn.toString()
+          },
+        }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
