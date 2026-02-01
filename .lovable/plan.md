@@ -1,33 +1,24 @@
 
-# Fix News Article Display: Clean Gibberish Content
+
+# Fix Scraped Content: Remove Error Messages & Paywall Notices
 
 ## Problem Identified
 
-The news articles are scraped from external websites using Firecrawl and stored with raw markdown content that includes:
-- Navigation boilerplate (`[Skip to navigation]`, `[Skip to main content]`)
-- Base64 encoded images that render as garbage text
-- Tracking URLs with long parameter strings
-- Website-specific UI elements ("Story Continues", image captions repeated)
-- Press release headers with location/date stamps
+The news articles scraped from Yahoo Finance contain unwanted boilerplate that the current sanitizer doesn't catch:
 
-This raw content is then rendered directly via `dangerouslySetInnerHTML` in the `ArticleContent` component, making the articles look messy and unprofessional.
+1. **"Oops, something went wrong"** - Yahoo Finance error message appearing at the very top
+2. **"This is a paid press release..."** - Press release disclosure notices
+3. **"MARKETS LIVE BLOG"** - Promotional banners with links
+4. **Yahoo image links** - Logo images with markdown formatting
+5. **"Skip to right column"** - Additional navigation patterns not currently caught
+
+These appear at the top of articles and make them look broken/unprofessional.
 
 ---
 
-## Solution: Two-Pronged Approach
+## Solution
 
-### 1. Frontend Sanitization (Immediate Fix)
-Create a utility function to clean markdown/HTML content before display:
-- Strip navigation links and boilerplate patterns
-- Remove base64 image references
-- Clean up tracking URLs
-- Remove duplicate headers and captions
-
-### 2. Enhanced Summary Display
-Redesign the `NewsSummary` component to be more visually appealing with:
-- Better typography and spacing
-- Gradient background accent
-- Proper markdown rendering (not just plain text)
+Update the `contentSanitizer.ts` utility to catch these additional patterns specific to Yahoo Finance and press release content.
 
 ---
 
@@ -35,95 +26,67 @@ Redesign the `NewsSummary` component to be more visually appealing with:
 
 | File | Change |
 |------|--------|
-| `src/lib/contentSanitizer.ts` | New utility to clean scraped content |
-| `src/components/dashboard/NewsSummary.tsx` | Enhanced design with markdown support |
-| `src/components/articles/ArticleContent.tsx` | Use sanitizer before rendering; switch to ReactMarkdown |
-| `src/pages/NewsDetail.tsx` | Apply sanitization to content |
+| `src/lib/contentSanitizer.ts` | Add regex patterns to remove Yahoo-specific errors, paid release notices, and promotional banners |
 
 ---
 
-## Implementation Details
-
-### Content Sanitizer (`src/lib/contentSanitizer.ts`)
+## New Patterns to Add
 
 ```typescript
-export function sanitizeNewsContent(content: string): string {
-  let cleaned = content
-    // Remove skip navigation links
-    .replace(/\[Skip to [^\]]+\]\([^)]+\)/g, '')
-    // Remove base64 images
-    .replace(/!\[[^\]]*\]\(<Base64-Image-Removed>\)/g, '')
-    .replace(/!\[[^\]]*\]\(data:image[^)]+\)/g, '')
-    // Remove "Story Continues" and similar boilerplate
-    .replace(/^Story Continues$/gm, '')
-    // Clean up excessive whitespace
-    .replace(/\n{3,}/g, '\n\n')
-    // Remove press release headers at start
-    .replace(/^.*ACCESS Newswire.*$/gm, '')
-    // Remove tracking URLs (keep display text)
-    .replace(/\[([^\]]+)\]\(https:\/\/www\.globenewswire\.com\/Tracker[^)]+\)/g, '$1');
-  
-  return cleaned.trim();
-}
+// Yahoo Finance error messages
+.replace(/^Oops,?\s*something went wrong\s*$/gim, '')
+
+// Paid press release notices  
+.replace(/This is a paid press release\.?\s*Contact the press release distributor directly with any inquiries\.?/gi, '')
+
+// Markets live blog banners (with markdown formatting)
+.replace(/\[\*\*MARKETS LIVE BLOG\*\*[^\]]*\]\([^)]+\)/gi, '')
+
+// Skip to right column (missed pattern)
+.replace(/\[Skip to right column\]\([^)]+\)/gi, '')
+
+// GlobeNewswire logo images
+.replace(/\[!\[[^\]]*\]\([^)]+\)\]\([^)]+\)/g, '') // Linked images
+.replace(/!\[[^\]]*\]\(https?:\/\/[^)]*yimg\.com[^)]*\)/g, '') // Yahoo image CDN
+
+// Dateline headers (e.g., "Fri, January 23, 2026 at 7:50 PM EST7 min read")
+.replace(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s*[A-Z][a-z]+\s+\d{1,2},\s*\d{4}\s+at\s+\d{1,2}:\d{2}\s*(AM|PM)\s*[A-Z]{3}\d*\s*min read\s*$/gim, '')
+
+// Duplicate title/source lines (like "Direct Meds" appearing alone)
+.replace(/^[A-Za-z\s]{2,30}$/gm, (match) => {
+  // Only remove if it looks like a standalone source name
+  const sourcePatterns = /^(Direct Meds|GlobeNewswire|Yahoo Finance|Reuters|AP News)$/i;
+  return sourcePatterns.test(match.trim()) ? '' : match;
+})
 ```
-
-### NewsSummary Component Enhancement
-
-Redesign with:
-- Subtle gradient border accent on the left
-- Better icon placement
-- Support for longer, formatted summaries
-- Smooth entrance animation
-
-```text
-Before:
-┌─────────────────────────────────┐
-│ 📄 Summary                       │
-│ Plain text paragraph...          │
-└─────────────────────────────────┘
-
-After:
-┌─────────────────────────────────┐
-│                                  │
-│ ┃ 📄 Key Takeaways              │ (gradient accent bar)
-│ ┃                                │
-│ ┃ • Clean, formatted summary    │
-│ ┃ • Key points highlighted      │
-│ ┃ • Professional typography     │
-│                                  │
-└─────────────────────────────────┘
-```
-
-### ArticleContent Improvements
-
-- Replace `dangerouslySetInnerHTML` with `ReactMarkdown` for safer rendering
-- Apply content sanitizer before rendering
-- Add loading skeleton for better UX
 
 ---
 
 ## Expected Result
 
 ```text
-Before:
-├── [Skip to navigation](link) [Skip to main content](link)
-├── ![image](<Base64-Image-Removed>)
-├── TUCSON, AZ / ACCESS Newswire / January 29, 2026 /
-├── Story Continues
-└── Unreadable mess of tracking URLs
+Before (top of article):
+├── "Oops, something went wrong"
+├── [Skip to navigation]...
+├── "This is a paid press release..."
+├── [GlobeNewswire logo image]
+├── "Direct Meds"
+├── "Fri, January 23, 2026 at 7:50 PM EST7 min read"
+└── Actual content starts here...
 
-After:
-├── Clean, readable headline
-├── Well-formatted paragraphs
-├── Proper markdown rendering (bold, links, lists)
-├── Professional source attribution
-└── No gibberish or boilerplate
+After (clean):
+├── Actual content starts immediately
+├── No error messages or notices
+├── Professional, clean presentation
+└── Proper article formatting
 ```
 
 ---
 
-## Bonus: Visual Polish
+## Additional Cleanup
 
-- Add a subtle "AI Summary" badge to differentiate original content
-- Implement smooth fade-in animations for content blocks
-- Better mobile typography with responsive font sizing
+Also clean up after sanitization:
+- Remove any lines that are now empty after pattern removal
+- Ensure content doesn't start with excessive blank lines
+- Trim the result to remove leading/trailing whitespace
+
