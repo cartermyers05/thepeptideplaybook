@@ -494,6 +494,27 @@
     50% { opacity: 0; }
   }
 
+  /* Streaming text animation for AI responses */
+  .streaming-text {
+    position: relative;
+  }
+
+  .streaming-text > *:last-child::after {
+    content: '';
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: hsl(var(--primary));
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: cursor-blink 1s steps(1) infinite;
+  }
+
+  @keyframes cursor-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
   /* ========================================
      HOVER INTERACTIONS
      ======================================== */
