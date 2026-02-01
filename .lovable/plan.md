@@ -1,33 +1,39 @@
 
-# Fix: Promo Code Redemption Flow
 
-## Problem Identified
-After entering a valid promo code during signup, users are still redirected to checkout because:
+# Fix: Promo Code Redemption Race Condition + Checkout Flow
 
-1. **Email confirmation blocks redemption**: When users sign up, Supabase requires email verification. This means there's no session immediately after signup (`signUpData.session` is `null`), so the promo code redemption never executes.
+## Problems Identified
 
-2. **Lost promo code context**: By the time the user confirms their email and logs in, the promo code information is lost (it was only stored in component state during signup).
+### Problem 1: Promo Code Redemption Timing
+The promo code is redeemed **after** the user is already redirected to checkout:
 
-3. **ProtectedRoute enforcement**: When the user navigates to `/dashboard`, the `ProtectedRoute` sees their tier is still "free" and redirects them to `/checkout`.
+```text
+Timeline:
+1. Signup completes → Session created
+2. Auth state changes → useAuth fires SIGNED_IN event  
+3. useTier loads profile (tier: "free") 
+4. ProtectedRoute sees isPaid=false → redirects to /checkout
+5. redeemPendingPromoCode runs (in setTimeout with 100ms delay)
+6. Profile updated to tier: "insider" → but user is already on /checkout
+```
+
+**Root cause**: The `setTimeout(() => redeemPendingPromoCode(), 100)` runs asynchronously and doesn't block the tier check. By the time it completes, React Query has already cached the profile with `tier: "free"`.
+
+### Problem 2: Checkout Page Doesn't Check Tier
+The `/checkout` page immediately starts the Stripe checkout without first checking if the user should skip checkout (e.g., promo code was just redeemed).
 
 ---
 
 ## Solution
 
-Persist the promo code to localStorage before signup, then redeem it automatically when the user first logs in (after email confirmation).
+### Step 1: Make Promo Code Redemption Awaitable
+Convert `redeemPendingPromoCode` to return a Promise and track redemption state so components can wait for it to complete.
 
-### Step 1: Store Promo Code Before Signup
-In `Signup.tsx`, save the valid promo code to localStorage before calling `supabase.auth.signUp()`.
+### Step 2: Add Checkout Page Tier Check
+Before starting checkout, verify the user's tier. If they're already paid (from promo code), redirect to dashboard instead.
 
-### Step 2: Redeem on First Login
-In the `useAuth.tsx` hook, after successful authentication:
-- Check localStorage for a pending promo code
-- If found, call `redeem-promo-code` Edge Function
-- On success, clear the localStorage and refresh the profile data
-- This ensures the promo code is redeemed regardless of whether the user signed up with email confirmation or not
-
-### Step 3: Invalidate Profile Cache
-After successful redemption, invalidate the React Query profile cache so `useTier` immediately reflects the updated tier.
+### Step 3: Ensure Profile Refetch After Redemption
+After redemption succeeds, explicitly refetch the profile before any navigation decisions are made.
 
 ---
 
@@ -35,27 +41,51 @@ After successful redemption, invalidate the React Query profile cache so `useTie
 
 | File | Change |
 |------|--------|
-| `src/pages/Signup.tsx` | Save promo code to localStorage before signup; simplify post-signup flow |
-| `src/hooks/useAuth.tsx` | Add promo code redemption logic on `SIGNED_IN` event; invalidate profile cache |
+| `src/hooks/useAuth.tsx` | Track promo redemption status; await redemption before proceeding |
+| `src/pages/Checkout.tsx` | Check tier status before initiating checkout; redirect to dashboard if already paid |
+| `src/components/auth/ProtectedRoute.tsx` | Wait for pending promo code redemption before making routing decisions |
 
 ---
 
-## Flow After Fix
+## Implementation Details
+
+### useAuth.tsx Changes
+- Add a state to track if promo code redemption is pending
+- Await the redemption and ensure profile cache is invalidated **before** allowing navigation
+- Export a flag indicating redemption is in progress
+
+### Checkout.tsx Changes
+- Import `useTier` hook
+- Before calling `startCheckout`, check if `isPaid` is true
+- If already paid, redirect to `/dashboard` instead of Stripe
+
+### ProtectedRoute.tsx Changes  
+- Check for pending promo code in localStorage
+- If found, show loading state while redemption completes
+- Only redirect to checkout after confirming tier is still "free"
+
+---
+
+## Expected Flow After Fix
 
 ```text
-1. User enters promo code → validated via Edge Function
-2. User clicks "Create account" → promo code saved to localStorage
-3. User receives confirmation email → clicks link
-4. Auth state changes to SIGNED_IN → useAuth detects pending promo code
-5. Promo code redeemed → profile updated to tier: "insider"
-6. Profile cache invalidated → useTier returns isPaid: true
-7. User proceeds to dashboard (not checkout)
+1. User enters promo code → validated during signup
+2. User creates account → promo code saved to localStorage
+3. Auth state changes (SIGNED_IN)
+4. ProtectedRoute detects pending promo code → shows loading
+5. redeemPendingPromoCode runs → awaited
+6. Profile updated to tier: "insider"
+7. Profile cache invalidated → useTier refetches
+8. useTier returns isPaid: true
+9. ProtectedRoute allows access → user proceeds to dashboard
 ```
 
 ---
 
-## Edge Cases Handled
+## Backup Check in Checkout Page
 
-- **Already redeemed**: The `redeem-promo-code` function already checks if user has redeemed a code
-- **Invalid/expired code**: Validation happens during signup; redemption failure won't break login
-- **LocalStorage unavailable**: Graceful fallback (user goes to checkout as before)
+Even if the ProtectedRoute fix misses the timing, the Checkout page will:
+1. Check `useTier` for current payment status
+2. If `isPaid: true`, navigate to `/dashboard` immediately
+3. If `isPaid: false`, proceed with Stripe checkout
+
