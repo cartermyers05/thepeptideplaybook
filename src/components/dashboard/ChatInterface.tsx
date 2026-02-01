@@ -472,7 +472,14 @@ export default function ChatInterface() {
                           {message.role === "assistant" ? (
                             <div className="text-sm">
                               {message.content ? (
-                                <ReactMarkdown>{message.content}</ReactMarkdown>
+                                <>
+                                  <div className={isLoading && message === messages[messages.length - 1] ? "streaming-text" : ""}>
+                                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                                  </div>
+                                  {isLoading && message === messages[messages.length - 1] && (
+                                    <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle rounded-full" />
+                                  )}
+                                </>
                               ) : isLoading && message === messages[messages.length - 1] ? (
                                 <TypingIndicator />
                               ) : null}
