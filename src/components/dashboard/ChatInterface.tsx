@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import ReactMarkdown from "react-markdown";
+import { TypewriterMessage } from "./TypewriterMessage";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useCreateConversation, useUpdateConversationTitle } from "@/hooks/useConversations";
@@ -470,20 +470,10 @@ export default function ChatInterface() {
                         )}
                         <div className="prose prose-sm dark:prose-invert max-w-none">
                           {message.role === "assistant" ? (
-                            <div className="text-sm">
-                              {message.content ? (
-                                <>
-                                  <div className={isLoading && message === messages[messages.length - 1] ? "streaming-text" : ""}>
-                                    <ReactMarkdown>{message.content}</ReactMarkdown>
-                                  </div>
-                                  {isLoading && message === messages[messages.length - 1] && (
-                                    <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle rounded-full" />
-                                  )}
-                                </>
-                              ) : isLoading && message === messages[messages.length - 1] ? (
-                                <TypingIndicator />
-                              ) : null}
-                            </div>
+                            <TypewriterMessage
+                              content={message.content}
+                              isStreaming={isLoading && message === messages[messages.length - 1]}
+                            />
                           ) : (
                             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                           )}
