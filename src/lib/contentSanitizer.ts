@@ -6,9 +6,27 @@ export function sanitizeNewsContent(content: string): string {
   if (!content) return '';
 
   let cleaned = content
-    // Remove skip navigation links
+    // Yahoo Finance error messages
+    .replace(/^Oops,?\s*something went wrong\.?\s*$/gim, '')
+    
+    // Paid press release notices
+    .replace(/This is a paid press release\.?\s*Contact the press release distributor directly with any inquiries\.?/gi, '')
+    
+    // Markets live blog banners
+    .replace(/\[\*\*MARKETS LIVE BLOG\*\*[^\]]*\]\([^)]+\)/gi, '')
+    
+    // Remove skip navigation links (including right column)
     .replace(/\[Skip to [^\]]+\]\([^)]+\)/gi, '')
     .replace(/Skip to [^\n]+\n/gi, '')
+    
+    // Yahoo image CDN links
+    .replace(/!\[[^\]]*\]\(https?:\/\/[^)]*yimg\.com[^)]*\)/g, '')
+    
+    // Linked images (nested markdown)
+    .replace(/\[!\[[^\]]*\]\([^)]+\)\]\([^)]+\)/g, '')
+    
+    // Dateline headers (e.g., "Fri, January 23, 2026 at 7:50 PM EST7 min read")
+    .replace(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s*[A-Z][a-z]+\s+\d{1,2},\s*\d{4}\s+at\s+\d{1,2}:\d{2}\s*(AM|PM)\s*[A-Z]{3,4}\d*\s*min read\s*$/gim, '')
     
     // Remove base64 images and placeholder references
     .replace(/!\[[^\]]*\]\(<Base64-Image-Removed>\)/g, '')
@@ -69,7 +87,10 @@ export function sanitizeNewsContent(content: string): string {
     
     // Remove lines that start with common navigation items
     .replace(/^(Home|Menu|Search|Login|Sign [Ii]n|Subscribe)\s*$/gm, '')
-    .replace(/^(Previous|Next)\s*(Article|Post|Story)?\s*$/gm, '');
+    .replace(/^(Previous|Next)\s*(Article|Post|Story)?\s*$/gm, '')
+    
+    // Remove standalone source names
+    .replace(/^(Direct Meds|GlobeNewswire|Yahoo Finance|Reuters|AP News|ACCESS Newswire)\s*$/gim, '');
 
   return cleaned.trim();
 }
