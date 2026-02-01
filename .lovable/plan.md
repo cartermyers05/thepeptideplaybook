@@ -1,41 +1,33 @@
 
+# Fix News Article Display: Clean Gibberish Content
 
-# Smooth Typewriter Animation for AI Chat
+## Problem Identified
 
-## Problem
-The current streaming displays text in whatever chunks arrive from the API. Since network data arrives in bursts (sometimes many words at once), the animation feels jerky and "chunky" rather than smooth.
+The news articles are scraped from external websites using Firecrawl and stored with raw markdown content that includes:
+- Navigation boilerplate (`[Skip to navigation]`, `[Skip to main content]`)
+- Base64 encoded images that render as garbage text
+- Tracking URLs with long parameter strings
+- Website-specific UI elements ("Story Continues", image captions repeated)
+- Press release headers with location/date stamps
 
-## Solution
-Create a client-side **typewriter buffer** that:
-1. Receives chunks from the API and queues them
-2. Reveals text character-by-character at a consistent speed (like the HeroDemo)
-3. Shows a blinking cursor while typing
-
-This decouples the network speed from the visual animation, ensuring a smooth, cinematic typing effect.
+This raw content is then rendered directly via `dangerouslySetInnerHTML` in the `ArticleContent` component, making the articles look messy and unprofessional.
 
 ---
 
-## Technical Approach
+## Solution: Two-Pronged Approach
 
-### New Custom Hook: `useTypewriter`
-Create a reusable hook that accepts incoming text and outputs a smoothly-revealed version:
+### 1. Frontend Sanitization (Immediate Fix)
+Create a utility function to clean markdown/HTML content before display:
+- Strip navigation links and boilerplate patterns
+- Remove base64 image references
+- Clean up tracking URLs
+- Remove duplicate headers and captions
 
-```tsx
-const { displayedText, isTyping } = useTypewriter(fullText, {
-  speed: 15, // ms per character
-  enabled: isStreaming
-});
-```
-
-The hook will:
-- Track the full content received so far
-- Animate revealing it character by character
-- Catch up quickly if the buffer gets too large (prevents lag)
-
-### Integration with ChatInterface
-- Store both `fullContent` (from API) and use the hook to get `displayedContent`
-- Render `displayedContent` with ReactMarkdown
-- Show blinking cursor while `isTyping` is true
+### 2. Enhanced Summary Display
+Redesign the `NewsSummary` component to be more visually appealing with:
+- Better typography and spacing
+- Gradient background accent
+- Proper markdown rendering (not just plain text)
 
 ---
 
@@ -43,63 +35,95 @@ The hook will:
 
 | File | Change |
 |------|--------|
-| `src/hooks/useTypewriter.ts` | New hook: manages character-by-character reveal with adjustable speed |
-| `src/components/dashboard/ChatInterface.tsx` | Use the typewriter hook for assistant messages during streaming |
+| `src/lib/contentSanitizer.ts` | New utility to clean scraped content |
+| `src/components/dashboard/NewsSummary.tsx` | Enhanced design with markdown support |
+| `src/components/articles/ArticleContent.tsx` | Use sanitizer before rendering; switch to ReactMarkdown |
+| `src/pages/NewsDetail.tsx` | Apply sanitization to content |
 
 ---
 
 ## Implementation Details
 
-### useTypewriter Hook Logic
+### Content Sanitizer (`src/lib/contentSanitizer.ts`)
 
-```text
-Input: "Hello world" (arrives in chunks: "Hel", "lo w", "orld")
-
-Frame 1: displayedText = "H"
-Frame 2: displayedText = "He"  
-Frame 3: displayedText = "Hel"
-Frame 4: displayedText = "Hell"
-...continues until caught up...
-Frame N: displayedText = "Hello world"
+```typescript
+export function sanitizeNewsContent(content: string): string {
+  let cleaned = content
+    // Remove skip navigation links
+    .replace(/\[Skip to [^\]]+\]\([^)]+\)/g, '')
+    // Remove base64 images
+    .replace(/!\[[^\]]*\]\(<Base64-Image-Removed>\)/g, '')
+    .replace(/!\[[^\]]*\]\(data:image[^)]+\)/g, '')
+    // Remove "Story Continues" and similar boilerplate
+    .replace(/^Story Continues$/gm, '')
+    // Clean up excessive whitespace
+    .replace(/\n{3,}/g, '\n\n')
+    // Remove press release headers at start
+    .replace(/^.*ACCESS Newswire.*$/gm, '')
+    // Remove tracking URLs (keep display text)
+    .replace(/\[([^\]]+)\]\(https:\/\/www\.globenewswire\.com\/Tracker[^)]+\)/g, '$1');
+  
+  return cleaned.trim();
+}
 ```
 
-Key features:
-- **Base speed**: ~15ms per character (adjustable)
-- **Catch-up mode**: If buffer > 50 chars behind, speed increases to catch up
-- **Random variance**: Slight randomization (±5ms) for natural feel
-- **Instant complete**: When streaming ends, immediately show all remaining text
+### NewsSummary Component Enhancement
 
-### ChatInterface Changes
-- Track `streamingMessageId` to know which message is actively streaming
-- Pass full content to `useTypewriter` hook
-- Render the `displayedText` output instead of raw content
+Redesign with:
+- Subtle gradient border accent on the left
+- Better icon placement
+- Support for longer, formatted summaries
+- Smooth entrance animation
+
+```text
+Before:
+┌─────────────────────────────────┐
+│ 📄 Summary                       │
+│ Plain text paragraph...          │
+└─────────────────────────────────┘
+
+After:
+┌─────────────────────────────────┐
+│                                  │
+│ ┃ 📄 Key Takeaways              │ (gradient accent bar)
+│ ┃                                │
+│ ┃ • Clean, formatted summary    │
+│ ┃ • Key points highlighted      │
+│ ┃ • Professional typography     │
+│                                  │
+└─────────────────────────────────┘
+```
+
+### ArticleContent Improvements
+
+- Replace `dangerouslySetInnerHTML` with `ReactMarkdown` for safer rendering
+- Apply content sanitizer before rendering
+- Add loading skeleton for better UX
 
 ---
 
-## Visual Result
+## Expected Result
 
 ```text
-Before (chunky):
-├── "Hello" appears
-├── (pause)
-├── " world, how are you doing" appears all at once
-├── (pause)  
-├── " today?" appears
-└── Feels jerky and inconsistent
+Before:
+├── [Skip to navigation](link) [Skip to main content](link)
+├── ![image](<Base64-Image-Removed>)
+├── TUCSON, AZ / ACCESS Newswire / January 29, 2026 /
+├── Story Continues
+└── Unreadable mess of tracking URLs
 
-After (smooth):
-├── "H" → "He" → "Hel" → "Hell" → "Hello" → " " → "w"...
-├── Each character appears with consistent timing
-├── Blinking cursor follows the text
-└── Feels like someone is actually typing
+After:
+├── Clean, readable headline
+├── Well-formatted paragraphs
+├── Proper markdown rendering (bold, links, lists)
+├── Professional source attribution
+└── No gibberish or boilerplate
 ```
 
 ---
 
-## Edge Cases Handled
+## Bonus: Visual Polish
 
-- **Fast API response**: Typewriter catches up smoothly without jarring jumps
-- **Slow API response**: Cursor waits (shows typing indicator) until more content arrives
-- **Markdown rendering**: ReactMarkdown handles partial markdown gracefully
-- **Stream completion**: Remaining buffer instantly revealed when `isLoading` becomes false
-
+- Add a subtle "AI Summary" badge to differentiate original content
+- Implement smooth fade-in animations for content blocks
+- Better mobile typography with responsive font sizing
