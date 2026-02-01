@@ -1,27 +1,43 @@
 import { useEffect, useRef } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useCheckout } from "@/hooks/useCheckout";
 import { useAuth } from "@/hooks/useAuth";
+import { useTier } from "@/hooks/useTier";
 import { Shield, CreditCard, RefreshCcw } from "lucide-react";
 
 export default function Checkout() {
   const { startCheckout, isLoading } = useCheckout();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isRedeemingPromoCode } = useAuth();
+  const { isPaid, isLoading: tierLoading } = useTier();
+  const navigate = useNavigate();
   const hasStartedRef = useRef(false);
 
   useEffect(() => {
-    if (!authLoading && user && !hasStartedRef.current) {
+    // Wait for all loading states to resolve
+    if (authLoading || tierLoading || isRedeemingPromoCode) return;
+    
+    // If user is already paid (promo code redeemed), redirect to dashboard
+    if (isPaid) {
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+
+    // Start checkout only once
+    if (user && !hasStartedRef.current) {
       hasStartedRef.current = true;
       startCheckout();
     }
-  }, [authLoading, user]);
+  }, [authLoading, tierLoading, isRedeemingPromoCode, user, isPaid, navigate, startCheckout]);
 
-  if (authLoading || isLoading) {
+  // Show loading while checking auth, tier, or redeeming promo
+  if (authLoading || tierLoading || isRedeemingPromoCode || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-8 h-8 rounded-lg bg-primary animate-pulse mx-auto mb-4" />
-          <p className="text-muted-foreground">Redirecting to checkout...</p>
+          <p className="text-muted-foreground">
+            {isRedeemingPromoCode ? "Applying promo code..." : "Redirecting to checkout..."}
+          </p>
         </div>
       </div>
     );
@@ -29,6 +45,18 @@ export default function Checkout() {
 
   if (!user) {
     return <Navigate to="/signup?redirect=/checkout" replace />;
+  }
+
+  // If already paid, this will be handled by the useEffect redirect
+  if (isPaid) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-8 h-8 rounded-lg bg-primary animate-pulse mx-auto mb-4" />
+          <p className="text-muted-foreground">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

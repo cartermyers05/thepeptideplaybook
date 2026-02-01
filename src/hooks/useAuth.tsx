@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
+  isRedeemingPromoCode: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -14,6 +15,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   isLoading: true,
+  isRedeemingPromoCode: false,
   signOut: async () => {},
 });
 
@@ -21,14 +23,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRedeemingPromoCode, setIsRedeemingPromoCode] = useState(false);
+  const redemptionAttemptedRef = useRef(false);
   const queryClient = useQueryClient();
 
   // Redeem pending promo code from localStorage (saved during signup)
-  const redeemPendingPromoCode = useCallback(async () => {
+  // Returns true if redemption was successful, false otherwise
+  const redeemPendingPromoCode = useCallback(async (): Promise<boolean> => {
     const pendingCode = localStorage.getItem("pending_promo_code");
-    if (!pendingCode) return;
+    if (!pendingCode) return false;
+
+    // Prevent duplicate redemption attempts
+    if (redemptionAttemptedRef.current) return false;
+    redemptionAttemptedRef.current = true;
 
     console.log("[Auth] Found pending promo code, attempting redemption");
+    setIsRedeemingPromoCode(true);
 
     try {
       const { data, error } = await supabase.functions.invoke("redeem-promo-code", {
@@ -37,17 +47,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error || !data?.success) {
         console.error("[Auth] Promo code redemption failed:", error || data?.error);
+        return false;
       } else {
         console.log("[Auth] Promo code redeemed successfully");
         // Invalidate profile cache so useTier reflects the updated tier
-        queryClient.invalidateQueries({ queryKey: ["profile"] });
+        await queryClient.invalidateQueries({ queryKey: ["profile"] });
+        // Wait for the profile to refetch
+        await queryClient.refetchQueries({ queryKey: ["profile"] });
+        return true;
       }
     } catch (err) {
       console.error("[Auth] Error redeeming promo code:", err);
+      return false;
     } finally {
       // Always clear localStorage regardless of success/failure
       localStorage.removeItem("pending_promo_code");
       localStorage.removeItem("pending_promo_type");
+      setIsRedeemingPromoCode(false);
     }
   }, [queryClient]);
 
@@ -89,13 +105,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Run promo code redemption and backup payment verification on login/signup
         if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session?.user) {
-          // Use setTimeout to avoid blocking the auth state update
-          setTimeout(() => {
-            // First try to redeem any pending promo code
-            redeemPendingPromoCode();
-            // Then run backup payment verification
+          // Check for pending promo code - await it before proceeding
+          const hasPendingPromo = localStorage.getItem("pending_promo_code");
+          if (hasPendingPromo) {
+            redeemPendingPromoCode().then(() => {
+              verifyPaymentStatus(session.user.id);
+            });
+          } else {
             verifyPaymentStatus(session.user.id);
-          }, 100);
+          }
         }
       }
     );
@@ -104,14 +122,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setIsLoading(false);
-
-      // Also run promo code redemption and backup verification on initial load if user is logged in
+      
+      // Check for pending promo code on initial load
       if (session?.user) {
-        setTimeout(() => {
-          redeemPendingPromoCode();
+        const hasPendingPromo = localStorage.getItem("pending_promo_code");
+        if (hasPendingPromo) {
+          redeemPendingPromoCode().then(() => {
+            setIsLoading(false);
+            verifyPaymentStatus(session.user.id);
+          });
+        } else {
+          setIsLoading(false);
           verifyPaymentStatus(session.user.id);
-        }, 100);
+        }
+      } else {
+        setIsLoading(false);
       }
     });
 
@@ -123,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, signOut }}>
+    <AuthContext.Provider value={{ user, session, isLoading, isRedeemingPromoCode, signOut }}>
       {children}
     </AuthContext.Provider>
   );

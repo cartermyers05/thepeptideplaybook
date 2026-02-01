@@ -7,12 +7,12 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, isRedeemingPromoCode } = useAuth();
   const { isPaid, isLoading: tierLoading } = useTier();
   const location = useLocation();
 
-  // Show loading while checking auth or tier
-  if (authLoading || tierLoading) {
+  // Show loading while checking auth, tier, or redeeming promo code
+  if (authLoading || tierLoading || isRedeemingPromoCode) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-pulse-soft">
