@@ -1,24 +1,56 @@
 
+# Fix Promo Code Redemption for Lucas & Improve UX
 
-# Fix Scraped Content: Remove Error Messages & Paywall Notices
+## Problem Summary
 
-## Problem Identified
+Lucas Correia (influencer) tried to use his promo code (`VIP2025`) but couldn't access the AI chatbox. His account shows:
+- **tier: `free`** (should be `insider`)
+- **No promo code redemption record** in the database
+- **Has `stripe_customer_id`** (was redirected to checkout instead)
 
-The news articles scraped from Yahoo Finance contain unwanted boilerplate that the current sanitizer doesn't catch:
-
-1. **"Oops, something went wrong"** - Yahoo Finance error message appearing at the very top
-2. **"This is a paid press release..."** - Press release disclosure notices
-3. **"MARKETS LIVE BLOG"** - Promotional banners with links
-4. **Yahoo image links** - Logo images with markdown formatting
-5. **"Skip to right column"** - Additional navigation patterns not currently caught
-
-These appear at the top of articles and make them look broken/unprofessional.
+**Root causes:**
+1. The promo code flow relies on localStorage, which can be lost if the user confirms email on a different browser/device or clears their cache
+2. There's no way to redeem a promo code after signup - users who miss the opportunity are stuck at checkout with no option to enter a code
+3. The "Have a promo code?" collapsible section is easy to miss during signup
 
 ---
 
-## Solution
+## Solution: Three-Part Fix
 
-Update the `contentSanitizer.ts` utility to catch these additional patterns specific to Yahoo Finance and press release content.
+### Part 1: Immediate Fix for Lucas
+Manually upgrade Lucas's account in the database:
+- Set `tier` to `insider`
+- Set `subscription_status` to `active`
+
+### Part 2: Add Promo Code Input to Checkout Page
+Allow users who reach checkout to still apply a promo code before paying:
+
+```text
+Current Checkout:
+┌─────────────────────────────────┐
+│  Full Access — $67               │
+│  [Pay Now Button]                │
+└─────────────────────────────────┘
+
+New Checkout:
+┌─────────────────────────────────┐
+│  Full Access — $67               │
+│                                  │
+│  🎁 Have a promo code?           │  ← Collapsible input
+│  ┌──────────────┬───────┐        │
+│  │ VIP2025      │ Apply │        │
+│  └──────────────┴───────┘        │
+│  ✓ VIP Access unlocked!          │
+│                                  │
+│  [Pay Now Button]                │
+│        OR                        │
+│  [Access Dashboard →]            │  ← Shows if promo applied
+└─────────────────────────────────┘
+```
+
+### Part 3: Make Signup Promo Input More Visible
+- Auto-expand the promo code section if a `?code=` URL parameter is present (already working)
+- Add a subtle badge/highlight to draw attention to the promo code option
 
 ---
 
@@ -26,67 +58,64 @@ Update the `contentSanitizer.ts` utility to catch these additional patterns spec
 
 | File | Change |
 |------|--------|
-| `src/lib/contentSanitizer.ts` | Add regex patterns to remove Yahoo-specific errors, paid release notices, and promotional banners |
+| Database | Update Lucas's profile to `tier: insider`, `subscription_status: active` |
+| `src/pages/Checkout.tsx` | Add `PromoCodeInput` component with redirect logic when code applied |
+| `src/pages/Signup.tsx` | Minor UX improvement to make promo input more visible |
 
 ---
 
-## New Patterns to Add
+## Checkout Page Changes (Main Fix)
 
 ```typescript
-// Yahoo Finance error messages
-.replace(/^Oops,?\s*something went wrong\s*$/gim, '')
+// In Checkout.tsx - Add promo code redemption:
 
-// Paid press release notices  
-.replace(/This is a paid press release\.?\s*Contact the press release distributor directly with any inquiries\.?/gi, '')
+const [promoApplied, setPromoApplied] = useState(false);
 
-// Markets live blog banners (with markdown formatting)
-.replace(/\[\*\*MARKETS LIVE BLOG\*\*[^\]]*\]\([^)]+\)/gi, '')
+const handlePromoSuccess = async (code: string, type: string) => {
+  if (type === "free_access") {
+    // Call redeem-promo-code edge function
+    const { data, error } = await supabase.functions.invoke("redeem-promo-code", {
+      body: { code },
+    });
+    
+    if (data?.success) {
+      setPromoApplied(true);
+      // Invalidate tier cache
+      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      toast({ title: "VIP Access Activated!", description: "Redirecting to dashboard..." });
+      setTimeout(() => navigate("/dashboard"), 1500);
+    }
+  }
+};
 
-// Skip to right column (missed pattern)
-.replace(/\[Skip to right column\]\([^)]+\)/gi, '')
+// In the UI, add PromoCodeInput above the payment button
+<PromoCodeInput
+  onValidCode={handlePromoSuccess}
+  onInvalidCode={() => {}}
+/>
 
-// GlobeNewswire logo images
-.replace(/\[!\[[^\]]*\]\([^)]+\)\]\([^)]+\)/g, '') // Linked images
-.replace(/!\[[^\]]*\]\(https?:\/\/[^)]*yimg\.com[^)]*\)/g, '') // Yahoo image CDN
-
-// Dateline headers (e.g., "Fri, January 23, 2026 at 7:50 PM EST7 min read")
-.replace(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s*[A-Z][a-z]+\s+\d{1,2},\s*\d{4}\s+at\s+\d{1,2}:\d{2}\s*(AM|PM)\s*[A-Z]{3}\d*\s*min read\s*$/gim, '')
-
-// Duplicate title/source lines (like "Direct Meds" appearing alone)
-.replace(/^[A-Za-z\s]{2,30}$/gm, (match) => {
-  // Only remove if it looks like a standalone source name
-  const sourcePatterns = /^(Direct Meds|GlobeNewswire|Yahoo Finance|Reuters|AP News)$/i;
-  return sourcePatterns.test(match.trim()) ? '' : match;
-})
+{promoApplied && (
+  <Button onClick={() => navigate("/dashboard")}>
+    Go to Dashboard →
+  </Button>
+)}
 ```
 
 ---
 
 ## Expected Result
 
-```text
-Before (top of article):
-├── "Oops, something went wrong"
-├── [Skip to navigation]...
-├── "This is a paid press release..."
-├── [GlobeNewswire logo image]
-├── "Direct Meds"
-├── "Fri, January 23, 2026 at 7:50 PM EST7 min read"
-└── Actual content starts here...
-
-After (clean):
-├── Actual content starts immediately
-├── No error messages or notices
-├── Professional, clean presentation
-└── Proper article formatting
-```
+After implementation:
+1. **Lucas gets immediate access** via database update
+2. **Future influencers** who reach checkout can still enter their promo code
+3. **No more "stuck at checkout"** - users always have a path to redeem promo codes
+4. **Better UX** - promo code option is visible at the critical conversion point
 
 ---
 
-## Additional Cleanup
+## Testing Checklist
 
-Also clean up after sanitization:
-- Remove any lines that are now empty after pattern removal
-- Ensure content doesn't start with excessive blank lines
-- Trim the result to remove leading/trailing whitespace
-
+After changes:
+- [ ] Create new account without promo code → arrives at checkout → enter promo code → redirected to dashboard
+- [ ] Create new account with promo code during signup → goes directly to dashboard
+- [ ] Verify Lucas can now access AI chatbox
