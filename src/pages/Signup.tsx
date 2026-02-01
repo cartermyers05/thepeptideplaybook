@@ -44,7 +44,13 @@ export default function Signup() {
 
     setIsLoading(true);
     try {
-      const { data: signUpData, error } = await supabase.auth.signUp({
+      // Persist promo code to localStorage BEFORE signup so it survives email confirmation
+      if (validPromoCode) {
+        localStorage.setItem("pending_promo_code", validPromoCode);
+        localStorage.setItem("pending_promo_type", promoCodeType || "");
+      }
+
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -57,28 +63,11 @@ export default function Signup() {
 
       if (error) throw error;
 
-      // If user has a valid promo code, redeem it
-      if (validPromoCode && signUpData.session) {
-        try {
-          const { data: redeemData, error: redeemError } = await supabase.functions.invoke("redeem-promo-code", {
-            body: { code: validPromoCode },
-          });
-
-          if (redeemError || !redeemData?.success) {
-            console.error("Failed to redeem promo code:", redeemError || redeemData?.error);
-            // Still proceed to step 3, but they'll go to checkout
-            setValidPromoCode(null);
-            setPromoCodeType(null);
-          }
-        } catch (redeemErr) {
-          console.error("Error redeeming promo code:", redeemErr);
-          setValidPromoCode(null);
-          setPromoCodeType(null);
-        }
-      }
-
       setStep(3);
     } catch (error: any) {
+      // Clear localStorage on signup failure
+      localStorage.removeItem("pending_promo_code");
+      localStorage.removeItem("pending_promo_type");
       toast({
         title: "Error",
         description: error.message || "Something went wrong",
