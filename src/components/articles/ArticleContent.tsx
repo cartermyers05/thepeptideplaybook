@@ -1,8 +1,13 @@
+import ReactMarkdown from "react-markdown";
+import { sanitizeNewsContent } from "@/lib/contentSanitizer";
+
 interface ArticleContentProps {
   content: string;
 }
 
 export function ArticleContent({ content }: ArticleContentProps) {
+  const cleanedContent = sanitizeNewsContent(content);
+
   return (
     <article
       className="prose prose-lg dark:prose-invert max-w-none
@@ -20,7 +25,8 @@ export function ArticleContent({ content }: ArticleContentProps) {
         prose-table:border-collapse prose-table:w-full
         prose-th:bg-muted prose-th:p-3 prose-th:text-left prose-th:font-semibold
         prose-td:p-3 prose-td:border-t prose-td:border-border"
-      dangerouslySetInnerHTML={{ __html: content }}
-    />
+    >
+      <ReactMarkdown>{cleanedContent}</ReactMarkdown>
+    </article>
   );
 }
