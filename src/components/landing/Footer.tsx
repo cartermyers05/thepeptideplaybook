@@ -20,6 +20,12 @@ export function Footer() {
             <Link to="/guides" className="text-purple-200/60 hover:text-purple-300 transition-colors">
               Guides
             </Link>
+            <Link to="/editorial-policy" className="text-purple-200/60 hover:text-purple-300 transition-colors">
+              Editorial Policy
+            </Link>
+            <Link to="/partners" className="text-purple-200/60 hover:text-purple-300 transition-colors">
+              Partners
+            </Link>
             <Link to="/terms" className="text-purple-200/60 hover:text-purple-300 transition-colors">
               Terms
             </Link>

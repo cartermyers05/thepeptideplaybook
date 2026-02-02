@@ -50,6 +50,54 @@ const guides = [
       "Sermorelin, ipamorelin, CJC-1295, GHRP-2/6. Mechanisms, research, and regulatory status.",
     href: "/guides/growth-hormone-peptides-guide",
   },
+  {
+    title: "BPC-157 Cancer Risk",
+    description:
+      "Angiogenesis concerns explained. What we know and don't know about cancer risk.",
+    href: "/guides/bpc-157-cancer-risk",
+  },
+  {
+    title: "BPC-157 Drug Test Detection",
+    description:
+      "WADA bans it, but employment tests don't check. Complete detection guide.",
+    href: "/guides/bpc-157-drug-test",
+  },
+  {
+    title: "BPC-157 Injection Infections",
+    description:
+      "Harm reduction: signs of infection, when to seek care, and contamination risks.",
+    href: "/guides/bpc-157-infection-risk",
+  },
+  {
+    title: "TB-500 Side Effects",
+    description:
+      "Almost no human data exists. What animal studies and anecdotal reports show.",
+    href: "/guides/tb-500-side-effects",
+  },
+  {
+    title: "CJC-1295 Safety",
+    description:
+      "FDA concerns about GH secretagogues. Known side effects and unknowns.",
+    href: "/guides/cjc-1295-safety",
+  },
+  {
+    title: "Verify Peptide COA",
+    description:
+      "HPLC and mass spectrometry explained. Red flags and what legitimate COAs include.",
+    href: "/guides/verify-peptide-coa",
+  },
+  {
+    title: "Peptide Contamination Risks",
+    description:
+      "Why contamination is common in unregulated peptides and how to reduce risk.",
+    href: "/guides/peptide-contamination",
+  },
+  {
+    title: "Peptide TikTok Myths",
+    description:
+      "Fact-checking viral claims about wolverine healing, safety, and Big Pharma conspiracies.",
+    href: "/guides/peptide-tiktok-myths",
+  },
 ];
 
 export default function Guides() {

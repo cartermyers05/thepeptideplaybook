@@ -3,6 +3,7 @@ import { AlertCircle } from "lucide-react";
 interface WhatWeDontKnowProps {
   topic?: string;
   customBullets?: string[];
+  items?: string[];
   variant?: "research-peptide" | "fda-approved" | "regulatory" | "general";
 }
 
@@ -56,9 +57,10 @@ function getBullets(variant: string): string[] {
 export function WhatWeDontKnow({ 
   topic, 
   customBullets,
+  items,
   variant = "research-peptide" 
 }: WhatWeDontKnowProps) {
-  const bullets = customBullets || getBullets(variant);
+  const bullets = items || customBullets || getBullets(variant);
 
   return (
     <section id="what-we-dont-know" className="mb-10">
