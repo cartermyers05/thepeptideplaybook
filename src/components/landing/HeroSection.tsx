@@ -78,15 +78,19 @@ export function HeroSection() {
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <a href="#demo">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm w-full sm:w-auto"
-                >
-                  Watch Demo
-                </Button>
-              </a>
+              <Button
+                variant="outline"
+                size="lg"
+                className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm w-full sm:w-auto"
+                onClick={() => {
+                  document.getElementById('demo')?.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }}
+              >
+                Watch Demo
+              </Button>
             </motion.div>
 
             {/* Trust signals */}
