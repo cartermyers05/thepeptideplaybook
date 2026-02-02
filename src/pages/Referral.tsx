@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  Sparkles,
   Menu,
   MessageSquare,
   History,
@@ -26,6 +25,7 @@ import { useReferrals, useCreateReferralCode } from "@/hooks/useReferrals";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/brand/Logo";
 
 const navItems = [
   { icon: MessageSquare, label: "Chat", href: "/chat" },
@@ -91,10 +91,7 @@ export default function Referral() {
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between px-4 h-16 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <span className="font-bold">Peptide Playbook AI</span>
+              <Logo size="sm" />
             </Link>
             <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-1">
               <X className="w-5 h-5" />
