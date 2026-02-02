@@ -6,14 +6,19 @@ import { GuideCTA } from "@/components/guides/GuideCTA";
 import { GuideDisclaimer } from "@/components/guides/GuideDisclaimer";
 import { RelatedGuides } from "@/components/guides/RelatedGuides";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { PrimarySources } from "@/components/articles/PrimarySources";
+import { WhatWeDontKnow } from "@/components/articles/WhatWeDontKnow";
 import { SITE_URL } from "@/lib/seo";
 
 const tocItems = [
   { id: "comparison", title: "Side-by-Side Comparison", level: 2 },
   { id: "bpc-157-mechanism", title: "How BPC-157 Works", level: 2 },
   { id: "tb-500-mechanism", title: "How TB-500 Works", level: 2 },
-  { id: "research-reality", title: "Research Reality", level: 2 },
+  { id: "animal-lab-studies", title: "Animal & Lab Studies", level: 2 },
+  { id: "human-evidence", title: "Human Evidence", level: 2 },
   { id: "stacking", title: "The Stacking Question", level: 2 },
+  { id: "what-we-dont-know", title: "What We Don't Know", level: 2 },
+  { id: "primary-sources", title: "Primary Sources", level: 2 },
   { id: "faq", title: "FAQ", level: 2 },
 ];
 
@@ -47,7 +52,7 @@ const articleSchema = {
   headline: "BPC-157 vs TB-500: Complete Comparison [2026]",
   description: "BPC-157 vs TB-500 comparison. Different mechanisms, same regulatory status. What evidence shows about these healing peptides.",
   datePublished: "2026-01-30",
-  dateModified: "2026-01-30",
+  dateModified: "2026-02-02",
   author: {
     "@type": "Organization",
     name: "Peptide Playbook",
@@ -79,6 +84,19 @@ const faqSchema = {
   })),
 };
 
+const bpc157AndTb500Sources = [
+  {
+    title: "BPC 157: A Systematic Review (2024)",
+    url: "https://pubmed.ncbi.nlm.nih.gov/30915550/",
+    description: "Comprehensive review of 36 BPC-157 studies examining preclinical evidence.",
+  },
+  {
+    title: "Thymosin Beta-4 and Tissue Repair",
+    url: "https://pubmed.ncbi.nlm.nih.gov/20515666/",
+    description: "Review of TB-4 mechanisms in wound healing and tissue regeneration.",
+  },
+];
+
 export default function BPC157vsTB500Guide() {
   return (
     <GuideLayout
@@ -93,8 +111,8 @@ export default function BPC157vsTB500Guide() {
 
         <article className="flex-1 max-w-3xl">
           <QuickAnswerBox
-            answer="BPC-157 and TB-500 are both studied for tissue healing but work through different mechanisms. BPC-157 interacts with nitric oxide and growth factors. TB-500 works through actin-binding and cell migration. Neither has been proven safe or effective in humans. Both are FDA Category 2 prohibited substances. Claims that one is 'better' than the other are not supported by comparative data."
-            lastUpdated="January 30, 2026"
+            answer="BPC-157 and TB-500 have both shown tissue-healing effects in animal studies, but neither has been proven safe or effective in humans. No human clinical trials exist for either peptide. BPC-157 interacts with nitric oxide and growth factors; TB-500 works through actin-binding and cell migration. Both are FDA Category 2 prohibited substances and WADA banned. Claims that one is 'better' than the other are not supported by comparative human data."
+            lastUpdated="February 2, 2026"
             readTime="7 minutes"
           />
 
@@ -186,18 +204,40 @@ export default function BPC157vsTB500Guide() {
             </p>
           </section>
 
-          <section id="research-reality" className="mb-10">
-            <h2 className="text-2xl font-bold mb-4">Research Reality</h2>
+          <section id="animal-lab-studies" className="mb-10">
+            <h2 className="text-2xl font-bold mb-4">Animal & Lab Studies</h2>
             <p className="text-muted-foreground mb-4 leading-relaxed">
-              <strong>BPC-157:</strong> 35 animal studies, 1 tiny human study (12 patients, no control group).
+              Both peptides have shown effects in preclinical research:
             </p>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
-              <strong>TB-500:</strong> Multiple animal studies, zero human studies.
-            </p>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
-              No head-to-head comparisons exist between these peptides. When you see claims online that one is "better" for certain uses, that's based on anecdotes and speculation — not comparative evidence.
-            </p>
+            <div className="space-y-4 mb-4">
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="font-semibold mb-2">BPC-157 Animal Data</p>
+                <p className="text-sm text-muted-foreground">35+ animal studies showing effects on tendon healing, muscle repair, ligament regeneration, and gut ulcer recovery in rat models.</p>
+              </div>
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="font-semibold mb-2">TB-500 Animal Data</p>
+                <p className="text-sm text-muted-foreground">Multiple animal studies demonstrating wound healing effects, used in veterinary medicine for horses. Cell migration and tissue repair observed in lab settings.</p>
+              </div>
+            </div>
             <div className="p-4 bg-amber-500/10 border-l-4 border-amber-500 rounded-r-lg">
+              <p className="text-sm font-medium">
+                <strong>Critical limitation:</strong> Animal models don't reliably predict human outcomes. What works in rats or horses may not work in humans, and what appears safe in animals may cause unexpected problems in people.
+              </p>
+            </div>
+          </section>
+
+          <section id="human-evidence" className="mb-10">
+            <h2 className="text-2xl font-bold mb-4">Human Evidence</h2>
+            <p className="text-muted-foreground mb-4 leading-relaxed">
+              <strong>BPC-157:</strong> 1 small retrospective study of 12 patients with chronic knee pain. No control group, no blinding. This study design cannot prove the peptide works.
+            </p>
+            <p className="text-muted-foreground mb-4 leading-relaxed">
+              <strong>TB-500:</strong> No published human clinical trials exist.
+            </p>
+            <p className="text-muted-foreground mb-4 leading-relaxed">
+              <strong>No head-to-head comparisons exist between these peptides in humans.</strong> When you see claims online that one is "better" for certain uses, that's based on anecdotes and speculation — not comparative evidence.
+            </p>
+            <div className="p-4 bg-destructive/10 border-l-4 border-destructive rounded-r-lg">
               <p className="text-sm font-medium">
                 Online forums are full of opinions about BPC-157 vs TB-500. These are personal experiences, not evidence. What works for one person tells you nothing about what will work for you.
               </p>
@@ -222,11 +262,15 @@ export default function BPC157vsTB500Guide() {
             </div>
           </section>
 
+          <WhatWeDontKnow topic="BPC-157 and TB-500" variant="research-peptide" />
+
+          <PrimarySources sources={bpc157AndTb500Sources} />
+
           <section id="faq">
             <GuideFAQ items={faqItems} />
           </section>
 
-          <BottomLineBox content="Different mechanisms, same evidence gap — neither BPC-157 nor TB-500 is proven in humans. Both are Category 2 prohibited. Choosing between them is choosing between unknowns. Don't let marketing or forum hype convince you otherwise." />
+          <BottomLineBox content="Different mechanisms, same evidence gap — neither BPC-157 nor TB-500 is proven safe or effective in humans. Both are Category 2 prohibited. Choosing between them is choosing between unknowns. Don't let marketing or forum hype convince you otherwise." />
 
           <RelatedGuides guides={relatedGuides} />
 

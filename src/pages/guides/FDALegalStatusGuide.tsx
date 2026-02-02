@@ -6,6 +6,8 @@ import { GuideCTA } from "@/components/guides/GuideCTA";
 import { GuideDisclaimer } from "@/components/guides/GuideDisclaimer";
 import { RelatedGuides } from "@/components/guides/RelatedGuides";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { PrimarySources } from "@/components/articles/PrimarySources";
+import { WhatWeDontKnow } from "@/components/articles/WhatWeDontKnow";
 import { SITE_URL } from "@/lib/seo";
 
 const tocItems = [
@@ -15,6 +17,8 @@ const tocItems = [
   { id: "fda-approved", title: "FDA-Approved Peptides", level: 2 },
   { id: "can-compound", title: "What Can Still Be Compounded", level: 2 },
   { id: "gray-market", title: "The Gray Market", level: 2 },
+  { id: "what-we-dont-know", title: "What We Don't Know", level: 2 },
+  { id: "primary-sources", title: "Primary Sources", level: 2 },
   { id: "faq", title: "FAQ", level: 2 },
 ];
 
@@ -48,7 +52,7 @@ const articleSchema = {
   headline: "FDA Peptide Regulations 2026: Complete Legal Status Guide",
   description: "Complete breakdown of which peptides are legal, banned, or in regulatory limbo in 2026. Category 1, Category 2, compounding rules explained.",
   datePublished: "2026-01-30",
-  dateModified: "2026-01-30",
+  dateModified: "2026-02-02",
   author: {
     "@type": "Organization",
     name: "Peptide Playbook",
@@ -94,8 +98,8 @@ export default function FDALegalStatusGuide() {
 
         <article className="flex-1 max-w-3xl">
           <QuickAnswerBox
-            answer="In 2026, the FDA uses a category system for peptide compounding. Category 1 peptides can be compounded. Category 2 peptides (BPC-157, TB-500, many healing peptides) are prohibited due to safety concerns. FDA-approved peptides (semaglutide, tirzepatide) require prescription with strict compounding rules."
-            lastUpdated="January 30, 2026"
+            answer="This guide covers FDA regulatory categories, not clinical evidence. The FDA's Category 2 designation for peptides like BPC-157 and TB-500 is based on safety concerns and lack of adequate human data, not proven harm. Category 1 peptides can be compounded; Category 2 cannot. FDA-approved peptides (semaglutide, tirzepatide) require prescriptions. Regulatory status may change as the FDA reviews evidence."
+            lastUpdated="February 2, 2026"
             readTime="10 minutes"
           />
 
@@ -241,6 +245,10 @@ export default function FDALegalStatusGuide() {
               </p>
             </div>
           </section>
+
+          <WhatWeDontKnow variant="regulatory" />
+
+          <PrimarySources topic="peptide-legal" />
 
           <section id="faq">
             <GuideFAQ items={faqItems} />
