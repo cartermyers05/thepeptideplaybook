@@ -1,45 +1,55 @@
 
+# Fix "Watch Demo" Button Navigation
 
-# Remove Fake Testimonials
+## The Problem
 
-## What's Changing
+The "Watch Demo" button in the Hero section uses a standard HTML anchor tag (`<a href="#demo">`), which doesn't work properly with React Router. When clicked:
+- The URL updates to include `#demo`
+- But no scrolling happens to the demo section
+- The page may appear to do nothing
 
-There's only one fake testimonial remaining in the codebase:
+## The Solution
 
-**File: `src/components/landing/HeroSection.tsx` (Lines 70-82)**
-```
-"Finally, answers based on actual studies." — James, Biohacker
-```
+Replace the anchor tag with a proper onClick handler that uses native JavaScript smooth scrolling.
 
-## The Fix
+## Technical Changes
 
-Remove the entire "social proof snippet" block from the Hero section. The Hero will still have strong trust signals through:
-- "200+ researchers" badge
-- "Free forever" badge  
-- "No credit card" badge
+**File: `src/components/landing/HeroSection.tsx`**
 
-These data-driven signals are more credible than a fabricated quote.
-
-## Technical Details
-
-**File to edit:** `src/components/landing/HeroSection.tsx`
-
-Remove lines 70-82 (the entire `motion.div` containing the fake testimonial):
+Replace lines 81-89:
 ```tsx
-{/* Social proof snippet */}
-<motion.div
-  variants={itemVariants}
-  className="mb-8 inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-muted/50 border border-border/50"
+// BEFORE (broken)
+<a href="#demo">
+  <Button variant="outline" size="lg" ...>
+    Watch Demo
+  </Button>
+</a>
+
+// AFTER (working)
+<Button
+  variant="outline"
+  size="lg"
+  className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm w-full sm:w-auto"
+  onClick={() => {
+    document.getElementById('demo')?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }}
 >
-  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-    <span className="text-sm">💬</span>
-  </div>
-  <p className="text-sm text-muted-foreground italic">
-    "Finally, answers based on actual studies."
-    <span className="text-foreground font-medium ml-1">— James, Biohacker</span>
-  </p>
-</motion.div>
+  Watch Demo
+</Button>
 ```
 
-No other files need changes. The `SocialProof.tsx` component is already clean (shows stats, not testimonials).
+## Why This Works
 
+1. **Native scrolling**: Uses browser's native `scrollIntoView()` API with smooth behavior
+2. **No URL change**: Avoids React Router interference by not changing the URL
+3. **Reliable**: Works regardless of routing state or page position
+4. **Consistent pattern**: Matches the project's existing approach of wrapping buttons in Link components only for actual route changes
+
+## Single File Change
+
+| File | Change |
+|------|--------|
+| `src/components/landing/HeroSection.tsx` | Replace anchor tag with onClick scroll handler |
