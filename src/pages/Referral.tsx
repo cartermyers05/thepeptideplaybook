@@ -53,7 +53,7 @@ export default function Referral() {
   }, [isLoading, referralStats, user]);
 
   const referralCode = referralStats?.referralCode || "";
-  const referralLink = referralCode ? `https://peptideplaybook.ai/ref/${referralCode}` : "";
+  const referralLink = referralCode ? `${window.location.origin}/ref/${referralCode}` : "";
 
   const handleCopyLink = () => {
     if (!referralLink) return;
@@ -61,7 +61,7 @@ export default function Referral() {
     setCopied(true);
     toast({
       title: "Link copied!",
-      description: "Share it with your friends to earn free months.",
+      description: "Share it with your friends. You earn $33.50 per sale!",
     });
     setTimeout(() => setCopied(false), 2000);
   };
@@ -161,10 +161,10 @@ export default function Referral() {
                 <Gift className="w-8 h-8 text-primary-foreground" />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold mb-3">
-                Give 14 Days, Get 1 Month Free
+                Earn 50% Commission Per Sale
               </h2>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Share Peptide Playbook AI with friends. When they subscribe, you both win.
+                Share Peptide Playbook AI with friends. Earn $33.50 for every sale you refer.
               </p>
             </motion.div>
 
@@ -237,9 +237,9 @@ export default function Referral() {
                 {isLoading ? (
                   <Skeleton className="h-9 w-8 mx-auto mb-1" />
                 ) : (
-                  <p className="text-3xl font-bold">{referralStats?.monthsEarned || 0}</p>
+                  <p className="text-3xl font-bold">${(referralStats?.completed || 0) * 33.5}</p>
                 )}
-                <p className="text-sm text-muted-foreground">Months earned</p>
+                <p className="text-sm text-muted-foreground">Earned</p>
               </div>
             </motion.div>
 
@@ -254,8 +254,8 @@ export default function Referral() {
               <div className="space-y-4">
                 {[
                   { step: 1, text: "Share your unique referral link with friends" },
-                  { step: 2, text: "They get 14 days free when they sign up" },
-                  { step: 3, text: "When they subscribe, you get 1 month free" },
+                  { step: 2, text: "They sign up and pay $67 for lifetime access" },
+                  { step: 3, text: "You earn $33.50 (50% commission) per sale" },
                 ].map((item) => (
                   <div key={item.step} className="flex items-start gap-4">
                     <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold shrink-0">

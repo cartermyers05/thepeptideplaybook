@@ -50,7 +50,7 @@ export default function Signup() {
         localStorage.setItem("pending_promo_type", promoCodeType || "");
       }
 
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -62,6 +62,27 @@ export default function Signup() {
       });
 
       if (error) throw error;
+
+      // After successful signup, check for referral code and link it
+      const referralCode = localStorage.getItem("referral_code");
+      if (referralCode && signUpData.user) {
+        try {
+          // Find the referral entry with this code and update with the new user's ID
+          const { error: referralError } = await supabase
+            .from("referrals")
+            .update({ referred_id: signUpData.user.id })
+            .eq("referral_code", referralCode)
+            .is("referred_id", null);
+          
+          if (!referralError) {
+            // Clear the referral code from localStorage after successful linking
+            localStorage.removeItem("referral_code");
+          }
+        } catch (refError) {
+          // Don't block signup if referral linking fails
+          console.error("Failed to link referral:", refError);
+        }
+      }
 
       setStep(3);
     } catch (error: any) {
