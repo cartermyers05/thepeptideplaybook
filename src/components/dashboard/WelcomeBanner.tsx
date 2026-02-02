@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, Bot, Database } from "lucide-react";
+import { X, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { useTier } from "@/hooks/useTier";
@@ -43,7 +43,7 @@ export default function WelcomeBanner({ onStartChat }: WelcomeBannerProps) {
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-4">
           {/* Icon */}
           <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-            <Bot className="w-5 h-5 text-primary" />
+            <span className="text-sm font-bold text-primary">PP</span>
           </div>
 
           {/* Content */}
@@ -78,7 +78,6 @@ export default function WelcomeBanner({ onStartChat }: WelcomeBannerProps) {
         {isPaid && (
           <div className="lg:hidden flex items-center gap-4 mt-4 pt-4 border-t border-border">
             <div className="flex items-center gap-2">
-              <Bot className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm"><strong>{questionsAsked}</strong> questions asked</span>
             </div>
             <div className="flex items-center gap-2">

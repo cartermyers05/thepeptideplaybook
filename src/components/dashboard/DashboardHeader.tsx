@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, History, Bookmark, BarChart3 } from "lucide-react";
+import { History, Bookmark, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import UserMenu from "./UserMenu";
 import TabSwitcher from "./TabSwitcher";
+import { Logo } from "@/components/brand/Logo";
 
 interface DashboardHeaderProps {
   activeTab: "news" | "chat";
@@ -29,9 +30,7 @@ export default function DashboardHeader({ activeTab, onTabChange }: DashboardHea
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <Logo size="sm" showText={false} />
             <span className="font-semibold hidden sm:block">
               Peptide Playbook AI
             </span>

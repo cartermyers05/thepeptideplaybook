@@ -2,7 +2,7 @@ import {
   Home, 
   ClipboardCheck, 
   Database, 
-  Bot, 
+  MessageSquare, 
   Mail, 
   Settings,
   LogOut,
@@ -25,7 +25,7 @@ const navItems: NavItem[] = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
   { icon: ClipboardCheck, label: "Source Checklist", path: "/dashboard/checklist" },
   { icon: Database, label: "Peptide Database", path: "/dashboard/database" },
-  { icon: Bot, label: "AI Assistant", path: "/dashboard/chat" },
+  { icon: MessageSquare, label: "AI Assistant", path: "/dashboard/chat" },
   { icon: Mail, label: "Research Digest", path: "/dashboard/digest" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];

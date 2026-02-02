@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const DEMO_CONVERSATIONS = [
@@ -8,11 +8,11 @@ const DEMO_CONVERSATIONS = [
     question: "What peptides are FDA approved?",
     answer: `Several peptides have full FDA approval:
 
-✅ **Semaglutide** (Ozempic, Wegovy) - Diabetes & weight management
+• **Semaglutide** (Ozempic, Wegovy) — Diabetes & weight management
 
-✅ **Tirzepatide** (Mounjaro, Zepbound) - Dual GIP/GLP-1 agonist
+• **Tirzepatide** (Mounjaro, Zepbound) — Dual GIP/GLP-1 agonist
 
-✅ **Tesamorelin** (Egrifta) - HIV lipodystrophy
+• **Tesamorelin** (Egrifta) — HIV lipodystrophy
 
 Most peptides like BPC-157 and TB-500 remain **research-only**.`,
   },
@@ -20,11 +20,11 @@ Most peptides like BPC-157 and TB-500 remain **research-only**.`,
     question: "Is BPC-157 safe to use?",
     answer: `BPC-157 shows a strong safety profile in studies:
 
-🔬 **No reported toxicity** in animal models at high doses
+• **No reported toxicity** in animal models at high doses
 
-📊 **Well-tolerated** in preliminary human trials
+• **Well-tolerated** in preliminary human trials
 
-⚠️ **Not FDA approved** - still considered research-only
+• **Not FDA approved** — still considered research-only
 
 Always consult a physician before use.`,
   },
@@ -32,11 +32,11 @@ Always consult a physician before use.`,
     question: "Best peptide for recovery?",
     answer: `For recovery, researchers commonly study:
 
-💪 **BPC-157** - Gut-derived, promotes tissue healing
+• **BPC-157** — Gut-derived, promotes tissue healing
 
-🦴 **TB-500** - Thymosin beta-4, supports regeneration
+• **TB-500** — Thymosin beta-4, supports regeneration
 
-🔥 **GHK-Cu** - Copper peptide for skin & wound repair
+• **GHK-Cu** — Copper peptide for skin & wound repair
 
 Stacking protocols vary by injury type.`,
   },
@@ -136,11 +136,11 @@ export function HeroDemo() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-4 pb-3 border-b border-border/50">
         <motion.div 
-          className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center"
+          className="w-9 h-9 rounded-full bg-primary flex items-center justify-center"
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <Bot className="w-4 h-4 text-primary" />
+          <span className="text-xs font-bold text-primary-foreground">PP</span>
         </motion.div>
         <div>
           <p className="font-medium text-sm">Peptide Playbook AI</p>
@@ -182,8 +182,8 @@ export function HeroDemo() {
           transition={{ duration: 0.3 }}
           className="flex gap-3"
         >
-          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <Bot className="w-3.5 h-3.5 text-primary" />
+          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span className="text-[8px] font-bold text-primary-foreground">PP</span>
           </div>
           <div className="flex-1 min-h-[180px]">
             {(phase === "thinking" || phase === "typing-question") && phase !== "typing-question" ? (

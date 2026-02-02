@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Mail, Lock } from "lucide-react";
+import { ArrowRight, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FloatingOrbs } from "@/components/landing/FloatingOrbs";
 import { GridPattern } from "@/components/landing/GridPattern";
+import { Logo } from "@/components/brand/Logo";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -64,16 +65,7 @@ export default function Login() {
             className="flex flex-col items-center justify-center mb-8"
           >
             <Link to="/" className="flex flex-col items-center gap-3 group">
-              <motion.div 
-                className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-glow"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Sparkles className="w-7 h-7 text-primary-foreground" />
-              </motion.div>
-              <span className="font-bold text-xl text-foreground group-hover:text-primary transition-colors">
-                Peptide Playbook AI
-              </span>
+              <Logo size="lg" />
             </Link>
           </motion.div>
 

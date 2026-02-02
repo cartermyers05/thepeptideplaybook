@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { extractKeyPoints, sanitizeNewsContent } from "@/lib/contentSanitizer";
 import { Badge } from "@/components/ui/badge";
 
@@ -25,9 +25,7 @@ export function NewsSummary({ summary }: NewsSummaryProps) {
       
       <div className="p-6 pl-5">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-primary" />
-          </div>
+          <div className="w-8 h-0.5 bg-primary/60" />
           <h2 className="font-semibold text-lg">Key Takeaways</h2>
           <Badge variant="outline" className="text-xs bg-primary/5 border-primary/20 text-primary">
             AI Summary

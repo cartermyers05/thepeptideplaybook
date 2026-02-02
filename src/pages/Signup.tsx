@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, Sparkles, Mail, Lock, User, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Mail, Lock, User, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PromoCodeInput } from "@/components/auth/PromoCodeInput";
+import { Logo } from "@/components/brand/Logo";
 
 const steps = [
   { id: 1, title: "Email" },
@@ -115,10 +116,7 @@ export default function Signup() {
         <div className="max-w-md w-full mx-auto">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 mb-12">
-            <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-lg">PeptideGPT</span>
+            <Logo size="sm" />
           </Link>
 
           {/* Progress steps */}

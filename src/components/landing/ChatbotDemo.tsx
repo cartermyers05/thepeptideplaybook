@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Bot, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -123,10 +122,9 @@ export function ChatbotDemo() {
           transition={{ duration: 0.5 }}
           className="text-center mb-10"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            <Bot className="w-4 h-4" />
+          <p className="text-sm font-medium text-primary tracking-wide uppercase mb-4">
             Live Demo
-          </div>
+          </p>
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
             See It In Action
           </h2>
@@ -205,8 +203,8 @@ export function ChatbotDemo() {
                 className="mt-6 p-6 rounded-xl bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-5 h-5 text-primary" />
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                    <span className="text-sm font-bold text-primary-foreground">PP</span>
                   </div>
                   <div className="flex-1">
                     <h4 className="text-lg font-semibold mb-1">Want unlimited questions?</h4>

@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Sparkles,
   Send,
   ThumbsUp,
   ThumbsDown,
@@ -365,7 +364,7 @@ export default function ChatInterface() {
               >
                 {/* Logo */}
                 <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6">
-                  <Sparkles className="w-8 h-8 text-primary-foreground" />
+                  <span className="text-xl font-bold text-primary-foreground">PP</span>
                 </div>
 
                 <h2 className="text-2xl font-bold mb-2">
@@ -462,7 +461,7 @@ export default function ChatInterface() {
                             </div>
                             <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
                               <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center">
-                                <Sparkles className="w-3 h-3 text-primary-foreground" />
+                                <span className="text-[8px] font-bold text-primary-foreground">PP</span>
                               </div>
                               <span className="text-xs font-medium text-muted-foreground">Peptide Playbook AI</span>
                             </div>

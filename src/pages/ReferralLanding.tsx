@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles, Gift, ArrowRight } from "lucide-react";
+import { Gift, ArrowRight } from "lucide-react";
 
 export default function ReferralLanding() {
   const { code } = useParams<{ code: string }>();
@@ -45,8 +45,7 @@ export default function ReferralLanding() {
         </p>
 
         <div className="flex items-center justify-center gap-2 text-primary mb-8">
-          <Sparkles className="w-5 h-5 animate-pulse" />
-          <span className="font-medium">Redirecting to signup...</span>
+          <span className="font-medium">Redirecting to signup</span>
           <ArrowRight className="w-5 h-5" />
         </div>
 

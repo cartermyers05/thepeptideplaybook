@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bot, Send, X, AlertCircle } from "lucide-react";
+import { Send, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -18,7 +18,7 @@ const MAX_MESSAGES = 10;
 const COOLDOWN_MS = 2000;
 const SESSION_KEY = "peptide-chat-messages";
 
-const WELCOME_MESSAGE = `👋 Hey! I'm your Peptide Playbook AI—the smartest peptide research assistant on the planet.
+const WELCOME_MESSAGE = `Hey! I'm your Peptide Playbook research assistant.
 
 **I can help you:**
 • Compare any peptides side-by-side
@@ -26,7 +26,7 @@ const WELCOME_MESSAGE = `👋 Hey! I'm your Peptide Playbook AI—the smartest p
 • Understand mechanisms and research
 • Separate real science from TikTok hype
 
-Ask me anything about peptides. What would you like to know?`;
+Ask me anything about peptides.`;
 
 const EXAMPLE_QUESTIONS = [
   "What's the difference between BPC-157 and TB-500?",
@@ -154,8 +154,8 @@ export function ChatWidget({ onClose }: ChatWidgetProps) {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <Bot className="w-5 h-5 text-primary" />
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+            <span className="text-sm font-bold text-primary-foreground">PP</span>
           </div>
           <div>
             <p className="font-medium text-sm">Peptide Assistant</p>
