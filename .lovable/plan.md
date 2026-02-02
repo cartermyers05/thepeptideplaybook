@@ -1,211 +1,169 @@
 
-# Remove Remaining Sparkles & Bot Icons
+# Remove Remaining Sparkles & Bot Icons - Final Cleanup
 
-## Problem
+## Overview
 
-The site still has `Sparkles` (star) and `Bot` (robot) icons throughout the codebase. These are dead giveaways of AI-template design and need to be replaced with the "PP" initials avatar or removed entirely.
+Four files still have `Sparkles` icons and three files still have `Bot` icons that were missed in the previous cleanup. Additionally, there are emojis in one file that need to be replaced.
 
 ---
 
-## Files with Remaining Icons
+## Files with Remaining `Sparkles` Icon
 
-### **Sparkles Icon (16 files)**
+| File | Location | Replacement |
+|------|----------|-------------|
+| `src/pages/Partners.tsx` | Header badge (line 134), "What You Get" card (line 181) | Remove icon from badge, use text-only; use Edit icon instead of Sparkles for "5 Hook Scripts" |
+| `src/pages/Account.tsx` | Sidebar logo (lines 130-133) | Replace with Logo component |
+| `src/components/landing/ProductPreview.tsx` | AI features list bullets (line 134) | Replace with simple bullet dots |
+| `src/pages/admin/ArticleGenerator.tsx` | Page header, button, empty state, publish button (lines 151, 236, 266, 320) | Replace with text "PP" initials or FileText icon - this is admin only so less critical |
 
-| File | Usage | Fix |
-|------|-------|-----|
-| `src/components/landing/HeroDemo.tsx` | Bot icon in chat header + answer area | Replace with "PP" initials |
-| `src/components/landing/ChatbotDemo.tsx` | Bot + Sparkles in section header and paywall | Replace with text-only header, remove Sparkles from paywall |
-| `src/components/chat/ChatWidget.tsx` | Bot icon in header | Replace with "PP" initials |
-| `src/components/dashboard/ChatInterface.tsx` | Sparkles in empty state logo + message header | Replace with "PP" initials |
-| `src/components/dashboard/DashboardHeader.tsx` | Sparkles in logo | Replace with Logo component |
-| `src/components/dashboard/WelcomeBanner.tsx` | Bot + Sparkles icons | Replace with "PP" initials |
-| `src/components/dashboard/NewsSummary.tsx` | Sparkles icon in Key Takeaways header | Remove icon, use text-only |
-| `src/pages/Login.tsx` | Sparkles in logo | Replace with Logo component |
-| `src/pages/Signup.tsx` | Sparkles in logo | Replace with Logo component |
-| `src/pages/History.tsx` | Sparkles in sidebar logo | Replace with Logo component |
-| `src/pages/Saved.tsx` | Sparkles in sidebar logo | Replace with Logo component |
-| `src/pages/Stats.tsx` | Sparkles in sidebar logo | Replace with Logo component |
-| `src/pages/Referral.tsx` | Sparkles in sidebar logo + content | Replace with Logo component, remove other uses |
-| `src/pages/ReferralLanding.tsx` | Sparkles in loading indicator | Replace with simple arrow or text |
-| `src/components/dashboard/DashboardSidebar.tsx` | Bot icon in nav | Replace with text-based approach |
+---
+
+## Files with Remaining `Bot` Icon
+
+| File | Location | Replacement |
+|------|----------|-------------|
+| `src/components/landing/ProductPreview.tsx` | AI Research Assistant card icon (line 107) | Replace with "PP" initials avatar |
+| `src/pages/dashboard/Home.tsx` | Mobile tab switcher for AI Assistant (lines 3, 30) | Replace with MessageSquare icon |
 
 ---
 
 ## Implementation Details
 
-### 1. HeroDemo.tsx
+### 1. Partners.tsx
 
-**Current:**
+**Header badge (line 133-136):**
 ```tsx
-<Bot className="w-4 h-4 text-primary" />
-```
-
-**Replace with "PP" initials:**
-```tsx
-<div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
-  <span className="text-xs font-bold text-primary-foreground">PP</span>
+// Current:
+<div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-6">
+  <Sparkles className="w-4 h-4" />
+  Affiliate Program
 </div>
-```
 
-Also remove emojis from the demo answers (lines 11-41).
-
-### 2. ChatbotDemo.tsx
-
-**Section header:**
-Replace Bot icon badge with text-only:
-```tsx
-<p className="text-sm font-medium text-primary tracking-wide uppercase mb-4">
-  Live Demo
+// Replace with text-only:
+<p className="text-sm font-medium text-primary tracking-wide uppercase mb-6">
+  Affiliate Program
 </p>
 ```
 
-**Paywall section:**
-Remove Sparkles icon, use clean text:
+**"What You Get" grid (line 181):**
 ```tsx
-<div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-  <span className="text-sm font-bold text-primary-foreground">PP</span>
-</div>
+// Current:
+{ icon: Sparkles, title: "5 Hook Scripts", desc: "Proven hooks for videos and reels" },
+
+// Replace Sparkles with FileEdit or Pencil icon:
+{ icon: FileEdit, title: "5 Hook Scripts", desc: "Proven hooks for videos and reels" },
 ```
 
-### 3. ChatWidget.tsx
-
-**Header icon:**
+**Also remove emojis from whoWeWant array (lines 33-38):**
 ```tsx
-<div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-  <span className="text-sm font-bold text-primary-foreground">PP</span>
-</div>
+// Current:
+{ icon: "🏋️", title: "Health & Wellness Creators", ... },
+
+// Replace emojis with text-based categories:
+const whoWeWant = [
+  { title: "Health & Wellness Creators", desc: "Fitness influencers who prioritize evidence" },
+  { title: "Biohacking Content Creators", desc: "Those exploring optimization responsibly" },
+  // ... etc
+];
 ```
 
-### 4. ChatInterface.tsx
+### 2. Account.tsx
 
-**Empty state logo (line 367-368):**
+**Sidebar logo (lines 129-134):**
 ```tsx
-<div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6">
-  <span className="text-xl font-bold text-primary-foreground">PP</span>
-</div>
-```
+// Current:
+<Link to="/" className="flex items-center gap-2">
+  <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
+    <Sparkles className="w-4 h-4 text-primary-foreground" />
+  </div>
+  <span className="font-bold">PeptideGPT</span>
+</Link>
 
-**Message header icon (line 464-465):**
-```tsx
-<div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center">
-  <span className="text-[8px] font-bold text-primary-foreground">PP</span>
-</div>
-```
-
-### 5. DashboardHeader.tsx
-
-**Logo:**
-Import and use the Logo component:
-```tsx
+// Replace with Logo component:
 import { Logo } from "@/components/brand/Logo";
 
-// Replace:
-<div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-  <Sparkles className="w-4 h-4 text-primary-foreground" />
-</div>
-
-// With:
-<Logo showText={false} size="sm" />
-```
-
-### 6. WelcomeBanner.tsx
-
-**Replace Bot icon:**
-```tsx
-<div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-  <span className="text-sm font-bold text-primary">PP</span>
-</div>
-```
-
-**Remove Bot from mobile stats, just use text.**
-
-### 7. NewsSummary.tsx
-
-**Remove icon from header:**
-```tsx
-<div className="flex items-center gap-3 mb-4">
-  <div className="w-8 h-0.5 bg-primary/60" />
-  <h2 className="font-semibold text-lg">Key Takeaways</h2>
-</div>
-```
-
-### 8-13. Login, Signup, History, Saved, Stats, Referral Pages
-
-**All use Sparkles in sidebar logo. Replace with Logo component:**
-```tsx
-import { Logo } from "@/components/brand/Logo";
-
-// In the sidebar header:
 <Link to="/" className="flex items-center gap-2">
   <Logo size="sm" />
 </Link>
 ```
 
-### 14. ReferralLanding.tsx
+### 3. ProductPreview.tsx
 
-**Remove Sparkles from redirect indicator:**
+**Bot icon in AI card (lines 102-108):**
 ```tsx
-<div className="flex items-center justify-center gap-2 text-primary mb-8">
-  <span className="font-medium">Redirecting to signup</span>
-  <ArrowRight className="w-5 h-5" />
-</div>
+// Current:
+<motion.div 
+  className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center"
+  whileHover={{ scale: 1.1, rotate: 5 }}
+  transition={{ type: "spring", stiffness: 400 }}
+>
+  <Bot className="w-7 h-7 text-primary" />
+</motion.div>
+
+// Replace with "PP" initials:
+<motion.div 
+  className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center"
+  whileHover={{ scale: 1.1, rotate: 5 }}
+  transition={{ type: "spring", stiffness: 400 }}
+>
+  <span className="text-lg font-bold text-primary-foreground">PP</span>
+</motion.div>
 ```
 
-### 15. DashboardSidebar.tsx
-
-**Replace Bot icon with text:**
-
-The sidebar uses icons for navigation, which is functional and expected. However, the "AI Assistant" label with Bot icon should be updated:
-
+**Sparkles in feature list (lines 132-136):**
 ```tsx
-// Instead of Bot icon, use a simple circle with PP
-{ 
-  icon: () => <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center"><span className="text-[8px] font-bold text-primary-foreground">PP</span></div>, 
-  label: "AI Assistant", 
-  path: "/dashboard/chat" 
-}
+// Current:
+<Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
+
+// Replace with simple dot:
+<span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
 ```
 
-Actually, for navigation this is complex. Keep the icon-based nav but change to a different icon like `MessageSquare` which is functional and standard:
+### 4. Home.tsx (Dashboard)
+
+**Bot icon in mobile tab (lines 3, 30):**
 ```tsx
-{ icon: MessageSquare, label: "AI Assistant", path: "/dashboard/chat" },
+// Current:
+import { Bot, Newspaper } from "lucide-react";
+...
+<TabButton
+  active={activeTab === "chat"}
+  onClick={() => setActiveTab("chat")}
+  icon={Bot}
+  label="AI Assistant"
+/>
+
+// Replace Bot with MessageSquare:
+import { MessageSquare, Newspaper } from "lucide-react";
+...
+<TabButton
+  active={activeTab === "chat"}
+  onClick={() => setActiveTab("chat")}
+  icon={MessageSquare}
+  label="AI Assistant"
+/>
 ```
 
----
+### 5. ArticleGenerator.tsx (Admin Only - Lower Priority)
 
-## Remove Emojis from Demo Content
+Since this is an admin-only page, it's less visible to users. But for consistency:
 
-### HeroDemo.tsx
-
-Replace emoji-heavy demo answers with clean typography:
-
-**Current:**
+**Replace Sparkles with FileText or a neutral icon:**
 ```tsx
-✅ **Semaglutide** (Ozempic, Wegovy)
-🔬 **No reported toxicity**
-💪 **BPC-157**
-```
+// Import FileText instead of Sparkles
+import { FileText, Loader2, ArrowLeft, Eye, Save, AlertCircle } from "lucide-react";
 
-**New:**
-```tsx
-• **Semaglutide** (Ozempic, Wegovy)
-• **No reported toxicity** in animal models
-• **BPC-157**: Gut-derived, promotes tissue healing
-```
+// In header (line 151):
+<FileText className="w-6 h-6 text-primary" />
 
-### ChatWidget.tsx
+// In button (line 236):
+<FileText className="w-4 h-4 mr-2" />
 
-**Remove emoji from welcome message:**
-```tsx
-const WELCOME_MESSAGE = `Hey! I'm your Peptide Playbook research assistant.
+// In empty state (line 266):
+<FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
 
-**I can help you:**
-• Compare any peptides side-by-side
-• Check FDA approval status instantly
-• Understand mechanisms and research
-• Separate real science from TikTok hype
-
-Ask me anything about peptides.`;
+// In publish button (line 320):
+<ArrowRight className="w-4 h-4 mr-2" /> // or just remove icon
 ```
 
 ---
@@ -214,40 +172,29 @@ Ask me anything about peptides.`;
 
 | File | Changes |
 |------|---------|
-| `src/components/landing/HeroDemo.tsx` | Replace Bot with PP, remove emojis |
-| `src/components/landing/ChatbotDemo.tsx` | Replace Bot/Sparkles with PP/text |
-| `src/components/chat/ChatWidget.tsx` | Replace Bot with PP, remove emoji |
-| `src/components/dashboard/ChatInterface.tsx` | Replace Sparkles with PP |
-| `src/components/dashboard/DashboardHeader.tsx` | Use Logo component |
-| `src/components/dashboard/WelcomeBanner.tsx` | Replace Bot with PP |
-| `src/components/dashboard/NewsSummary.tsx` | Remove Sparkles |
-| `src/components/dashboard/DashboardSidebar.tsx` | Replace Bot with MessageSquare |
-| `src/pages/Login.tsx` | Use Logo component |
-| `src/pages/Signup.tsx` | Use Logo component |
-| `src/pages/History.tsx` | Use Logo component |
-| `src/pages/Saved.tsx` | Use Logo component |
-| `src/pages/Stats.tsx` | Use Logo component |
-| `src/pages/Referral.tsx` | Use Logo component, remove Sparkles |
-| `src/pages/ReferralLanding.tsx` | Remove Sparkles |
+| `src/pages/Partners.tsx` | Remove Sparkles from badge, replace icon in grid, remove emojis |
+| `src/pages/Account.tsx` | Replace Sparkles sidebar logo with Logo component |
+| `src/components/landing/ProductPreview.tsx` | Replace Bot with "PP", replace Sparkles bullets with dots |
+| `src/pages/dashboard/Home.tsx` | Replace Bot with MessageSquare |
+| `src/pages/admin/ArticleGenerator.tsx` | Replace Sparkles with FileText |
 
 ---
 
-## Visual Changes
+## Visual Summary
 
 | Before | After |
 |--------|-------|
-| `Sparkles` star icon in logos | Custom molecule SVG (Logo component) |
-| `Bot` robot icon in chat | "PP" initials avatar |
-| Emoji bullets (✅🔬💪🦴🔥⚠️) | Simple bullet points (•) or dashes |
-| Icon in colored container | Text initials or accent line |
+| `Sparkles` in badges | Text-only label |
+| `Bot` icon for AI | "PP" initials or MessageSquare |
+| Emoji categories (🏋️🧬💪) | Text-only with left border accent |
+| `Sparkles` in feature bullets | Simple dot bullets |
 
 ---
 
 ## Implementation Order
 
-1. Update HeroDemo.tsx (hero demo on landing page)
-2. Update ChatbotDemo.tsx (interactive demo section)
-3. Update ChatWidget.tsx (floating chat)
-4. Update ChatInterface.tsx (dashboard chat)
-5. Update all sidebar pages (Login, Signup, History, Saved, Stats, Referral, ReferralLanding)
-6. Update dashboard components (DashboardHeader, WelcomeBanner, NewsSummary, DashboardSidebar)
+1. `src/pages/Account.tsx` - Quick sidebar logo fix
+2. `src/pages/dashboard/Home.tsx` - Replace Bot with MessageSquare
+3. `src/components/landing/ProductPreview.tsx` - Replace Bot and Sparkles
+4. `src/pages/Partners.tsx` - Remove Sparkles and emojis
+5. `src/pages/admin/ArticleGenerator.tsx` - Replace Sparkles (admin page, lower priority)
