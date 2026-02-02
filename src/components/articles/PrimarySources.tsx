@@ -8,8 +8,9 @@ interface PrimarySource {
 
 interface PrimarySourcesProps {
   sources?: PrimarySource[];
+  additionalSources?: PrimarySource[];
   includeGlobalSources?: boolean;
-  topic?: "bpc-157" | "tb-500" | "semaglutide" | "tirzepatide" | "peptide-safety" | "peptide-legal" | "general";
+  topic?: "bpc-157" | "tb-500" | "semaglutide" | "tirzepatide" | "peptide-safety" | "peptide-legal" | "general" | "regulatory" | "safety";
 }
 
 const GLOBAL_SOURCES: PrimarySource[] = [
@@ -83,12 +84,14 @@ function getTopicSources(topic: string): PrimarySource[] {
 
 export function PrimarySources({ 
   sources = [], 
+  additionalSources = [],
   includeGlobalSources = true,
   topic = "general" 
 }: PrimarySourcesProps) {
   const topicSources = getTopicSources(topic);
   const allSources = [
     ...sources,
+    ...additionalSources,
     ...topicSources,
     ...(includeGlobalSources ? GLOBAL_SOURCES : []),
   ];

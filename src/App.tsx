@@ -44,6 +44,18 @@ import BPC157vsTB500Guide from "./pages/guides/BPC157vsTB500Guide";
 import SemaglutideGuide from "./pages/guides/SemaglutideGuide";
 import TirzepatideVsSemaglutideGuide from "./pages/guides/TirzepatideVsSemaglutideGuide";
 import GrowthHormonePeptidesGuide from "./pages/guides/GrowthHormonePeptidesGuide";
+import BPC157CancerRisk from "./pages/guides/BPC157CancerRisk";
+import BPC157DrugTest from "./pages/guides/BPC157DrugTest";
+import BPC157InfectionRisk from "./pages/guides/BPC157InfectionRisk";
+import TB500SideEffects from "./pages/guides/TB500SideEffects";
+import CJC1295Safety from "./pages/guides/CJC1295Safety";
+import VerifyPeptideCOA from "./pages/guides/VerifyPeptideCOA";
+import PeptideContamination from "./pages/guides/PeptideContamination";
+import PeptideTikTokMyths from "./pages/guides/PeptideTikTokMyths";
+
+// Trust signal pages
+import EditorialPolicy from "./pages/EditorialPolicy";
+import Partners from "./pages/Partners";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -80,6 +92,18 @@ const App = () => (
             <Route path="/guides/semaglutide-complete-guide" element={<SemaglutideGuide />} />
             <Route path="/guides/tirzepatide-vs-semaglutide" element={<TirzepatideVsSemaglutideGuide />} />
             <Route path="/guides/growth-hormone-peptides-guide" element={<GrowthHormonePeptidesGuide />} />
+            <Route path="/guides/bpc-157-cancer-risk" element={<BPC157CancerRisk />} />
+            <Route path="/guides/bpc-157-drug-test" element={<BPC157DrugTest />} />
+            <Route path="/guides/bpc-157-infection-risk" element={<BPC157InfectionRisk />} />
+            <Route path="/guides/tb-500-side-effects" element={<TB500SideEffects />} />
+            <Route path="/guides/cjc-1295-safety" element={<CJC1295Safety />} />
+            <Route path="/guides/verify-peptide-coa" element={<VerifyPeptideCOA />} />
+            <Route path="/guides/peptide-contamination" element={<PeptideContamination />} />
+            <Route path="/guides/peptide-tiktok-myths" element={<PeptideTikTokMyths />} />
+            
+            {/* Trust signal pages */}
+            <Route path="/editorial-policy" element={<EditorialPolicy />} />
+            <Route path="/partners" element={<Partners />} />
             
             {/* Protected routes - Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
