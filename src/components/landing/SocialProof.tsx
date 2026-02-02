@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
-import { BookOpen, FlaskConical, Database } from "lucide-react";
+import { BookOpen, FlaskConical, AlertTriangle } from "lucide-react";
 
 function CountUp({ end, duration = 2 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);
@@ -26,21 +26,21 @@ function CountUp({ end, duration = 2 }: { end: number; duration?: number }) {
 const stats = [
   {
     icon: BookOpen,
-    value: 500,
-    suffix: "+",
-    label: "Studies Analyzed",
+    value: 15,
+    suffix: "",
+    label: "Research Guides",
+  },
+  {
+    icon: AlertTriangle,
+    value: 47,
+    suffix: "",
+    label: "TikTok Myths Exposed",
   },
   {
     icon: FlaskConical,
-    value: 41,
-    suffix: "",
-    label: "Peptides Covered",
-  },
-  {
-    icon: Database,
-    value: 127,
+    value: 200,
     suffix: "+",
-    label: "Citations Indexed",
+    label: "Studies Cited",
   },
 ];
 

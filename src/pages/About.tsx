@@ -2,14 +2,14 @@ import { motion } from "framer-motion";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { SEOHead } from "@/components/seo/SEOHead";
-import { Target, BookOpen, ShieldCheck, XCircle } from "lucide-react";
+import { Target, BookOpen, ShieldCheck, XCircle, User, Stethoscope } from "lucide-react";
 
 export default function About() {
   return (
     <>
       <SEOHead
-        title="About Peptide Playbook AI | Our Mission"
-        description="Peptide Playbook AI exists because the peptide information landscape is broken. We provide research-based education to help people make informed decisions with their doctors."
+        title="About Peptide Playbook | Our Mission"
+        description="Peptide Playbook exists because the peptide information landscape is broken. We provide research-based education to help people make informed decisions with their doctors."
         canonical="/about"
       />
       <div className="min-h-screen bg-white">
@@ -22,7 +22,7 @@ export default function About() {
               className="max-w-3xl mx-auto"
             >
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight mb-8">
-                Why Peptide Playbook AI Exists
+                Why Peptide Playbook Exists
               </h1>
               
               <div className="prose prose-lg max-w-none">
@@ -39,16 +39,52 @@ export default function About() {
                 </p>
                 
                 <p className="text-xl font-medium mb-12">
-                  We built Peptide Playbook AI because we believe you deserve better.
+                  We built Peptide Playbook because you deserve better.
                 </p>
               </div>
+
+              {/* Our Team */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="content-card p-8 mb-8"
+              >
+                <h2 className="text-2xl font-semibold mb-6">Our Team</h2>
+                
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                      <User className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Research Team</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Our content is reviewed by healthcare professionals with expertise in peptide therapy and regenerative medicine.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                      <Stethoscope className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Medical Review Board</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Coming Soon — We're establishing a formal advisory board of physicians and researchers.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
 
               {/* What We Do */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="glass-card-subtle p-8 mb-8"
+                className="content-card p-8 mb-8"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -81,7 +117,7 @@ export default function About() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="glass-card-subtle p-8 mb-8"
+                className="content-card p-8 mb-8"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
@@ -104,7 +140,7 @@ export default function About() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="glass-card-subtle p-8"
+                className="content-card p-8"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">

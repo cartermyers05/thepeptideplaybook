@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroSection } from "@/components/landing/HeroSection";
+import { FeaturedBy } from "@/components/landing/FeaturedBy";
 import { SocialProof } from "@/components/landing/SocialProof";
 import { ChatbotDemo } from "@/components/landing/ChatbotDemo";
 import { ProblemSection } from "@/components/landing/ProblemSection";
@@ -20,8 +21,8 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="Peptide Playbook AI | The #1 AI Research Assistant for Peptides"
-        description="Ask anything about peptides. Get instant, research-backed answers from an AI trained on 41+ peptides and 500+ studies. Know FDA status, compare peptides, and understand the science."
+        title="Peptide Playbook | Evidence-Based Peptide Research Library"
+        description="Ask anything about peptides. Get instant, research-backed answers from an AI trained on 41+ peptides and 200+ studies. Know FDA status, compare peptides, and understand the science."
         canonical="/"
       />
       <HomepageSchemas />
@@ -29,6 +30,7 @@ const Index = () => {
         <Navbar />
         <main>
           <HeroSection />
+          <FeaturedBy />
           <SocialProof />
           <ChatbotDemo />
           <ProblemSection />
