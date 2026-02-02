@@ -9,6 +9,8 @@ import { ArticleContent } from "@/components/articles/ArticleContent";
 import { AuthorSection } from "@/components/articles/AuthorSection";
 import { CitationsSection } from "@/components/articles/CitationsSection";
 import { RelatedArticles } from "@/components/articles/RelatedArticles";
+import { PrimarySources } from "@/components/articles/PrimarySources";
+import { WhatWeDontKnow } from "@/components/articles/WhatWeDontKnow";
 import { ArticleSchema } from "@/components/seo/ArticleSchema";
 import { BreadcrumbSchema } from "@/components/seo/BreadcrumbSchema";
 import { BlogCTA } from "@/components/blog/BlogCTA";
@@ -81,6 +83,26 @@ export default function BlogPost() {
 
   // Parse citations
   const citations = article.citations as Array<{ source: string; url: string; study_name: string; year: number }> | null;
+  const hasCitations = citations && citations.length > 0;
+
+  // Determine topic for primary sources based on article content
+  const getPeptideTopic = (): "bpc-157" | "tb-500" | "semaglutide" | "tirzepatide" | "general" => {
+    const title = article.title.toLowerCase();
+    if (title.includes("bpc-157") || title.includes("bpc 157")) return "bpc-157";
+    if (title.includes("tb-500") || title.includes("tb 500") || title.includes("thymosin")) return "tb-500";
+    if (title.includes("semaglutide") || title.includes("ozempic") || title.includes("wegovy")) return "semaglutide";
+    if (title.includes("tirzepatide") || title.includes("mounjaro") || title.includes("zepbound")) return "tirzepatide";
+    return "general";
+  };
+
+  // Build evidence-aware TLDR prefix
+  const getEvidencePrefix = (): string => {
+    const topic = getPeptideTopic();
+    if (topic === "semaglutide" || topic === "tirzepatide") {
+      return "Based on FDA-approved clinical trial data: ";
+    }
+    return "Based on animal and lab studies (no human clinical trials exist): ";
+  };
 
   return (
     <>
@@ -152,8 +174,8 @@ export default function BlogPost() {
                 <KeyTakeaways takeaways={keyTakeaways} />
               )}
 
-              {/* TL;DR */}
-              <TLDRBox content={article.tldr} />
+              {/* TL;DR with evidence prefix */}
+              <TLDRBox content={`${getEvidencePrefix()}${article.tldr}`} />
 
               {/* Table of Contents */}
               <TableOfContents content={article.full_content} />
@@ -167,8 +189,16 @@ export default function BlogPost() {
                 <ArticleContent content={article.full_content} />
               </motion.div>
 
+              {/* What We Don't Know Section */}
+              <WhatWeDontKnow variant="research-peptide" />
+
+              {/* Primary Sources Section - fallback if no citations */}
+              {!hasCitations && (
+                <PrimarySources topic={getPeptideTopic()} />
+              )}
+
               {/* Citations */}
-              {citations && citations.length > 0 && (
+              {hasCitations && (
                 <CitationsSection citations={citations} />
               )}
 

@@ -6,16 +6,21 @@ import { GuideCTA } from "@/components/guides/GuideCTA";
 import { GuideDisclaimer } from "@/components/guides/GuideDisclaimer";
 import { RelatedGuides } from "@/components/guides/RelatedGuides";
 import { GuideTableOfContents } from "@/components/guides/GuideTableOfContents";
+import { PrimarySources } from "@/components/articles/PrimarySources";
+import { WhatWeDontKnow } from "@/components/articles/WhatWeDontKnow";
 import { SITE_URL } from "@/lib/seo";
 
 const tocItems = [
   { id: "what-is-bpc-157", title: "What is BPC-157?", level: 2 },
   { id: "how-does-bpc-157-work", title: "How Does BPC-157 Work?", level: 2 },
-  { id: "research", title: "What Does the Research Show?", level: 2 },
+  { id: "animal-lab-studies", title: "Animal & Lab Studies", level: 2 },
+  { id: "human-evidence", title: "Human Evidence", level: 2 },
   { id: "fda-status", title: "FDA Status and Legality", level: 2 },
   { id: "safety", title: "Safety Profile and Concerns", level: 2 },
+  { id: "what-we-dont-know", title: "What We Don't Know", level: 2 },
   { id: "access", title: "How People Access BPC-157", level: 2 },
   { id: "comparison", title: "BPC-157 vs Other Peptides", level: 2 },
+  { id: "primary-sources", title: "Primary Sources", level: 2 },
   { id: "faq", title: "FAQ", level: 2 },
 ];
 
@@ -54,7 +59,7 @@ const articleSchema = {
   headline: "BPC-157: Complete Guide to Research, Safety & Legal Status [2026]",
   description: "Everything you need to know about BPC-157 in 2026. FDA status, research findings, safety profile, and what confused Americans should understand.",
   datePublished: "2026-01-30",
-  dateModified: "2026-01-30",
+  dateModified: "2026-02-02",
   author: {
     "@type": "Organization",
     name: "Peptide Playbook",
@@ -100,8 +105,8 @@ export default function BPC157Guide() {
 
         <article className="flex-1 max-w-3xl">
           <QuickAnswerBox
-            answer="BPC-157 (Body Protection Compound-157) is a synthetic peptide derived from a protein found in human gastric juice. Research in animal studies suggests it may promote tissue healing, but there are no FDA-approved human uses and no completed clinical trials proving safety or efficacy in humans. As of January 2026, BPC-157 is classified as a Category 2 bulk drug substance by the FDA, meaning compounding pharmacies cannot legally provide it."
-            lastUpdated="January 30, 2026"
+            answer="BPC-157 has shown tissue-healing effects in animal studies, but no published human clinical trials prove safety or efficacy. Because it is FDA Category 2 and not approved for human use, all claims should be treated as unproven. Animal research suggests potential mechanisms, but these do not translate to proven human benefits. As of 2026, compounding pharmacies cannot legally provide BPC-157."
+            lastUpdated="February 2, 2026"
             readTime="12 minutes"
           />
 
@@ -146,62 +151,71 @@ export default function BPC157Guide() {
             </div>
           </section>
 
-          <section id="research" className="mb-10">
-            <h2 className="text-2xl font-bold mb-4">What Does the Research Actually Show?</h2>
+          <section id="animal-lab-studies" className="mb-10">
+            <h2 className="text-2xl font-bold mb-4">Animal & Lab Studies</h2>
             <p className="text-muted-foreground mb-4 leading-relaxed">
-              A 2025 systematic review examined 36 studies published between 1993 and 2024:
+              A 2025 systematic review examined 36 studies published between 1993 and 2024. Of these, 35 were preclinical studies conducted in animals or cell cultures.
+            </p>
+            <p className="text-muted-foreground mb-4 leading-relaxed">
+              In animal models, BPC-157 showed improvements in:
             </p>
             <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
-              <li>35 were preclinical studies (animals or cells)</li>
-              <li>1 was a small retrospective human study (12 patients, no control group)</li>
-              <li>0 were randomized controlled trials</li>
+              <li>Tendon healing (rat Achilles tendon models)</li>
+              <li>Muscle repair</li>
+              <li>Ligament regeneration</li>
+              <li>Bone fracture healing</li>
+              <li>Gut ulcer recovery</li>
             </ul>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
-              In animal models, BPC-157 showed improvements in tendon healing, muscle repair, ligament regeneration, bone fracture healing, and gut ulcer recovery.
-            </p>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
-              <strong>The single human study:</strong> 12 patients with chronic knee pain received BPC-157 injection. 7 reported pain relief &gt;6 months. Problems: no control group, no blinding, retrospective design.
-            </p>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
-              A 2025 pilot in 2 healthy adults showed IV BPC-157 was tolerated up to 20mg. That's it — two people.
-            </p>
-
+            <div className="p-4 bg-amber-500/10 border-l-4 border-amber-500 rounded-r-lg mb-4">
+              <p className="text-sm font-medium">
+                <strong>Critical limitation:</strong> Animal models don't reliably predict human outcomes. Many substances that work in rats fail in human trials. The history of drug development is filled with promising animal results that didn't translate to people.
+              </p>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm border border-border rounded-lg overflow-hidden">
                 <thead className="bg-muted">
                   <tr>
-                    <th className="text-left p-3 font-semibold">Research Category</th>
-                    <th className="text-left p-3 font-semibold">Status</th>
+                    <th className="text-left p-3 font-semibold">Research Type</th>
+                    <th className="text-left p-3 font-semibold">Number of Studies</th>
+                    <th className="text-left p-3 font-semibold">Findings</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-t border-border">
+                    <td className="p-3">Cell studies</td>
+                    <td className="p-3 text-muted-foreground">Multiple</td>
+                    <td className="p-3 text-muted-foreground">Biological activity exists</td>
+                  </tr>
+                  <tr className="border-t border-border">
                     <td className="p-3">Animal studies</td>
-                    <td className="p-3 text-muted-foreground">Multiple positive findings</td>
-                  </tr>
-                  <tr className="border-t border-border">
-                    <td className="p-3">Human safety data</td>
-                    <td className="p-3 text-muted-foreground">2 people in pilot</td>
-                  </tr>
-                  <tr className="border-t border-border">
-                    <td className="p-3">Human efficacy trials</td>
-                    <td className="p-3 text-muted-foreground">None completed</td>
+                    <td className="p-3 text-muted-foreground">35+</td>
+                    <td className="p-3 text-muted-foreground">Healing effects in various models</td>
                   </tr>
                   <tr className="border-t border-border">
                     <td className="p-3">Randomized controlled trials</td>
-                    <td className="p-3 text-muted-foreground">None</td>
-                  </tr>
-                  <tr className="border-t border-border">
-                    <td className="p-3">FDA approval</td>
-                    <td className="p-3 text-muted-foreground">None</td>
+                    <td className="p-3 text-muted-foreground">0</td>
+                    <td className="p-3 text-muted-foreground">None completed</td>
                   </tr>
                 </tbody>
               </table>
             </div>
+          </section>
 
-            <div className="mt-6 p-4 bg-primary/5 border-l-4 border-primary rounded-r-lg">
+          <section id="human-evidence" className="mb-10">
+            <h2 className="text-2xl font-bold mb-4">Human Evidence</h2>
+            <p className="text-muted-foreground mb-4 leading-relaxed">
+              <strong>No published human clinical trials exist for BPC-157 proving safety or efficacy.</strong>
+            </p>
+            <p className="text-muted-foreground mb-4 leading-relaxed">
+              The available human data is extremely limited:
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2">
+              <li><strong>12-patient study:</strong> Retrospective, no control group, no blinding. 7 of 12 reported pain relief lasting over 6 months. This study design cannot prove causation.</li>
+              <li><strong>2-person pilot:</strong> Showed IV BPC-157 was tolerated up to 20mg in 2 healthy adults. That's the entire human safety dataset.</li>
+            </ul>
+            <div className="p-4 bg-destructive/10 border-l-4 border-destructive rounded-r-lg">
               <p className="text-sm font-medium">
-                <strong>What this means for you:</strong> The gap between "works in rats" and "proven in humans" is enormous. Current evidence does not support claims that BPC-157 is a proven treatment for anything.
+                <strong>What this means:</strong> Claims that BPC-157 is "proven" to heal injuries, fix gut issues, or provide other benefits in humans are not supported by clinical evidence. The gap between animal studies and human proof remains unbridged.
               </p>
             </div>
           </section>
@@ -233,15 +247,14 @@ export default function BPC157Guide() {
               <strong>What we know:</strong> Animal studies show no lethal dose or obvious organ damage. Pilot study in 2 humans showed tolerance.
             </p>
             <p className="text-muted-foreground mb-4 leading-relaxed">
-              <strong>What we don't know:</strong> Long-term effects, drug interactions, effects in people with health conditions, safe dosing, effects of contaminated products.
-            </p>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
-              <strong>Theoretical concerns:</strong> BPC-157 promotes angiogenesis (blood vessel growth) — unknown implications for cancer, vascular conditions.
+              <strong>Theoretical concerns:</strong> BPC-157 promotes angiogenesis (blood vessel growth). The implications for cancer, vascular conditions, and other situations are unknown.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              <strong>Biggest real risk:</strong> Unregulated products may not contain what they claim. Contamination and mislabeling are documented issues.
+              <strong>Biggest real risk:</strong> Unregulated products may not contain what they claim. Contamination and mislabeling are documented issues in the gray market peptide supply.
             </p>
           </section>
+
+          <WhatWeDontKnow topic="BPC-157" variant="research-peptide" />
 
           <section id="access" className="mb-10">
             <h2 className="text-2xl font-bold mb-4">How People Access BPC-157</h2>
@@ -295,11 +308,13 @@ export default function BPC157Guide() {
             </div>
           </section>
 
+          <PrimarySources topic="bpc-157" />
+
           <section id="faq">
             <GuideFAQ items={faqItems} />
           </section>
 
-          <BottomLineBox content="BPC-157 has interesting animal research but has not been proven safe or effective in humans. FDA Category 2 means it's prohibited from compounding. Anyone claiming it's a 'proven treatment' is overstating the evidence." />
+          <BottomLineBox content="BPC-157 has shown healing effects in animal studies but has not been proven safe or effective in humans. No human clinical trials exist. FDA Category 2 status means it's prohibited from compounding. Anyone claiming it's a 'proven treatment' is overstating the evidence." />
 
           <RelatedGuides guides={relatedGuides} />
 

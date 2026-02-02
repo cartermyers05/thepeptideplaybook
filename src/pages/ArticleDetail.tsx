@@ -15,6 +15,8 @@ import { ArticleContent } from "@/components/articles/ArticleContent";
 import { CitationsSection } from "@/components/articles/CitationsSection";
 import { RelatedArticles } from "@/components/articles/RelatedArticles";
 import { InlineAICTA } from "@/components/articles/InlineAICTA";
+import { PrimarySources } from "@/components/articles/PrimarySources";
+import { WhatWeDontKnow } from "@/components/articles/WhatWeDontKnow";
 import { TableOfContents } from "@/components/blog/TableOfContents";
 
 import { Button } from "@/components/ui/button";
@@ -105,6 +107,18 @@ export default function ArticleDetail() {
   if (!article) return null;
 
   const readTime = estimateReadTime(article.full_content);
+
+  // Determine topic for primary sources based on article content
+  const getPeptideTopic = (): "bpc-157" | "tb-500" | "semaglutide" | "tirzepatide" | "general" => {
+    const title = article.title.toLowerCase();
+    if (title.includes("bpc-157") || title.includes("bpc 157")) return "bpc-157";
+    if (title.includes("tb-500") || title.includes("tb 500") || title.includes("thymosin")) return "tb-500";
+    if (title.includes("semaglutide") || title.includes("ozempic") || title.includes("wegovy")) return "semaglutide";
+    if (title.includes("tirzepatide") || title.includes("mounjaro") || title.includes("zepbound")) return "tirzepatide";
+    return "general";
+  };
+
+  const hasCitations = article.citations && article.citations.length > 0;
 
   return (
     <>
@@ -248,6 +262,9 @@ export default function ArticleDetail() {
               <ArticleContent content={article.full_content} />
             </div>
 
+            {/* What We Don't Know Section */}
+            <WhatWeDontKnow variant="research-peptide" />
+
             {/* Mid-article CTA */}
             <InlineAICTA articleTitle={article.title} />
 
@@ -271,8 +288,13 @@ export default function ArticleDetail() {
               </section>
             )}
 
+            {/* Primary Sources Section - fallback if no citations */}
+            {!hasCitations && (
+              <PrimarySources topic={getPeptideTopic()} />
+            )}
+
             {/* Citations Section */}
-            {article.citations && article.citations.length > 0 && (
+            {hasCitations && (
               <div className="mt-12">
                 <CitationsSection citations={article.citations} />
               </div>
