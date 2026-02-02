@@ -1,57 +1,103 @@
 import { Link } from "react-router-dom";
+import { Logo } from "@/components/brand/Logo";
 
 export function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-[#1a0a2e] to-[#0f051a] text-white py-12 relative overflow-hidden">
-      {/* Top gradient divider */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
-      
-      {/* Subtle radial glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-      
-      <div className="container px-4 relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
-          <div>
-            <p className="text-white font-semibold text-lg">Peptide Playbook AI</p>
-            <p className="text-sm text-purple-200/70">Educational content. Not medical advice.</p>
+    <footer className="bg-slate-900 text-white py-16">
+      <div className="container px-4">
+        {/* Top section */}
+        <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
+          {/* Logo and tagline */}
+          <div className="max-w-xs">
+            <Logo showText size="md" className="text-white [&_span]:text-white [&_path]:stroke-teal-400 [&_circle]:fill-teal-400" />
+            <p className="text-slate-400 text-sm mt-4 leading-relaxed">
+              Evidence-based peptide research. No hype. No sales pitch. Just research you can trust.
+            </p>
           </div>
 
-          <nav className="flex flex-wrap justify-center gap-6 text-sm">
-            <Link to="/guides" className="text-purple-200/60 hover:text-purple-300 transition-colors">
-              Guides
-            </Link>
-            <Link to="/editorial-policy" className="text-purple-200/60 hover:text-purple-300 transition-colors">
-              Editorial Policy
-            </Link>
-            <Link to="/partners" className="text-purple-200/60 hover:text-purple-300 transition-colors">
-              Partners
-            </Link>
-            <Link to="/terms" className="text-purple-200/60 hover:text-purple-300 transition-colors">
-              Terms
-            </Link>
-            <Link to="/privacy" className="text-purple-200/60 hover:text-purple-300 transition-colors">
-              Privacy
-            </Link>
-            <Link to="/disclaimer" className="text-purple-200/60 hover:text-purple-300 transition-colors">
-              Disclaimer
-            </Link>
-            <a
-              href="mailto:support@peptideplaybook.com"
-              className="text-purple-200/60 hover:text-purple-300 transition-colors"
-            >
-              Contact
-            </a>
-          </nav>
+          {/* Link columns */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
+            <div>
+              <h4 className="font-semibold text-sm mb-4">Research</h4>
+              <ul className="space-y-3 text-sm">
+                <li>
+                  <Link to="/guides" className="text-slate-400 hover:text-white transition-colors">
+                    All Guides
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/guides/bpc-157-complete-guide" className="text-slate-400 hover:text-white transition-colors">
+                    BPC-157 Guide
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/guides/semaglutide-complete-guide" className="text-slate-400 hover:text-white transition-colors">
+                    Semaglutide Guide
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/guides/are-peptides-safe" className="text-slate-400 hover:text-white transition-colors">
+                    Peptide Safety
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-sm mb-4">Company</h4>
+              <ul className="space-y-3 text-sm">
+                <li>
+                  <Link to="/about" className="text-slate-400 hover:text-white transition-colors">
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/editorial-policy" className="text-slate-400 hover:text-white transition-colors">
+                    Editorial Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/partners" className="text-slate-400 hover:text-white transition-colors">
+                    Partners
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-sm mb-4">Legal</h4>
+              <ul className="space-y-3 text-sm">
+                <li>
+                  <Link to="/terms" className="text-slate-400 hover:text-white transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/privacy" className="text-slate-400 hover:text-white transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/disclaimer" className="text-slate-400 hover:text-white transition-colors">
+                    Medical Disclaimer
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
 
-        <div className="border-t border-purple-500/20 pt-8">
-          <p className="text-xs text-purple-200/60 text-center max-w-2xl mx-auto mb-4">
-            Peptide Playbook AI provides educational information based on published research. 
-            It is not medical advice and does not replace consultation with a healthcare provider.
+        {/* Bottom bar */}
+        <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-xs text-slate-500 text-center md:text-left">
+            © 2026 Peptide Playbook. All rights reserved. Educational content only. Not medical advice.
           </p>
-          <p className="text-xs text-purple-200/50 text-center">
-            © {new Date().getFullYear()} Peptide Playbook AI. All rights reserved.
-          </p>
+          <a
+            href="mailto:hello@peptideplaybook.com"
+            className="text-sm text-slate-400 hover:text-white transition-colors"
+          >
+            hello@peptideplaybook.com
+          </a>
         </div>
       </div>
     </footer>

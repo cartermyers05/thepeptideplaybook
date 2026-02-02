@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 
 const navLinks = [
   { label: "What's Inside", href: "#product" },
@@ -34,9 +35,9 @@ export function Navbar() {
       >
         <div className="container px-4">
           <div className="flex items-center justify-between h-16 md:h-18">
-            {/* Wordmark */}
-            <Link to="/" className="font-semibold text-lg tracking-tight">
-              Peptide Playbook AI
+            {/* Logo */}
+            <Link to="/">
+              <Logo size="md" />
             </Link>
 
             {/* Desktop nav */}
