@@ -19,6 +19,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const hookScripts = [
   "Everyone's injecting BPC-157 but nobody's reading the research. I found a tool that actually explains what we know vs what's just hype.",
@@ -72,23 +73,43 @@ export default function Partners() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission (would integrate with backend later)
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Application Submitted!",
-      description: "We'll review your application and get back to you within 48 hours.",
-    });
-    
-    setFormData({
-      name: "",
-      email: "",
-      socialHandle: "",
-      followerCount: "",
-      whyPartner: "",
-      howPromote: ""
-    });
-    setIsSubmitting(false);
+    try {
+      const { error } = await supabase
+        .from("partner_applications")
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          social_handle: formData.socialHandle,
+          follower_count: formData.followerCount,
+          why_partner: formData.whyPartner,
+          how_promote: formData.howPromote,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Application Submitted!",
+        description: "We'll review your application and get back to you within 48 hours.",
+      });
+      
+      setFormData({
+        name: "",
+        email: "",
+        socialHandle: "",
+        followerCount: "",
+        whyPartner: "",
+        howPromote: ""
+      });
+    } catch (error: any) {
+      console.error("Partner application error:", error);
+      toast({
+        title: "Submission Failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

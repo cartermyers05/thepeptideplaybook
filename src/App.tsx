@@ -56,6 +56,8 @@ import PeptideTikTokMyths from "./pages/guides/PeptideTikTokMyths";
 // Trust signal pages
 import EditorialPolicy from "./pages/EditorialPolicy";
 import Partners from "./pages/Partners";
+import ReferralLanding from "./pages/ReferralLanding";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -104,6 +106,9 @@ const App = () => (
             {/* Trust signal pages */}
             <Route path="/editorial-policy" element={<EditorialPolicy />} />
             <Route path="/partners" element={<Partners />} />
+            
+            {/* Referral link handler */}
+            <Route path="/ref/:code" element={<ReferralLanding />} />
             
             {/* Protected routes - Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

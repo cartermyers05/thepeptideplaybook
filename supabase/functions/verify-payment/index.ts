@@ -221,6 +221,35 @@ serve(async (req) => {
       logStep("Purchase recorded");
     }
 
+    // Check if this user was referred and mark the referral as completed
+    try {
+      const { data: referralData, error: referralFetchError } = await supabase
+        .from("referrals")
+        .select("id, status")
+        .eq("referred_id", user.id)
+        .eq("status", "pending")
+        .maybeSingle();
+
+      if (!referralFetchError && referralData) {
+        const { error: referralUpdateError } = await supabase
+          .from("referrals")
+          .update({ 
+            status: "completed",
+            reward_applied: true 
+          })
+          .eq("id", referralData.id);
+
+        if (referralUpdateError) {
+          logStep("Error updating referral", { error: referralUpdateError.message });
+        } else {
+          logStep("Referral marked as completed", { referralId: referralData.id });
+        }
+      }
+    } catch (refError) {
+      logStep("Error processing referral completion", { error: String(refError) });
+      // Don't throw - this is a non-critical operation
+    }
+
     return new Response(JSON.stringify({ verified: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

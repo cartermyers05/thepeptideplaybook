@@ -408,6 +408,48 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_applications: {
+        Row: {
+          created_at: string | null
+          email: string
+          follower_count: string | null
+          how_promote: string | null
+          id: string
+          name: string
+          notes: string | null
+          reviewed_at: string | null
+          social_handle: string
+          status: string | null
+          why_partner: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          follower_count?: string | null
+          how_promote?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          reviewed_at?: string | null
+          social_handle: string
+          status?: string | null
+          why_partner?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          follower_count?: string | null
+          how_promote?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          social_handle?: string
+          status?: string | null
+          why_partner?: string | null
+        }
+        Relationships: []
+      }
       peptides: {
         Row: {
           category: string
