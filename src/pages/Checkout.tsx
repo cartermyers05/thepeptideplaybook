@@ -67,21 +67,13 @@ export default function Checkout() {
   };
 
   useEffect(() => {
-    // Wait for all loading states to resolve
-    if (authLoading || tierLoading || isRedeemingPromoCode || promoApplied) return;
+    // Billing disabled - redirect authenticated users straight to dashboard
+    if (authLoading) return;
     
-    // If user is already paid (promo code redeemed), redirect to dashboard
-    if (isPaid) {
+    if (user) {
       navigate("/dashboard", { replace: true });
-      return;
     }
-
-    // Start checkout only once
-    if (user && !hasStartedRef.current && !promoApplied) {
-      hasStartedRef.current = true;
-      startCheckout();
-    }
-  }, [authLoading, tierLoading, isRedeemingPromoCode, user, isPaid, navigate, startCheckout, promoApplied]);
+  }, [authLoading, user, navigate]);
 
   // Show loading while checking auth, tier, or redeeming promo
   if (authLoading || tierLoading || isRedeemingPromoCode) {

@@ -58,9 +58,8 @@ export function PricingCTA() {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              <span className="text-5xl font-bold text-gradient">$67</span>
-              <span className="text-muted-foreground ml-2">one-time</span>
-              <p className="text-sm text-muted-foreground mt-2">Lifetime access. No subscriptions.</p>
+              <span className="text-5xl font-bold text-gradient">Free</span>
+              <p className="text-sm text-muted-foreground mt-2">No payment required. Full access.</p>
             </motion.div>
 
             <motion.ul 
@@ -98,7 +97,7 @@ export function PricingCTA() {
             <Link to="/signup" className="w-full relative z-10 block">
               <Button size="lg" className="w-full btn-primary-clean h-12 text-base">
                 <Sparkles className="w-4 h-4 mr-2" />
-                Get AI Access Now
+                Get Free Access
               </Button>
             </Link>
 

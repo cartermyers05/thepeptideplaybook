@@ -1,10 +1,9 @@
+import { Link } from "react-router-dom";
 import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight, Shield, Zap, Clock, HelpCircle } from "lucide-react";
-import { useCheckout } from "@/hooks/useCheckout";
-import { useAuth } from "@/hooks/useAuth";
+import { Check, ArrowRight, Shield, Zap, HelpCircle } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -63,16 +62,6 @@ const faqs = [
 ];
 
 export default function Pricing() {
-  const { startCheckout, isLoading } = useCheckout();
-  const { user } = useAuth();
-
-  const handleCheckout = () => {
-    if (!user) {
-      window.location.href = "/signup?redirect=/checkout";
-      return;
-    }
-    startCheckout();
-  };
 
   return (
     <>
@@ -105,22 +94,22 @@ export default function Pricing() {
                 <div className="bg-primary/5 p-8 text-center border-b border-primary/10">
                   <p className="text-sm font-semibold text-primary mb-2">Complete Access</p>
                   <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-6xl font-bold">$67</span>
-                    <span className="text-muted-foreground">USD</span>
+                    <span className="text-6xl font-bold">Free</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">One-time payment • Lifetime access</p>
+                  <p className="text-sm text-muted-foreground mt-2">No payment required • Full access</p>
                 </div>
 
                 {/* CTA */}
                 <div className="p-8">
                   <Button
-                    onClick={handleCheckout}
-                    disabled={isLoading}
+                    asChild
                     size="lg"
                     className="w-full btn-primary-clean h-14 text-lg mb-4"
                   >
-                    {isLoading ? "Loading..." : "Get Instant Access"}
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <Link to="/signup">
+                      Get Free Access
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Link>
                   </Button>
                   
                   <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
@@ -184,13 +173,14 @@ export default function Pricing() {
                 Join 4,200+ members who stopped relying on TikTok and Reddit for peptide information.
               </p>
               <Button
-                onClick={handleCheckout}
-                disabled={isLoading}
+                asChild
                 size="lg"
                 className="btn-primary-clean h-12"
               >
-                Get Full Access
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <Link to="/signup">
+                  Get Free Access
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
               </Button>
             </div>
           </div>
