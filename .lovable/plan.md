@@ -1,316 +1,277 @@
 
 
-# SEO Expansion: 15 New Citation-Optimized Guide Pages
+# Citation-Grade Upgrade: Static Guides + Database Articles
 
 ## Overview
 
-This plan adds 15 new guide pages optimized for AI search engine citations (ChatGPT, Perplexity, Claude). Each page follows the proven pattern established in existing guides with:
-
-- Quick Answer in first 100 words (for AI extraction)
-- Clear separation of animal vs human evidence
-- FAQ schema markup
-- Internal linking to related guides
-- Evidence-based tone with honest uncertainty acknowledgment
+This plan upgrades all existing guide pages and database article templates to "citation-grade" for AI search engines. The changes add structured evidence sections, primary sources, and explicit "What We Don't Know" content.
 
 ---
 
-## Implementation Architecture
+## Scope Analysis
 
-### Existing Pattern (Reused)
+### Static Guide Pages to Update (4 files)
 
-Each new guide page follows this structure:
-```text
-GuideLayout
-├── GuideTableOfContents (sticky sidebar)
-├── QuickAnswerBox (first 100 words, schema markup)
-├── h1 Title
-├── Content Sections (with ids for TOC)
-├── GuideFAQ (schema markup)
-├── BottomLineBox
-├── RelatedGuides (internal links)
-├── GuideCTA
-└── GuideDisclaimer
+| File | Current Structure |
+|------|-------------------|
+| `src/pages/guides/BPC157Guide.tsx` | Has "Research" section combined, no Primary Sources, no "What We Don't Know" |
+| `src/pages/guides/FDALegalStatusGuide.tsx` | No research evidence sections (regulatory focus), no Primary Sources |
+| `src/pages/guides/ArePeptidesSafeGuide.tsx` | Has combined safety info, no Primary Sources, no "What We Don't Know" |
+| `src/pages/guides/BPC157vsTB500Guide.tsx` | Has "Research Reality" section, no Primary Sources, no "What We Don't Know" |
+
+### Database Article Templates to Update (2 files)
+
+| File | Purpose |
+|------|---------|
+| `src/pages/ArticleDetail.tsx` | Renders articles from `/articles/*` route |
+| `src/pages/BlogPost.tsx` | Renders articles from `/blog/*` route |
+
+### Domain Consistency Fix
+
+Current `src/lib/seo.ts` uses `peptideplaybook.com` but published URL is `thepeptideplaybook.lovable.app`. The sitemap uses `.com`. This needs to be consistent.
+
+---
+
+## Changes Per Requirement
+
+### 1. Add "Primary Sources" Section
+
+**Placement:** Immediately before the GuideFAQ component
+
+**Global links (use on ALL pages):**
+- FDA Bulk Drug Substances: `https://www.fda.gov/drugs/human-drug-compounding/bulk-drug-substances-used-compounding`
+- WADA Prohibited List: `https://www.wada-ama.org/en/prohibited-list`
+
+**BPC-157 specific PubMed links:**
+- `https://pubmed.ncbi.nlm.nih.gov/30915550/` (Systematic review)
+- `https://pubmed.ncbi.nlm.nih.gov/21030672/` (Tendon healing)
+- `https://pubmed.ncbi.nlm.nih.gov/27847366/` (Mechanism study)
+
+**Format per page:**
+```tsx
+<section id="primary-sources" className="mb-10">
+  <h2 className="text-2xl font-bold mb-4">Primary Sources</h2>
+  <ul className="space-y-3">
+    <li>
+      <a href="URL" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
+        Paper Title
+      </a>
+      <span className="text-muted-foreground"> — 1-sentence description</span>
+    </li>
+  </ul>
+</section>
 ```
 
-### Files to Create (15 new pages)
+---
 
-| # | File Path | Slug | Priority |
-|---|-----------|------|----------|
-| 1 | `src/pages/guides/SemaglutideVsTirzepatideWeightLoss.tsx` | `semaglutide-vs-tirzepatide-weight-loss` | Highest |
-| 2 | `src/pages/guides/BPC157SideEffects.tsx` | `bpc-157-side-effects` | High |
-| 3 | `src/pages/guides/BPC157Tendonitis.tsx` | `bpc-157-tendonitis` | High |
-| 4 | `src/pages/guides/ArePeptidesLegal.tsx` | `are-peptides-legal` | High |
-| 5 | `src/pages/guides/BPC157GutHealing.tsx` | `bpc-157-gut-healing` | High |
-| 6 | `src/pages/guides/TB500vsBPC157.tsx` | `tb-500-vs-bpc-157` | Medium |
-| 7 | `src/pages/guides/OralVsInjectableBPC157.tsx` | `oral-vs-injectable-bpc-157` | Medium |
-| 8 | `src/pages/guides/BPC157WADABanned.tsx` | `bpc-157-wada-banned` | Medium |
-| 9 | `src/pages/guides/PeptideQualityTesting.tsx` | `peptide-quality-testing` | Medium |
-| 10 | `src/pages/guides/FindPeptideClinic.tsx` | `find-peptide-clinic` | Medium |
-| 11 | `src/pages/guides/GHKCuHairLoss.tsx` | `ghk-cu-hair-loss` | Lower |
-| 12 | `src/pages/guides/TB500TendonRepair.tsx` | `tb-500-tendon-repair` | Lower |
-| 13 | `src/pages/guides/IpamorelinCJC1295.tsx` | `ipamorelin-cjc-1295` | Lower |
-| 14 | `src/pages/guides/PeptideInjectionSites.tsx` | `peptide-injection-sites` | Lower |
-| 15 | `src/pages/guides/PeptideCycling.tsx` | `peptide-cycling` | Lower |
+### 2. Split Evidence Sections into Animal & Lab Studies + Human Evidence
 
-### Files to Modify
+**Current state per file:**
 
-| File | Change |
-|------|--------|
-| `src/App.tsx` | Add 15 new routes |
-| `src/pages/Guides.tsx` | Add 15 new cards organized by category |
-| `public/sitemap.xml` | Add 15 new URLs |
+| File | Current Section | Split Into |
+|------|-----------------|------------|
+| BPC157Guide.tsx | "What Does the Research Actually Show?" | "Animal & Lab Studies" + "Human Evidence" |
+| ArePeptidesSafeGuide.tsx | "Research Peptide Safety" | "Animal & Lab Studies" + "Human Evidence" |
+| BPC157vsTB500Guide.tsx | "Research Reality" | "Animal & Lab Studies" + "Human Evidence" |
+| FDALegalStatusGuide.tsx | N/A (regulatory focus) | Add minimal "Evidence Context" section explaining FDA's reasoning |
+
+**Required content per section:**
+
+Animal & Lab Studies:
+- What animal/cell data suggests
+- Explicit limitation: "Animal models don't reliably predict human outcomes"
+
+Human Evidence:
+- If no trials exist: "No published human clinical trials exist for [TOPIC]."
+- If trials exist: Summarize with sample size, endpoints, duration, limitations
 
 ---
 
-## Content Structure Per Page
+### 3. Add "What We Don't Know" Section
 
-### Page 1: Semaglutide vs Tirzepatide Weight Loss
+**Placement:** After the Risks/Safety section (or create one if missing)
 
-**Quick Answer:**
-Both are FDA-approved GLP-1 medications for weight loss. Clinical trials show tirzepatide (Mounjaro/Zepbound) produces greater average weight loss (20-25%) compared to semaglutide (Wegovy/Ozempic, 15-17%). Tirzepatide is a dual GIP/GLP-1 agonist while semaglutide is GLP-1 only. Side effects are similar. Cost and insurance coverage vary significantly.
+**Add to TOC:** `{ id: "what-we-dont-know", title: "What We Don't Know", level: 2 }`
 
-**TOC Sections:**
-1. Side-by-Side Comparison Table
-2. How Semaglutide Works
-3. How Tirzepatide Works
-4. Clinical Trial Results (Head-to-Head)
-5. Side Effects Comparison
-6. Cost and Insurance
-7. Which Should You Choose?
-8. Primary Sources
-9. FAQ
-
-**FAQ (3-4 questions):**
-- Can I switch from Ozempic to Mounjaro?
-- Which has fewer side effects?
-- Is tirzepatide worth the extra cost?
-
-**Related Guides:**
-- Semaglutide Complete Guide
-- Tirzepatide vs Semaglutide (existing)
-- Are Peptides Safe?
-
----
-
-### Page 2: BPC-157 Side Effects
-
-**Quick Answer:**
-There is almost no published human safety data on BPC-157. Most "side effect" information comes from anecdotal reports on forums and social media, not clinical trials. Animal studies show low acute toxicity, but this does not prove safety for humans. Reported anecdotal side effects include nausea, dizziness, and injection site reactions.
-
-**TOC Sections:**
-1. The Human Data Problem
-2. What Animal Studies Show About Safety
-3. Anecdotal Reports (What Users Say)
-4. Theoretical Risks
-5. FDA Safety Concerns
-6. Quality/Contamination Risks
-7. Primary Sources
-8. FAQ
-
-**FAQ:**
-- Does BPC-157 cause cancer?
-- Can BPC-157 damage your liver?
-- Is BPC-157 safe long-term?
-
----
-
-### Page 3: BPC-157 Tendonitis
-
-**Quick Answer:**
-BPC-157 has shown tendon-healing effects in multiple animal studies, including rat Achilles tendon models. However, there are zero published human clinical trials specifically on tendonitis. The animal data is promising but cannot be directly applied to human treatment decisions. BPC-157 is not FDA-approved and is banned by WADA.
-
-**TOC Sections:**
-1. What Is BPC-157?
-2. Animal Studies on Tendon Healing
-3. Human Evidence (Currently None)
-4. How BPC-157 Theoretically Works on Tendons
-5. Risks and Unknowns
-6. Legal Status
-7. Primary Sources
-8. FAQ
-
----
-
-### Page 4: Are Peptides Legal
-
-**Quick Answer:**
-Peptide legality is complicated. Possessing research peptides is generally not illegal for individuals. Selling peptides for human consumption without FDA approval is illegal. FDA-approved peptides (like semaglutide) require prescriptions. "Research use only" peptides exist in a gray area. Some states have additional restrictions. WADA bans most peptides for athletes.
-
-**TOC Sections:**
-1. Federal Law Overview
-2. FDA-Approved vs Research Peptides
-3. The "Research Use Only" Loophole
-4. State-by-State Variations
-5. Importing Peptides
-6. Athlete-Specific Rules
-7. What Could Get You in Trouble
-8. Primary Sources
-9. FAQ
-
----
-
-### Pages 5-15: Similar Structure
-
-Each remaining page follows the identical pattern with:
-- Specific Quick Answer (100 words max)
-- 7-9 TOC sections
-- 3-4 FAQ items with schema
-- 2-3 related guide links
-- Primary sources section
-
----
-
-## Technical Implementation
-
-### Schema Markup (Automatic via Components)
-
-Each page automatically includes:
-
-1. **Article Schema** (via GuideLayout articleSchema prop)
-2. **FAQ Schema** (via GuideFAQ component)
-3. **Breadcrumb Schema** (via GuideLayout)
-4. **Answer Schema** (via QuickAnswerBox component)
-
-### App.tsx Route Additions
+**Standard bullets (adapt per topic):**
 
 ```tsx
-// Add imports
-import SemaglutideVsTirzepatideWeightLoss from "./pages/guides/SemaglutideVsTirzepatideWeightLoss";
-import BPC157SideEffects from "./pages/guides/BPC157SideEffects";
-// ... (13 more imports)
-
-// Add routes
-<Route path="/guides/semaglutide-vs-tirzepatide-weight-loss" element={<SemaglutideVsTirzepatideWeightLoss />} />
-<Route path="/guides/bpc-157-side-effects" element={<BPC157SideEffects />} />
-// ... (13 more routes)
-```
-
-### Guides Hub Reorganization
-
-Organize guides by category for better UX:
-
-```text
-Categories:
-├── Recovery & Healing
-│   ├── BPC-157 Complete Guide
-│   ├── BPC-157 for Tendonitis
-│   ├── BPC-157 for Gut Health
-│   ├── TB-500 Tendon Repair
-│   ├── BPC-157 vs TB-500
-│   └── TB-500 vs BPC-157
-│
-├── Weight Loss (GLP-1)
-│   ├── Semaglutide Complete Guide
-│   ├── Tirzepatide vs Semaglutide
-│   └── Semaglutide vs Tirzepatide Weight Loss
-│
-├── Anti-Aging & Growth
-│   ├── Growth Hormone Peptides Guide
-│   ├── Ipamorelin + CJC-1295
-│   └── GHK-Cu for Hair Loss
-│
-├── Safety & Legal
-│   ├── Are Peptides Safe?
-│   ├── Are Peptides Legal?
-│   ├── FDA Peptide Regulations 2026
-│   ├── BPC-157 Side Effects
-│   ├── BPC-157 WADA Banned
-│   └── Peptide Quality Testing
-│
-└── How-To Guides
-    ├── Oral vs Injectable BPC-157
-    ├── Find a Peptide Clinic
-    ├── Peptide Injection Sites
-    └── Peptide Cycling
-```
-
-### Sitemap Updates
-
-Add 15 new entries to `public/sitemap.xml`:
-
-```xml
-<url>
-  <loc>https://peptideplaybook.com/guides/semaglutide-vs-tirzepatide-weight-loss</loc>
-  <lastmod>2026-02-02</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.9</priority>
-</url>
-<!-- ... 14 more entries -->
+<section id="what-we-dont-know" className="mb-10">
+  <h2 className="text-2xl font-bold mb-4">What We Don't Know</h2>
+  <p className="text-muted-foreground mb-4 leading-relaxed">
+    Despite available research, significant knowledge gaps remain:
+  </p>
+  <ul className="list-disc list-inside text-muted-foreground space-y-2">
+    <li>Long-term safety in humans (no multi-year studies exist)</li>
+    <li>Optimal protocols (no clinical data to establish regimens)</li>
+    <li>Drug interactions (never formally studied)</li>
+    <li>Effects in specific populations (pregnancy, elderly, chronic disease)</li>
+    <li>Product purity risks from unregulated sources</li>
+    <li>Whether animal findings translate to clinical outcomes in humans</li>
+  </ul>
+</section>
 ```
 
 ---
 
-## Internal Linking Strategy
+### 4. Update QuickAnswerBox to State Evidence Level
 
-Each new page links to:
-- 2-3 related existing guides (already in RelatedGuides component)
-- Main /guides hub (via breadcrumb)
-- Homepage (via GuideCTA "Ask the Peptide Assistant")
+**Pattern for each QuickAnswerBox:**
 
-Cross-linking map:
-- BPC-157 pages link to each other
-- Weight loss pages link to each other
-- Safety/legal pages link to each other
-- All pages link back to hub
+First 1-3 sentences must explicitly state:
+1. What evidence exists (animal/lab vs human)
+2. What does NOT exist (no human trials if applicable)
+3. Regulatory status if relevant (not FDA-approved, WADA banned)
+
+**Example rewrites:**
+
+BPC157Guide.tsx (current):
+> "BPC-157 (Body Protection Compound-157) is a synthetic peptide derived from..."
+
+BPC157Guide.tsx (updated):
+> "BPC-157 has shown tissue-healing effects in animal studies, but no published human clinical trials prove safety or efficacy. Because it is FDA Category 2 and not approved for human use, all claims should be treated as unproven. Animal research suggests potential mechanisms, but these do not translate to proven human benefits."
 
 ---
 
-## Content Tone Guidelines
+## File-by-File Changes
 
-Following project memory rules:
-- No em dashes (use colons, periods, or sentence restructuring)
-- Evidence-based, not promotional
-- Acknowledge uncertainty honestly
-- No medical advice or dosing recommendations
-- Link to primary sources for major claims
-- Separate animal evidence from human evidence clearly
+### BPC157Guide.tsx
+
+| Change | Location |
+|--------|----------|
+| Update QuickAnswerBox answer text | Line 102-106 |
+| Add to tocItems: "animal-lab-studies", "human-evidence", "what-we-dont-know", "primary-sources" | Lines 11-20 |
+| Split section id="research" into two sections | Lines 149-207 |
+| Add "What We Don't Know" section after safety section | After line 244 |
+| Add "Primary Sources" section before FAQ | Before line 298 |
+
+### FDALegalStatusGuide.tsx
+
+| Change | Location |
+|--------|----------|
+| Update QuickAnswerBox to state regulatory basis (not evidence-based) | Line 96-100 |
+| Add to tocItems: "what-we-dont-know", "primary-sources" | Lines 11-19 |
+| Add "What We Don't Know" section (regulatory uncertainty focus) | After line 243 |
+| Add "Primary Sources" section before FAQ | Before line 245 |
+
+### ArePeptidesSafeGuide.tsx
+
+| Change | Location |
+|--------|----------|
+| Update QuickAnswerBox answer text | Line 95-98 |
+| Add to tocItems: "animal-lab-studies", "human-evidence", "what-we-dont-know", "primary-sources" | Lines 11-18 |
+| Split "Research Peptide Safety" section into two | Lines 152-197 |
+| Add "What We Don't Know" section after extra-cautious section | After line 232 |
+| Add "Primary Sources" section before FAQ | Before line 234 |
+
+### BPC157vsTB500Guide.tsx
+
+| Change | Location |
+|--------|----------|
+| Update QuickAnswerBox answer text | Line 95-98 |
+| Add to tocItems: "animal-lab-studies", "human-evidence", "what-we-dont-know", "primary-sources" | Lines 11-18 |
+| Split "Research Reality" into two sections | Lines 189-205 |
+| Add "What We Don't Know" section after stacking section | After line 223 |
+| Add "Primary Sources" section before FAQ | Before line 225 |
+
+### ArticleDetail.tsx (Database Articles)
+
+The database articles use `DirectAnswerBlock` component which displays `article.tldr` as the quick answer. The content structure comes from `article.full_content` (markdown).
+
+Changes needed:
+- Update DirectAnswerBlock component to include evidence-level framing
+- Add fallback Primary Sources section if `article.citations` is empty
+- Inject "What We Don't Know" guidance into the template structure
+
+However, since database articles have dynamic content, we need to:
+1. Add a new `PrimarySources` component for static fallback links
+2. Add a `WhatWeDontKnow` component for injectable uncertainty disclosure
+3. Modify `ArticleDetail.tsx` and `BlogPost.tsx` to include these sections
+
+### BlogPost.tsx (Database Articles)
+
+Same changes as ArticleDetail.tsx:
+- Add PrimarySources fallback component
+- Add WhatWeDontKnow component  
+- Ensure TLDRBox states evidence level (via component update)
+
+---
+
+## New Components to Create
+
+### 1. PrimarySources.tsx
+
+```tsx
+// src/components/articles/PrimarySources.tsx
+// Displays standard primary source links when article.citations is empty
+// Includes FDA and WADA global links
+```
+
+### 2. WhatWeDontKnow.tsx
+
+```tsx
+// src/components/articles/WhatWeDontKnow.tsx
+// Displays standard uncertainty bullets
+// Accepts optional topic-specific customization
+```
+
+### 3. Update TLDRBox.tsx
+
+Update to accept an optional `evidenceLevel` prop that prepends evidence framing.
+
+---
+
+## Domain Consistency Check
+
+**Current state in `src/lib/seo.ts`:**
+```ts
+export const SITE_URL = "https://peptideplaybook.com";
+```
+
+**In sitemap.xml:**
+Uses `peptideplaybook.com`
+
+**Published URL:**
+`thepeptideplaybook.lovable.app`
+
+**Decision:** Keep `.com` domain as canonical (user appears to own this domain or intends to). The `.lovable.app` is the development/staging URL. No change needed as `.com` is the production intent.
 
 ---
 
 ## Implementation Order
 
-Build in priority order (highest search volume first):
-
-**Batch 1 (Highest Impact):**
-1. semaglutide-vs-tirzepatide-weight-loss
-2. bpc-157-side-effects
-3. bpc-157-tendonitis
-4. are-peptides-legal
-5. bpc-157-gut-healing
-
-**Batch 2 (Medium Impact):**
-6. tb-500-vs-bpc-157
-7. oral-vs-injectable-bpc-157
-8. bpc-157-wada-banned
-9. peptide-quality-testing
-10. find-peptide-clinic
-
-**Batch 3 (Lower Impact):**
-11. ghk-cu-hair-loss
-12. tb-500-tendon-repair
-13. ipamorelin-cjc-1295
-14. peptide-injection-sites
-15. peptide-cycling
+1. **Create new components** (PrimarySources, WhatWeDontKnow, update TLDRBox)
+2. **Update static guide pages** (4 files) in order:
+   - BPC157Guide.tsx
+   - ArePeptidesSafeGuide.tsx
+   - BPC157vsTB500Guide.tsx
+   - FDALegalStatusGuide.tsx
+3. **Update database article templates** (2 files):
+   - ArticleDetail.tsx
+   - BlogPost.tsx
+4. **Verify no dosing advice added** (QA check)
 
 ---
 
-## Estimated Work
-
-- **15 new page files**: ~250-350 lines each
-- **App.tsx updates**: ~30 new lines
-- **Guides.tsx restructure**: Complete rewrite with categories
-- **sitemap.xml**: 15 new URL entries
-
----
-
-## Success Criteria
+## Acceptance Checklist
 
 After implementation:
-1. All 15 pages are live and accessible
-2. Each page passes Google Rich Results Test for FAQ schema
-3. Each page has 3+ external links to PubMed/FDA/WADA
-4. Sitemap is updated with all 15 URLs
-5. Pages match exact URL structure specified
-6. Quick Answer boxes contain direct answers in first 100 words
-7. /guides hub shows all 22 guides organized by category
+- [ ] Every updated page contains Primary Sources with 3-5 links
+- [ ] Every updated page contains Animal & Lab Studies and Human Evidence sections (where applicable)
+- [ ] Every updated page contains What We Don't Know with 4-6 bullets
+- [ ] Every QuickAnswerBox explicitly states the evidence level
+- [ ] No dosing instructions added anywhere
+- [ ] No change to unrelated copy, layout, or URL structure
+- [ ] FDA link: `https://www.fda.gov/drugs/human-drug-compounding/bulk-drug-substances-used-compounding`
+- [ ] WADA link: `https://www.wada-ama.org/en/prohibited-list`
+- [ ] BPC-157 PubMed links included on relevant pages
+
+---
+
+## Technical Notes
+
+- All static guide pages use identical component structure (GuideLayout, QuickAnswerBox, GuideFAQ, etc.)
+- Database articles use different components (DirectAnswerBlock, TLDRBox, CitationsSection)
+- Both need parallel updates for consistency
+- The 15 newly created guide pages (BPC157SideEffects, etc.) already follow citation-grade patterns and only need minor consistency updates to Primary Sources links
 
