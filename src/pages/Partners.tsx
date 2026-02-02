@@ -16,7 +16,13 @@ import {
   Copy, 
   Check,
   Send,
-  Sparkles
+  FileEdit,
+  Heart,
+  Dna,
+  Dumbbell,
+  Stethoscope,
+  Clock,
+  FlaskConical,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,12 +36,12 @@ const hookScripts = [
 ];
 
 const whoWeWant = [
-  { icon: "🏋️", title: "Health & Wellness Creators", desc: "Fitness influencers who prioritize evidence" },
-  { icon: "🧬", title: "Biohacking Content Creators", desc: "Those exploring optimization responsibly" },
-  { icon: "💪", title: "Fitness Influencers", desc: "Athletes and coaches who value safety" },
-  { icon: "🩺", title: "Functional Medicine Practitioners", desc: "Healthcare providers educating patients" },
-  { icon: "⏳", title: "Longevity Educators", desc: "Anti-aging content focused on evidence" },
-  { icon: "🔬", title: "Health Misinformation Fighters", desc: "Anyone combating health pseudoscience" },
+  { icon: Heart, title: "Health & Wellness Creators", desc: "Fitness influencers who prioritize evidence" },
+  { icon: Dna, title: "Biohacking Content Creators", desc: "Those exploring optimization responsibly" },
+  { icon: Dumbbell, title: "Fitness Influencers", desc: "Athletes and coaches who value safety" },
+  { icon: Stethoscope, title: "Functional Medicine Practitioners", desc: "Healthcare providers educating patients" },
+  { icon: Clock, title: "Longevity Educators", desc: "Anti-aging content focused on evidence" },
+  { icon: FlaskConical, title: "Health Misinformation Fighters", desc: "Anyone combating health pseudoscience" },
 ];
 
 export default function Partners() {
@@ -130,10 +136,9 @@ export default function Partners() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center max-w-3xl mx-auto mb-16"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-6">
-                <Sparkles className="w-4 h-4" />
+              <p className="text-sm font-medium text-primary tracking-wide uppercase mb-6">
                 Affiliate Program
-              </div>
+              </p>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
                 Earn 50% Commission Educating Your Audience
               </h1>
@@ -178,7 +183,7 @@ export default function Partners() {
                 {[
                   { icon: LinkIcon, title: "Unique Tracking Link", desc: "Personal affiliate link with real-time stats" },
                   { icon: FileText, title: "Swipe Copy", desc: "Ready-to-use captions for posts and stories" },
-                  { icon: Sparkles, title: "5 Hook Scripts", desc: "Proven hooks for videos and reels" },
+                  { icon: FileEdit, title: "5 Hook Scripts", desc: "Proven hooks for videos and reels" },
                   { icon: Gift, title: "Free Product Access", desc: "Full access to review and reference" },
                 ].map((item, index) => (
                   <div key={index} className="glass-card-subtle p-6">
@@ -203,7 +208,9 @@ export default function Partners() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {whoWeWant.map((item, index) => (
                   <div key={index} className="glass-card-subtle p-6 flex items-start gap-4">
-                    <span className="text-3xl">{item.icon}</span>
+                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <item.icon className="w-5 h-5 text-primary" />
+                    </div>
                     <div>
                       <h3 className="font-semibold mb-1">{item.title}</h3>
                       <p className="text-sm text-muted-foreground">{item.desc}</p>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Newspaper } from "lucide-react";
+import { MessageSquare, Newspaper } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import ChatInterface from "@/components/dashboard/ChatInterface";
 import QuickNewsPanel from "@/components/dashboard/QuickNewsPanel";
@@ -27,7 +27,7 @@ export default function Dashboard() {
             <TabButton
               active={activeTab === "chat"}
               onClick={() => setActiveTab("chat")}
-              icon={Bot}
+              icon={MessageSquare}
               label="AI Assistant"
             />
             <TabButton

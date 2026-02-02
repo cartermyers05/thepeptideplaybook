@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, Loader2, ArrowLeft, Eye, Save, AlertCircle } from "lucide-react";
+import { FileText, Loader2, ArrowLeft, Eye, Save, AlertCircle, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
@@ -148,7 +148,7 @@ export default function ArticleGenerator() {
               </Button>
               <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2">
-                  <Sparkles className="w-6 h-6 text-primary" />
+                  <FileText className="w-6 h-6 text-primary" />
                   AI Article Generator
                 </h1>
                 <p className="text-muted-foreground text-sm">
@@ -233,7 +233,7 @@ export default function ArticleGenerator() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4 mr-2" />
+                      <FileText className="w-4 h-4 mr-2" />
                       Generate Article
                     </>
                   )}
@@ -263,7 +263,7 @@ export default function ArticleGenerator() {
               <CardContent>
                 {!generatedArticle && !isGenerating && (
                   <div className="text-center py-16 text-muted-foreground">
-                    <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Your generated article will appear here</p>
                   </div>
                 )}
@@ -317,7 +317,7 @@ export default function ArticleGenerator() {
 
                     <div className="flex gap-2 pt-4 border-t">
                       <Button onClick={handlePublish} className="flex-1">
-                        <Sparkles className="w-4 h-4 mr-2" />
+                        <ArrowRight className="w-4 h-4 mr-2" />
                         Publish
                       </Button>
                       <Button variant="outline" onClick={handleSaveDraft}>
