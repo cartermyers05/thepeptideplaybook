@@ -71,19 +71,7 @@ export default function WelcomeBanner({ onStartChat }: WelcomeBannerProps) {
             </div>
           )}
 
-          {/* CTA for free users */}
-          {!isPaid && (
-            <Button 
-              size="sm" 
-              className="flex-shrink-0 shadow-lg shadow-primary/20"
-              asChild
-            >
-              <a href="/checkout">
-                <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                Unlock Full Access
-              </a>
-            </Button>
-          )}
+          {/* Billing disabled - no upgrade CTA needed */}
         </div>
 
         {/* Mobile stats */}

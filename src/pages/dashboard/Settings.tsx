@@ -114,16 +114,11 @@ export default function Settings() {
 
           <div className="flex items-center justify-between p-4 bg-muted rounded-lg mb-4">
             <div>
-              <p className="font-medium">{isPaid ? "Member" : "Free"}</p>
+              <p className="font-medium">Member</p>
               <p className="text-sm text-muted-foreground">
-                {isPaid ? "Lifetime access to all features" : "Upgrade to unlock all features"}
+                Full access to all features
               </p>
             </div>
-            {!isPaid && (
-              <Button asChild variant="outline" size="sm">
-                <Link to="/checkout">Upgrade — $67</Link>
-              </Button>
-            )}
           </div>
 
           {/* Feature Access List */}

@@ -9,7 +9,8 @@ export function useTier() {
   const rawTier = profile?.tier || "free";
   const currentTier: Tier = rawTier === "free" ? "free" : "member";
 
-  const isPaid = currentTier === "member";
+  // Free access for everyone - billing disabled
+  const isPaid = true;
 
   return {
     tier: currentTier,
