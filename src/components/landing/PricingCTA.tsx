@@ -58,8 +58,11 @@ export function PricingCTA() {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              <span className="text-5xl font-bold text-gradient">Free</span>
-              <p className="text-sm text-muted-foreground mt-2">No payment required. Full access.</p>
+              <div className="flex items-baseline justify-center gap-2">
+                <span className="text-5xl font-bold text-gradient">$67</span>
+                <span className="text-xl text-muted-foreground line-through">$197</span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">One-time payment. Lifetime access.</p>
             </motion.div>
 
             <motion.ul 
@@ -97,7 +100,7 @@ export function PricingCTA() {
             <Link to="/signup" className="w-full relative z-10 block">
               <Button size="lg" className="w-full btn-primary-clean h-12 text-base">
                 <Sparkles className="w-4 h-4 mr-2" />
-                Create Free Account
+                Get Full Access
               </Button>
             </Link>
 
@@ -108,7 +111,7 @@ export function PricingCTA() {
               viewport={{ once: true }}
               transition={{ delay: 0.5 }}
             >
-              No credit card required. Start researching in 30 seconds.
+              30-day money-back guarantee. Start researching in 30 seconds.
             </motion.p>
           </div>
         </motion.div>

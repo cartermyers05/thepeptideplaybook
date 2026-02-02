@@ -5,9 +5,9 @@ import { HeroDemo } from "./HeroDemo";
 import { Link } from "react-router-dom";
 
 const trustItems = [
-  { icon: Users, text: "200+ researchers" },
-  { icon: Sparkles, text: "Free forever" },
-  { icon: CreditCard, text: "No credit card" },
+  { icon: Users, text: "4,200+ researchers" },
+  { icon: Sparkles, text: "30-day guarantee" },
+  { icon: CreditCard, text: "$67 one-time" },
 ];
 
 const containerVariants = {
@@ -74,7 +74,7 @@ export function HeroSection() {
             >
               <Link to="/signup">
                 <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group w-full sm:w-auto">
-                  Try It Free Now
+                  Get Full Access
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>

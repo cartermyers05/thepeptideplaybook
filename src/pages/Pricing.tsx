@@ -67,7 +67,7 @@ export default function Pricing() {
     <>
       <SEOHead
         title="Pricing | Peptide Playbook AI"
-        description="Get free access to Peptide Playbook AI. No payment required, instant access to all features."
+        description="Get lifetime access to Peptide Playbook AI for $67. One-time payment, no subscriptions. 30-day money-back guarantee."
       />
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -94,9 +94,10 @@ export default function Pricing() {
                 <div className="bg-primary/5 p-8 text-center border-b border-primary/10">
                   <p className="text-sm font-semibold text-primary mb-2">Complete Access</p>
                   <div className="flex items-baseline justify-center gap-2">
-                    <span className="text-6xl font-bold">Free</span>
+                    <span className="text-6xl font-bold">$67</span>
+                    <span className="text-xl text-muted-foreground line-through">$197</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">No payment required • Full access</p>
+                  <p className="text-sm text-muted-foreground mt-2">One-time payment • Lifetime access</p>
                 </div>
 
                 {/* CTA */}
@@ -106,8 +107,8 @@ export default function Pricing() {
                     size="lg"
                     className="w-full btn-primary-clean h-14 text-lg mb-4"
                   >
-                    <Link to="/signup">
-                      Get Free Access
+                    <Link to="/checkout">
+                      Get Full Access — $67
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Link>
                   </Button>
@@ -177,8 +178,8 @@ export default function Pricing() {
                 size="lg"
                 className="btn-primary-clean h-12"
               >
-                <Link to="/signup">
-                  Get Free Access
+                <Link to="/checkout">
+                  Get Full Access — $67
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>
