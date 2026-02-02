@@ -1,331 +1,253 @@
 
-# Remove AI-Template Icon Patterns: Custom Visual Language
+# Remove Remaining Sparkles & Bot Icons
 
-## Problem Analysis
+## Problem
 
-The site uses Lucide icons in patterns that scream "AI-generated template":
-
-1. **Rounded circle/square backgrounds with small icons** (HeroSection trust items, SocialProof stats, WhoThisIsFor checkmarks, ProblemSection pain points)
-2. **Check/X icons in feature lists** (PricingCTA, WhoThisIsFor)
-3. **Sparkles icon everywhere** (very AI-template)
-4. **Bot icon** for AI assistant (generic)
-5. **Colored icon containers** with primary/10 backgrounds
-
-## Solution: Replace with Typography-First, Editorial Design
-
-Instead of icon-heavy design, we shift to a more editorial, text-focused approach that feels like a professional publication.
+The site still has `Sparkles` (star) and `Bot` (robot) icons throughout the codebase. These are dead giveaways of AI-template design and need to be replaced with the "PP" initials avatar or removed entirely.
 
 ---
 
-## Part 1: Trust Items in HeroSection
+## Files with Remaining Icons
 
-**Current (AI-template):**
-```tsx
-<div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-  <item.icon className="w-3 h-3 text-primary" />
-</div>
-```
+### **Sparkles Icon (16 files)**
 
-**New (editorial):**
-- Use simple text with a subtle separator or bullet
-- No icon containers at all
-
-```tsx
-const trustItems = [
-  "4,200+ researchers",
-  "30-day guarantee",
-  "$67 one-time",
-];
-
-// Render as simple text with dots between
-<div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-sm text-muted-foreground">
-  {trustItems.map((item, index) => (
-    <span key={index} className="flex items-center gap-2">
-      {index > 0 && <span className="w-1 h-1 rounded-full bg-border" />}
-      {item}
-    </span>
-  ))}
-</div>
-```
+| File | Usage | Fix |
+|------|-------|-----|
+| `src/components/landing/HeroDemo.tsx` | Bot icon in chat header + answer area | Replace with "PP" initials |
+| `src/components/landing/ChatbotDemo.tsx` | Bot + Sparkles in section header and paywall | Replace with text-only header, remove Sparkles from paywall |
+| `src/components/chat/ChatWidget.tsx` | Bot icon in header | Replace with "PP" initials |
+| `src/components/dashboard/ChatInterface.tsx` | Sparkles in empty state logo + message header | Replace with "PP" initials |
+| `src/components/dashboard/DashboardHeader.tsx` | Sparkles in logo | Replace with Logo component |
+| `src/components/dashboard/WelcomeBanner.tsx` | Bot + Sparkles icons | Replace with "PP" initials |
+| `src/components/dashboard/NewsSummary.tsx` | Sparkles icon in Key Takeaways header | Remove icon, use text-only |
+| `src/pages/Login.tsx` | Sparkles in logo | Replace with Logo component |
+| `src/pages/Signup.tsx` | Sparkles in logo | Replace with Logo component |
+| `src/pages/History.tsx` | Sparkles in sidebar logo | Replace with Logo component |
+| `src/pages/Saved.tsx` | Sparkles in sidebar logo | Replace with Logo component |
+| `src/pages/Stats.tsx` | Sparkles in sidebar logo | Replace with Logo component |
+| `src/pages/Referral.tsx` | Sparkles in sidebar logo + content | Replace with Logo component, remove other uses |
+| `src/pages/ReferralLanding.tsx` | Sparkles in loading indicator | Replace with simple arrow or text |
+| `src/components/dashboard/DashboardSidebar.tsx` | Bot icon in nav | Replace with text-based approach |
 
 ---
 
-## Part 2: SocialProof Stats Section
+## Implementation Details
 
-**Current (AI-template):**
-```tsx
-<div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-  <stat.icon className="w-6 h-6 text-primary" />
-</div>
-```
-
-**New (typography-focused):**
-- Remove icons entirely
-- Use bold numbers with subtle styling
-- Add a thin colored accent line above each stat instead
-
-```tsx
-const stats = [
-  { value: 15, suffix: "", label: "Research Guides" },
-  { value: 47, suffix: "", label: "TikTok Myths Exposed" },
-  { value: 200, suffix: "+", label: "Studies Cited" },
-];
-
-// Render with accent lines instead of icons
-<div className="text-center">
-  <div className="w-8 h-0.5 bg-primary/60 mx-auto mb-4" />
-  <p className="text-3xl md:text-4xl font-bold text-foreground mb-1">
-    <CountUp end={stat.value} />{stat.suffix}
-  </p>
-  <p className="text-sm text-muted-foreground">{stat.label}</p>
-</div>
-```
-
----
-
-## Part 3: WhoThisIsFor - Check/X Lists
-
-**Current (AI-template):**
-```tsx
-<div className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center">
-  <Check className="w-3 h-3 text-success" />
-</div>
-```
-
-**New (editorial):**
-- Use simple text bullets with left border accent
-- Green left border for "For You", red for "Not For You"
-
-```tsx
-// For You list item
-<li className="pl-4 border-l-2 border-success/60 text-muted-foreground">
-  {item}
-</li>
-
-// Not For You list item
-<li className="pl-4 border-l-2 border-destructive/60 text-muted-foreground">
-  {item}
-</li>
-```
-
-**Update section headers:**
-```tsx
-// Instead of icon in header
-<h3 className="text-xl font-semibold mb-6 text-success">
-  This Is For You If...
-</h3>
-
-<h3 className="text-xl font-semibold mb-6 text-destructive">
-  Not For You If...
-</h3>
-```
-
----
-
-## Part 4: PricingCTA Feature List
-
-**Current (AI-template):**
-```tsx
-{feature.highlight ? (
-  <Sparkles className="w-3 h-3 text-primary" />
-) : (
-  <Check className="w-3 h-3 text-success" />
-)}
-```
-
-**New (minimal):**
-- Use simple checkmark character or small dot
-- No icon containers
-
-```tsx
-<li className="flex items-center gap-3">
-  <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-  <span className={feature.highlight ? "font-medium" : ""}>
-    {feature.text}
-  </span>
-</li>
-```
-
----
-
-## Part 5: ProblemSection Pain Points
-
-**Current (AI-template):**
-```tsx
-<AlertCircle className="w-5 h-5 text-destructive/70" />
-```
-
-**New (editorial):**
-- Use numbered list or simple dash
-- No icons at all
-
-```tsx
-<div className="flex items-start gap-4 p-4 rounded-xl bg-muted/50 border border-border/50">
-  <span className="text-destructive/70 font-medium flex-shrink-0">{index + 1}.</span>
-  <span className="text-foreground">{point}</span>
-</div>
-```
-
----
-
-## Part 6: AIShowcase Capabilities
-
-**Current (AI-template):**
-```tsx
-<div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-  <cap.icon className="w-5 h-5 text-primary" />
-</div>
-```
-
-**New (text-focused):**
-- Use a simple title with example, no icon
-
-```tsx
-const capabilities = [
-  {
-    title: "Compare Peptides",
-    description: "Side-by-side analysis of any two peptides",
-    example: '"BPC-157 vs TB-500 for recovery?"',
-  },
-  // ...
-];
-
-// Render without icons
-<div className="p-4 border-l-2 border-primary/40 bg-muted/30">
-  <h4 className="font-medium text-sm mb-1">{cap.title}</h4>
-  <p className="text-xs text-muted-foreground mb-2">{cap.description}</p>
-  <p className="text-xs text-primary font-medium italic">{cap.example}</p>
-</div>
-```
-
----
-
-## Part 7: AI Chat Demo - Replace Bot Icon
+### 1. HeroDemo.tsx
 
 **Current:**
 ```tsx
-<Bot className="w-5 h-5 text-primary" />
+<Bot className="w-4 h-4 text-primary" />
 ```
 
-**New:**
-- Use initials or text avatar instead of robot icon
-- Feels more like a real product
-
+**Replace with "PP" initials:**
 ```tsx
-<div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-  <span className="text-sm font-semibold text-primary-foreground">PP</span>
+<div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+  <span className="text-xs font-bold text-primary-foreground">PP</span>
 </div>
 ```
 
----
+Also remove emojis from the demo answers (lines 11-41).
 
-## Part 8: Checkout Trust Elements
+### 2. ChatbotDemo.tsx
 
-**Current:**
+**Section header:**
+Replace Bot icon badge with text-only:
 ```tsx
-<Shield className="w-3.5 h-3.5" />
-```
-
-**New:**
-- Just use text with subtle separators
-
-```tsx
-<div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-  <span>256-bit SSL</span>
-  <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-  <span>Powered by Stripe</span>
-  <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-  <span>30-day refund</span>
-</div>
-```
-
----
-
-## Part 9: Navigation Sidebar Icons
-
-**Keep these** - Navigation icons are functional and expected. However, simplify styling:
-- Remove any hover effects that scale icons
-- Keep them plain and functional
-
----
-
-## Part 10: Remove Sparkles Icon Entirely
-
-The `Sparkles` icon is heavily associated with AI-generated templates. Remove from:
-- HeroSection trust items
-- PricingCTA header badge and button
-- AIShowcase header and buttons
-- AIAssistant capability badges
-
-Replace with text-only badges or remove entirely.
-
----
-
-## Part 11: PricingCTA Header Badge
-
-**Current:**
-```tsx
-<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-  <Sparkles className="w-4 h-4 text-primary" />
-  <span>AI-Powered Research</span>
-</div>
-```
-
-**New:**
-```tsx
-<p className="text-sm font-medium text-primary tracking-wide uppercase">
-  AI-Powered Research
+<p className="text-sm font-medium text-primary tracking-wide uppercase mb-4">
+  Live Demo
 </p>
 ```
 
+**Paywall section:**
+Remove Sparkles icon, use clean text:
+```tsx
+<div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+  <span className="text-sm font-bold text-primary-foreground">PP</span>
+</div>
+```
+
+### 3. ChatWidget.tsx
+
+**Header icon:**
+```tsx
+<div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+  <span className="text-sm font-bold text-primary-foreground">PP</span>
+</div>
+```
+
+### 4. ChatInterface.tsx
+
+**Empty state logo (line 367-368):**
+```tsx
+<div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6">
+  <span className="text-xl font-bold text-primary-foreground">PP</span>
+</div>
+```
+
+**Message header icon (line 464-465):**
+```tsx
+<div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center">
+  <span className="text-[8px] font-bold text-primary-foreground">PP</span>
+</div>
+```
+
+### 5. DashboardHeader.tsx
+
+**Logo:**
+Import and use the Logo component:
+```tsx
+import { Logo } from "@/components/brand/Logo";
+
+// Replace:
+<div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+  <Sparkles className="w-4 h-4 text-primary-foreground" />
+</div>
+
+// With:
+<Logo showText={false} size="sm" />
+```
+
+### 6. WelcomeBanner.tsx
+
+**Replace Bot icon:**
+```tsx
+<div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+  <span className="text-sm font-bold text-primary">PP</span>
+</div>
+```
+
+**Remove Bot from mobile stats, just use text.**
+
+### 7. NewsSummary.tsx
+
+**Remove icon from header:**
+```tsx
+<div className="flex items-center gap-3 mb-4">
+  <div className="w-8 h-0.5 bg-primary/60" />
+  <h2 className="font-semibold text-lg">Key Takeaways</h2>
+</div>
+```
+
+### 8-13. Login, Signup, History, Saved, Stats, Referral Pages
+
+**All use Sparkles in sidebar logo. Replace with Logo component:**
+```tsx
+import { Logo } from "@/components/brand/Logo";
+
+// In the sidebar header:
+<Link to="/" className="flex items-center gap-2">
+  <Logo size="sm" />
+</Link>
+```
+
+### 14. ReferralLanding.tsx
+
+**Remove Sparkles from redirect indicator:**
+```tsx
+<div className="flex items-center justify-center gap-2 text-primary mb-8">
+  <span className="font-medium">Redirecting to signup</span>
+  <ArrowRight className="w-5 h-5" />
+</div>
+```
+
+### 15. DashboardSidebar.tsx
+
+**Replace Bot icon with text:**
+
+The sidebar uses icons for navigation, which is functional and expected. However, the "AI Assistant" label with Bot icon should be updated:
+
+```tsx
+// Instead of Bot icon, use a simple circle with PP
+{ 
+  icon: () => <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center"><span className="text-[8px] font-bold text-primary-foreground">PP</span></div>, 
+  label: "AI Assistant", 
+  path: "/dashboard/chat" 
+}
+```
+
+Actually, for navigation this is complex. Keep the icon-based nav but change to a different icon like `MessageSquare` which is functional and standard:
+```tsx
+{ icon: MessageSquare, label: "AI Assistant", path: "/dashboard/chat" },
+```
+
 ---
 
-## Files to Modify
+## Remove Emojis from Demo Content
+
+### HeroDemo.tsx
+
+Replace emoji-heavy demo answers with clean typography:
+
+**Current:**
+```tsx
+✅ **Semaglutide** (Ozempic, Wegovy)
+🔬 **No reported toxicity**
+💪 **BPC-157**
+```
+
+**New:**
+```tsx
+• **Semaglutide** (Ozempic, Wegovy)
+• **No reported toxicity** in animal models
+• **BPC-157**: Gut-derived, promotes tissue healing
+```
+
+### ChatWidget.tsx
+
+**Remove emoji from welcome message:**
+```tsx
+const WELCOME_MESSAGE = `Hey! I'm your Peptide Playbook research assistant.
+
+**I can help you:**
+• Compare any peptides side-by-side
+• Check FDA approval status instantly
+• Understand mechanisms and research
+• Separate real science from TikTok hype
+
+Ask me anything about peptides.`;
+```
+
+---
+
+## Files to Modify (Summary)
 
 | File | Changes |
 |------|---------|
-| `src/components/landing/HeroSection.tsx` | Replace icon trust items with text-only |
-| `src/components/landing/SocialProof.tsx` | Replace icons with accent lines |
-| `src/components/landing/WhoThisIsFor.tsx` | Replace Check/X icons with border accents |
-| `src/components/landing/PricingCTA.tsx` | Replace checkmark icons with dots, remove Sparkles |
-| `src/components/landing/ProblemSection.tsx` | Replace AlertCircle with numbered list |
-| `src/components/landing/AIShowcase.tsx` | Replace icon cards with text-focused, replace Bot with initials |
-| `src/components/landing/AIAssistant.tsx` | Replace Bot icon with initials avatar |
-| `src/pages/Checkout.tsx` | Replace trust icons with text-only |
-| `src/components/landing/FAQ.tsx` | No icons to remove (already clean) |
-| `src/components/landing/HowItWorks.tsx` | Numbers already work, keep as-is |
+| `src/components/landing/HeroDemo.tsx` | Replace Bot with PP, remove emojis |
+| `src/components/landing/ChatbotDemo.tsx` | Replace Bot/Sparkles with PP/text |
+| `src/components/chat/ChatWidget.tsx` | Replace Bot with PP, remove emoji |
+| `src/components/dashboard/ChatInterface.tsx` | Replace Sparkles with PP |
+| `src/components/dashboard/DashboardHeader.tsx` | Use Logo component |
+| `src/components/dashboard/WelcomeBanner.tsx` | Replace Bot with PP |
+| `src/components/dashboard/NewsSummary.tsx` | Remove Sparkles |
+| `src/components/dashboard/DashboardSidebar.tsx` | Replace Bot with MessageSquare |
+| `src/pages/Login.tsx` | Use Logo component |
+| `src/pages/Signup.tsx` | Use Logo component |
+| `src/pages/History.tsx` | Use Logo component |
+| `src/pages/Saved.tsx` | Use Logo component |
+| `src/pages/Stats.tsx` | Use Logo component |
+| `src/pages/Referral.tsx` | Use Logo component, remove Sparkles |
+| `src/pages/ReferralLanding.tsx` | Remove Sparkles |
 
 ---
 
-## Visual Summary
+## Visual Changes
 
 | Before | After |
 |--------|-------|
-| Icon in colored circle container | Accent line or just text |
-| Check/X icons in lists | Left border accent in list color |
-| Sparkles everywhere | Removed entirely |
-| Bot icon for AI | Text initials "PP" |
-| Icon + title + description cards | Left-border accent cards |
-| Trust badges with icons | Plain text with dot separators |
+| `Sparkles` star icon in logos | Custom molecule SVG (Logo component) |
+| `Bot` robot icon in chat | "PP" initials avatar |
+| Emoji bullets (✅🔬💪🦴🔥⚠️) | Simple bullet points (•) or dashes |
+| Icon in colored container | Text initials or accent line |
 
 ---
 
-## What Stays
+## Implementation Order
 
-- **Navigation sidebar icons** - Functional, expected
-- **Logo component** - Already custom SVG
-- **Guide page metadata icons** (Clock, ShieldCheck) - Editorial and expected
-- **Arrow icons** in buttons - Standard UX pattern
-
----
-
-## Implementation Priority
-
-1. Remove Sparkles icon from all files
-2. Update HeroSection trust items
-3. Update SocialProof section
-4. Update WhoThisIsFor lists
-5. Update PricingCTA features
-6. Update ProblemSection
-7. Update AIShowcase and AIAssistant
-8. Update Checkout trust elements
+1. Update HeroDemo.tsx (hero demo on landing page)
+2. Update ChatbotDemo.tsx (interactive demo section)
+3. Update ChatWidget.tsx (floating chat)
+4. Update ChatInterface.tsx (dashboard chat)
+5. Update all sidebar pages (Login, Signup, History, Saved, Stats, Referral, ReferralLanding)
+6. Update dashboard components (DashboardHeader, WelcomeBanner, NewsSummary, DashboardSidebar)
