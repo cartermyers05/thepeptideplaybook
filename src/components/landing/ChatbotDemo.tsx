@@ -128,7 +128,7 @@ export function ChatbotDemo() {
             Live Demo
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            See What Peptide Playbook AI Can Do
+            See It In Action
           </h2>
           <p className="text-muted-foreground text-lg">
             Ask one question free. Pick a topic below.
@@ -209,13 +209,13 @@ export function ChatbotDemo() {
                     <Sparkles className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-lg font-semibold mb-1">Want to keep exploring?</h4>
+                    <h4 className="text-lg font-semibold mb-1">Want unlimited questions?</h4>
                     <p className="text-muted-foreground text-sm mb-4">
-                      Unlock unlimited questions + the complete guide
+                      Create a free account to unlock the full AI research assistant
                     </p>
                     <Link to="/signup" className="relative z-10 inline-block">
                       <Button className="btn-primary-clean">
-                        Get Free Access
+                        Unlock Unlimited Questions
                       </Button>
                     </Link>
                   </div>

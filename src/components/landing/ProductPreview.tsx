@@ -139,7 +139,7 @@ export function ProductPreview() {
 
                 <Link to="/signup" className="relative z-10">
                   <Button className="btn-primary-clean group">
-                    Get Full Access
+                    Get Free Access Now
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>

@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
-import { Bot, Quote } from "lucide-react";
+import { BookOpen, FlaskConical, Database } from "lucide-react";
 
 function CountUp({ end, duration = 2 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);
@@ -23,21 +23,24 @@ function CountUp({ end, duration = 2 }: { end: number; duration?: number }) {
   return <span ref={ref}>{count}</span>;
 }
 
-const testimonials = [
+const stats = [
   {
-    quote: "It's like having a peptide researcher in my pocket. I finally understand what I'm reading.",
-    author: "Mike R.",
-    context: "Fitness enthusiast",
+    icon: BookOpen,
+    value: 500,
+    suffix: "+",
+    label: "Studies Analyzed",
   },
   {
-    quote: "I showed my doctor the AI's sources and research summaries. He was genuinely impressed.",
-    author: "Sarah K.",
-    context: "Health-conscious professional",
+    icon: FlaskConical,
+    value: 41,
+    suffix: "",
+    label: "Peptides Covered",
   },
   {
-    quote: "Finally, answers based on actual studies instead of Reddit threads and TikTok speculation.",
-    author: "James T.",
-    context: "Biohacker",
+    icon: Database,
+    value: 127,
+    suffix: "+",
+    label: "Citations Indexed",
   },
 ];
 
@@ -45,7 +48,7 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.2 },
+    transition: { staggerChildren: 0.15 },
   },
 };
 
@@ -56,99 +59,44 @@ const itemVariants = {
 
 export function SocialProof() {
   return (
-    <section id="about" className="py-24 md:py-32 bg-background">
+    <section id="about" className="py-16 md:py-20 bg-secondary/30 border-y border-border/50">
       <div className="container px-4">
-        {/* Testimonials */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="max-w-5xl mx-auto mb-20"
+          className="max-w-4xl mx-auto"
         >
-          <motion.div variants={itemVariants} className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <Bot className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">What Users Say</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-              Trusted by Peptide Researchers
+          <motion.div variants={itemVariants} className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-3">
+              Built on Real Research, Not Reddit
             </h2>
+            <p className="text-muted-foreground">
+              Every answer is backed by peer-reviewed studies and FDA data
+            </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
+          <motion.div 
+            variants={containerVariants}
+            className="grid grid-cols-3 gap-6 md:gap-12"
+          >
+            {stats.map((stat, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="glass-card p-6 relative"
-                whileHover={{ y: -4 }}
+                className="text-center"
               >
-                <Quote className="w-8 h-8 text-primary/20 absolute top-4 right-4" />
-                <p className="text-foreground leading-relaxed mb-4">
-                  "{testimonial.quote}"
-                </p>
-                <div>
-                  <p className="font-medium text-sm">{testimonial.author}</p>
-                  <p className="text-xs text-muted-foreground">{testimonial.context}</p>
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <stat.icon className="w-6 h-6 text-primary" />
                 </div>
+                <p className="text-3xl md:text-4xl font-bold text-foreground mb-1">
+                  <CountUp end={stat.value} />
+                  {stat.suffix}
+                </p>
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
               </motion.div>
             ))}
-          </div>
-        </motion.div>
-
-        {/* Why this exists */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="max-w-2xl mx-auto text-center"
-        >
-          <motion.h2 
-            variants={itemVariants}
-            className="text-3xl md:text-4xl font-semibold tracking-tight mb-8"
-          >
-            Why I Built This AI
-          </motion.h2>
-          
-          <div className="text-lg text-muted-foreground leading-relaxed space-y-6 text-left">
-            <motion.p variants={itemVariants}>
-              I spent months going down the peptide rabbit hole. TikTok videos, Reddit threads, 
-              sketchy forums. The more I researched, the more I realized most advice was unreliable 
-              at best, dangerous at worst.
-            </motion.p>
-            
-            <motion.p variants={itemVariants}>
-              <strong className="text-foreground">Peptide Playbook AI</strong> is the research assistant 
-              I wish existed when I started. It's trained on peer-reviewed literature, knows FDA 
-              classifications, and can compare peptides instantly. It won't tell you what to take—but 
-              it will help you understand what's actually going on.
-            </motion.p>
-          </div>
-          
-          <motion.div 
-            variants={itemVariants}
-            className="mt-10 pt-10 border-t border-border flex justify-center gap-8"
-          >
-            <div className="text-center">
-              <p className="text-2xl font-semibold text-foreground">
-                <CountUp end={200} />+
-              </p>
-              <p className="text-sm text-muted-foreground">hours of research</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-semibold text-foreground">
-                <CountUp end={500} />+
-              </p>
-              <p className="text-sm text-muted-foreground">studies reviewed</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-semibold text-foreground">
-                <CountUp end={41} />
-              </p>
-              <p className="text-sm text-muted-foreground">peptides covered</p>
-            </div>
           </motion.div>
         </motion.div>
       </div>

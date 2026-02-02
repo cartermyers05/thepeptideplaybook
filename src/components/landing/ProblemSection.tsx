@@ -1,12 +1,20 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { AlertCircle } from "lucide-react";
+
+const painPoints = [
+  "TikTok \"experts\" who bought one peptide once",
+  "Reddit threads that contradict every 3 comments",
+  "47 browser tabs and more confusion than when you started",
+  "Doctors who dismiss you or don't know what you're talking about",
+];
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
+      staggerChildren: 0.1,
     },
   },
 };
@@ -47,42 +55,42 @@ export function ProblemSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="max-w-3xl mx-auto"
+          className="max-w-2xl mx-auto text-center"
           style={{ y }}
         >
           <motion.h2 
             variants={itemVariants}
-            className="text-3xl md:text-4xl font-semibold tracking-tight text-center mb-10"
+            className="text-3xl md:text-4xl font-semibold tracking-tight mb-4"
           >
-            Why Peptide Research Is So Hard to Navigate
+            You've Tried to Research Peptides Before
           </motion.h2>
+          
+          <motion.p variants={itemVariants} className="text-lg text-muted-foreground mb-10">
+            Sound familiar?
+          </motion.p>
 
-          <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
-            <motion.p variants={itemVariants}>
-              Let's be honest about what's happening:
-            </motion.p>
+          <motion.div 
+            variants={containerVariants}
+            className="space-y-4 text-left max-w-lg mx-auto mb-10"
+          >
+            {painPoints.map((point, index) => (
+              <motion.div
+                key={index}
+                variants={itemVariants}
+                className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/50"
+              >
+                <AlertCircle className="w-5 h-5 text-destructive/70 flex-shrink-0 mt-0.5" />
+                <span className="text-foreground">{point}</span>
+              </motion.div>
+            ))}
+          </motion.div>
 
-            <motion.p variants={itemVariants}>
-              TikTok is full of 23-year-olds who bought peptides once and now think 
-              they're experts. Reddit threads contradict each other every three comments. 
-              The "research" people cite is usually one rat study from 2007.
-            </motion.p>
-
-            <motion.p variants={itemVariants}>
-              Meanwhile, the FDA just put half of the most popular peptides on the 
-              Category 2 list. Your doctor either doesn't know what you're talking about 
-              or dismisses you completely. And if you try to do your own research, you 
-              end up with 47 browser tabs open and more confused than when you started.
-            </motion.p>
-
-            <motion.p
-              variants={itemVariants}
-              className="text-foreground font-medium text-center pt-4 text-xl"
-            >
-              You don't need another influencer's opinion. You need actual information 
-              you can trust.
-            </motion.p>
-          </div>
+          <motion.p
+            variants={itemVariants}
+            className="text-foreground font-medium text-xl"
+          >
+            You don't need more opinions. You need a research assistant that actually knows the science.
+          </motion.p>
         </motion.div>
       </div>
     </section>

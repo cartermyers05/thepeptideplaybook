@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Gift } from "lucide-react";
+import { X, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -101,15 +101,15 @@ export function ExitIntentPopup() {
 
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <Gift className="w-8 h-8 text-primary" />
+            <FlaskConical className="w-8 h-8 text-primary" />
           </div>
 
           <h3 className="text-2xl font-bold mb-2">
-            Wait! Don't leave confused.
+            See the 3 FDA-Approved Peptides
           </h3>
 
           <p className="text-muted-foreground">
-            Get our free "5 Red Flags" checklist. Learn exactly what to watch for before buying anything.
+            Get a quick reference guide showing which peptides have actual FDA approval and what they're approved for.
           </p>
         </div>
 
@@ -138,7 +138,7 @@ export function ExitIntentPopup() {
             className="w-full h-12 btn-primary-clean"
             disabled={isLoading}
           >
-            {isLoading ? "Sending..." : "Send Me the Free Guide"}
+            {isLoading ? "Sending..." : "Send Me the Guide"}
           </Button>
         </form>
 

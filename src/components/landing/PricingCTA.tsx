@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, Shield, Sparkles } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const features = [
@@ -97,37 +97,19 @@ export function PricingCTA() {
             <Link to="/signup" className="w-full relative z-10 block">
               <Button size="lg" className="w-full btn-primary-clean h-12 text-base">
                 <Sparkles className="w-4 h-4 mr-2" />
-                Get Free Access
+                Create Free Account
               </Button>
             </Link>
 
-            <motion.div 
-              className="flex items-center justify-center gap-2 mt-6 text-sm text-muted-foreground"
+            <motion.p 
+              className="text-center text-sm text-muted-foreground mt-6"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5 }}
             >
-              <Shield className="w-4 h-4 text-success" />
-              <span>30-day money-back guarantee. No questions asked.</span>
-            </motion.div>
-
-            {/* Payment Method Icons */}
-            <motion.div 
-              className="flex items-center justify-center gap-3 mt-4 pt-4 border-t border-border/50"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.6 }}
-            >
-              <span className="text-xs text-muted-foreground">Secure payment via</span>
-              <div className="flex items-center gap-2">
-                <div className="bg-muted/50 rounded px-2 py-1 text-xs font-medium text-muted-foreground">Visa</div>
-                <div className="bg-muted/50 rounded px-2 py-1 text-xs font-medium text-muted-foreground">Mastercard</div>
-                <div className="bg-muted/50 rounded px-2 py-1 text-xs font-medium text-muted-foreground">Amex</div>
-                <div className="bg-muted/50 rounded px-2 py-1 text-xs font-medium text-muted-foreground">Stripe</div>
-              </div>
-            </motion.div>
+              No credit card required. Start researching in 30 seconds.
+            </motion.p>
           </div>
         </motion.div>
 

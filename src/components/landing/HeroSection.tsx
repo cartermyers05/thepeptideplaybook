@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Shield, Zap, Clock, ArrowRight } from "lucide-react";
+import { Users, Sparkles, CreditCard, ArrowRight } from "lucide-react";
 import { HeroDemo } from "./HeroDemo";
 import { Link } from "react-router-dom";
 
 const trustItems = [
-  { icon: Shield, text: "30-Day Guarantee" },
-  { icon: Zap, text: "Instant Access" },
-  { icon: Clock, text: "No Subscription" },
+  { icon: Users, text: "200+ researchers" },
+  { icon: Sparkles, text: "Free forever" },
+  { icon: CreditCard, text: "No credit card" },
 ];
 
 const containerVariants = {
@@ -48,14 +48,14 @@ export function HeroSection() {
               variants={itemVariants}
               className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6"
             >
-              Ask Anything About Peptides
+              Stop Guessing.
               <motion.span
                 className="block text-gradient mt-2"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
               >
-                Get Research Backed Answers
+                Start Understanding.
               </motion.span>
             </motion.h1>
 
@@ -64,28 +64,21 @@ export function HeroSection() {
               variants={itemVariants}
               className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed"
             >
-              Your 24/7 AI research assistant that knows 41+ peptides, their FDA status, mechanisms, and the latest studies.
+              Get instant answers on BPC-157, Semaglutide, and 41+ peptides. No more Reddit rabbit holes. Your AI research assistant is ready.
             </motion.p>
 
-            {/* Stats row */}
+            {/* Social proof snippet */}
             <motion.div
               variants={itemVariants}
-              className="flex flex-wrap justify-center lg:justify-start gap-6 mb-8"
+              className="mb-8 inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-muted/50 border border-border/50"
             >
-              <div className="text-center lg:text-left">
-                <p className="text-2xl font-bold text-gradient">41+</p>
-                <p className="text-xs text-muted-foreground">Peptides</p>
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-sm">💬</span>
               </div>
-              <div className="h-10 w-px bg-border" />
-              <div className="text-center lg:text-left">
-                <p className="text-2xl font-bold text-gradient">500+</p>
-                <p className="text-xs text-muted-foreground">Studies</p>
-              </div>
-              <div className="h-10 w-px bg-border" />
-              <div className="text-center lg:text-left">
-                <p className="text-2xl font-bold text-gradient">24/7</p>
-                <p className="text-xs text-muted-foreground">Instant</p>
-              </div>
+              <p className="text-sm text-muted-foreground italic">
+                "Finally, answers based on actual studies."
+                <span className="text-foreground font-medium ml-1">— James, Biohacker</span>
+              </p>
             </motion.div>
 
             {/* CTAs */}
@@ -93,20 +86,21 @@ export function HeroSection() {
               variants={itemVariants}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
             >
-              <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-                <Link to="/signup">
-                  Get Free Access
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm"
-              >
-                <a href="#demo">See More Examples</a>
-              </Button>
+              <Link to="/signup">
+                <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group w-full sm:w-auto">
+                  Try It Free Now
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <a href="#demo">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="h-12 px-8 text-base hover-lift border-border/60 bg-background/50 backdrop-blur-sm w-full sm:w-auto"
+                >
+                  Watch Demo
+                </Button>
+              </a>
             </motion.div>
 
             {/* Trust signals */}
