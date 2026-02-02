@@ -79,12 +79,8 @@ export default function Signup() {
   };
 
   const handleContinue = () => {
-    // If promo code was successfully applied, go to dashboard
-    if (validPromoCode && promoCodeType === "free_access") {
-      navigate("/dashboard");
-    } else {
-      navigate("/checkout");
-    }
+    // Billing disabled - always go to dashboard
+    navigate("/dashboard");
   };
 
   return (
@@ -290,15 +286,11 @@ export default function Signup() {
                 Welcome to PeptideGPT!
               </h1>
               <p className="text-muted-foreground mb-8">
-                {validPromoCode && promoCodeType === "free_access"
-                  ? "Your VIP access has been activated. You're all set!"
-                  : "Your account is ready. Complete your purchase to unlock full access."}
+                Your account is ready. You have full access to everything!
               </p>
 
               <Button size="lg" className="w-full h-12" onClick={handleContinue}>
-                {validPromoCode && promoCodeType === "free_access"
-                  ? "Go to Dashboard"
-                  : "Complete Purchase"}
+                Go to Dashboard
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </motion.div>

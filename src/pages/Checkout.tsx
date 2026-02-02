@@ -129,8 +129,8 @@ export default function Checkout() {
       <div className="text-center max-w-sm px-4">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-xl font-semibold mb-1">Full Access — $67</h1>
-          <p className="text-sm text-muted-foreground">One-time payment, lifetime access</p>
+          <h1 className="text-xl font-semibold mb-1">Free Access</h1>
+          <p className="text-sm text-muted-foreground">No payment required</p>
         </div>
 
         {/* Promo code section */}

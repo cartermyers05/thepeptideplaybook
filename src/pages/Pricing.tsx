@@ -67,7 +67,7 @@ export default function Pricing() {
     <>
       <SEOHead
         title="Pricing | Peptide Playbook AI"
-        description="Get full access to Peptide Playbook AI for $67. One-time payment, lifetime access, 30-day money-back guarantee."
+        description="Get free access to Peptide Playbook AI. No payment required, instant access to all features."
       />
       <div className="min-h-screen bg-background">
         <Navbar />
