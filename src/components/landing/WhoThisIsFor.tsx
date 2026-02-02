@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { Check, X } from "lucide-react";
 
 const forYou = [
   "You're curious about peptides but tired of conflicting information",
@@ -36,20 +35,13 @@ export function WhoThisIsFor() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="glass-card-success p-6 md:p-8"
+            className="content-card p-6 md:p-8"
           >
-            <h3 className="text-xl font-semibold mb-6 flex items-center gap-3">
-              <motion.div 
-                className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center"
-                whileHover={{ scale: 1.1 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <Check className="w-4 h-4 text-success" />
-              </motion.div>
+            <h3 className="text-xl font-semibold mb-6 text-success">
               This Is For You If...
             </h3>
             <motion.ul 
-              className="space-y-4"
+              className="space-y-3"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -58,16 +50,10 @@ export function WhoThisIsFor() {
               {forYou.map((item, index) => (
                 <motion.li 
                   key={index} 
-                  className="flex items-start gap-3"
+                  className="pl-4 border-l-2 border-success/60 text-muted-foreground py-1"
                   variants={listItemVariants}
                 >
-                  <motion.div 
-                    className="w-5 h-5 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0 mt-0.5"
-                    whileHover={{ scale: 1.2 }}
-                  >
-                    <Check className="w-3 h-3 text-success" />
-                  </motion.div>
-                  <span className="text-muted-foreground">{item}</span>
+                  {item}
                 </motion.li>
               ))}
             </motion.ul>
@@ -79,20 +65,13 @@ export function WhoThisIsFor() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="glass-card-destructive p-6 md:p-8"
+            className="content-card p-6 md:p-8"
           >
-            <h3 className="text-xl font-semibold mb-6 flex items-center gap-3">
-              <motion.div 
-                className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center"
-                whileHover={{ scale: 1.1 }}
-                transition={{ type: "spring", stiffness: 400 }}
-              >
-                <X className="w-4 h-4 text-destructive" />
-              </motion.div>
+            <h3 className="text-xl font-semibold mb-6 text-destructive">
               Not For You If...
             </h3>
             <motion.ul 
-              className="space-y-4"
+              className="space-y-3"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -101,16 +80,10 @@ export function WhoThisIsFor() {
               {notForYou.map((item, index) => (
                 <motion.li 
                   key={index} 
-                  className="flex items-start gap-3"
+                  className="pl-4 border-l-2 border-destructive/60 text-muted-foreground py-1"
                   variants={listItemVariants}
                 >
-                  <motion.div 
-                    className="w-5 h-5 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0 mt-0.5"
-                    whileHover={{ scale: 1.2 }}
-                  >
-                    <X className="w-3 h-3 text-destructive" />
-                  </motion.div>
-                  <span className="text-muted-foreground">{item}</span>
+                  {item}
                 </motion.li>
               ))}
             </motion.ul>

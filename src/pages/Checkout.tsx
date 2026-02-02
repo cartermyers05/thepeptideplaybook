@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useCheckout } from "@/hooks/useCheckout";
 import { useAuth } from "@/hooks/useAuth";
 import { useTier } from "@/hooks/useTier";
-import { Shield, CreditCard, RefreshCcw, Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 import { PromoCodeInput } from "@/components/auth/PromoCodeInput";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -176,20 +176,13 @@ export default function Checkout() {
           </div>
         )}
         
-        {/* Trust elements */}
-        <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Shield className="w-3.5 h-3.5" />
-            <span>256-bit SSL</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <CreditCard className="w-3.5 h-3.5" />
-            <span>Stripe</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <RefreshCcw className="w-3.5 h-3.5" />
-            <span>30-day refund</span>
-          </div>
+        {/* Trust elements - text only with dot separators */}
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <span>256-bit SSL</span>
+          <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+          <span>Powered by Stripe</span>
+          <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+          <span>30-day refund</span>
         </div>
       </div>
     </div>

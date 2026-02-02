@@ -1,6 +1,5 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
-import { BookOpen, FlaskConical, AlertTriangle } from "lucide-react";
 
 function CountUp({ end, duration = 2 }: { end: number; duration?: number }) {
   const [count, setCount] = useState(0);
@@ -25,19 +24,16 @@ function CountUp({ end, duration = 2 }: { end: number; duration?: number }) {
 
 const stats = [
   {
-    icon: BookOpen,
     value: 15,
     suffix: "",
     label: "Research Guides",
   },
   {
-    icon: AlertTriangle,
     value: 47,
     suffix: "",
     label: "TikTok Myths Exposed",
   },
   {
-    icon: FlaskConical,
     value: 200,
     suffix: "+",
     label: "Studies Cited",
@@ -87,9 +83,8 @@ export function SocialProof() {
                 variants={itemVariants}
                 className="text-center"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <stat.icon className="w-6 h-6 text-primary" />
-                </div>
+                {/* Accent line instead of icon */}
+                <div className="w-8 h-0.5 bg-primary/60 mx-auto mb-4" />
                 <p className="text-3xl md:text-4xl font-bold text-foreground mb-1">
                   <CountUp end={stat.value} />
                   {stat.suffix}

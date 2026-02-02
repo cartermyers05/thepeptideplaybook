@@ -1,6 +1,5 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { AlertCircle } from "lucide-react";
 
 const painPoints = [
   "TikTok \"experts\" who bought one peptide once",
@@ -77,9 +76,11 @@ export function ProblemSection() {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border/50"
+                className="flex items-start gap-4 p-4 rounded-xl bg-muted/50 border border-border/50"
               >
-                <AlertCircle className="w-5 h-5 text-destructive/70 flex-shrink-0 mt-0.5" />
+                <span className="text-destructive/70 font-semibold flex-shrink-0 tabular-nums">
+                  {index + 1}.
+                </span>
                 <span className="text-foreground">{point}</span>
               </motion.div>
             ))}
