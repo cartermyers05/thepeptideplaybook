@@ -67,20 +67,6 @@ export function HeroSection() {
               Get instant answers on BPC-157, Semaglutide, and 41+ peptides. No more Reddit rabbit holes. Your AI research assistant is ready.
             </motion.p>
 
-            {/* Social proof snippet */}
-            <motion.div
-              variants={itemVariants}
-              className="mb-8 inline-flex items-center gap-3 px-4 py-2.5 rounded-xl bg-muted/50 border border-border/50"
-            >
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-sm">💬</span>
-              </div>
-              <p className="text-sm text-muted-foreground italic">
-                "Finally, answers based on actual studies."
-                <span className="text-foreground font-medium ml-1">— James, Biohacker</span>
-              </p>
-            </motion.div>
-
             {/* CTAs */}
             <motion.div
               variants={itemVariants}
