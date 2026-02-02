@@ -21,7 +21,7 @@ const faqs = [
   },
   {
     question: "Is this a subscription?",
-    answer: "No subscription required. Create a free account and get instant access to everything, including all future updates.",
+    answer: "No. You pay once ($67) and get lifetime access to everything, including all future updates. No recurring charges ever.",
   },
   {
     question: "Will this tell me what peptides to take?",

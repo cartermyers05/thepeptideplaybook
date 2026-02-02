@@ -27,6 +27,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Billing disabled - just require authentication
+  // Not paid → go to checkout
+  if (!isPaid) {
+    return <Navigate to="/checkout" replace />;
+  }
+
   return <>{children}</>;
 }

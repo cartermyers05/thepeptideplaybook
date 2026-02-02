@@ -67,13 +67,21 @@ export default function Checkout() {
   };
 
   useEffect(() => {
-    // Billing disabled - redirect authenticated users straight to dashboard
-    if (authLoading) return;
+    // If user is authenticated, already paid, and not processing promo
+    if (authLoading || tierLoading || isRedeemingPromoCode) return;
     
-    if (user) {
+    // Already paid → go to dashboard
+    if (user && isPaid) {
       navigate("/dashboard", { replace: true });
+      return;
     }
-  }, [authLoading, user, navigate]);
+    
+    // Authenticated but not paid → trigger checkout
+    if (user && !isPaid && !hasStartedRef.current && !promoApplied && !isRedeeming) {
+      hasStartedRef.current = true;
+      startCheckout();
+    }
+  }, [authLoading, tierLoading, user, isPaid, startCheckout, promoApplied, isRedeeming, isRedeemingPromoCode, navigate]);
 
   // Show loading while checking auth, tier, or redeeming promo
   if (authLoading || tierLoading || isRedeemingPromoCode) {
@@ -129,9 +137,25 @@ export default function Checkout() {
       <div className="text-center max-w-sm px-4">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-xl font-semibold mb-1">Free Access</h1>
-          <p className="text-sm text-muted-foreground">No payment required</p>
+          <h1 className="text-xl font-semibold mb-1">Complete Your Purchase</h1>
+          <p className="text-sm text-muted-foreground">One-time payment: $67</p>
         </div>
+
+        {/* Pay button as fallback */}
+        {!isLoading && !isRedeeming && (
+          <Button 
+            size="lg" 
+            className="w-full btn-primary-clean h-12 mb-6"
+            onClick={() => {
+              if (!hasStartedRef.current) {
+                hasStartedRef.current = true;
+                startCheckout();
+              }
+            }}
+          >
+            Pay $67 — Get Full Access
+          </Button>
+        )}
 
         {/* Promo code section */}
         <div className="mb-6 text-left">
