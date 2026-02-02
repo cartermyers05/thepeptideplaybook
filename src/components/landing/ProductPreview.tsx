@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Bot, Database, ShieldCheck, Mail, Sparkles, ArrowRight } from "lucide-react";
+import { Database, ShieldCheck, Mail, ArrowRight } from "lucide-react";
 import { FloatingOrbs } from "./FloatingOrbs";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -100,11 +100,11 @@ export function ProductPreview() {
               <div>
                 <div className="flex items-center gap-3 mb-4">
                   <motion.div 
-                    className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center"
+                    className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     transition={{ type: "spring", stiffness: 400 }}
                   >
-                    <Bot className="w-7 h-7 text-primary" />
+                    <span className="text-lg font-bold text-primary-foreground">PP</span>
                   </motion.div>
                   <div>
                     <div className="flex items-center gap-2">
@@ -131,7 +131,7 @@ export function ProductPreview() {
                       transition={{ delay: 0.1 * index }}
                       className="flex items-center gap-2 text-sm"
                     >
-                      <Sparkles className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
                       <span>{feature}</span>
                     </motion.li>
                   ))}
