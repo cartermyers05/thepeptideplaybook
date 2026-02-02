@@ -1,328 +1,326 @@
 
-# AI Citation Upgrade v2: Complete Implementation Plan
+# Enable Billing: Complete Payment Flow Implementation
 
 ## Overview
 
-This plan transforms Peptide Playbook guides from "articles" to "reference desk" format by adding Evidence Tables, trust signal pages, changelog components, and 8 new high-intent fear/safety pages.
+This plan re-enables the $67 one-time payment requirement and ensures all user flows work correctly. The billing system infrastructure already exists (Stripe integration, edge functions, thank-you page verification), but it was disabled by hardcoding `isPaid = true` and bypassing checkout redirects.
 
 ---
 
-## Part 1: New Components to Create
+## Current State Analysis
 
-### 1. EvidenceTable.tsx
-**Location:** `src/components/guides/EvidenceTable.tsx`
+### What's Currently Broken (Billing Disabled)
 
-A structured table that AI search engines can easily extract for citation.
+| File | Issue |
+|------|-------|
+| `src/hooks/useTier.ts` | Line 13: `isPaid = true` hardcoded for all users |
+| `src/components/auth/ProtectedRoute.tsx` | Line 31: Only checks auth, doesn't redirect unpaid users to checkout |
+| `src/pages/Checkout.tsx` | Lines 69-76: Immediately redirects authenticated users to dashboard |
+| `src/pages/Signup.tsx` | Line 82-84: Always navigates to dashboard after signup |
+| Landing page components | Show "Free" pricing instead of "$67" |
+| `src/pages/Pricing.tsx` | Displays "Free" instead of $67 pricing |
 
-**Interface:**
+### What Already Works
+
+- `create-checkout` edge function: Creates Stripe sessions correctly
+- `verify-payment` edge function: Verifies payment and updates tier to "member"
+- `ThankYou.tsx`: Handles verification flow properly
+- `useCheckout.ts` hook: Redirects to Stripe correctly
+- Promo code system: Works for VIP access bypass
+- Profile tier tracking: Database has `tier` column
+
+---
+
+## Implementation Plan
+
+### Phase 1: Core Billing Logic (3 files)
+
+#### 1.1 Fix `useTier.ts`
+
+**Current (broken):**
 ```typescript
-interface Study {
-  studyType: "Cell" | "Animal" | "Human";
-  species?: string;
-  sampleSize?: string;
-  condition: string;
-  outcome: string;
-  result: string;
-  pubmedLink?: string;
+// Free access for everyone - billing disabled
+const isPaid = true;
+```
+
+**Fixed:**
+```typescript
+// User is paid if tier is anything other than "free"
+const isPaid = rawTier !== "free" && rawTier !== null;
+```
+
+#### 1.2 Fix `ProtectedRoute.tsx`
+
+**Current (broken):**
+```typescript
+// Billing disabled - just require authentication
+return <>{children}</>;
+```
+
+**Fixed:**
+```typescript
+// Not paid → go to checkout
+if (!isPaid) {
+  return <Navigate to="/checkout" replace />;
+}
+
+return <>{children}</>;
+```
+
+#### 1.3 Fix `Checkout.tsx`
+
+**Remove this block (lines 69-76):**
+```typescript
+useEffect(() => {
+  // Billing disabled - redirect authenticated users straight to dashboard
+  if (authLoading) return;
+  
+  if (user) {
+    navigate("/dashboard", { replace: true });
+  }
+}, [authLoading, user, navigate]);
+```
+
+**Replace with proper checkout trigger:**
+```typescript
+useEffect(() => {
+  // If user is authenticated and not paid, start checkout
+  if (authLoading || tierLoading) return;
+  
+  if (user && !isPaid && !hasStartedRef.current && !promoApplied) {
+    hasStartedRef.current = true;
+    startCheckout();
+  }
+}, [authLoading, tierLoading, user, isPaid, startCheckout, promoApplied]);
+```
+
+**Update UI copy:**
+- Change "Free Access" to "Complete Access"
+- Change "No payment required" to "One-time payment: $67"
+- Add a visible "Pay $67" button as fallback
+
+---
+
+### Phase 2: Signup Flow Fix (1 file)
+
+#### 2.1 Fix `Signup.tsx`
+
+**Current (broken):**
+```typescript
+const handleContinue = () => {
+  // Billing disabled - always go to dashboard
+  navigate("/dashboard");
+};
+```
+
+**Fixed:**
+```typescript
+const handleContinue = () => {
+  // Check if user has valid promo code or needs to pay
+  if (validPromoCode && promoCodeType === "free_access") {
+    navigate("/dashboard");
+  } else {
+    navigate("/checkout");
+  }
+};
+```
+
+**Update welcome message:**
+- Current: "Your account is ready. You have full access to everything!"
+- Fixed: "Your account is ready. Complete checkout to unlock full access."
+
+---
+
+### Phase 3: Landing Page Pricing Updates (5 files)
+
+#### 3.1 `HeroSection.tsx`
+
+**Update trust items (line 8-11):**
+```typescript
+const trustItems = [
+  { icon: Users, text: "4,200+ researchers" },
+  { icon: Shield, text: "30-day guarantee" },
+  { icon: CreditCard, text: "$67 one-time" },
+];
+```
+
+**Update CTA button text:**
+- Change "Try It Free Now" to "Get Full Access"
+
+#### 3.2 `PricingCTA.tsx`
+
+**Update pricing display:**
+```typescript
+<div className="flex items-baseline gap-2">
+  <span className="text-5xl font-bold text-gradient">$67</span>
+  <span className="text-muted-foreground line-through">$197</span>
+</div>
+<p className="text-sm text-muted-foreground mt-2">
+  One-time payment. Lifetime access.
+</p>
+```
+
+**Update button:**
+- Change "Create Free Account" to "Get Full Access"
+
+**Update bottom text:**
+- Change "No credit card required" to "30-day money-back guarantee"
+
+#### 3.3 `Navbar.tsx`
+
+**Update CTA button:**
+- Change "Try Free" to "Get Access"
+
+#### 3.4 `FloatingCTA.tsx`
+
+**Update button:**
+- Change "Try Free" to "Get Access"
+
+#### 3.5 `Pricing.tsx`
+
+**Full page update:**
+- Change "Free" to "$67"
+- Update copy to match paid offering
+- Route button to `/checkout` instead of `/signup`
+
+---
+
+### Phase 4: FAQ Updates (2 files)
+
+#### 4.1 `FAQ.tsx` (landing page)
+
+**Update FAQ item 4:**
+```typescript
+{
+  question: "Is this a subscription?",
+  answer: "No. You pay once ($67) and get lifetime access to everything, including all future updates. No recurring charges ever.",
 }
 ```
 
-**Design:**
-- Clean table with alternating row colors
-- Study type badges: Cell (gray), Animal (yellow), Human (green)
-- Clickable PubMed links in last column
-- Mobile responsive (stacks cards on small screens)
-- Accessibility: proper table semantics
+#### 4.2 `Pricing.tsx` FAQ section
 
-### 2. GuideChangelog.tsx
-**Location:** `src/components/guides/GuideChangelog.tsx`
+Same update as above.
 
-Displays update history for trust signals.
+---
 
-**Interface:**
+### Phase 5: UpgradePrompt Component Update
+
+#### 5.1 `UpgradePrompt.tsx`
+
+**Update copy:**
 ```typescript
-interface ChangelogEntry {
-  date: string;
-  change: string;
-}
-```
+<p className="text-muted-foreground max-w-md mb-8">
+  Get full access to {feature.toLowerCase()} and all other features for just $67.
+</p>
 
-**Design:**
-- Simple table format with "Update History" header
-- Most recent changes first
-- Collapsible if more than 5 entries
-
----
-
-## Part 2: Trust Signal Pages (2 New Pages)
-
-### Page 1: Editorial Policy
-**File:** `src/pages/EditorialPolicy.tsx`
-**Route:** `/editorial-policy`
-
-**Sections:**
-1. Our Mission
-2. How We Evaluate Evidence
-3. Evidence Hierarchy We Use (RCTs > Human observational > Animal > Cell > Anecdotal)
-4. What We Don't Do (no medical advice, no dosages, no peptide sales)
-5. Update Policy
-6. Contact
-
-**Schema:** Organization schema with publishingPrinciples property
-
-### Page 2: About Page Update
-**File:** `src/pages/About.tsx` (existing, needs update)
-
-**Changes:**
-- Add link to Editorial Policy
-- Add "Our Team" section (structure for future advisor)
-- Add "Content Review" note: "Our content is reviewed for accuracy by healthcare professionals with expertise in peptide therapy and sports medicine."
-
----
-
-## Part 3: Partners/Affiliate Page
-
-### Partners Page
-**File:** `src/pages/Partners.tsx`
-**Route:** `/partners`
-
-**Sections:**
-1. Hero: "Earn 50% Commission Educating Your Audience"
-2. Commission Structure (50% per sale, 30-day cookie, monthly payout)
-3. What You Get (tracking link, swipe copy, hook scripts, free product)
-4. Who We're Looking For (wellness creators, biohackers, fitness influencers)
-5. 5 Hook Scripts (displayed as copyable cards)
-6. Application Form (Name, Email, Social handle, Followers, Why partner, How promote)
-
----
-
-## Part 4: Fear/Safety Guide Pages (8 New Pages)
-
-All pages follow the standard GuideLayout pattern with:
-- QuickAnswerBox with evidence-level language
-- EvidenceTable (where applicable)
-- GuideTableOfContents
-- GuideFAQ with schema
-- GuideChangelog
-- PrimarySources
-- WhatWeDontKnow
-
-### Page 1: BPC-157 Cancer Risk
-**File:** `src/pages/guides/BPC157CancerRisk.tsx`
-**Route:** `/guides/bpc-157-cancer-risk`
-**Target Query:** "BPC-157 cancer risk"
-
-**Quick Answer:** There is no direct evidence that BPC-157 causes cancer in humans. However, BPC-157 promotes angiogenesis (blood vessel growth), and some researchers have raised theoretical concerns that this could potentially support tumor growth in people who already have cancer. No human studies have evaluated cancer risk. This remains an unknown.
-
-**Sections:**
-1. The Angiogenesis Concern Explained
-2. What Animal Studies Show
-3. What We Don't Know
-4. Who Should Be Extra Cautious
-5. The Honest Answer
-6. Primary Sources
-7. FAQ
-
-### Page 2: BPC-157 Drug Test
-**File:** `src/pages/guides/BPC157DrugTest.tsx`
-**Route:** `/guides/bpc-157-drug-test`
-**Target Query:** "BPC-157 drug test detection window"
-
-**Quick Answer:** BPC-157 is banned by WADA and can be detected in anti-doping tests. Detection methods exist but are not used in standard employment or military drug panels. WADA/USADA athletic testing and some military performance-enhancement screenings can detect peptides. Detection windows are not well-established publicly.
-
-**Sections:**
-1. What Drug Tests Look For
-2. WADA/USADA Testing (Athletes)
-3. Military Drug Testing
-4. Employment Drug Tests
-5. Detection Window (What We Know)
-6. Primary Sources
-7. FAQ
-
-### Page 3: BPC-157 Infection Risk
-**File:** `src/pages/guides/BPC157InfectionRisk.tsx`
-**Route:** `/guides/bpc-157-infection-risk`
-**Target Query:** "BPC-157 injection site infection risk"
-
-**Quick Answer:** Injection site infections are a real risk when self-administering any injectable, including BPC-157. Risks include bacterial infection, abscess formation, and cellulitis. These risks increase with non-sterile technique, contaminated products, or reusing needles. This is harm reduction information, not encouragement to use research peptides.
-
-**Sections:**
-1. Why Injection Infections Happen
-2. Signs of Injection Site Infection
-3. When to Seek Medical Care
-4. Risk Factors
-5. Product Contamination Concerns
-6. Primary Sources
-7. FAQ
-
-### Page 4: TB-500 Side Effects
-**File:** `src/pages/guides/TB500SideEffects.tsx`
-**Route:** `/guides/tb-500-side-effects`
-**Target Query:** "TB-500 side effects human data"
-
-**Quick Answer:** There is almost no published human safety data on TB-500 (Thymosin Beta-4). Side effect information comes primarily from anecdotal reports, not clinical trials. Reported effects include headache, nausea, and injection site reactions. TB-500 is FDA Category 2 and cannot be legally compounded. Long-term safety is completely unknown.
-
-### Page 5: CJC-1295 Safety
-**File:** `src/pages/guides/CJC1295Safety.tsx`
-**Route:** `/guides/cjc-1295-safety`
-**Target Query:** "CJC-1295 safety FDA concerns"
-
-**Quick Answer:** CJC-1295 is a growth hormone releasing hormone (GHRH) analog that stimulates natural GH production. The FDA has noted serious adverse events associated with growth hormone secretagogues. Side effects may include water retention, joint pain, numbness/tingling, and potential effects on blood sugar. It is not FDA-approved for anti-aging or performance use.
-
-### Page 6: Verify Peptide COA
-**File:** `src/pages/guides/VerifyPeptideCOA.tsx`
-**Route:** `/guides/verify-peptide-coa`
-**Target Query:** "how to verify peptide COA HPLC mass spec"
-
-**Quick Answer:** A Certificate of Analysis (COA) should include HPLC (purity testing) and Mass Spectrometry (identity confirmation). Red flags: no COA provided, COA without batch numbers, purity below 98%, no lab name, or COA that does not match your batch. Legitimate suppliers provide third-party testing from ISO-certified labs.
-
-### Page 7: Peptide Contamination
-**File:** `src/pages/guides/PeptideContamination.tsx`
-**Route:** `/guides/peptide-contamination`
-**Target Query:** "research peptides contamination risks"
-
-**Quick Answer:** Contamination is a significant risk in the unregulated peptide market. Contaminants can include bacteria, endotoxins, heavy metals, residual solvents, and other peptides. Unlike pharmaceutical drugs, research peptides have no FDA manufacturing oversight. Contamination has caused infections, allergic reactions, and unknown long-term effects.
-
-### Page 8: Peptide TikTok Myths
-**File:** `src/pages/guides/PeptideTikTokMyths.tsx`
-**Route:** `/guides/peptide-tiktok-myths`
-**Target Query:** "peptide myths TikTok"
-
-**Quick Answer:** TikTok has popularized peptides with viral claims about "wolverine healing," "reversing aging," and "miracle fat loss." Most of these claims extrapolate wildly from limited animal research. This guide fact-checks the most common TikTok peptide claims against what peer-reviewed research actually shows.
-
-**Sections:**
-1. Myth: "BPC-157 heals anything in 2 weeks"
-2. Myth: "Peptides are completely safe because they're natural"
-3. Myth: "The FDA banned peptides because Big Pharma"
-4. Myth: "Everyone in Hollywood uses peptides"
-5. Myth: "You don't need a doctor for peptides"
-6. What's Actually True
-7. Primary Sources
-8. FAQ
-
----
-
-## Part 5: Update Existing Guides (4 Pages)
-
-Add to each of these existing guide pages:
-- **EvidenceTable** component (after QuickAnswerBox, before main content)
-- **GuideChangelog** component (before FAQ section)
-- **"Last reviewed" date** visible near title (update QuickAnswerBox)
-
-### Pages to Update:
-| Page | Evidence Table Data |
-|------|---------------------|
-| BPC157Guide.tsx | 4-5 animal studies from systematic review |
-| FDALegalStatusGuide.tsx | Regulatory timeline table (different format) |
-| ArePeptidesSafeGuide.tsx | General safety evidence summary |
-| BPC157vsTB500Guide.tsx | Comparative evidence table |
-
----
-
-## Part 6: File Changes Summary
-
-### New Files to Create (12 files)
-
-| File | Type |
-|------|------|
-| `src/components/guides/EvidenceTable.tsx` | Component |
-| `src/components/guides/GuideChangelog.tsx` | Component |
-| `src/pages/EditorialPolicy.tsx` | Page |
-| `src/pages/Partners.tsx` | Page |
-| `src/pages/guides/BPC157CancerRisk.tsx` | Guide |
-| `src/pages/guides/BPC157DrugTest.tsx` | Guide |
-| `src/pages/guides/BPC157InfectionRisk.tsx` | Guide |
-| `src/pages/guides/TB500SideEffects.tsx` | Guide |
-| `src/pages/guides/CJC1295Safety.tsx` | Guide |
-| `src/pages/guides/VerifyPeptideCOA.tsx` | Guide |
-| `src/pages/guides/PeptideContamination.tsx` | Guide |
-| `src/pages/guides/PeptideTikTokMyths.tsx` | Guide |
-
-### Files to Modify (8 files)
-
-| File | Changes |
-|------|---------|
-| `src/App.tsx` | Add 10 new routes |
-| `src/pages/About.tsx` | Add Editorial Policy link, advisor structure |
-| `src/pages/Guides.tsx` | Add 8 new guide cards |
-| `src/pages/guides/BPC157Guide.tsx` | Add EvidenceTable, GuideChangelog |
-| `src/pages/guides/FDALegalStatusGuide.tsx` | Add timeline table, GuideChangelog |
-| `src/pages/guides/ArePeptidesSafeGuide.tsx` | Add EvidenceTable, GuideChangelog |
-| `src/pages/guides/BPC157vsTB500Guide.tsx` | Add EvidenceTable, GuideChangelog |
-| `src/components/landing/Footer.tsx` | Add Editorial Policy and Partners links |
-| `public/sitemap.xml` | Add 10 new URLs |
-
----
-
-## Part 7: Sitemap Additions
-
-Add these URLs to `public/sitemap.xml`:
-
-```xml
-<!-- Trust Signal Pages -->
-<url>
-  <loc>https://peptideplaybook.com/editorial-policy</loc>
-  <lastmod>2026-02-02</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.6</priority>
-</url>
-<url>
-  <loc>https://peptideplaybook.com/partners</loc>
-  <lastmod>2026-02-02</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.7</priority>
-</url>
-
-<!-- Fear/Safety Pages (8 entries) -->
-<url>
-  <loc>https://peptideplaybook.com/guides/bpc-157-cancer-risk</loc>
-  <lastmod>2026-02-02</lastmod>
-  <changefreq>monthly</changefreq>
-  <priority>0.8</priority>
-</url>
-<!-- ... 7 more guide entries -->
+<Button asChild size="lg" className="btn-primary-clean">
+  <Link to="/checkout">
+    Unlock for $67
+  </Link>
+</Button>
 ```
 
 ---
 
-## Part 8: Implementation Priority Order
+## Complete File Changes Summary
 
-1. **EvidenceTable component** (used by multiple pages)
-2. **GuideChangelog component** (used by all guides)
-3. **EditorialPolicy page** (trust signal, links from other pages)
-4. **Partners page** (revenue driver)
-5. **PeptideTikTokMyths guide** (shareable, linkable, high engagement)
-6. **BPC157CancerRisk guide** (high intent query)
-7. **VerifyPeptideCOA guide** (high intent query)
-8. Update 4 existing guides with EvidenceTable + Changelog
-9. Remaining fear/safety pages
-10. Sitemap and routing updates
-11. Footer link updates
-
----
-
-## Technical Notes
-
-- All new guides follow the exact same pattern as `BPC157Guide.tsx`
-- EvidenceTable is mobile-first (card view on small screens, table on desktop)
-- GuideChangelog is collapsible to save vertical space
-- QuickAnswerBox already displays "Last Updated" date
-- Partners form will use a simple state-based form (no backend needed initially)
-- All external links open in new tabs with `rel="noopener noreferrer"`
-- FAQ schema automatically injected via GuideFAQ component
+| File | Change Type | Key Changes |
+|------|-------------|-------------|
+| `src/hooks/useTier.ts` | Logic fix | `isPaid` based on actual tier |
+| `src/components/auth/ProtectedRoute.tsx` | Logic fix | Redirect unpaid to `/checkout` |
+| `src/pages/Checkout.tsx` | Logic + UI | Auto-trigger checkout, update copy |
+| `src/pages/Signup.tsx` | Logic + UI | Route to checkout if no promo |
+| `src/components/landing/HeroSection.tsx` | Copy | $67 pricing, updated CTAs |
+| `src/components/landing/PricingCTA.tsx` | Copy | $67 pricing, updated CTAs |
+| `src/components/landing/Navbar.tsx` | Copy | "Get Access" CTA |
+| `src/components/landing/FloatingCTA.tsx` | Copy | "Get Access" CTA |
+| `src/components/landing/FAQ.tsx` | Copy | Subscription answer update |
+| `src/pages/Pricing.tsx` | Full update | $67 pricing throughout |
+| `src/components/dashboard/UpgradePrompt.tsx` | Copy | $67 unlock message |
 
 ---
 
-## Acceptance Checklist
+## User Flow Testing Scenarios
 
-After implementation:
-- [ ] EvidenceTable displays correctly with colored badges
-- [ ] GuideChangelog shows update history on all guides
-- [ ] EditorialPolicy page is accessible and linked from footer
-- [ ] Partners page displays application form
-- [ ] All 8 new guides are accessible and have FAQ schema
-- [ ] Existing 4 guides have EvidenceTable added
-- [ ] Sitemap includes all 10 new URLs
-- [ ] Footer links to Editorial Policy and Partners
-- [ ] All pages pass mobile responsiveness check
-- [ ] No dosing advice anywhere in new content
+### Scenario 1: New User (No Promo Code)
+1. User lands on homepage → sees $67 pricing
+2. Clicks "Get Full Access" → goes to `/signup`
+3. Creates account → redirected to `/checkout`
+4. Sees Stripe checkout → pays $67
+5. Redirected to `/thank-you?session_id=xxx`
+6. Payment verified → tier updated to "member"
+7. Clicks "Start Exploring" → dashboard loads normally
+
+### Scenario 2: New User (With Promo Code)
+1. User lands on `/signup?code=VIPCODE`
+2. Enters promo code → validated
+3. Creates account → promo saved to localStorage
+4. Auth confirms → promo redeemed automatically
+5. Tier updated to "member" → dashboard accessible
+
+### Scenario 3: Existing Free User
+1. Logs in → goes to dashboard
+2. ProtectedRoute sees `isPaid = false`
+3. Redirected to `/checkout`
+4. Can enter promo code or pay $67
+5. After payment → full access
+
+### Scenario 4: Existing Paid User
+1. Logs in → dashboard loads normally
+2. No checkout redirect
+3. Full feature access
+
+### Scenario 5: Checkout Cancel
+1. User at Stripe → clicks "back"
+2. Returns to `/pricing` (cancel URL)
+3. Can try again
+
+### Scenario 6: Payment Verification Failure
+1. User completes payment
+2. Redirected to `/thank-you`
+3. If verification fails → shows retry button
+4. Backup verification runs on next login
+
+---
+
+## Edge Cases Handled
+
+| Edge Case | Solution |
+|-----------|----------|
+| User refreshes during checkout | `hasStartedRef` prevents duplicate sessions |
+| Promo code entered during signup | Saved to localStorage, redeemed after auth |
+| Email confirmation required | Promo code persists in localStorage |
+| Payment succeeds but verification fails | Backup check on login (useAuth) |
+| User already has Stripe customer | create-checkout reuses customer ID |
+| Multiple browser tabs | `isProcessingRef` prevents race conditions |
+
+---
+
+## Testing Checklist
+
+After implementation, verify:
+
+- [ ] Homepage shows $67 pricing
+- [ ] New signup → redirects to checkout
+- [ ] Promo code bypass works during signup
+- [ ] Promo code bypass works on checkout page
+- [ ] Stripe checkout creates session correctly
+- [ ] Payment success → thank-you page verifies
+- [ ] Verified user can access dashboard
+- [ ] Unpaid user gets redirected to checkout
+- [ ] Cancel button returns to pricing page
+- [ ] Mobile flows work correctly
+- [ ] All CTAs route to correct pages
+- [ ] FAQ mentions $67 pricing correctly
+
+---
+
+## Stripe Configuration Check
+
+The existing setup uses:
+- Price ID: `price_1SuiuLKivWYlZk5KLQmOGU1S` ($67 one-time)
+- Success URL: `/thank-you?session_id={CHECKOUT_SESSION_ID}`
+- Cancel URL: `/pricing`
+- Metadata: `tier: "member"`, `user_id: user.id`
+
+No changes needed to edge functions.
