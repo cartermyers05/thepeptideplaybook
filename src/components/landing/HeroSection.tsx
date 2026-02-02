@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Users, Sparkles, CreditCard, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { HeroDemo } from "./HeroDemo";
 import { Link } from "react-router-dom";
 
 const trustItems = [
-  { icon: Users, text: "4,200+ researchers" },
-  { icon: Sparkles, text: "30-day guarantee" },
-  { icon: CreditCard, text: "$67 one-time" },
+  "4,200+ researchers",
+  "30-day guarantee",
+  "$67 one-time",
 ];
 
 const containerVariants = {
@@ -93,21 +93,16 @@ export function HeroSection() {
               </Button>
             </motion.div>
 
-            {/* Trust signals */}
+            {/* Trust signals - text only with dot separators */}
             <motion.div
               variants={itemVariants}
-              className="flex flex-wrap justify-center lg:justify-start gap-4"
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-sm text-muted-foreground"
             >
               {trustItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 text-sm text-muted-foreground"
-                >
-                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                    <item.icon className="w-3 h-3 text-primary" />
-                  </div>
-                  <span>{item.text}</span>
-                </div>
+                <span key={index} className="flex items-center gap-4">
+                  {index > 0 && <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />}
+                  <span>{item}</span>
+                </span>
               ))}
             </motion.div>
           </motion.div>

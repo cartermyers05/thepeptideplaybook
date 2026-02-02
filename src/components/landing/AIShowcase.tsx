@@ -1,30 +1,26 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Sparkles, ArrowRight, MessageSquare, Scale, FileText, Shield } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const capabilities = [
   {
-    icon: Scale,
     title: "Compare Peptides",
     description: "Side-by-side analysis of any two peptides",
     example: '"BPC-157 vs TB-500 for recovery?"',
   },
   {
-    icon: Shield,
     title: "FDA Status Checks",
     description: "Instant classification and legal status",
     example: '"Is semaglutide FDA approved?"',
   },
   {
-    icon: FileText,
     title: "Research Summaries",
     description: "Key findings from peer-reviewed studies",
     example: '"What does research say about MK-677?"',
   },
   {
-    icon: MessageSquare,
     title: "Any Question",
     description: "Ask anything about mechanisms, safety, or use",
     example: '"What peptides help with sleep?"',
@@ -89,10 +85,9 @@ export function AIShowcase() {
           viewport={{ once: true }}
           className="text-center mb-14"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">See the AI in Action</span>
-          </div>
+          <p className="text-sm font-medium text-primary tracking-wide uppercase mb-6">
+            See the AI in Action
+          </p>
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
             Ask Anything. Get Instant Answers.
           </h2>
@@ -103,7 +98,7 @@ export function AIShowcase() {
         </motion.div>
 
         <div className="max-w-5xl mx-auto grid lg:grid-cols-5 gap-8 items-start">
-          {/* Capabilities sidebar */}
+          {/* Capabilities sidebar - text-focused with left border */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -118,18 +113,11 @@ export function AIShowcase() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="glass-card p-4 group hover:border-primary/30 transition-colors cursor-default"
+                className="p-4 border-l-2 border-primary/40 bg-muted/30 rounded-r-lg"
               >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
-                    <cap.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-sm mb-1">{cap.title}</h4>
-                    <p className="text-xs text-muted-foreground mb-2">{cap.description}</p>
-                    <p className="text-xs text-primary font-medium">{cap.example}</p>
-                  </div>
-                </div>
+                <h4 className="font-medium text-sm mb-1">{cap.title}</h4>
+                <p className="text-xs text-muted-foreground mb-2">{cap.description}</p>
+                <p className="text-xs text-primary font-medium italic">{cap.example}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -142,11 +130,11 @@ export function AIShowcase() {
             transition={{ delay: 0.2 }}
             className="lg:col-span-3"
           >
-            <div className="glass-card shadow-glow glow-border overflow-hidden">
-              {/* Chat header */}
+            <div className="content-card overflow-hidden border-primary/20">
+              {/* Chat header with initials avatar */}
               <div className="flex items-center gap-3 p-4 border-b border-border/50">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                  <span className="text-sm font-semibold text-primary-foreground">PP</span>
                 </div>
                 <div>
                   <p className="font-medium text-sm">Peptide Playbook AI</p>
@@ -165,13 +153,14 @@ export function AIShowcase() {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center h-[350px] text-center"
                   >
-                    <Bot className="w-12 h-12 text-primary/30 mb-4" />
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <span className="text-lg font-semibold text-primary">PP</span>
+                    </div>
                     <p className="text-muted-foreground mb-4">Click below to see a demo response</p>
                     <Button
                       onClick={() => setHasStarted(true)}
                       className="btn-primary-clean"
                     >
-                      <Sparkles className="w-4 h-4 mr-2" />
                       Run Demo
                     </Button>
                   </motion.div>
@@ -246,13 +235,12 @@ export function AIShowcase() {
             >
               <Button asChild size="lg" className="btn-primary-clean group">
                 <Link to="/signup">
-                  <Sparkles className="w-4 h-4 mr-2" />
                   Try It Free
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
               <p className="text-xs text-muted-foreground mt-3">
-                No credit card required • Get instant access
+                No credit card required. Get instant access.
               </p>
             </motion.div>
           </motion.div>

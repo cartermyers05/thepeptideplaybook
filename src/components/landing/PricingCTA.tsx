@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const features = [
@@ -31,10 +31,9 @@ export function PricingCTA() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary">AI-Powered Research</span>
-          </div>
+          <p className="text-sm font-medium text-primary tracking-wide uppercase mb-6">
+            AI-Powered Research
+          </p>
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
             Get Your AI Research Assistant
           </h2>
@@ -50,7 +49,7 @@ export function PricingCTA() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="max-w-md mx-auto"
         >
-          <div className="glass-card p-8 shadow-glow glow-border">
+          <div className="content-card p-8 border-primary/20">
             <motion.div 
               className="text-center mb-8"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -66,7 +65,7 @@ export function PricingCTA() {
             </motion.div>
 
             <motion.ul 
-              className="space-y-4 mb-8"
+              className="space-y-3 mb-8"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -78,19 +77,8 @@ export function PricingCTA() {
                   className="flex items-center gap-3"
                   variants={featureVariants}
                 >
-                  <motion.div 
-                    className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      feature.highlight ? "bg-primary/20" : "bg-success/10"
-                    }`}
-                    whileHover={{ scale: 1.2 }}
-                  >
-                    {feature.highlight ? (
-                      <Sparkles className="w-3 h-3 text-primary" />
-                    ) : (
-                      <Check className="w-3 h-3 text-success" />
-                    )}
-                  </motion.div>
-                  <span className={`${feature.highlight ? "font-medium text-foreground" : "text-foreground"}`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                  <span className={feature.highlight ? "font-medium text-foreground" : "text-foreground"}>
                     {feature.text}
                   </span>
                 </motion.li>
@@ -98,9 +86,9 @@ export function PricingCTA() {
             </motion.ul>
 
             <Link to="/signup" className="w-full relative z-10 block">
-              <Button size="lg" className="w-full btn-primary-clean h-12 text-base">
-                <Sparkles className="w-4 h-4 mr-2" />
+              <Button size="lg" className="w-full btn-primary-clean h-12 text-base group">
                 Get Full Access
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
 

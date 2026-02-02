@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Send, Sparkles, FileText, Scale, Shield } from "lucide-react";
+import { Send } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const chatExamples = [
@@ -7,31 +7,26 @@ const chatExamples = [
     question: "What's the difference between BPC-157 and TB-500?",
     answer: "Great question. Both are peptides studied for tissue repair, but they work differently. **BPC-157** primarily targets the digestive system and local tissue healing, while **TB-500** focuses on systemic tissue repair and cell migration...",
     capability: "Compare peptides",
-    icon: Scale,
   },
   {
     question: "Is semaglutide FDA approved?",
-    answer: "✅ **Yes, semaglutide is FDA-approved** under brand names Ozempic, Wegovy, and Rybelsus. It's approved for Type 2 diabetes and chronic weight management. However, compounded versions are NOT FDA-approved...",
+    answer: "Yes, **semaglutide is FDA-approved** under brand names Ozempic, Wegovy, and Rybelsus. It's approved for Type 2 diabetes and chronic weight management. However, compounded versions are NOT FDA-approved...",
     capability: "FDA status checks",
-    icon: Shield,
   },
   {
     question: "What does the research say about MK-677 for sleep?",
     answer: "Studies show MK-677 can improve sleep quality. A notable 1997 study in *Neuroendocrinology* found it **increased REM sleep by 50%** and improved sleep duration in older adults. However, it may also cause...",
     capability: "Research summaries",
-    icon: FileText,
   },
   {
     question: "What peptides help with injury recovery?",
-    answer: "Several peptides are studied for recovery: **BPC-157** (tendon/ligament), **TB-500** (muscle/systemic), **GHK-Cu** (skin/wound healing). Research quality varies—BPC-157 has the most animal studies...",
+    answer: "Several peptides are studied for recovery: **BPC-157** (tendon/ligament), **TB-500** (muscle/systemic), **GHK-Cu** (skin/wound healing). Research quality varies. BPC-157 has the most animal studies...",
     capability: "Category guidance",
-    icon: Sparkles,
   },
   {
     question: "Are peptides legal to buy online?",
     answer: "It's complicated. **FDA-approved peptides** (insulin, semaglutide) require prescriptions. Research peptides sold 'not for human consumption' exist in a gray area. Buying for personal use is technically...",
     capability: "Legal clarity",
-    icon: Shield,
   },
 ];
 
@@ -46,7 +41,6 @@ export function AIAssistant() {
   }, []);
 
   const currentExample = chatExamples[currentIndex];
-  const CurrentIcon = currentExample.icon;
 
   return (
     <motion.div
@@ -58,19 +52,15 @@ export function AIAssistant() {
         transition: { duration: 0.3 }
       }}
       transition={{ delay: 0.2, duration: 0.5 }}
-      className="glass-card p-5 shadow-glow glow-border"
+      className="content-card p-5 border-primary/20"
       style={{ transformStyle: "preserve-3d", perspective: 1000 }}
     >
-      {/* Chat header */}
+      {/* Chat header with initials avatar */}
       <div className="flex items-center justify-between mb-5 pb-3 border-b border-border/50">
         <div className="flex items-center gap-3">
-          <motion.div 
-            className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center"
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <Bot className="w-4 h-4 text-primary" />
-          </motion.div>
+          <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center">
+            <span className="text-xs font-semibold text-primary-foreground">PP</span>
+          </div>
           <div>
             <p className="font-medium text-sm">Peptide Playbook AI</p>
             <div className="flex items-center gap-1.5">
@@ -79,16 +69,15 @@ export function AIAssistant() {
             </div>
           </div>
         </div>
-        {/* Capability badge */}
+        {/* Capability badge - text only */}
         <motion.div
           key={currentIndex}
           initial={{ opacity: 0, x: 10 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -10 }}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-xs text-primary"
+          className="px-2.5 py-1 rounded-full bg-primary/10 text-xs text-primary font-medium"
         >
-          <CurrentIcon className="w-3 h-3" />
-          <span>{currentExample.capability}</span>
+          {currentExample.capability}
         </motion.div>
       </div>
 
