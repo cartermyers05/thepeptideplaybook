@@ -1,105 +1,91 @@
 
-
-# Disable Billing & Make Product Free
+# Fix Remaining Billing-Disabled Issues
 
 ## Overview
 
-You want to remove the paywall and let everyone access the product for free. This involves modifying the access control logic so authenticated users can use all features without payment verification.
+The core billing logic is correctly disabled (`isPaid: true`), but there are stale references to $67 pricing throughout the site that need to be updated for consistency.
 
 ---
 
 ## Changes Required
 
-### Core Access Control (Most Important)
+### 1. Update Signup Flow (Critical)
+**File: `src/pages/Signup.tsx`**
 
-| File | Change |
-|------|--------|
-| `src/hooks/useTier.ts` | Always return `isPaid: true` regardless of database tier |
-| `src/components/auth/ProtectedRoute.tsx` | Remove the checkout redirect for non-paying users |
+The signup step 3 still shows "Complete Purchase" and redirects to checkout. Change to:
+- Always redirect to `/dashboard` after signup
+- Update button text from "Complete Purchase" to "Go to Dashboard"
+- Update message to "Your account is ready. You have full access to everything!"
 
-### UI Updates (Hide Payment References)
+### 2. Landing Page CTAs
+**Files to update:**
 
-| File | Change |
-|------|--------|
-| `src/pages/Checkout.tsx` | Redirect to dashboard instead of showing payment UI |
-| `src/pages/Pricing.tsx` | Update messaging to reflect free access |
-| `src/components/landing/PricingCTA.tsx` | Change "$67" to "Free" and update CTA text |
-| `src/components/dashboard/UpgradePrompt.tsx` | This will no longer be shown, but can leave as-is |
-| `src/components/dashboard/WelcomeBanner.tsx` | Remove "Upgrade" CTA for free users |
-| `src/pages/dashboard/Settings.tsx` | Update tier display text |
+| File | Current Text | New Text |
+|------|--------------|----------|
+| `src/components/landing/HeroSection.tsx` | "Get Full Access - $67" | "Get Free Access" |
+| `src/components/landing/ChatbotDemo.tsx` | "Get Full Access — $67" | "Get Free Access" |
 
----
+### 3. FAQ Content
+**File: `src/components/landing/FAQ.tsx`**
 
-## Technical Details
+Update the pricing FAQ answer:
+- Current: "No. You pay once ($67) and get lifetime access..."
+- New: "No subscription required. Create a free account and get instant access to everything."
 
-### 1. useTier.ts - Force Free Access
+### 4. Guide CTA
+**File: `src/components/guides/GuideCTA.tsx`**
 
-```typescript
-// Before
-const isPaid = currentTier === "member";
+- Current: "Get the Peptide Playbook — $67"
+- New: "Get Free Access to Peptide Playbook"
 
-// After  
-const isPaid = true; // Free access for everyone
-```
+### 5. Upgrade Prompt
+**File: `src/components/dashboard/UpgradePrompt.tsx`**
 
-### 2. ProtectedRoute.tsx - Remove Payment Check
+Since billing is disabled and `isPaid` is always `true`, this component won't show. However, for completeness:
+- Remove "$67" reference from text
+- Update to reflect free access
 
-```typescript
-// Before
-if (!isPaid) {
-  return <Navigate to="/checkout" replace />;
-}
+### 6. Checkout Page
+**File: `src/pages/Checkout.tsx`**
 
-// After
-// Remove this check entirely - just require authentication
-```
+- Update header from "Full Access — $67" to "Free Access"
+- Keep the redirect logic (authenticated users go to dashboard)
 
-### 3. Checkout.tsx - Redirect to Dashboard
+### 7. Pricing Page SEO
+**File: `src/pages/Pricing.tsx`**
 
-```typescript
-// Immediately redirect logged-in users to dashboard
-useEffect(() => {
-  if (user && !authLoading) {
-    navigate("/dashboard", { replace: true });
-  }
-}, [user, authLoading]);
-```
-
-### 4. Landing Page Pricing Updates
-
-- Change "$67" → "Free"
-- Change "Get Instant Access" → "Get Free Access"
-- Change "one-time payment" → "No payment required"
-- Keep the feature list to show value
+- Update meta description to remove $67 reference
 
 ---
 
-## What This Preserves
+## Console Warning Fix (Optional)
 
-- **Authentication still required** - Users must sign up/log in
-- **Promo code system** - Still works (just not needed)
-- **Stripe integration** - Remains in codebase for future reactivation
-- **User profiles & tiers** - Database structure unchanged
-- **All features** - AI chat, database, digest, checklist all work
+**File: `src/components/landing/InteractiveBackground.tsx`**
+
+Fix the duplicate React key warning by ensuring unique keys in the EnergyPulse component.
 
 ---
 
-## Easy to Revert
+## Summary of Files to Edit
 
-When you're ready to re-enable billing:
-1. Revert `useTier.ts` to check actual tier
-2. Restore `ProtectedRoute.tsx` checkout redirect
-3. Update pricing copy back to $67
+| File | Priority |
+|------|----------|
+| `src/pages/Signup.tsx` | Critical (flow broken) |
+| `src/components/landing/HeroSection.tsx` | High (main CTA) |
+| `src/components/landing/ChatbotDemo.tsx` | High (visible CTA) |
+| `src/components/landing/FAQ.tsx` | Medium (content accuracy) |
+| `src/components/guides/GuideCTA.tsx` | Medium |
+| `src/components/dashboard/UpgradePrompt.tsx` | Low (not shown) |
+| `src/pages/Checkout.tsx` | Low (bypassed) |
+| `src/pages/Pricing.tsx` | Low (SEO only) |
 
 ---
 
-## Expected User Flow After Changes
+## Security Notes
 
-```text
-Before:
-Landing → Signup → Checkout ($67) → Pay → Dashboard
+The scan found 10 security findings. Most are acceptable for a billing-disabled beta:
+- **Stripe IDs exposed**: Low risk since billing is disabled
+- **Tier self-upgrade possible**: Irrelevant since everyone gets access
+- **Leaked password protection**: Can be enabled via backend settings
 
-After:
-Landing → Signup → Dashboard (instant access)
-```
-
+These don't block launch but should be addressed before re-enabling billing.
