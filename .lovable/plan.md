@@ -1,277 +1,328 @@
 
-
-# Citation-Grade Upgrade: Static Guides + Database Articles
+# AI Citation Upgrade v2: Complete Implementation Plan
 
 ## Overview
 
-This plan upgrades all existing guide pages and database article templates to "citation-grade" for AI search engines. The changes add structured evidence sections, primary sources, and explicit "What We Don't Know" content.
+This plan transforms Peptide Playbook guides from "articles" to "reference desk" format by adding Evidence Tables, trust signal pages, changelog components, and 8 new high-intent fear/safety pages.
 
 ---
 
-## Scope Analysis
+## Part 1: New Components to Create
 
-### Static Guide Pages to Update (4 files)
+### 1. EvidenceTable.tsx
+**Location:** `src/components/guides/EvidenceTable.tsx`
 
-| File | Current Structure |
-|------|-------------------|
-| `src/pages/guides/BPC157Guide.tsx` | Has "Research" section combined, no Primary Sources, no "What We Don't Know" |
-| `src/pages/guides/FDALegalStatusGuide.tsx` | No research evidence sections (regulatory focus), no Primary Sources |
-| `src/pages/guides/ArePeptidesSafeGuide.tsx` | Has combined safety info, no Primary Sources, no "What We Don't Know" |
-| `src/pages/guides/BPC157vsTB500Guide.tsx` | Has "Research Reality" section, no Primary Sources, no "What We Don't Know" |
+A structured table that AI search engines can easily extract for citation.
 
-### Database Article Templates to Update (2 files)
+**Interface:**
+```typescript
+interface Study {
+  studyType: "Cell" | "Animal" | "Human";
+  species?: string;
+  sampleSize?: string;
+  condition: string;
+  outcome: string;
+  result: string;
+  pubmedLink?: string;
+}
+```
 
-| File | Purpose |
+**Design:**
+- Clean table with alternating row colors
+- Study type badges: Cell (gray), Animal (yellow), Human (green)
+- Clickable PubMed links in last column
+- Mobile responsive (stacks cards on small screens)
+- Accessibility: proper table semantics
+
+### 2. GuideChangelog.tsx
+**Location:** `src/components/guides/GuideChangelog.tsx`
+
+Displays update history for trust signals.
+
+**Interface:**
+```typescript
+interface ChangelogEntry {
+  date: string;
+  change: string;
+}
+```
+
+**Design:**
+- Simple table format with "Update History" header
+- Most recent changes first
+- Collapsible if more than 5 entries
+
+---
+
+## Part 2: Trust Signal Pages (2 New Pages)
+
+### Page 1: Editorial Policy
+**File:** `src/pages/EditorialPolicy.tsx`
+**Route:** `/editorial-policy`
+
+**Sections:**
+1. Our Mission
+2. How We Evaluate Evidence
+3. Evidence Hierarchy We Use (RCTs > Human observational > Animal > Cell > Anecdotal)
+4. What We Don't Do (no medical advice, no dosages, no peptide sales)
+5. Update Policy
+6. Contact
+
+**Schema:** Organization schema with publishingPrinciples property
+
+### Page 2: About Page Update
+**File:** `src/pages/About.tsx` (existing, needs update)
+
+**Changes:**
+- Add link to Editorial Policy
+- Add "Our Team" section (structure for future advisor)
+- Add "Content Review" note: "Our content is reviewed for accuracy by healthcare professionals with expertise in peptide therapy and sports medicine."
+
+---
+
+## Part 3: Partners/Affiliate Page
+
+### Partners Page
+**File:** `src/pages/Partners.tsx`
+**Route:** `/partners`
+
+**Sections:**
+1. Hero: "Earn 50% Commission Educating Your Audience"
+2. Commission Structure (50% per sale, 30-day cookie, monthly payout)
+3. What You Get (tracking link, swipe copy, hook scripts, free product)
+4. Who We're Looking For (wellness creators, biohackers, fitness influencers)
+5. 5 Hook Scripts (displayed as copyable cards)
+6. Application Form (Name, Email, Social handle, Followers, Why partner, How promote)
+
+---
+
+## Part 4: Fear/Safety Guide Pages (8 New Pages)
+
+All pages follow the standard GuideLayout pattern with:
+- QuickAnswerBox with evidence-level language
+- EvidenceTable (where applicable)
+- GuideTableOfContents
+- GuideFAQ with schema
+- GuideChangelog
+- PrimarySources
+- WhatWeDontKnow
+
+### Page 1: BPC-157 Cancer Risk
+**File:** `src/pages/guides/BPC157CancerRisk.tsx`
+**Route:** `/guides/bpc-157-cancer-risk`
+**Target Query:** "BPC-157 cancer risk"
+
+**Quick Answer:** There is no direct evidence that BPC-157 causes cancer in humans. However, BPC-157 promotes angiogenesis (blood vessel growth), and some researchers have raised theoretical concerns that this could potentially support tumor growth in people who already have cancer. No human studies have evaluated cancer risk. This remains an unknown.
+
+**Sections:**
+1. The Angiogenesis Concern Explained
+2. What Animal Studies Show
+3. What We Don't Know
+4. Who Should Be Extra Cautious
+5. The Honest Answer
+6. Primary Sources
+7. FAQ
+
+### Page 2: BPC-157 Drug Test
+**File:** `src/pages/guides/BPC157DrugTest.tsx`
+**Route:** `/guides/bpc-157-drug-test`
+**Target Query:** "BPC-157 drug test detection window"
+
+**Quick Answer:** BPC-157 is banned by WADA and can be detected in anti-doping tests. Detection methods exist but are not used in standard employment or military drug panels. WADA/USADA athletic testing and some military performance-enhancement screenings can detect peptides. Detection windows are not well-established publicly.
+
+**Sections:**
+1. What Drug Tests Look For
+2. WADA/USADA Testing (Athletes)
+3. Military Drug Testing
+4. Employment Drug Tests
+5. Detection Window (What We Know)
+6. Primary Sources
+7. FAQ
+
+### Page 3: BPC-157 Infection Risk
+**File:** `src/pages/guides/BPC157InfectionRisk.tsx`
+**Route:** `/guides/bpc-157-infection-risk`
+**Target Query:** "BPC-157 injection site infection risk"
+
+**Quick Answer:** Injection site infections are a real risk when self-administering any injectable, including BPC-157. Risks include bacterial infection, abscess formation, and cellulitis. These risks increase with non-sterile technique, contaminated products, or reusing needles. This is harm reduction information, not encouragement to use research peptides.
+
+**Sections:**
+1. Why Injection Infections Happen
+2. Signs of Injection Site Infection
+3. When to Seek Medical Care
+4. Risk Factors
+5. Product Contamination Concerns
+6. Primary Sources
+7. FAQ
+
+### Page 4: TB-500 Side Effects
+**File:** `src/pages/guides/TB500SideEffects.tsx`
+**Route:** `/guides/tb-500-side-effects`
+**Target Query:** "TB-500 side effects human data"
+
+**Quick Answer:** There is almost no published human safety data on TB-500 (Thymosin Beta-4). Side effect information comes primarily from anecdotal reports, not clinical trials. Reported effects include headache, nausea, and injection site reactions. TB-500 is FDA Category 2 and cannot be legally compounded. Long-term safety is completely unknown.
+
+### Page 5: CJC-1295 Safety
+**File:** `src/pages/guides/CJC1295Safety.tsx`
+**Route:** `/guides/cjc-1295-safety`
+**Target Query:** "CJC-1295 safety FDA concerns"
+
+**Quick Answer:** CJC-1295 is a growth hormone releasing hormone (GHRH) analog that stimulates natural GH production. The FDA has noted serious adverse events associated with growth hormone secretagogues. Side effects may include water retention, joint pain, numbness/tingling, and potential effects on blood sugar. It is not FDA-approved for anti-aging or performance use.
+
+### Page 6: Verify Peptide COA
+**File:** `src/pages/guides/VerifyPeptideCOA.tsx`
+**Route:** `/guides/verify-peptide-coa`
+**Target Query:** "how to verify peptide COA HPLC mass spec"
+
+**Quick Answer:** A Certificate of Analysis (COA) should include HPLC (purity testing) and Mass Spectrometry (identity confirmation). Red flags: no COA provided, COA without batch numbers, purity below 98%, no lab name, or COA that does not match your batch. Legitimate suppliers provide third-party testing from ISO-certified labs.
+
+### Page 7: Peptide Contamination
+**File:** `src/pages/guides/PeptideContamination.tsx`
+**Route:** `/guides/peptide-contamination`
+**Target Query:** "research peptides contamination risks"
+
+**Quick Answer:** Contamination is a significant risk in the unregulated peptide market. Contaminants can include bacteria, endotoxins, heavy metals, residual solvents, and other peptides. Unlike pharmaceutical drugs, research peptides have no FDA manufacturing oversight. Contamination has caused infections, allergic reactions, and unknown long-term effects.
+
+### Page 8: Peptide TikTok Myths
+**File:** `src/pages/guides/PeptideTikTokMyths.tsx`
+**Route:** `/guides/peptide-tiktok-myths`
+**Target Query:** "peptide myths TikTok"
+
+**Quick Answer:** TikTok has popularized peptides with viral claims about "wolverine healing," "reversing aging," and "miracle fat loss." Most of these claims extrapolate wildly from limited animal research. This guide fact-checks the most common TikTok peptide claims against what peer-reviewed research actually shows.
+
+**Sections:**
+1. Myth: "BPC-157 heals anything in 2 weeks"
+2. Myth: "Peptides are completely safe because they're natural"
+3. Myth: "The FDA banned peptides because Big Pharma"
+4. Myth: "Everyone in Hollywood uses peptides"
+5. Myth: "You don't need a doctor for peptides"
+6. What's Actually True
+7. Primary Sources
+8. FAQ
+
+---
+
+## Part 5: Update Existing Guides (4 Pages)
+
+Add to each of these existing guide pages:
+- **EvidenceTable** component (after QuickAnswerBox, before main content)
+- **GuideChangelog** component (before FAQ section)
+- **"Last reviewed" date** visible near title (update QuickAnswerBox)
+
+### Pages to Update:
+| Page | Evidence Table Data |
+|------|---------------------|
+| BPC157Guide.tsx | 4-5 animal studies from systematic review |
+| FDALegalStatusGuide.tsx | Regulatory timeline table (different format) |
+| ArePeptidesSafeGuide.tsx | General safety evidence summary |
+| BPC157vsTB500Guide.tsx | Comparative evidence table |
+
+---
+
+## Part 6: File Changes Summary
+
+### New Files to Create (12 files)
+
+| File | Type |
+|------|------|
+| `src/components/guides/EvidenceTable.tsx` | Component |
+| `src/components/guides/GuideChangelog.tsx` | Component |
+| `src/pages/EditorialPolicy.tsx` | Page |
+| `src/pages/Partners.tsx` | Page |
+| `src/pages/guides/BPC157CancerRisk.tsx` | Guide |
+| `src/pages/guides/BPC157DrugTest.tsx` | Guide |
+| `src/pages/guides/BPC157InfectionRisk.tsx` | Guide |
+| `src/pages/guides/TB500SideEffects.tsx` | Guide |
+| `src/pages/guides/CJC1295Safety.tsx` | Guide |
+| `src/pages/guides/VerifyPeptideCOA.tsx` | Guide |
+| `src/pages/guides/PeptideContamination.tsx` | Guide |
+| `src/pages/guides/PeptideTikTokMyths.tsx` | Guide |
+
+### Files to Modify (8 files)
+
+| File | Changes |
 |------|---------|
-| `src/pages/ArticleDetail.tsx` | Renders articles from `/articles/*` route |
-| `src/pages/BlogPost.tsx` | Renders articles from `/blog/*` route |
-
-### Domain Consistency Fix
-
-Current `src/lib/seo.ts` uses `peptideplaybook.com` but published URL is `thepeptideplaybook.lovable.app`. The sitemap uses `.com`. This needs to be consistent.
+| `src/App.tsx` | Add 10 new routes |
+| `src/pages/About.tsx` | Add Editorial Policy link, advisor structure |
+| `src/pages/Guides.tsx` | Add 8 new guide cards |
+| `src/pages/guides/BPC157Guide.tsx` | Add EvidenceTable, GuideChangelog |
+| `src/pages/guides/FDALegalStatusGuide.tsx` | Add timeline table, GuideChangelog |
+| `src/pages/guides/ArePeptidesSafeGuide.tsx` | Add EvidenceTable, GuideChangelog |
+| `src/pages/guides/BPC157vsTB500Guide.tsx` | Add EvidenceTable, GuideChangelog |
+| `src/components/landing/Footer.tsx` | Add Editorial Policy and Partners links |
+| `public/sitemap.xml` | Add 10 new URLs |
 
 ---
 
-## Changes Per Requirement
+## Part 7: Sitemap Additions
 
-### 1. Add "Primary Sources" Section
+Add these URLs to `public/sitemap.xml`:
 
-**Placement:** Immediately before the GuideFAQ component
+```xml
+<!-- Trust Signal Pages -->
+<url>
+  <loc>https://peptideplaybook.com/editorial-policy</loc>
+  <lastmod>2026-02-02</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.6</priority>
+</url>
+<url>
+  <loc>https://peptideplaybook.com/partners</loc>
+  <lastmod>2026-02-02</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.7</priority>
+</url>
 
-**Global links (use on ALL pages):**
-- FDA Bulk Drug Substances: `https://www.fda.gov/drugs/human-drug-compounding/bulk-drug-substances-used-compounding`
-- WADA Prohibited List: `https://www.wada-ama.org/en/prohibited-list`
-
-**BPC-157 specific PubMed links:**
-- `https://pubmed.ncbi.nlm.nih.gov/30915550/` (Systematic review)
-- `https://pubmed.ncbi.nlm.nih.gov/21030672/` (Tendon healing)
-- `https://pubmed.ncbi.nlm.nih.gov/27847366/` (Mechanism study)
-
-**Format per page:**
-```tsx
-<section id="primary-sources" className="mb-10">
-  <h2 className="text-2xl font-bold mb-4">Primary Sources</h2>
-  <ul className="space-y-3">
-    <li>
-      <a href="URL" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
-        Paper Title
-      </a>
-      <span className="text-muted-foreground"> — 1-sentence description</span>
-    </li>
-  </ul>
-</section>
+<!-- Fear/Safety Pages (8 entries) -->
+<url>
+  <loc>https://peptideplaybook.com/guides/bpc-157-cancer-risk</loc>
+  <lastmod>2026-02-02</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.8</priority>
+</url>
+<!-- ... 7 more guide entries -->
 ```
 
 ---
 
-### 2. Split Evidence Sections into Animal & Lab Studies + Human Evidence
+## Part 8: Implementation Priority Order
 
-**Current state per file:**
-
-| File | Current Section | Split Into |
-|------|-----------------|------------|
-| BPC157Guide.tsx | "What Does the Research Actually Show?" | "Animal & Lab Studies" + "Human Evidence" |
-| ArePeptidesSafeGuide.tsx | "Research Peptide Safety" | "Animal & Lab Studies" + "Human Evidence" |
-| BPC157vsTB500Guide.tsx | "Research Reality" | "Animal & Lab Studies" + "Human Evidence" |
-| FDALegalStatusGuide.tsx | N/A (regulatory focus) | Add minimal "Evidence Context" section explaining FDA's reasoning |
-
-**Required content per section:**
-
-Animal & Lab Studies:
-- What animal/cell data suggests
-- Explicit limitation: "Animal models don't reliably predict human outcomes"
-
-Human Evidence:
-- If no trials exist: "No published human clinical trials exist for [TOPIC]."
-- If trials exist: Summarize with sample size, endpoints, duration, limitations
+1. **EvidenceTable component** (used by multiple pages)
+2. **GuideChangelog component** (used by all guides)
+3. **EditorialPolicy page** (trust signal, links from other pages)
+4. **Partners page** (revenue driver)
+5. **PeptideTikTokMyths guide** (shareable, linkable, high engagement)
+6. **BPC157CancerRisk guide** (high intent query)
+7. **VerifyPeptideCOA guide** (high intent query)
+8. Update 4 existing guides with EvidenceTable + Changelog
+9. Remaining fear/safety pages
+10. Sitemap and routing updates
+11. Footer link updates
 
 ---
 
-### 3. Add "What We Don't Know" Section
+## Technical Notes
 
-**Placement:** After the Risks/Safety section (or create one if missing)
-
-**Add to TOC:** `{ id: "what-we-dont-know", title: "What We Don't Know", level: 2 }`
-
-**Standard bullets (adapt per topic):**
-
-```tsx
-<section id="what-we-dont-know" className="mb-10">
-  <h2 className="text-2xl font-bold mb-4">What We Don't Know</h2>
-  <p className="text-muted-foreground mb-4 leading-relaxed">
-    Despite available research, significant knowledge gaps remain:
-  </p>
-  <ul className="list-disc list-inside text-muted-foreground space-y-2">
-    <li>Long-term safety in humans (no multi-year studies exist)</li>
-    <li>Optimal protocols (no clinical data to establish regimens)</li>
-    <li>Drug interactions (never formally studied)</li>
-    <li>Effects in specific populations (pregnancy, elderly, chronic disease)</li>
-    <li>Product purity risks from unregulated sources</li>
-    <li>Whether animal findings translate to clinical outcomes in humans</li>
-  </ul>
-</section>
-```
-
----
-
-### 4. Update QuickAnswerBox to State Evidence Level
-
-**Pattern for each QuickAnswerBox:**
-
-First 1-3 sentences must explicitly state:
-1. What evidence exists (animal/lab vs human)
-2. What does NOT exist (no human trials if applicable)
-3. Regulatory status if relevant (not FDA-approved, WADA banned)
-
-**Example rewrites:**
-
-BPC157Guide.tsx (current):
-> "BPC-157 (Body Protection Compound-157) is a synthetic peptide derived from..."
-
-BPC157Guide.tsx (updated):
-> "BPC-157 has shown tissue-healing effects in animal studies, but no published human clinical trials prove safety or efficacy. Because it is FDA Category 2 and not approved for human use, all claims should be treated as unproven. Animal research suggests potential mechanisms, but these do not translate to proven human benefits."
-
----
-
-## File-by-File Changes
-
-### BPC157Guide.tsx
-
-| Change | Location |
-|--------|----------|
-| Update QuickAnswerBox answer text | Line 102-106 |
-| Add to tocItems: "animal-lab-studies", "human-evidence", "what-we-dont-know", "primary-sources" | Lines 11-20 |
-| Split section id="research" into two sections | Lines 149-207 |
-| Add "What We Don't Know" section after safety section | After line 244 |
-| Add "Primary Sources" section before FAQ | Before line 298 |
-
-### FDALegalStatusGuide.tsx
-
-| Change | Location |
-|--------|----------|
-| Update QuickAnswerBox to state regulatory basis (not evidence-based) | Line 96-100 |
-| Add to tocItems: "what-we-dont-know", "primary-sources" | Lines 11-19 |
-| Add "What We Don't Know" section (regulatory uncertainty focus) | After line 243 |
-| Add "Primary Sources" section before FAQ | Before line 245 |
-
-### ArePeptidesSafeGuide.tsx
-
-| Change | Location |
-|--------|----------|
-| Update QuickAnswerBox answer text | Line 95-98 |
-| Add to tocItems: "animal-lab-studies", "human-evidence", "what-we-dont-know", "primary-sources" | Lines 11-18 |
-| Split "Research Peptide Safety" section into two | Lines 152-197 |
-| Add "What We Don't Know" section after extra-cautious section | After line 232 |
-| Add "Primary Sources" section before FAQ | Before line 234 |
-
-### BPC157vsTB500Guide.tsx
-
-| Change | Location |
-|--------|----------|
-| Update QuickAnswerBox answer text | Line 95-98 |
-| Add to tocItems: "animal-lab-studies", "human-evidence", "what-we-dont-know", "primary-sources" | Lines 11-18 |
-| Split "Research Reality" into two sections | Lines 189-205 |
-| Add "What We Don't Know" section after stacking section | After line 223 |
-| Add "Primary Sources" section before FAQ | Before line 225 |
-
-### ArticleDetail.tsx (Database Articles)
-
-The database articles use `DirectAnswerBlock` component which displays `article.tldr` as the quick answer. The content structure comes from `article.full_content` (markdown).
-
-Changes needed:
-- Update DirectAnswerBlock component to include evidence-level framing
-- Add fallback Primary Sources section if `article.citations` is empty
-- Inject "What We Don't Know" guidance into the template structure
-
-However, since database articles have dynamic content, we need to:
-1. Add a new `PrimarySources` component for static fallback links
-2. Add a `WhatWeDontKnow` component for injectable uncertainty disclosure
-3. Modify `ArticleDetail.tsx` and `BlogPost.tsx` to include these sections
-
-### BlogPost.tsx (Database Articles)
-
-Same changes as ArticleDetail.tsx:
-- Add PrimarySources fallback component
-- Add WhatWeDontKnow component  
-- Ensure TLDRBox states evidence level (via component update)
-
----
-
-## New Components to Create
-
-### 1. PrimarySources.tsx
-
-```tsx
-// src/components/articles/PrimarySources.tsx
-// Displays standard primary source links when article.citations is empty
-// Includes FDA and WADA global links
-```
-
-### 2. WhatWeDontKnow.tsx
-
-```tsx
-// src/components/articles/WhatWeDontKnow.tsx
-// Displays standard uncertainty bullets
-// Accepts optional topic-specific customization
-```
-
-### 3. Update TLDRBox.tsx
-
-Update to accept an optional `evidenceLevel` prop that prepends evidence framing.
-
----
-
-## Domain Consistency Check
-
-**Current state in `src/lib/seo.ts`:**
-```ts
-export const SITE_URL = "https://peptideplaybook.com";
-```
-
-**In sitemap.xml:**
-Uses `peptideplaybook.com`
-
-**Published URL:**
-`thepeptideplaybook.lovable.app`
-
-**Decision:** Keep `.com` domain as canonical (user appears to own this domain or intends to). The `.lovable.app` is the development/staging URL. No change needed as `.com` is the production intent.
-
----
-
-## Implementation Order
-
-1. **Create new components** (PrimarySources, WhatWeDontKnow, update TLDRBox)
-2. **Update static guide pages** (4 files) in order:
-   - BPC157Guide.tsx
-   - ArePeptidesSafeGuide.tsx
-   - BPC157vsTB500Guide.tsx
-   - FDALegalStatusGuide.tsx
-3. **Update database article templates** (2 files):
-   - ArticleDetail.tsx
-   - BlogPost.tsx
-4. **Verify no dosing advice added** (QA check)
+- All new guides follow the exact same pattern as `BPC157Guide.tsx`
+- EvidenceTable is mobile-first (card view on small screens, table on desktop)
+- GuideChangelog is collapsible to save vertical space
+- QuickAnswerBox already displays "Last Updated" date
+- Partners form will use a simple state-based form (no backend needed initially)
+- All external links open in new tabs with `rel="noopener noreferrer"`
+- FAQ schema automatically injected via GuideFAQ component
 
 ---
 
 ## Acceptance Checklist
 
 After implementation:
-- [ ] Every updated page contains Primary Sources with 3-5 links
-- [ ] Every updated page contains Animal & Lab Studies and Human Evidence sections (where applicable)
-- [ ] Every updated page contains What We Don't Know with 4-6 bullets
-- [ ] Every QuickAnswerBox explicitly states the evidence level
-- [ ] No dosing instructions added anywhere
-- [ ] No change to unrelated copy, layout, or URL structure
-- [ ] FDA link: `https://www.fda.gov/drugs/human-drug-compounding/bulk-drug-substances-used-compounding`
-- [ ] WADA link: `https://www.wada-ama.org/en/prohibited-list`
-- [ ] BPC-157 PubMed links included on relevant pages
-
----
-
-## Technical Notes
-
-- All static guide pages use identical component structure (GuideLayout, QuickAnswerBox, GuideFAQ, etc.)
-- Database articles use different components (DirectAnswerBlock, TLDRBox, CitationsSection)
-- Both need parallel updates for consistency
-- The 15 newly created guide pages (BPC157SideEffects, etc.) already follow citation-grade patterns and only need minor consistency updates to Primary Sources links
-
+- [ ] EvidenceTable displays correctly with colored badges
+- [ ] GuideChangelog shows update history on all guides
+- [ ] EditorialPolicy page is accessible and linked from footer
+- [ ] Partners page displays application form
+- [ ] All 8 new guides are accessible and have FAQ schema
+- [ ] Existing 4 guides have EvidenceTable added
+- [ ] Sitemap includes all 10 new URLs
+- [ ] Footer links to Editorial Policy and Partners
+- [ ] All pages pass mobile responsiveness check
+- [ ] No dosing advice anywhere in new content
