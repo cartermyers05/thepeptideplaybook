@@ -1,12 +1,10 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { ProblemSection } from "@/components/landing/ProblemSection";
-import { AgitationSection } from "@/components/landing/AgitationSection";
+import { SocialProof } from "@/components/landing/SocialProof";
 import { ChatbotDemo } from "@/components/landing/ChatbotDemo";
-import { SolutionSection } from "@/components/landing/SolutionSection";
+import { ProblemSection } from "@/components/landing/ProblemSection";
 import { ProductPreview } from "@/components/landing/ProductPreview";
 import { HowItWorks } from "@/components/landing/HowItWorks";
-import { SocialProof } from "@/components/landing/SocialProof";
 import { WhoThisIsFor } from "@/components/landing/WhoThisIsFor";
 import { FAQ } from "@/components/landing/FAQ";
 import { PricingCTA } from "@/components/landing/PricingCTA";
@@ -31,13 +29,11 @@ const Index = () => {
         <Navbar />
         <main>
           <HeroSection />
-          <ProblemSection />
-          <AgitationSection />
+          <SocialProof />
           <ChatbotDemo />
-          <SolutionSection />
+          <ProblemSection />
           <ProductPreview />
           <HowItWorks />
-          <SocialProof />
           <WhoThisIsFor />
           <FAQ />
           <PricingCTA />

@@ -72,9 +72,9 @@ export function Navbar() {
               >
                 Log In
               </Link>
-              <a href="#pricing">
-                <Button size="sm" className="btn-primary-clean">Get Access</Button>
-              </a>
+              <Link to="/signup">
+                <Button size="sm" className="btn-primary-clean">Try Free</Button>
+              </Link>
             </div>
 
             {/* Mobile menu button */}
@@ -129,9 +129,9 @@ export function Navbar() {
               Log In
             </Link>
             <div className="pt-4 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}>
-              <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button className="w-full btn-primary-clean">Get Access</Button>
-              </a>
+              <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full btn-primary-clean">Try Free</Button>
+              </Link>
             </div>
           </nav>
         </div>
