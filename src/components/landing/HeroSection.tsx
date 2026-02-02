@@ -94,8 +94,8 @@ export function HeroSection() {
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
             >
               <Button asChild size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-                <Link to="/pricing">
-                  Get Full Access - $67
+                <Link to="/signup">
+                  Get Free Access
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>

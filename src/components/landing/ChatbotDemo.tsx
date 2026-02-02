@@ -215,7 +215,7 @@ export function ChatbotDemo() {
                     </p>
                     <Link to="/signup" className="relative z-10 inline-block">
                       <Button className="btn-primary-clean">
-                        Get Full Access — $67
+                        Get Free Access
                       </Button>
                     </Link>
                   </div>

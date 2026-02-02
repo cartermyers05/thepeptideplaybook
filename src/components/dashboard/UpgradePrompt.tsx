@@ -18,7 +18,7 @@ export function UpgradePrompt({ feature }: UpgradePromptProps) {
       </h2>
       
       <p className="text-muted-foreground max-w-md mb-8">
-        Get full access to {feature.toLowerCase()} and all other features for just $67. One-time payment, lifetime access.
+        Get full access to {feature.toLowerCase()} and all other features. Create a free account to continue.
       </p>
       
       <Button asChild size="lg" className="btn-primary-clean">

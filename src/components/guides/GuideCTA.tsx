@@ -16,9 +16,9 @@ export function GuideCTA() {
             Ask the Peptide Assistant
           </Button>
         </Link>
-        <Link to="/pricing">
+        <Link to="/signup">
           <Button variant="outline" className="gap-2">
-            Get the Peptide Playbook — $67
+            Get Free Access to Peptide Playbook
             <ArrowRight className="w-4 h-4" />
           </Button>
         </Link>
