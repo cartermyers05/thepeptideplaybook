@@ -1,432 +1,259 @@
 
-# Peptide Playbook Complete Product Rebuild
+# Complete Build Plan: Phase 1 Fix + Phases 2-4 Implementation
 
-## Executive Summary
+## Phase 1 Bug Fix (Must Do First)
 
-Transform the current peptide information product into an AI-powered peptide coaching platform ("Duolingo for peptides") with daily check-ins, progress tracking, personalized protocols, and gamified engagement.
+### Issue Identified
+The quiz flow has a bug where localStorage isn't set before navigation when the database insert fails (which always happens for unauthenticated users due to RLS). This causes the results page to redirect back to /quiz.
+
+### Fix Required
+**File: `src/pages/Quiz.tsx`**
+- Move `localStorage.setItem()` BEFORE the database insert attempt
+- This ensures quiz data is available on the results page regardless of database insert success
+
+```
+Current flow (broken):
+1. Try DB insert → fails for anonymous
+2. Throw error
+3. Catch → navigate (but localStorage never set)
+4. Results page → no data → redirect to /quiz
+
+Fixed flow:
+1. Set localStorage first
+2. Try DB insert → may fail for anonymous (that's okay)
+3. Navigate to results
+4. Results page → has data → shows protocol
+```
 
 ---
 
-## Current State Analysis
+## Phase 2: Dashboard Redesign + Protocol Page + AI Coach Interface
 
-### What Exists (Can Be Reused)
-| Component | Status | Reusability |
-|-----------|--------|-------------|
-| Authentication | Working | Keep as-is |
-| Supabase integration | Working | Extend with new tables |
-| Chat/AI Edge Function | Working | Adapt for AI Coach modes |
-| Stripe integration | $67 one-time | Convert to subscriptions |
-| Existing chat UI | Working | Repurpose for AI Coach |
-| Dashboard layout | Working | Redesign structure |
-| Landing components | Working | Update copy/CTAs |
+### 2.1 New Dashboard Sidebar
+**File: `src/components/dashboard/DashboardSidebar.tsx`**
 
-### What Needs to Be Built
-1. Onboarding quiz flow (new)
-2. Protocol generator logic (new)
-3. AI Coach with structured modes (new)
-4. Daily check-in system (new)
-5. Streak/gamification system (new)
-6. Progress tracking (new)
-7. Subscription billing (modify existing)
+Update navigation items to match new structure:
+- Dashboard (home)
+- My Protocol (document)
+- AI Coach (bot/message)
+- Chat (message-square) 
+- Progress (chart)
+- Settings (gear)
 
----
+### 2.2 Dashboard Home Redesign
+**File: `src/pages/dashboard/Home.tsx`**
 
-## Implementation Phases
+New layout:
+- Welcome header with streak badge
+- Protocol status banner (Week X, Day Y)
+- TODAY'S CHECK-IN card (prominent, center)
+- Quick action buttons (Talk to Coach, View Protocol)
+- Recent milestones list
 
-### Phase 1: Foundation (Week 1-2)
+### 2.3 Protocol Page
+**New File: `src/pages/dashboard/Protocol.tsx`**
 
-#### 1.1 Database Schema Changes
-Create new tables for the coaching platform:
+Features:
+- Protocol header with name, status badge, cycle progress
+- Peptide cards showing name, purpose, dosage, frequency, timing
+- Weekly schedule calendar view
+- Action buttons (Pause, Restart, Download PDF)
 
-```text
-NEW TABLES:
-┌─────────────────────────────────────────────────────────────┐
-│ quiz_responses                                               │
-│ - id, user_id, primary_goal, experience_level,              │
-│   main_concerns[], timeline, age_range, completed_at        │
-├─────────────────────────────────────────────────────────────┤
-│ protocols                                                    │
-│ - id, user_id, goal, protocol_name, peptides (JSONB),       │
-│   cycle_length_weeks, current_day, current_week,            │
-│   status, started_at, created_at                            │
-├─────────────────────────────────────────────────────────────┤
-│ check_ins                                                    │
-│ - id, user_id, protocol_id, date, completed,                │
-│   injection_done, energy_level, mood, sleep_quality,        │
-│   side_effects[], notes, created_at                         │
-├─────────────────────────────────────────────────────────────┤
-│ streaks                                                      │
-│ - id, user_id, current_streak, longest_streak,              │
-│   last_check_in_date, streak_freezes_available              │
-├─────────────────────────────────────────────────────────────┤
-│ milestones                                                   │
-│ - id, user_id, milestone_type, achieved_at                  │
-└─────────────────────────────────────────────────────────────┘
+### 2.4 AI Coach Interface
+**New File: `src/pages/dashboard/Coach.tsx`**
 
-MODIFY EXISTING:
-┌─────────────────────────────────────────────────────────────┐
-│ profiles - add:                                              │
-│   subscription_tier ('free', 'monthly', 'annual')           │
-│   stripe_subscription_id                                     │
-│   referral_code (unique)                                     │
-│   referred_by (uuid)                                         │
-└─────────────────────────────────────────────────────────────┘
-```
+Tab-based interface with 4 modes:
+- Daily Check-In (structured flow)
+- Reconstitution Guide (step-by-step)
+- Injection Guide (step-by-step)
+- Ask Coach (free-form chat)
 
-#### 1.2 Stripe Subscription Setup
-Convert from one-time $67 payment to recurring subscriptions:
+### 2.5 New Hooks
+**New Files:**
+- `src/hooks/useProtocol.ts` - Protocol CRUD operations
+- `src/hooks/useCheckIn.ts` - Check-in operations
+- `src/hooks/useStreak.ts` - Streak logic
+- `src/hooks/useMilestones.ts` - Achievement tracking
 
-| Plan | Price | Stripe Product |
-|------|-------|----------------|
-| Monthly | $29/month | New product/price |
-| Annual | $249/year ($20.75/mo) | New product/price |
+### 2.6 Route Updates
+**File: `src/App.tsx`**
 
-Update `create-checkout` edge function to handle subscription mode.
-
-#### 1.3 Route Structure
-New routes to add:
-
-```text
-/quiz              - Multi-step onboarding quiz
-/quiz/results      - Protocol preview (teaser for non-paid)
-/dashboard         - Main home with today's card
-/dashboard/protocol - Current protocol details
-/dashboard/coach   - AI Coach (structured guidance)
-/dashboard/chat    - General AI chat (existing)
-/dashboard/progress - Stats, streaks, calendar
-/dashboard/settings - Account management
-/affiliate         - Affiliate dashboard (future)
-```
-
-#### 1.4 Landing Page Updates
-- New hero: "Your AI Peptide Coach"
-- Update subheadline to emphasize guided journey
-- Change CTA: "Get Your Free Protocol" -> /quiz
-- Update pricing section for subscriptions
+Add new routes:
+- `/dashboard/protocol` → Protocol page
+- `/dashboard/coach` → AI Coach page
+- `/dashboard/progress` → Progress page
 
 ---
 
-### Phase 2: Quiz & Protocol Generator (Week 2-3)
+## Phase 3: Check-In Flow + Guides
 
-#### 2.1 Quiz Flow Component
-5-step interactive quiz with progress bar:
+### 3.1 Check-In Flow Component
+**New File: `src/components/coach/CheckInFlow.tsx`**
 
-```text
-Step 1: Goal Selection (single select)
-├── Fat Loss
-├── Muscle & Recovery  
-├── Injury Recovery
-├── Anti-Aging & Longevity
-├── Cognitive Enhancement
-└── General Wellness
-
-Step 2: Experience Level (single select)
-├── Complete Beginner
-├── Some Experience
-└── Experienced
-
-Step 3: Main Concerns (multi-select, max 3)
-├── Reconstitution
-├── Dosing
-├── Side Effects
-├── Sourcing
-├── Stacking
-└── Injections
-
-Step 4: Timeline (single select)
-├── Ready Now
-├── Soon (next month)
-└── Just Researching
-
-Step 5: Email Capture
-└── Email input + newsletter opt-in
-```
-
-#### 2.2 Protocol Generation Logic
-Map quiz responses to pre-defined protocols:
-
-| Goal | Protocol | Duration | Peptides |
-|------|----------|----------|----------|
-| Fat Loss | GLP-1 Focus | 8 weeks | Semaglutide + optional BPC-157 |
-| Muscle & Recovery | Performance Stack | 8 weeks | BPC-157 + TB-500 |
-| Injury Recovery | Healing Focus | 6 weeks | BPC-157 + TB-500 |
-| Anti-Aging | Longevity Stack | 12 weeks | Epithalon + GHK-Cu |
-| Cognitive | Nootropic Stack | 8 weeks | Semax + Selank |
-| General Wellness | Beginner Safe | 6 weeks | BPC-157 only |
-
-Store protocol as JSONB with full peptide details (name, purpose, dosage, frequency, timing).
-
----
-
-### Phase 3: AI Coach System (Week 3-4)
-
-#### 3.1 Coach Interface Design
-Chat-like interface with 4 modes (tabs):
-
-```text
-┌────────────────────────────────────────────────────────────┐
-│  [Daily Check-In] [Reconstitution] [Injection] [Ask Coach] │
-├────────────────────────────────────────────────────────────┤
-│                                                            │
-│  🔥 Day 7 of 56 | Week 1 of 8 | 6-day streak              │
-│                                                            │
-│  AI Coach: "Good morning! Ready for today's check-in?"    │
-│                                                            │
-│  ┌──────────────────────────────────────────────┐         │
-│  │ Did you complete today's injection?          │         │
-│  │  [Yes ✓]  [Not Yet]  [Skipped]              │         │
-│  └──────────────────────────────────────────────┘         │
-│                                                            │
-└────────────────────────────────────────────────────────────┘
-```
-
-#### 3.2 Daily Check-In Flow
-Structured conversation with checkpoints:
-
-1. Injection completion (Yes/Not Yet/Skipped)
+Structured conversation:
+1. Injection completion (Yes/Not Yet/Skipped buttons)
 2. Energy level (1-5 emoji scale)
 3. Mood (1-5 emoji scale)
 4. Sleep quality (1-5 emoji scale)
-5. Side effects (multi-select: None, Fatigue, Headache, etc.)
+5. Side effects (multi-select chips)
 6. Optional notes (text input)
 
 On completion:
+- Save to check_ins table
 - Update streak
 - Check for milestones
-- Show motivational message
-- Flag concerning side effects with guidance
+- Show celebration animation
 
-#### 3.3 Reconstitution Guide Mode
-Step-by-step walkthrough with "Done" checkpoints:
+### 3.2 Reconstitution Guide Component
+**New File: `src/components/coach/ReconGuide.tsx`**
 
-```text
-Step 1: Gather Supplies    [Done ✓]
-Step 2: Wash Hands        [Done ✓]
-Step 3: Clean Vials       [Current Step]
-Step 4: Calculate Water   [Locked]
-Step 5: Draw Water        [Locked]
-Step 6: Add to Peptide    [Locked]
-Step 7: Dissolve          [Locked]
-Step 8: Storage           [Locked]
-```
+8-step guided walkthrough:
+1. Gather Supplies (checklist)
+2. Wash Hands
+3. Clean Vials
+4. Calculate Water (with peptide-specific values)
+5. Draw Water
+6. Add to Peptide (SLOWLY)
+7. Dissolve
+8. Storage
 
-Each step shows detailed instructions before user can proceed.
+Each step waits for user to click "Done" before proceeding.
 
-#### 3.4 AI Coach Edge Function
-Create new `coach` edge function with context-aware prompting:
+### 3.3 Injection Guide Component
+**New File: `src/components/coach/InjectionGuide.tsx`**
 
-- Inject user's protocol details
-- Include current day/week of cycle
-- Add recent check-in history
-- Set appropriate tone (warm, supportive, safety-conscious)
+7-step guided walkthrough:
+1. Gather supplies
+2. Clean injection site
+3. Draw correct dosage
+4. Remove air bubbles
+5. Pinch skin, insert needle
+6. Inject slowly
+7. Apply pressure, dispose
+
+### 3.4 Coach Edge Function
+**New File: `supabase/functions/coach/index.ts`**
+
+Context-aware AI responses with:
+- User's protocol details
+- Current day/week of cycle
+- Recent check-in history
+- Warm, supportive tone
 
 ---
 
-### Phase 4: Gamification & Progress (Week 4-5)
+## Phase 4: Progress Tracking + Gamification
 
-#### 4.1 Streak System
+### 4.1 Progress Page
+**New File: `src/pages/dashboard/Progress.tsx`**
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ Streak Logic:                                                │
-│                                                              │
-│ - Check-in today + yesterday = streak++                     │
-│ - Check-in today, missed yesterday = streak = 1             │
-│ - Already checked in today = no change                      │
-│ - Streak freezes available = 2 (protect streak on miss)     │
-│                                                              │
-│ Milestone triggers: 7, 14, 30, 60, 90 day streaks           │
-└─────────────────────────────────────────────────────────────┘
-```
-
-#### 4.2 Milestones/Achievements
-
-| Milestone | Type | Trigger |
-|-----------|------|---------|
-| First Check-In | `first_checkin` | Complete first check-in |
-| First Reconstitution | `first_recon` | Complete reconstitution guide |
-| Week 1 Complete | `week_1` | 7 days into protocol |
-| 7-Day Streak | `streak_7` | 7 consecutive check-ins |
-| 14-Day Streak | `streak_14` | 14 consecutive check-ins |
-| 30-Day Streak | `streak_30` | 30 consecutive check-ins |
-| Cycle Complete | `cycle_complete` | Finish entire protocol |
-
-#### 4.3 Progress Dashboard
+Sections:
+- Stats overview (current streak, longest, total check-ins)
 - Streak calendar (monthly view with green highlights)
 - Check-in history (expandable list)
-- Trend charts (energy, mood, sleep over time)
-- Achievement badges grid (earned vs locked)
+- Trend charts (energy, mood, sleep over time using Recharts)
+- Achievement badges grid
+
+### 4.2 Streak Calendar Component
+**New File: `src/components/progress/StreakCalendar.tsx`**
+
+Monthly calendar showing:
+- Days with check-ins (green)
+- Current streak highlighted
+- Missed days (gray)
+
+### 4.3 Achievement Badges Component
+**New File: `src/components/progress/AchievementGrid.tsx`**
+
+Grid of badges:
+- First Check-In
+- First Reconstitution
+- Week 1 Complete
+- 7-Day Streak
+- 14-Day Streak
+- 30-Day Streak
+- Cycle Complete
+
+Earned badges shown in color, locked badges grayed out.
+
+### 4.4 Streak Logic Implementation
+**Hook: `src/hooks/useStreak.ts`**
+
+Logic:
+- Check-in today + yesterday = streak++
+- Check-in today, missed yesterday = streak = 1
+- Streak freezes protect against single missed days
+- Milestone triggers at 7, 14, 30, 60, 90 days
 
 ---
 
-### Phase 5: Dashboard Redesign (Week 5-6)
+## New Files Summary
 
-#### 5.1 New Sidebar Navigation
-
-```text
-┌──────────────────────┐
-│ 🧬 Peptide Playbook  │
-├──────────────────────┤
-│ 🏠 Dashboard         │
-│ 📋 My Protocol       │
-│ 🤖 AI Coach          │
-│ 💬 Chat              │
-│ 📊 Progress          │
-│ ⚙️  Settings         │
-├──────────────────────┤
-│ [Avatar] John Doe    │
-│ 🟢 Monthly           │
-└──────────────────────┘
+### Components
+```
+src/components/
+├── coach/
+│   ├── CoachInterface.tsx
+│   ├── CheckInFlow.tsx
+│   ├── ReconGuide.tsx
+│   ├── InjectionGuide.tsx
+│   └── AskCoach.tsx
+├── protocol/
+│   ├── ProtocolCard.tsx
+│   ├── PeptideCard.tsx
+│   └── ScheduleCalendar.tsx
+└── progress/
+    ├── StreakCalendar.tsx
+    ├── TrendCharts.tsx
+    └── AchievementGrid.tsx
 ```
 
-#### 5.2 Dashboard Home Layout
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ Welcome back, John! 🔥 6-day streak                          │
-│ Week 2, Day 3 of your 8-week cycle                          │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ TODAY'S CHECK-IN                                        │ │
-│ │ Ready to log today? ───────────────── [Complete Check-In]│ │
-│ └─────────────────────────────────────────────────────────┘ │
-│                                                              │
-│ ┌─────────────────────────────┬───────────────────────────┐ │
-│ │ 🗣️ Talk to Coach            │ 📋 View Protocol          │ │
-│ └─────────────────────────────┴───────────────────────────┘ │
-│                                                              │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ RECENT MILESTONES                                       │ │
-│ │ 🏆 Week 1 Complete - Feb 1                              │ │
-│ │ 🏆 First Check-In - Jan 25                              │ │
-│ └─────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+### Pages
+```
+src/pages/dashboard/
+├── Protocol.tsx
+├── Coach.tsx
+└── Progress.tsx
 ```
 
----
-
-## Technical Architecture
-
-### New Files to Create
-
-```text
-src/
-├── pages/
-│   ├── Quiz.tsx                    # Multi-step quiz
-│   ├── QuizResults.tsx             # Protocol preview
-│   └── dashboard/
-│       ├── Protocol.tsx            # Protocol details
-│       ├── Coach.tsx               # AI Coach interface
-│       └── Progress.tsx            # Stats & achievements
-├── components/
-│   ├── quiz/
-│   │   ├── QuizProgress.tsx        # Progress bar
-│   │   ├── GoalStep.tsx            # Step 1
-│   │   ├── ExperienceStep.tsx      # Step 2
-│   │   ├── ConcernsStep.tsx        # Step 3
-│   │   ├── TimelineStep.tsx        # Step 4
-│   │   └── EmailStep.tsx           # Step 5
-│   ├── coach/
-│   │   ├── CoachInterface.tsx      # Main coach UI
-│   │   ├── CheckInFlow.tsx         # Daily check-in
-│   │   ├── ReconGuide.tsx          # Reconstitution steps
-│   │   ├── InjectionGuide.tsx      # Injection steps
-│   │   └── AskCoach.tsx            # Free-form chat
-│   ├── protocol/
-│   │   ├── ProtocolCard.tsx        # Protocol overview
-│   │   ├── PeptideCard.tsx         # Individual peptide
-│   │   └── ScheduleCalendar.tsx    # Weekly schedule
-│   └── progress/
-│       ├── StreakCalendar.tsx      # Monthly calendar
-│       ├── TrendCharts.tsx         # Mood/energy charts
-│       └── AchievementGrid.tsx     # Badges
-├── hooks/
-│   ├── useQuiz.ts                  # Quiz state management
-│   ├── useProtocol.ts              # Protocol CRUD
-│   ├── useCheckIn.ts               # Check-in operations
-│   ├── useStreak.ts                # Streak logic
-│   └── useMilestones.ts            # Achievement tracking
-└── supabase/functions/
-    ├── coach/index.ts              # AI Coach edge function
-    └── generate-protocol/index.ts  # Protocol generation
-
+### Hooks
+```
+src/hooks/
+├── useProtocol.ts
+├── useCheckIn.ts
+├── useStreak.ts
+└── useMilestones.ts
 ```
 
-### Modified Files
-
-```text
-src/
-├── App.tsx                         # Add new routes
-├── pages/Index.tsx                 # Update hero/CTAs
-├── components/landing/
-│   ├── HeroSection.tsx             # New copy
-│   ├── HowItWorks.tsx              # New steps
-│   └── PricingCTA.tsx              # Subscription pricing
-├── hooks/useTier.ts                # Handle subscription tiers
-└── supabase/functions/
-    └── create-checkout/index.ts    # Switch to subscriptions
+### Edge Functions
 ```
-
----
-
-## Migration Strategy
-
-### Data Preservation
-- Existing users keep access (grandfather them to "annual" tier)
-- Existing conversations preserved
-- Profile data retained
-
-### Transition Plan
-1. Deploy new database schema alongside existing
-2. Build new UI components
-3. Update landing page
-4. Test with beta users
-5. Full launch with email announcement
-
----
-
-## Success Metrics
-
-| Metric | Target |
-|--------|--------|
-| Quiz completion rate | > 60% |
-| Quiz-to-signup conversion | > 30% |
-| Daily check-in completion | > 70% |
-| 7-day streak achievement | > 50% |
-| Monthly retention | > 80% |
-| NPS score | > 50 |
+supabase/functions/
+└── coach/index.ts
+```
 
 ---
 
 ## Implementation Order
 
-1. **Week 1**: Database schema + Stripe subscriptions + updated landing
-2. **Week 2**: Quiz flow + protocol generator
-3. **Week 3**: Dashboard redesign + protocol page
-4. **Week 4**: AI Coach - daily check-in mode
-5. **Week 5**: AI Coach - reconstitution/injection guides
-6. **Week 6**: Progress tracking + gamification
-7. **Week 7**: Polish, testing, bug fixes
-8. **Week 8**: Referral system + launch
+1. **First**: Fix Phase 1 quiz bug (localStorage before DB insert)
+2. **Test**: Verify quiz → results flow works for anonymous users
+3. **Phase 2**: Build dashboard redesign + protocol page + coach interface
+4. **Test**: Verify new dashboard loads, navigation works
+5. **Phase 3**: Build check-in flow + guides
+6. **Test**: Complete a check-in, verify data saves
+7. **Phase 4**: Build progress page + gamification
+8. **Test**: Verify streak updates, milestones trigger
+9. **Final Test**: Complete full user journey (quiz → signup → dashboard → check-in → progress)
 
 ---
 
-## Questions Before Implementation
+## Database Considerations
 
-Before proceeding, I'd like to confirm a few things:
+The schema is already in place from Phase 1:
+- `quiz_responses` - stores quiz data
+- `protocols` - stores user protocols
+- `check_ins` - stores daily check-ins
+- `user_streaks` - stores streak data
+- `milestones` - stores achievements
 
-1. **Pricing Model**: Should I create new Stripe products for $29/month and $249/year subscriptions, or do you already have these configured?
-
-2. **Existing Users**: How should we handle current paid users ($67 one-time)? Options:
-   - Grandfather them to "annual" tier permanently
-   - Give them 12 months of access then require subscription
-   - Something else?
-
-3. **Email Service**: Do you have Resend or another email service configured for transactional emails (check-in reminders, streak warnings)?
-
-4. **Implementation Approach**: Would you prefer I:
-   - Build everything in phases (can test incrementally)
-   - Build complete MVP then launch all at once
-
-These answers will help me tailor the implementation to your specific needs.
+No additional migrations needed.
