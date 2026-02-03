@@ -34,6 +34,9 @@ import DashboardChat from "./pages/dashboard/ChatPage";
 import DashboardDigest from "./pages/dashboard/Digest";
 import DashboardCommunity from "./pages/dashboard/Community";
 import DashboardSettings from "./pages/dashboard/Settings";
+import DashboardProtocol from "./pages/dashboard/Protocol";
+import DashboardCoach from "./pages/dashboard/Coach";
+import DashboardProgress from "./pages/dashboard/Progress";
 
 // SEO Guide pages
 import Guides from "./pages/Guides";
@@ -120,12 +123,17 @@ const App = () => (
             
             {/* Protected routes - Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/protocol" element={<ProtectedRoute><DashboardProtocol /></ProtectedRoute>} />
+            <Route path="/dashboard/coach" element={<ProtectedRoute><DashboardCoach /></ProtectedRoute>} />
+            <Route path="/dashboard/progress" element={<ProtectedRoute><DashboardProgress /></ProtectedRoute>} />
+            <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardSettings /></ProtectedRoute>} />
+            
+            {/* Legacy routes kept for backwards compatibility */}
             <Route path="/dashboard/checklist" element={<ProtectedRoute><DashboardChecklist /></ProtectedRoute>} />
             <Route path="/dashboard/database" element={<ProtectedRoute><DashboardDatabase /></ProtectedRoute>} />
             <Route path="/dashboard/chat" element={<ProtectedRoute><DashboardChat /></ProtectedRoute>} />
             <Route path="/dashboard/digest" element={<ProtectedRoute><DashboardDigest /></ProtectedRoute>} />
             <Route path="/dashboard/community" element={<ProtectedRoute><DashboardCommunity /></ProtectedRoute>} />
-            <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardSettings /></ProtectedRoute>} />
             
             {/* Legacy protected routes - redirects to new dashboard */}
             <Route path="/chat" element={<ProtectedRoute><DashboardChat /></ProtectedRoute>} />

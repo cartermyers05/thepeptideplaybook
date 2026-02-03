@@ -3,7 +3,6 @@ import {
   ClipboardCheck, 
   Database, 
   MessageSquare, 
-  Mail, 
   Settings,
   LogOut,
   ChevronLeft,
@@ -23,10 +22,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
-  { icon: ClipboardCheck, label: "Source Checklist", path: "/dashboard/checklist" },
-  { icon: Database, label: "Peptide Database", path: "/dashboard/database" },
-  { icon: MessageSquare, label: "AI Assistant", path: "/dashboard/chat" },
-  { icon: Mail, label: "Research Digest", path: "/dashboard/digest" },
+  { icon: ClipboardCheck, label: "My Protocol", path: "/dashboard/protocol" },
+  { icon: MessageSquare, label: "AI Coach", path: "/dashboard/coach" },
+  { icon: Database, label: "Progress", path: "/dashboard/progress" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
