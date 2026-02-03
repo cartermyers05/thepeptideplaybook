@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const DEMO_CONVERSATIONS = [
@@ -225,7 +224,7 @@ export function HeroDemo() {
           className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
           disabled
         />
-        <Send className="w-4 h-4 text-muted-foreground" />
+        <span className="text-muted-foreground text-lg">→</span>
       </div>
 
       {/* Progress dots */}

@@ -1,5 +1,4 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -219,7 +218,7 @@ export function AIShowcase() {
                     className="flex-1 bg-background rounded-lg px-4 py-2.5 text-sm outline-none border border-border/50"
                   />
                   <Button disabled size="sm" variant="ghost">
-                    <ArrowRight className="w-4 h-4" />
+                    <span className="text-lg">→</span>
                   </Button>
                 </div>
               </div>
@@ -236,7 +235,7 @@ export function AIShowcase() {
               <Button asChild size="lg" className="btn-primary-clean group">
                 <Link to="/signup">
                   Try It Free
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
                 </Link>
               </Button>
               <p className="text-xs text-muted-foreground mt-3">

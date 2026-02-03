@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const features = [
@@ -88,7 +87,7 @@ export function PricingCTA() {
             <Link to="/signup" className="w-full relative z-10 block">
               <Button size="lg" className="w-full btn-primary-clean h-12 text-base group">
                 Get Full Access
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
               </Button>
             </Link>
 

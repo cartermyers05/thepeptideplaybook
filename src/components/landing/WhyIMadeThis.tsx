@@ -1,10 +1,9 @@
 import { motion } from "framer-motion";
-import { BookOpen, Clock, FileText } from "lucide-react";
 
 const stats = [
-  { icon: Clock, value: "200+", label: "Hours of Research" },
-  { icon: BookOpen, value: "15", label: "Peptides Analyzed" },
-  { icon: FileText, value: "100+", label: "Sources Reviewed" },
+  { value: "200+", label: "Hours of Research" },
+  { value: "15", label: "Peptides Analyzed" },
+  { value: "100+", label: "Sources Reviewed" },
 ];
 
 export function WhyIMadeThis() {
@@ -47,7 +46,7 @@ export function WhyIMadeThis() {
                 </p>
                 <p>
                   "I'm not a doctor. I'm not going to tell you what to take. But I am someone who's 
-                  done the research — and I built this platform so you don't have to waste 200+ hours 
+                  done the research, and I built this platform so you don't have to waste 200+ hours 
                   like I did."
                 </p>
                 <p className="font-medium text-foreground">
@@ -60,9 +59,7 @@ export function WhyIMadeThis() {
             <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-border">
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                    <stat.icon className="w-5 h-5 text-primary" />
-                  </div>
+                  <div className="w-8 h-0.5 bg-primary/50 mx-auto mb-3" />
                   <p className="text-xl md:text-2xl font-bold text-gradient">{stat.value}</p>
                   <p className="text-xs text-muted-foreground">{stat.label}</p>
                 </div>

@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { X } from "lucide-react";
 
 const consequences = [
   "You waste money on peptides that don't do what you thought they would",
@@ -58,13 +57,7 @@ export function AgitationSection() {
                 variants={itemVariants}
                 className="flex items-start gap-4 text-lg text-muted-foreground group"
               >
-                <motion.div 
-                  className="w-7 h-7 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0 mt-0.5"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  <X className="w-4 h-4 text-destructive" />
-                </motion.div>
+                <span className="text-destructive font-bold text-xl flex-shrink-0 w-6 leading-7">—</span>
                 <span className="group-hover:text-foreground transition-colors duration-200">
                   {item}
                 </span>

@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { Database, ShieldCheck, Mail, ArrowRight } from "lucide-react";
 import { FloatingOrbs } from "./FloatingOrbs";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -13,19 +12,19 @@ const aiFeatures = [
 
 const products = [
   {
-    icon: Database,
+    abbrev: "DB",
     title: "Peptide Database",
     description: "Look up any peptide and instantly see its research status, FDA classification, mechanism of action, and safety considerations.",
     stats: "41 peptides • Searchable • Filterable",
   },
   {
-    icon: ShieldCheck,
+    abbrev: "SC",
     title: "Source Evaluation Checklist",
     description: "Before you buy anything from anyone, run them through this checklist. Know exactly what legitimate sources look like.",
     stats: "5 red flags • Verification steps",
   },
   {
-    icon: Mail,
+    abbrev: "RD",
     title: "Monthly Research Digest",
     description: "New studies, FDA updates, and research developments delivered monthly. Stay current without doing the work yourself.",
     stats: "Monthly updates • Included forever",
@@ -140,7 +139,7 @@ export function ProductPreview() {
                 <Link to="/signup" className="relative z-10">
                   <Button className="btn-primary-clean group">
                     Get Free Access Now
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
                   </Button>
                 </Link>
               </div>
@@ -197,7 +196,7 @@ export function ProductPreview() {
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 400 }}
               >
-                <product.icon className="w-6 h-6 text-primary" />
+                <span className="text-sm font-bold text-primary">{product.abbrev}</span>
               </motion.div>
               <h3 className="text-lg font-semibold mb-3 group-hover:text-primary transition-colors">
                 {product.title}

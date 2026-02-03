@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 import { HeroDemo } from "./HeroDemo";
 import { Link } from "react-router-dom";
 
@@ -75,7 +74,7 @@ export function HeroSection() {
               <Link to="/signup">
                 <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group w-full sm:w-auto">
                   Get Full Access
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
                 </Button>
               </Link>
               <Button
