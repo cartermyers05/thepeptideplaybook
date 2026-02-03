@@ -58,6 +58,10 @@ import EditorialPolicy from "./pages/EditorialPolicy";
 import Partners from "./pages/Partners";
 import ReferralLanding from "./pages/ReferralLanding";
 
+// Quiz pages
+import Quiz from "./pages/Quiz";
+import QuizResults from "./pages/QuizResults";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -106,6 +110,10 @@ const App = () => (
             {/* Trust signal pages */}
             <Route path="/editorial-policy" element={<EditorialPolicy />} />
             <Route path="/partners" element={<Partners />} />
+            
+            {/* Quiz flow */}
+            <Route path="/quiz" element={<Quiz />} />
+            <Route path="/quiz/results" element={<QuizResults />} />
             
             {/* Referral link handler */}
             <Route path="/ref/:code" element={<ReferralLanding />} />
