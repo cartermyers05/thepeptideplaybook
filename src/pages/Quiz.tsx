@@ -96,8 +96,20 @@ export default function Quiz() {
     if (!canProceed()) return;
     
     setIsSubmitting(true);
+    
+    // Store in localStorage FIRST - this ensures results page has data
+    // even if DB insert fails (which happens for unauthenticated users due to RLS)
+    const quizData = {
+      goal: state.goal,
+      experience: state.experience,
+      concerns: state.concerns,
+      timeline: state.timeline,
+      email: state.email,
+    };
+    localStorage.setItem("quizResponse", JSON.stringify(quizData));
+    
     try {
-      // Save quiz response
+      // Try to save quiz response to database (may fail for anonymous users)
       const { data, error } = await supabase
         .from("quiz_responses")
         .insert({
@@ -112,25 +124,20 @@ export default function Quiz() {
         .select()
         .single();
 
-      if (error) throw error;
-
-      // Store in localStorage for results page
-      localStorage.setItem("quizResponse", JSON.stringify({
-        id: data.id,
-        goal: state.goal,
-        experience: state.experience,
-        concerns: state.concerns,
-        timeline: state.timeline,
-      }));
-
-      navigate("/quiz/results");
+      if (!error && data) {
+        // Update localStorage with the database ID if insert succeeded
+        localStorage.setItem("quizResponse", JSON.stringify({
+          ...quizData,
+          id: data.id,
+        }));
+      }
     } catch (error) {
-      console.error("Error saving quiz:", error);
-      // Still navigate - we can retry later
-      navigate("/quiz/results");
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error saving quiz to database:", error);
+      // Continue anyway - localStorage has the data
     }
+    
+    setIsSubmitting(false);
+    navigate("/quiz/results");
   };
 
   const nextStep = () => {
