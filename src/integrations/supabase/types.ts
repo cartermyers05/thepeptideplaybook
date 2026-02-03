@@ -189,6 +189,59 @@ export type Database = {
         }
         Relationships: []
       }
+      check_ins: {
+        Row: {
+          completed: boolean | null
+          created_at: string | null
+          date: string
+          energy_level: number | null
+          id: string
+          injection_done: string | null
+          mood: number | null
+          notes: string | null
+          protocol_id: string | null
+          side_effects: string[] | null
+          sleep_quality: number | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string | null
+          date: string
+          energy_level?: number | null
+          id?: string
+          injection_done?: string | null
+          mood?: number | null
+          notes?: string | null
+          protocol_id?: string | null
+          side_effects?: string[] | null
+          sleep_quality?: number | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string | null
+          date?: string
+          energy_level?: number | null
+          id?: string
+          injection_done?: string | null
+          mood?: number | null
+          notes?: string | null
+          protocol_id?: string | null
+          side_effects?: string[] | null
+          sleep_quality?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_ins_protocol_id_fkey"
+            columns: ["protocol_id"]
+            isOneToOne: false
+            referencedRelation: "protocols"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       citation_monitoring: {
         Row: {
           ai_engine: string
@@ -363,6 +416,27 @@ export type Database = {
           },
         ]
       }
+      milestones: {
+        Row: {
+          achieved_at: string | null
+          id: string
+          milestone_type: string
+          user_id: string
+        }
+        Insert: {
+          achieved_at?: string | null
+          id?: string
+          milestone_type: string
+          user_id: string
+        }
+        Update: {
+          achieved_at?: string | null
+          id?: string
+          milestone_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       news_articles: {
         Row: {
           category: string
@@ -507,6 +581,8 @@ export type Database = {
           id: string
           last_active_at: string | null
           questions_asked: number | null
+          referral_code: string | null
+          referred_by: string | null
           stripe_customer_id: string | null
           subscription_status: string | null
           terms_accepted_at: string | null
@@ -523,6 +599,8 @@ export type Database = {
           id?: string
           last_active_at?: string | null
           questions_asked?: number | null
+          referral_code?: string | null
+          referred_by?: string | null
           stripe_customer_id?: string | null
           subscription_status?: string | null
           terms_accepted_at?: string | null
@@ -539,6 +617,8 @@ export type Database = {
           id?: string
           last_active_at?: string | null
           questions_asked?: number | null
+          referral_code?: string | null
+          referred_by?: string | null
           stripe_customer_id?: string | null
           subscription_status?: string | null
           terms_accepted_at?: string | null
@@ -547,7 +627,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       promo_code_redemptions: {
         Row: {
@@ -611,6 +699,62 @@ export type Database = {
         }
         Relationships: []
       }
+      protocols: {
+        Row: {
+          created_at: string | null
+          current_day: number | null
+          current_week: number | null
+          cycle_length_weeks: number
+          goal: string
+          id: string
+          peptides: Json
+          protocol_name: string
+          quiz_response_id: string | null
+          started_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_day?: number | null
+          current_week?: number | null
+          cycle_length_weeks?: number
+          goal: string
+          id?: string
+          peptides?: Json
+          protocol_name: string
+          quiz_response_id?: string | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_day?: number | null
+          current_week?: number | null
+          cycle_length_weeks?: number
+          goal?: string
+          id?: string
+          peptides?: Json
+          protocol_name?: string
+          quiz_response_id?: string | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "protocols_quiz_response_id_fkey"
+            columns: ["quiz_response_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       purchases: {
         Row: {
           amount: number
@@ -638,6 +782,48 @@ export type Database = {
           stripe_subscription_id?: string | null
           tier?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      quiz_responses: {
+        Row: {
+          age_range: string | null
+          completed_at: string | null
+          created_at: string | null
+          email: string | null
+          experience_level: string
+          id: string
+          main_concerns: string[]
+          newsletter_opt_in: boolean | null
+          primary_goal: string
+          timeline: string
+          user_id: string | null
+        }
+        Insert: {
+          age_range?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          email?: string | null
+          experience_level: string
+          id?: string
+          main_concerns?: string[]
+          newsletter_opt_in?: boolean | null
+          primary_goal: string
+          timeline: string
+          user_id?: string | null
+        }
+        Update: {
+          age_range?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          email?: string | null
+          experience_level?: string
+          id?: string
+          main_concerns?: string[]
+          newsletter_opt_in?: boolean | null
+          primary_goal?: string
+          timeline?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -724,6 +910,36 @@ export type Database = {
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_streaks: {
+        Row: {
+          current_streak: number | null
+          id: string
+          last_check_in_date: string | null
+          longest_streak: number | null
+          streak_freezes_available: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number | null
+          id?: string
+          last_check_in_date?: string | null
+          longest_streak?: number | null
+          streak_freezes_available?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          current_streak?: number | null
+          id?: string
+          last_check_in_date?: string | null
+          longest_streak?: number | null
+          streak_freezes_available?: number | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []

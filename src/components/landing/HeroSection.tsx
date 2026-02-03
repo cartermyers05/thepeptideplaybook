@@ -4,9 +4,9 @@ import { HeroDemo } from "./HeroDemo";
 import { Link } from "react-router-dom";
 
 const trustItems = [
-  "4,200+ researchers",
-  "30-day guarantee",
-  "$67 one-time",
+  "4,200+ users",
+  "Cancel anytime",
+  "14-day free trial",
 ];
 
 const containerVariants = {
@@ -47,14 +47,14 @@ export function HeroSection() {
               variants={itemVariants}
               className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] mb-6"
             >
-              Stop Guessing.
+              Your AI Peptide Coach
               <motion.span
                 className="block text-gradient mt-2"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.5 }}
               >
-                Start Understanding.
+                Step-by-Step Guidance
               </motion.span>
             </motion.h1>
 
@@ -63,7 +63,7 @@ export function HeroSection() {
               variants={itemVariants}
               className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed"
             >
-              Get instant answers on BPC-157, Semaglutide, and 41+ peptides. No more Reddit rabbit holes. Your AI research assistant is ready.
+              Stop watching courses. Start getting guided. From reconstitution to daily check-ins, your AI coach walks you through every step of your peptide journey.
             </motion.p>
 
             {/* CTAs */}
@@ -71,9 +71,9 @@ export function HeroSection() {
               variants={itemVariants}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
             >
-              <Link to="/signup">
+              <Link to="/quiz">
                 <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group w-full sm:w-auto">
-                  Get Full Access
+                  Get Your Free Protocol
                   <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
                 </Button>
               </Link>

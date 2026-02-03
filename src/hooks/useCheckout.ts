@@ -2,13 +2,15 @@ import { useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+export type Plan = "monthly" | "annual";
+
 export function useCheckout() {
   const [isLoading, setIsLoading] = useState(false);
   const redirectingRef = useRef(false);
   const isProcessingRef = useRef(false);
   const { toast } = useToast();
 
-  const startCheckout = useCallback(async () => {
+  const startCheckout = useCallback(async (plan: Plan = "monthly") => {
     if (isProcessingRef.current || redirectingRef.current) return;
     isProcessingRef.current = true;
     setIsLoading(true);
@@ -19,7 +21,7 @@ export function useCheckout() {
       if (!session) {
         toast({
           title: "Please sign in",
-          description: "You need to be signed in to make a purchase.",
+          description: "You need to be signed in to subscribe.",
           variant: "destructive",
         });
         isProcessingRef.current = false;
@@ -29,6 +31,7 @@ export function useCheckout() {
 
       const response = await supabase.functions.invoke("create-checkout", {
         body: {
+          plan,
           successUrl: `${window.location.origin}/thank-you`,
           cancelUrl: `${window.location.origin}/pricing`,
         },
@@ -61,8 +64,48 @@ export function useCheckout() {
     }
   }, [toast]);
 
+  const openCustomerPortal = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Please sign in",
+          description: "You need to be signed in to manage your subscription.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await supabase.functions.invoke("customer-portal");
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      const { url } = response.data;
+      
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error("No portal URL returned");
+      }
+    } catch (error) {
+      console.error("Portal error:", error);
+      toast({
+        title: "Error opening subscription management",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
+  }, [toast]);
+
   return {
     startCheckout,
+    openCustomerPortal,
     isLoading,
   };
 }
