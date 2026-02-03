@@ -1,468 +1,402 @@
 
-# Peptide Playbook Complete Product Rebuild
 
-## Overview
+# Peptide Playbook - Complete Rebuild Plan
 
-This rebuild transforms the product positioning from "AI chatbot" to "personalized peptide course" with the tagline: **"The $2,000 Peptide Course. For $29."**
+## Executive Summary
 
-The core insight: We're selling education delivered via AI, not the AI itself. The competitor is Jay Campbell's $2,000 courses, not ChatGPT.
+This is a **major product pivot** from a subscription-based AI chatbot ($29/month) to a **one-time purchase course platform** ($99 per course). The rebuild affects the business model, database schema, Stripe integration, routing, and the entire user experience.
 
 ---
 
-## What's Staying (Do Not Touch)
+## What's Being Kept (No Changes)
 
-| Component | Reason |
+| Component | Status |
 |-----------|--------|
-| Database schema | Tables already support quiz, protocols, check-ins, streaks |
-| Stripe edge functions | `create-checkout`, `check-subscription`, `customer-portal` working |
-| Auth system | Supabase auth working |
-| Existing hooks | `useProtocol`, `useCheckIn`, `useStreak`, `useMilestones` working |
-| Coach edge function | AI gateway integration working |
+| Supabase auth system | Keep as-is |
+| Basic routing structure | Keep, add new routes |
+| Edge function infrastructure | Keep structure, update logic |
+| UI component library | Keep Shadcn/Tailwind |
+| Existing hooks structure | Keep pattern, rebuild logic |
 
 ---
 
-## Implementation Plan
+## Phase 1: Database Schema Changes
 
-### Phase 1: Landing Page Complete Redesign
+### New Tables to Create
 
-#### 1.1 Hero Section (`src/components/landing/HeroSection.tsx`)
-**Complete rewrite with new positioning:**
-
+**course_templates** (Admin-seeded, stores the 6 course types)
 ```text
-Headline: "The $2,000 Peptide Course. For $29."
-
-Subheadline: "Jay Campbell charges $1,999 for his peptide 
-masterclass. We built the same thing with AI - personalized 
-to YOUR goals, guiding you step-by-step, for the price of 
-a protein tub."
-
-Primary CTA: "Build My Course (Free)" → /quiz
-Secondary CTA: "See What's Inside" → scrolls to #curriculum
-
-Trust badges:
-- "500+ studies analyzed"
-- "Personalized to your goals"  
-- "Step-by-step guidance"
+- id: uuid (primary key)
+- goal: text (unique: fat_loss, muscle, recovery, anti_aging, cognitive, beginner)
+- title: text
+- description: text
+- peptides: jsonb (array of peptide objects)
+- duration_days: integer (42-84 depending on course)
+- lessons: jsonb (array of lesson objects with day, phase, title, content, action_item)
+- created_at: timestamp
 ```
 
-#### 1.2 Problem Section (`src/components/landing/ProblemSection.tsx`)
-**Rewrite to attack expensive courses:**
-
+**user_courses** (Created when user purchases)
 ```text
-Headline: "Peptide courses are a scam. Here's why."
-
-Three columns:
-1. "They charge $2,000 for information that's free online" 
-   - Icon: DollarSign
-2. "They give everyone the same generic protocol" 
-   - Icon: Users
-3. "They teach you, then abandon you" 
-   - Icon: UserX
-
-Subtext: "You don't need another course. You need a guide 
-that knows YOUR goals, walks you through every step, and 
-answers your questions at 2am when you're nervous about 
-your first injection."
+- id: uuid (primary key)
+- user_id: uuid (references profiles)
+- template_id: uuid (references course_templates)
+- goal: text
+- title: text
+- peptides: jsonb
+- duration_days: integer
+- lessons: jsonb
+- current_day: integer (default 0)
+- status: text (not_started, waiting_supplies, active, completed)
+- supplies_status: text (have_them, this_week, ordering)
+- started_at: timestamp
+- purchased_at: timestamp
+- created_at: timestamp
 ```
 
-#### 1.3 Solution Section (New: `src/components/landing/CourseFeatures.tsx`)
-**Three pillars of the product:**
-
+**lesson_progress** (Tracks completion per lesson)
 ```text
-Headline: "Your Personal Peptide Course"
-
-Card 1: "Personalized Protocol"
-- Answer 5 questions about your goals
-- Get a complete protocol: peptides, dosing, timing, cycle length
-- Not generic advice - built for YOU
-- Icon: Target
-
-Card 2: "Step-by-Step Guidance"  
-- Day-by-day instructions through your cycle
-- Reconstitution walkthrough with checkpoints
-- Injection guide for complete beginners
-- Icon: ListChecks
-
-Card 3: "AI Coach On Call"
-- Ask questions anytime, get instant answers
-- Trained on 500+ peptide studies
-- Like having an expert in your pocket
-- Icon: MessageCircle
+- id: uuid (primary key)
+- user_id: uuid (references profiles)
+- course_id: uuid (references user_courses)
+- day: integer
+- completed: boolean
+- completed_at: timestamp
+- notes: text
+- UNIQUE(user_id, course_id, day)
 ```
 
-#### 1.4 Curriculum Section (New: `src/components/landing/CurriculumSection.tsx`)
-**Show course modules like an actual course:**
-
+**chat_messages** (Replaces conversations+messages for simpler coach chat)
 ```text
-Headline: "What You'll Learn"
-
-Module 1: Your Personalized Protocol
-- Your recommended peptides based on goals
-- Exact dosing schedule
-- Cycle length and timing
-- What to expect each week
-
-Module 2: Reconstitution Mastery
-- Supply checklist
-- Step-by-step mixing guide
-- Common mistakes to avoid
-- Storage and handling
-
-Module 3: Injection Confidence
-- Site selection and rotation
-- Proper technique
-- Managing injection anxiety
-- What's normal vs concerning
-
-Module 4: Daily Optimization
-- Daily check-in system
-- Tracking your progress
-- Adjusting based on feedback
-- When to consult a professional
-
-Module 5: Ongoing Support
-- 24/7 AI coach access
-- Weekly research updates
-- Community Q&A (future)
+- id: uuid (primary key)
+- user_id: uuid (references profiles)
+- course_id: uuid (references user_courses, nullable)
+- role: text (user, assistant)
+- content: text
+- created_at: timestamp
 ```
 
-#### 1.5 Comparison Section (New: `src/components/landing/ComparisonSection.tsx`)
-**Direct comparison table:**
+### Tables to Update
 
-| Feature | Jay Campbell | Peptide Playbook |
-|---------|--------------|------------------|
-| Price | $299 - $1,999 | $29/month |
-| Personalization | Generic protocols | Built for YOUR goals |
-| Support | Watch videos alone | AI coach 24/7 |
-| Updates | Static content | Always current |
-| Format | 10+ hours of video | Bite-sized daily guidance |
-| Refund | "No refunds" | Cancel anytime |
-
-#### 1.6 Pricing Section (`src/components/landing/PricingCTA.tsx`)
-**Single prominent card:**
-
+**purchases** - Add course_goal field
 ```text
-Headline: "One price. Everything included."
-
-$29/month
-- Personalized protocol for your goals
-- Step-by-step reconstitution guide
-- Injection walkthrough
-- Daily guidance through your cycle
-- 24/7 AI coach access
-- Progress tracking
-- Cancel anytime
-
-CTA: "Start My Course"
-Below: "Or save 29% with annual ($249/year)"
-Small text: "30-day money-back guarantee. No questions asked."
+- course_goal: text (which course was purchased)
 ```
 
-#### 1.7 FAQ Section (`src/components/landing/FAQ.tsx`)
-**Update with new positioning FAQs:**
-- Is this medical advice?
-- How is this different from ChatGPT?
-- What if I'm a complete beginner?
-- Can I cancel anytime?
-- Do you sell peptides?
-
-#### 1.8 Footer (`src/components/landing/Footer.tsx`)
-**Add prominent legal disclaimer**
-
----
-
-### Phase 2: Quiz Flow Rebuild
-
-#### 2.1 Pre-Quiz Landing (Update `src/pages/Quiz.tsx`)
-**New intro screen before Step 1:**
-
+**referrals** - Add discount/credit tracking
 ```text
-Headline: "Let's build your peptide course"
-Subtext: "5 quick questions. Takes 90 seconds. Your 
-personalized protocol is on the other side."
-Progress indicator
-CTA: "Let's Go"
-```
-
-#### 2.2 Step 1: Goal Selection (Redesign)
-**Change icons and copy for "course building" feel:**
-
-```text
-Question: "What's your #1 goal?"
-
-Cards with icons:
-- Burn Fat (Flame) - "Optimize metabolism and body composition"
-- Build Muscle (Dumbbell) - "Accelerate recovery and growth"
-- Heal Faster (Heart) - "Recover from injury or surgery"
-- Slow Aging (Clock) - "Longevity, skin, vitality"
-- Sharpen Mind (Brain) - "Focus, memory, clarity"
-- Not Sure Yet (HelpCircle) - "Show me the options"
-
-Auto-advance on selection
-```
-
-#### 2.3 Step 2: Experience Level (Keep structure, update copy)
-
-#### 2.4 Step 3: Biggest Fear (Rename from "Concerns")
-**Single select instead of multi-select:**
-
-```text
-Question: "What worries you most about starting?"
-
-- Messing up reconstitution
-- Getting the dose wrong
-- The injection itself
-- Side effects
-- Nothing - I just need a protocol
-```
-
-#### 2.5 Step 4: Timeline (Keep current)
-
-#### 2.6 Step 5: Email Capture (Enhance)
-**Show protocol preview teaser:**
-
-```text
-Headline: "Your course is ready"
-Preview: Show protocol name and peptide names (blur dosing)
-Email input + newsletter checkbox
-CTA: "See My Protocol"
+- discount_amount: integer (default 2000 = $20)
+- credit_amount: integer (default 2000 = $20)
 ```
 
 ---
 
-### Phase 3: Quiz Results Page Rebuild
+## Phase 2: New Route Structure
 
-#### 3.1 For Non-Subscribed Users (`src/pages/QuizResults.tsx`)
-
-**Value stack with comparison pricing:**
-
+### Routes to Add
 ```text
-Header: "Your [Goal] Protocol"
-Subtext: "Built for [experience level] · Addressing [biggest fear]"
+/course/:goal       → Course preview page (pre-purchase)
+/dashboard/course   → Full course view (all lessons)
+/dashboard/plan     → Peptides & schedule view
+```
 
-Protocol Preview Card:
-- Show: Protocol name, Peptide names
-- Blur/lock: Dosing, Timing, Cycle schedule
+### Routes to Update
+```text
+/                   → Complete landing page redesign
+/dashboard          → Today's lesson view (replace current)
+/dashboard/coach    → Simplified chat (keep but update)
+/dashboard/settings → Add purchases & referrals view
+```
 
-What's Included Section (checklist):
-✓ Your complete protocol with exact dosing
-✓ Step-by-step reconstitution walkthrough  
-✓ Injection guide for beginners
-✓ Day-by-day guidance through your cycle
-✓ 24/7 AI coach for questions
-✓ Progress tracking with streaks
-
-Value Stack:
-- Personalized protocol ($299 value)
-- Reconstitution masterclass ($49 value)
-- 24/7 AI coaching (priceless)
-- Total value: $500+
-- Your price: $29/month
-
-CTA: "Unlock My Protocol - $29/month"
-Below: "Or $249/year (save 29%)"
+### Routes to Remove
+```text
+/quiz/results       → Replace with /course/:goal flow
+/dashboard/protocol → Replace with /dashboard/plan
+/dashboard/progress → Remove (integrate into dashboard home)
 ```
 
 ---
 
-### Phase 4: Dashboard Simplification
+## Phase 3: Landing Page Redesign
 
-#### 4.1 Sidebar Navigation (`src/components/dashboard/DashboardSidebar.tsx`)
-**Simplify to 4 items:**
-
-```text
-- Dashboard (home)
-- My Protocol
-- AI Coach
-- Settings
-
-REMOVE: Progress (integrate streaks into dashboard home)
-```
-
-#### 4.2 Dashboard Home (`src/pages/dashboard/Home.tsx`)
-**Focus on TODAY:**
+### New Component Structure
 
 ```text
-Top Section - Status Bar:
-- Current streak with flame: "7 day streak"
-- Cycle progress: "Week 2 of 8"
-- Quick status: "On track" (green) or "Check in today" (yellow)
-
-Main Section - Today's Focus:
-- Large check-in card
-- If not checked in: "Complete Check-In" button
-- If checked in: Show summary with checkmark
-
-Secondary Section - Quick Actions:
-- "Need Help?" → AI Coach
-- "View Protocol" → Protocol page
-
-Bottom Section - Recent Milestones
+src/pages/Index.tsx
+├── HeroSection (rewrite - "First AI-Powered Peptide Course")
+├── HowItWorksSection (new - 3 steps with icons)
+├── WhatsInsideSection (new - 6 feature cards)
+├── GoalSelectionSection (new - 6 goal cards linking to /course/:goal)
+├── PricingSection (rewrite - single $99 card)
+├── FAQ (update content)
+└── Footer (update with legal disclaimer)
 ```
 
-#### 4.3 Check-In as Modal (Move from separate flow)
-**Make check-in a modal that appears on dashboard:**
-- Keep existing `CheckInFlow` logic
-- Wrap in a Dialog/Modal
-- Open from dashboard button
-- Close and show celebration on complete
+### Key Messaging Changes
+
+| Old | New |
+|-----|-----|
+| "The $2,000 Peptide Course. For $29." | "The First AI-Powered Peptide Course" |
+| "Build My Course (Free)" | "Pick Your Goal" |
+| Subscription pricing | One-time $99 per course |
+| Protocol-focused | Lesson/course-focused |
 
 ---
 
-### Phase 5: AI Coach Simplification
+## Phase 4: Course Preview Page (/course/:goal)
 
-#### 5.1 Single Chat Interface (`src/pages/dashboard/Coach.tsx`)
-**Remove the 4 tabs. Make it ONE thing: Chat.**
+### New Page: `src/pages/CoursePreview.tsx`
 
+**Flow:**
+1. Show "Building your personalized course..." animation (3-4 seconds)
+2. Reveal course preview with:
+   - Course title
+   - What's included checklist
+   - Peptide list (no dosing shown pre-purchase)
+   - CTA: "Get Your Course - $99"
+3. If already purchased, show "Go to Dashboard" instead
+
+---
+
+## Phase 5: Stripe Integration Update
+
+### Update: `supabase/functions/create-checkout/index.ts`
+
+**Change from subscription to one-time payment:**
 ```text
-Reconstitution Guide → Move to Protocol page (collapsible)
-Injection Guide → Move to Protocol page (collapsible)
-Check-In Flow → Move to Dashboard (modal)
-Ask Coach → Keep as the ONLY thing on Coach page
+Current: mode: "subscription"
+New: mode: "payment"
+
+Current: Uses price IDs for monthly/annual
+New: Uses price_data with $99.00 unit_amount
+
+Current: subscription_data metadata
+New: payment metadata (user_id, goal)
 ```
 
-#### 5.2 Chat Interface Enhancement
-**Add suggested questions when empty:**
+### New Edge Function: `supabase/functions/handle-payment-success/index.ts`
 
+**Webhook handler for checkout.session.completed:**
+1. Extract user_id and goal from metadata
+2. Create purchase record
+3. Copy course template to user_courses
+4. Set status to 'not_started'
+
+---
+
+## Phase 6: Dashboard Redesign
+
+### Updated: `src/pages/dashboard/Home.tsx`
+
+**New Layout:**
 ```text
-Suggested Questions:
-- "What should I expect in week 1?"
-- "How do I know if my dose is right?"
-- "What are normal side effects?"
-- "Can I stack [peptide] with [peptide]?"
+┌─────────────────────────────────────────┐
+│ [Course Title]                          │
+│ Day X of Y                              │
+├─────────────────────────────────────────┤
+│ TODAY'S LESSON                          │
+│ Day X: [Lesson Title]                   │
+│ [Preview text...]                       │
+│ [Start Today's Lesson]                  │
+├─────────────────────────────────────────┤
+│ Progress: ████████░░ X%                 │
+├─────────────────────────────────────────┤
+│ [My Plan] [AI Coach]                    │
+└─────────────────────────────────────────┘
+```
+
+**Status-based views:**
+- `waiting_supplies`: "Waiting for supplies" message + "Ready to start" button
+- `active`: Today's lesson card
+- `completed`: Celebration + "Browse Courses" link
+
+### New Page: `src/pages/dashboard/CourseLessons.tsx`
+
+**Full course view with all lessons:**
+```text
+Phase 1: Preparation
+  Day 0: Welcome & Your Plan ✓
+  Day 1: Understanding Peptides ✓
+  Day 2: Supplies Checklist [Current]
+  Day 3: Reconstitution 🔒
+  ...
+
+Phase 2: Week 1
+  Day 4: Your First Injection 🔒
+  ...
+```
+
+### New Page: `src/pages/dashboard/MyPlan.tsx`
+
+**Replaces Protocol.tsx with course-appropriate naming:**
+- Peptide cards with research-based dosing language
+- Weekly schedule view
+- Supplies checklist
+- Move guides here from Protocol
+
+---
+
+## Phase 7: Welcome Flow
+
+### New Component: `src/components/dashboard/WelcomeModal.tsx`
+
+**Shown when `?welcome=true` in URL:**
+```text
+🎉 Your [Goal] Course is Ready!
+
+Before we start, one question:
+When are your supplies arriving?
+
+[I have them] → status: active, start Day 0
+[This week] → status: waiting_supplies
+[Still ordering] → Show supplies checklist
 ```
 
 ---
 
-### Phase 6: Protocol Page Enhancement
+## Phase 8: Course Templates Data
 
-#### 6.1 Protocol Page with Guides (`src/pages/dashboard/Protocol.tsx`)
-**Move reconstitution and injection guides here:**
+### Seed 6 course templates:
 
+| Goal | Title | Peptides | Duration |
+|------|-------|----------|----------|
+| fat_loss | Fat Loss Course | Semaglutide | 56 days (8 weeks) |
+| muscle | Muscle & Recovery Course | BPC-157, TB-500 | 56 days |
+| recovery | Injury Recovery Course | BPC-157, TB-500 | 42 days (6 weeks) |
+| anti_aging | Anti-Aging & Longevity Course | Epithalon, GHK-Cu | 84 days (12 weeks) |
+| cognitive | Cognitive Enhancement Course | Semax, Selank | 56 days |
+| beginner | Beginner Course | BPC-157 | 42 days |
+
+Each includes full lesson array with day, phase, title, content, action_item.
+
+---
+
+## Phase 9: Hooks & State Management
+
+### New Hooks
+
+**useCourse.ts**
 ```text
-Section 1: Your Peptides (existing peptide cards)
+- Fetch user's active course
+- Start/complete lessons
+- Update course status
+- Track current day
+```
 
-Section 2: Your Schedule (weekly calendar view)
+**useLessons.ts**
+```text
+- Fetch lesson progress
+- Mark lessons complete
+- Get today's lesson
+- Calculate streak (lessons completed consecutively)
+```
 
-Section 3: Guides (NEW)
-- Collapsible "Reconstitution Guide" 
-- Collapsible "Injection Guide"
-- Each step has "Mark Complete" checkbox
+**useChatMessages.ts** (simpler than current conversations)
+```text
+- Fetch chat history
+- Send message to coach
+- Store responses
+```
 
-Section 4: Actions (Start/Pause/Resume)
+### Hooks to Update
+
+**useProtocol.ts** → Rename to useCourse, update structure
+**useCheckIn.ts** → Merge into useLessons (lesson completion replaces check-in)
+
+---
+
+## Phase 10: AI Coach Updates
+
+### Update: `supabase/functions/coach/index.ts`
+
+**New system prompt:**
+```text
+You are an educational peptide coach helping a user through their course.
+
+User's Course: {course_title}
+User's Goal: {goal}
+User's Peptides: {peptides}
+Current Day: {current_day} of {duration_days}
+
+Guidelines:
+- Reference research: "Studies have shown...", "Research suggests..."
+- Never diagnose, prescribe, or give medical advice
+- If asked about sourcing, say you can't recommend specific sources
 ```
 
 ---
 
-### Phase 7: Protocol Templates Update
+## File Changes Summary
 
-#### 7.1 Update `src/hooks/useProtocol.ts`
-**Replace templates with specification from prompt:**
+### New Files (Create)
+```text
+src/pages/CoursePreview.tsx
+src/pages/dashboard/CourseLessons.tsx
+src/pages/dashboard/MyPlan.tsx
+src/components/dashboard/WelcomeModal.tsx
+src/components/course/LessonCard.tsx
+src/components/course/LessonModal.tsx
+src/components/landing/HowItWorksSection.tsx
+src/components/landing/WhatsInsideSection.tsx
+src/components/landing/GoalSelectionSection.tsx
+src/hooks/useCourse.ts
+src/hooks/useLessons.ts
+src/hooks/useChatMessages.ts
+supabase/functions/handle-payment-success/index.ts
+```
 
-| Goal | Protocol Name | Peptides | Duration |
-|------|---------------|----------|----------|
-| fat_loss | Fat Loss Protocol | Semaglutide | 8 weeks |
-| muscle_recovery | Muscle & Recovery Protocol | BPC-157 + TB-500 | 8 weeks |
-| injury_recovery | Injury Recovery Protocol | BPC-157 + TB-500 | 6 weeks |
-| anti_aging | Anti-Aging & Longevity Protocol | Epithalon + GHK-Cu | 12 weeks |
-| cognitive | Cognitive Enhancement Protocol | Semax + Selank | 8 weeks |
-| general_wellness | Beginner Protocol | BPC-157 | 6 weeks |
+### Files to Rewrite
+```text
+src/pages/Index.tsx (complete redesign)
+src/components/landing/HeroSection.tsx
+src/components/landing/PricingCTA.tsx
+src/components/landing/FAQ.tsx
+src/pages/dashboard/Home.tsx
+supabase/functions/create-checkout/index.ts
+supabase/functions/coach/index.ts
+```
 
-Each protocol includes full details: purpose, dosage, frequency, timing, site.
-
----
-
-## Files to Create
-
-| File | Purpose |
-|------|---------|
-| `src/components/landing/CourseFeatures.tsx` | 3-pillar solution section |
-| `src/components/landing/CurriculumSection.tsx` | Course modules accordion |
-| `src/components/landing/ComparisonSection.tsx` | Competitor comparison table |
-| `src/components/dashboard/CheckInModal.tsx` | Modal wrapper for check-in |
-| `src/components/protocol/CollapsibleGuide.tsx` | Reusable collapsible guide |
-
-## Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/pages/Index.tsx` | New section order, remove old sections |
-| `src/components/landing/HeroSection.tsx` | Complete rewrite |
-| `src/components/landing/ProblemSection.tsx` | New "courses are a scam" copy |
-| `src/components/landing/PricingCTA.tsx` | Single card with value stack |
-| `src/components/landing/FAQ.tsx` | New FAQ content |
-| `src/components/landing/Navbar.tsx` | Update nav links and CTAs |
-| `src/pages/Quiz.tsx` | Add intro screen, redesign steps |
-| `src/pages/QuizResults.tsx` | Add value stack, comparison pricing |
-| `src/pages/dashboard/Home.tsx` | Add status bar, check-in modal |
-| `src/pages/dashboard/Coach.tsx` | Remove tabs, single chat |
-| `src/pages/dashboard/Protocol.tsx` | Add collapsible guides |
-| `src/components/dashboard/DashboardSidebar.tsx` | Simplify nav items |
-| `src/hooks/useProtocol.ts` | Update protocol templates |
-
-## Files to Remove/Deprecate
-
-| File | Action |
-|------|--------|
-| `src/components/landing/ChatbotDemo.tsx` | Remove (positions AI as product) |
-| `src/components/landing/SocialProof.tsx` | Keep but update messaging |
-| `src/components/landing/ProductPreview.tsx` | Replace with CourseFeatures |
-| `src/pages/dashboard/Progress.tsx` | Keep but simplify/integrate |
-
----
-
-## Key Messaging Changes
-
-### Headlines
-- OLD: "Your AI Peptide Coach"
-- NEW: "The $2,000 Peptide Course. For $29."
-
-### CTAs
-- OLD: "Get Your Free Protocol"
-- NEW: "Build My Course (Free)"
-
-### Value Proposition
-- OLD: "AI-powered research assistant"
-- NEW: "Personalized peptide course that replaces $2,000 guru courses"
-
-### Competitor Framing
-- OLD: None
-- NEW: Direct comparison to Jay Campbell's $1,999 courses
+### Files to Deprecate/Remove
+```text
+src/pages/Quiz.tsx (replace with direct /course/:goal flow)
+src/pages/QuizResults.tsx (merge into CoursePreview)
+src/pages/dashboard/Protocol.tsx (replace with MyPlan)
+src/pages/dashboard/Progress.tsx (integrate into Home)
+src/hooks/useProtocol.ts (replace with useCourse)
+src/hooks/useCheckIn.ts (replace with useLessons)
+```
 
 ---
 
 ## Implementation Order
 
-1. **Landing Page** - Complete redesign (hero, problem, solution, curriculum, pricing)
-2. **Quiz Flow** - Add intro, redesign steps for "course building"
-3. **Quiz Results** - Add value stack and comparison pricing
-4. **Dashboard Simplification** - Merge check-in into modal, simplify nav
-5. **Coach Simplification** - Remove tabs, single chat only
-6. **Protocol Enhancement** - Add collapsible guides
-7. **Protocol Templates** - Update with detailed specifications
+1. **Database migrations** - Create new tables (course_templates, user_courses, lesson_progress, chat_messages)
+2. **Seed course templates** - Insert 6 course templates with full lesson content
+3. **Stripe update** - Change create-checkout to one-time payment mode
+4. **Payment webhook** - Create handle-payment-success edge function
+5. **New hooks** - Create useCourse, useLessons, useChatMessages
+6. **Course preview page** - Build /course/:goal with building animation
+7. **Landing page redesign** - New sections and goal selection
+8. **Dashboard redesign** - Today's lesson view, welcome modal
+9. **Course lessons page** - Full day-by-day view
+10. **My Plan page** - Peptides, schedule, supplies
+11. **Coach updates** - New system prompt and context
+12. **Settings updates** - Show purchases and referrals
+13. **Referral system** - $20 discount/credit flow
 
 ---
 
-## Legal Disclaimer (Must Include)
+## Success Verification Checklist
 
-```text
-"Peptide Playbook provides educational content based on published 
-research. This is not medical advice, diagnosis, or treatment. The 
-information provided is for educational purposes only and is not 
-intended to replace professional medical advice. Always consult a 
-qualified healthcare provider before starting any new supplement, 
-peptide, or health protocol. Individual results may vary. Peptide 
-Playbook does not sell peptides or recommend specific vendors."
-```
+- [ ] Landing page loads with "Pick Your Goal" cards
+- [ ] Clicking goal goes to /course/:goal with building animation
+- [ ] Course preview shows peptides without dosing
+- [ ] $99 checkout redirects to Stripe
+- [ ] Payment success creates user_course record
+- [ ] Welcome modal asks about supplies
+- [ ] Dashboard shows today's lesson
+- [ ] Lesson completion advances current_day
+- [ ] My Plan shows peptides with research-based language
+- [ ] AI Coach has course context
+- [ ] Referral codes generate $20 discount
 
----
-
-## Success Metrics
-
-| Metric | Target |
-|--------|--------|
-| Quiz start rate | > 20% of landing visitors |
-| Quiz completion rate | > 60% |
-| Quiz-to-signup conversion | > 30% |
-| Daily check-in completion | > 70% |
-| Monthly retention | > 80% |
