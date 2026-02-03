@@ -1,79 +1,70 @@
 
-# Replace Placeholder Logos with Research Source Trust Bar
+# Remove Yellow/Amber Highlights from UI
 
-## Overview
-Transform the "FeaturedBy" section from placeholder logos into a compelling trust signal that showcases the authoritative research sources powering Peptide Playbook. This will help convert cold traffic by immediately establishing credibility.
+## The Problem
+The current design uses a warm amber/yellow color (`#F59E0B`) for hover states and selections throughout the UI. This clashes with the teal primary brand color and feels inconsistent.
 
-## Current State
-- Shows "Research trusted by health-conscious individuals" with gray placeholder boxes
-- Displays "Press features coming soon" text
-- Provides no actual credibility signals
+## The Solution
+Replace the amber accent with a soft teal-based accent that harmonizes with the primary color scheme. This will create a cohesive, professional feel across all interactions.
 
-## Proposed Changes
+## What Will Change
 
-### 1. Update Header Copy
-Change from:
-> "Research trusted by health-conscious individuals"
+### Current Accent Color
+- Light mode: `38 92% 50%` (amber/gold - approximately #F59E0B)
+- Dark mode: `38 92% 45%`
 
-To:
-> "Research sourced from"
+### New Accent Color
+- Light mode: `173 30% 94%` (very light teal gray)
+- Dark mode: `173 25% 18%` (dark teal gray)
 
-This makes it clear we're showing WHERE the research comes from, not who trusts it.
+This creates a subtle, neutral highlight that's tinted toward the primary teal but isn't overpowering.
 
-### 2. Replace Placeholders with Authoritative Source Logos/Names
-Display recognizable research institution names that the platform actually cites:
+## Where You'll See the Change
 
-| Source | Why It Builds Trust |
-|--------|---------------------|
-| **PubMed / NIH** | Gold standard for medical research |
-| **FDA.gov** | Official regulatory authority |
-| **ClinicalTrials.gov** | Registry of human trials |
-| **WADA** | Sports/anti-doping authority |
-
-These are already cited throughout the guides (visible in `PrimarySources.tsx`), so this is accurate representation.
-
-### 3. Visual Treatment
-- Display source names as clean, professional text (not images that could look fake)
-- Use subtle styling: muted text with slight opacity
-- Add hover states that link to the actual source websites
-- Include a small external link icon on hover to signal clickability
-
-### 4. Remove "Press features coming soon"
-This undermines trust. Remove it entirely.
+| Component | What Changes |
+|-----------|--------------|
+| **Buttons** | Ghost and outline button hover backgrounds |
+| **Dropdown menus** | Item highlight when hovering/selecting |
+| **Select dropdowns** | Option focus/selection color |
+| **Navigation links** | Hover background color |
+| **Toggle buttons** | Active/pressed state background |
+| **Dialog close button** | Hover state |
+| **Sidebar items** | Hover and active states |
 
 ---
 
-## Technical Implementation
+## Technical Details
 
 ### File to Modify
-`src/components/landing/FeaturedBy.tsx`
+`src/index.css`
 
 ### Changes
-1. Create a `sources` array with name, URL, and optional description
-2. Map over sources to render clickable text links
-3. Update header text
-4. Remove the "coming soon" paragraph
-5. Add subtle hover animations for polish
+1. Update `--accent` CSS variable in `:root` (light mode)
+2. Update `--accent` CSS variable in `.dark` (dark mode)
+3. Update `--accent-foreground` to ensure proper text contrast
 
-### Code Structure
-```text
-┌─────────────────────────────────────────────────────────┐
-│            "Research sourced from"                       │
-│                                                         │
-│   PubMed   •   FDA.gov   •   ClinicalTrials.gov   •   WADA   │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
+### New Values
+
+**Light Mode:**
+```css
+--accent: 173 30% 94%;        /* Very light teal-gray */
+--accent-foreground: 222 47% 11%;  /* Keep dark text for contrast */
 ```
 
-Each source name will be a clickable external link with:
-- Muted foreground color
-- Hover: primary color + underline
-- Opens in new tab with proper `rel="noopener noreferrer"`
+**Dark Mode:**
+```css
+--accent: 173 25% 18%;        /* Dark teal-gray */
+--accent-foreground: 0 0% 98%;     /* Keep light text for contrast */
+```
+
+Also update sidebar accent to match:
+```css
+--sidebar-accent: 173 30% 92%;  /* Slightly more visible on sidebar */
+```
 
 ---
 
 ## Expected Outcome
-- Immediate credibility for cold traffic visitors
-- Accurate representation of actual sources used
-- Clean, professional appearance that matches the minimal design system
-- Clickable links that let skeptical users verify the sources exist
+- All hover states will use a cohesive teal-gray instead of jarring yellow
+- The UI will feel more professional and unified
+- Text remains readable with proper contrast ratios
