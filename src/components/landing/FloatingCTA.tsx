@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -23,7 +22,7 @@ export function FloatingCTA() {
       <Link to="/signup">
         <Button size="lg" className="btn-primary-clean h-12 px-6 shadow-lg">
           Get Access
-          <ArrowRight className="ml-2 w-4 h-4" />
+          <span className="ml-2">→</span>
         </Button>
       </Link>
     </div>

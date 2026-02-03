@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
 
 export function UrgencyBanner() {
   const [isVisible, setIsVisible] = useState(true);
@@ -71,10 +70,10 @@ export function UrgencyBanner() {
       </div>
       <button
         onClick={handleDismiss}
-        className="absolute right-4 top-1/2 -translate-y-1/2 hover:opacity-70 transition-opacity"
+        className="absolute right-4 top-1/2 -translate-y-1/2 hover:opacity-70 transition-opacity text-xl leading-none font-light"
         aria-label="Dismiss banner"
       >
-        <X className="w-4 h-4" />
+        ×
       </button>
     </div>
   );

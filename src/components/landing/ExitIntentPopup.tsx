@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { X, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -93,15 +92,15 @@ export function ExitIntentPopup() {
       <div className="bg-white rounded-2xl p-8 max-w-md w-full relative shadow-2xl animate-fade-up">
         <button
           onClick={() => setIsOpen(false)}
-          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-2xl leading-none font-light transition-colors"
           aria-label="Close popup"
         >
-          <X className="w-5 h-5" />
+          ×
         </button>
 
         <div className="text-center mb-6">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-            <FlaskConical className="w-8 h-8 text-primary" />
+            <span className="text-lg font-bold text-primary">FDA</span>
           </div>
 
           <h3 className="text-2xl font-bold mb-2">

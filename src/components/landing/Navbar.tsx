@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 
 const navLinks = [
@@ -78,17 +77,24 @@ export function Navbar() {
               </Link>
             </div>
 
-            {/* Mobile menu button */}
+            {/* Mobile menu button - CSS animated hamburger */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 -mr-2"
+              className="md:hidden p-2 -mr-2 flex flex-col justify-center items-center gap-1.5"
               aria-label="Toggle menu"
             >
-              {isMobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+              <span className={cn(
+                "w-5 h-0.5 bg-foreground transition-all duration-300 origin-center",
+                isMobileMenuOpen && "rotate-45 translate-y-2"
+              )} />
+              <span className={cn(
+                "w-5 h-0.5 bg-foreground transition-all duration-300",
+                isMobileMenuOpen && "opacity-0"
+              )} />
+              <span className={cn(
+                "w-5 h-0.5 bg-foreground transition-all duration-300 origin-center",
+                isMobileMenuOpen && "-rotate-45 -translate-y-2"
+              )} />
             </button>
           </div>
         </div>

@@ -1,5 +1,4 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Send } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const chatExamples = [
@@ -120,7 +119,7 @@ export function AIAssistant() {
           className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
           disabled
         />
-        <Send className="w-3.5 h-3.5 text-muted-foreground" />
+        <span className="text-muted-foreground text-sm">→</span>
       </div>
 
       {/* Dots indicator */}
