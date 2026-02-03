@@ -2,23 +2,23 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Check, Lock, Flame, Calendar, MessageSquare, ChartLine } from "lucide-react";
+import { Check, Lock, Flame } from "lucide-react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useAuth } from "@/hooks/useAuth";
 import { useTier } from "@/hooks/useTier";
 
 interface QuizResponse {
-  id: string;
+  id?: string;
   goal: string;
   experience: string;
-  concerns: string[];
+  fear: string;
   timeline: string;
 }
 
 interface Protocol {
   name: string;
   duration: string;
-  peptides: { name: string; purpose: string; dosage: string; frequency: string }[];
+  peptides: { name: string; purpose: string }[];
 }
 
 const protocolMap: Record<string, Protocol> = {
@@ -26,47 +26,46 @@ const protocolMap: Record<string, Protocol> = {
     name: "Fat Loss Protocol",
     duration: "8 weeks",
     peptides: [
-      { name: "Semaglutide", purpose: "Appetite regulation & metabolic optimization", dosage: "0.25mg → 2.4mg", frequency: "Once weekly" },
-      { name: "BPC-157", purpose: "Gut health & metabolic support", dosage: "250mcg", frequency: "Once daily" },
+      { name: "Semaglutide", purpose: "Appetite regulation & metabolic optimization" },
     ],
   },
   muscle_recovery: {
-    name: "Performance Stack",
+    name: "Muscle & Recovery Protocol",
     duration: "8 weeks",
     peptides: [
-      { name: "BPC-157", purpose: "Tissue repair & recovery acceleration", dosage: "250mcg", frequency: "Twice daily" },
-      { name: "TB-500", purpose: "Muscle healing & flexibility", dosage: "2.5mg", frequency: "Twice weekly" },
+      { name: "BPC-157", purpose: "Tissue repair & recovery acceleration" },
+      { name: "TB-500", purpose: "Muscle healing & flexibility" },
     ],
   },
   injury_recovery: {
-    name: "Healing Focus Protocol",
+    name: "Injury Recovery Protocol",
     duration: "6 weeks",
     peptides: [
-      { name: "BPC-157", purpose: "Accelerated tissue repair", dosage: "250-500mcg", frequency: "Twice daily" },
-      { name: "TB-500", purpose: "Systemic healing & inflammation reduction", dosage: "2.5mg", frequency: "Twice weekly" },
+      { name: "BPC-157", purpose: "Accelerated tissue repair" },
+      { name: "TB-500", purpose: "Systemic healing & inflammation reduction" },
     ],
   },
   anti_aging: {
-    name: "Longevity Stack",
+    name: "Anti-Aging & Longevity Protocol",
     duration: "12 weeks",
     peptides: [
-      { name: "Epithalon", purpose: "Telomere support & cellular longevity", dosage: "5mg", frequency: "Daily (20-day cycles)" },
-      { name: "GHK-Cu", purpose: "Skin rejuvenation & collagen synthesis", dosage: "1-2mg", frequency: "Once daily" },
+      { name: "Epithalon", purpose: "Telomere support & cellular longevity" },
+      { name: "GHK-Cu", purpose: "Skin rejuvenation & collagen synthesis" },
     ],
   },
   cognitive: {
-    name: "Nootropic Stack",
+    name: "Cognitive Enhancement Protocol",
     duration: "8 weeks",
     peptides: [
-      { name: "Semax", purpose: "Cognitive enhancement & neuroprotection", dosage: "200-600mcg", frequency: "Once daily (nasal)" },
-      { name: "Selank", purpose: "Anxiety reduction & mental clarity", dosage: "250-500mcg", frequency: "Once daily (nasal)" },
+      { name: "Semax", purpose: "Cognitive enhancement & neuroprotection" },
+      { name: "Selank", purpose: "Anxiety reduction & mental clarity" },
     ],
   },
   general_wellness: {
-    name: "Beginner Safe Protocol",
+    name: "Beginner Protocol",
     duration: "6 weeks",
     peptides: [
-      { name: "BPC-157", purpose: "Overall healing & gut health optimization", dosage: "250mcg", frequency: "Once daily" },
+      { name: "BPC-157", purpose: "Overall healing & gut health optimization" },
     ],
   },
 };
@@ -79,6 +78,35 @@ const goalLabels: Record<string, string> = {
   cognitive: "Cognitive Enhancement",
   general_wellness: "General Wellness",
 };
+
+const experienceLabels: Record<string, string> = {
+  beginner: "Complete Beginner",
+  some_experience: "Some Experience",
+  experienced: "Experienced",
+};
+
+const fearLabels: Record<string, string> = {
+  reconstitution: "Reconstitution",
+  dosing: "Dosing",
+  injections: "Injections",
+  side_effects: "Side Effects",
+  nothing: "Ready to Start",
+};
+
+const whatsIncluded = [
+  "Your complete protocol with exact dosing",
+  "Step-by-step reconstitution walkthrough",
+  "Injection guide for beginners",
+  "Day-by-day guidance through your cycle",
+  "24/7 AI coach for questions",
+  "Progress tracking with streaks",
+];
+
+const valueStack = [
+  { item: "Personalized protocol", value: "$299", note: "(Jay charges $299 for generic)" },
+  { item: "Reconstitution masterclass", value: "$49", note: "(courses charge $49)" },
+  { item: "24/7 AI coaching", value: "∞", note: "(priceless)" },
+];
 
 export default function QuizResults() {
   const navigate = useNavigate();
@@ -130,17 +158,17 @@ export default function QuizResults() {
             animate={{ opacity: 1, y: 0 }}
           >
             <p className="text-sm font-medium text-primary uppercase tracking-wide mb-3">
-              Your Personalized Protocol
+              Your Personalized Course
             </p>
-            <h1 className="text-3xl md:text-4xl font-semibold mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">
               {protocol.name}
             </h1>
             <p className="text-muted-foreground">
-              Optimized for {goalLabels[quizData.goal]} • {protocol.duration}
+              Built for {experienceLabels[quizData.experience]} · Addressing {fearLabels[quizData.fear]}
             </p>
           </motion.div>
 
-          {/* Protocol Card */}
+          {/* Protocol Preview Card */}
           <motion.div 
             className="bg-card border rounded-2xl overflow-hidden mb-8"
             initial={{ opacity: 0, y: 20 }}
@@ -151,10 +179,10 @@ export default function QuizResults() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="font-semibold text-lg">Recommended Peptides</h2>
-                  <p className="text-sm text-muted-foreground">Based on your goals and experience level</p>
+                  <p className="text-sm text-muted-foreground">{protocol.duration} cycle</p>
                 </div>
                 <span className="text-sm bg-primary/10 text-primary px-3 py-1 rounded-full">
-                  {protocol.peptides.length} peptides
+                  {protocol.peptides.length} peptide{protocol.peptides.length > 1 ? "s" : ""}
                 </span>
               </div>
             </div>
@@ -173,11 +201,11 @@ export default function QuizResults() {
                     <div className="grid grid-cols-2 gap-4 mt-4">
                       <div className="bg-secondary/50 rounded-lg p-3">
                         <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Dosage</p>
-                        <p className="font-medium">{peptide.dosage}</p>
+                        <p className="font-medium">250mcg</p>
                       </div>
                       <div className="bg-secondary/50 rounded-lg p-3">
                         <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Frequency</p>
-                        <p className="font-medium">{peptide.frequency}</p>
+                        <p className="font-medium">Once daily</p>
                       </div>
                     </div>
                   ) : (
@@ -193,7 +221,10 @@ export default function QuizResults() {
                         </div>
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Lock className="w-5 h-5 text-muted-foreground" />
+                        <div className="bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm border">
+                          <Lock className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">Unlock with subscription</span>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -204,29 +235,50 @@ export default function QuizResults() {
 
           {/* What's Included */}
           {!showFull && (
-            <motion.div 
-              className="bg-card border rounded-2xl p-6 mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <h3 className="font-semibold text-lg mb-4">Unlock your full protocol with Peptide Playbook</h3>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {[
-                  { icon: Check, text: "Complete dosing schedule with exact amounts" },
-                  { icon: MessageSquare, text: "Day-by-day AI coaching through your first week" },
-                  { icon: Check, text: "Step-by-step reconstitution walkthrough" },
-                  { icon: Calendar, text: "Daily check-ins to track progress" },
-                  { icon: MessageSquare, text: "24/7 AI chat for questions" },
-                  { icon: ChartLine, text: "Progress tracking with streaks" },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <item.icon className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className="text-sm">{item.text}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            <>
+              <motion.div 
+                className="bg-card border rounded-2xl p-6 mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h3 className="font-semibold text-lg mb-4">What's Included</h3>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {whatsIncluded.map((item, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span className="text-sm">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Value Stack */}
+              <motion.div 
+                className="bg-secondary/30 border rounded-2xl p-6 mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+              >
+                <h3 className="font-semibold text-lg mb-4">What you're getting:</h3>
+                <div className="space-y-3 mb-4">
+                  {valueStack.map((v, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <span className="text-sm">{v.item} <span className="text-muted-foreground">{v.note}</span></span>
+                      <span className="font-semibold">{v.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t pt-4 flex items-center justify-between">
+                  <span className="font-medium">Total value:</span>
+                  <span className="font-bold text-lg">$500+</span>
+                </div>
+                <div className="flex items-center justify-between text-primary mt-2">
+                  <span className="font-medium">Your price:</span>
+                  <span className="font-bold text-xl">$29/month</span>
+                </div>
+              </motion.div>
+            </>
           )}
 
           {/* CTA */}
@@ -239,9 +291,9 @@ export default function QuizResults() {
             {showFull ? (
               <>
                 <Link to="/dashboard">
-                  <Button size="lg" className="h-12 px-8 gap-2">
+                  <Button size="lg" className="h-12 px-8 gap-2 btn-primary-clean">
                     <Flame className="w-4 h-4" />
-                    Start My Protocol
+                    Start My Course
                   </Button>
                 </Link>
                 <p className="text-sm text-muted-foreground mt-3">
@@ -251,16 +303,19 @@ export default function QuizResults() {
             ) : (
               <>
                 <Link to="/signup">
-                  <Button size="lg" className="h-12 px-8">
-                    Start Your Journey – $29/mo
+                  <Button size="lg" className="h-14 px-10 text-lg btn-primary-clean">
+                    Unlock My Protocol – $29/mo
                   </Button>
                 </Link>
-                <p className="text-sm text-muted-foreground mt-3">
-                  Cancel anytime • 14-day money-back guarantee
+                <p className="text-sm text-muted-foreground mt-4">
+                  Or $249/year (save 29%)
                 </p>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
+                  Cancel anytime · 30-day money-back guarantee
+                </p>
+                <p className="text-sm text-muted-foreground mt-6">
                   Already have an account?{" "}
-                  <Link to="/login" className="text-primary hover:underline">
+                  <Link to="/login" className="text-primary hover:underline font-medium">
                     Log in
                   </Link>
                 </p>

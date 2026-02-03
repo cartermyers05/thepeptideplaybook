@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/Logo";
 
 const navLinks = [
-  { label: "What's Inside", href: "#product" },
-  { label: "Guides", href: "/guides", isRoute: true },
+  { label: "What's Inside", href: "#curriculum" },
+  { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
 ] as const;
 
@@ -42,25 +42,14 @@ export function Navbar() {
             {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
-                'isRoute' in link && link.isRoute ? (
-                  <Link
-                    key={link.label}
-                    to={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
-                  >
-                    {link.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-                  </Link>
-                ) : (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
-                  >
-                    {link.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
-                  </a>
-                )
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
+                >
+                  {link.label}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full" />
+                </a>
               ))}
             </nav>
 
@@ -72,8 +61,8 @@ export function Navbar() {
               >
                 Log In
               </Link>
-              <Link to="/signup">
-                <Button size="sm" className="btn-primary-clean">Get Access</Button>
+              <Link to="/quiz">
+                <Button size="sm" className="btn-primary-clean">Build My Course</Button>
               </Link>
             </div>
 
@@ -105,27 +94,15 @@ export function Navbar() {
         <div className="fixed inset-x-0 top-16 z-40 md:hidden bg-white border-b border-border animate-slide-down">
           <nav className="container px-4 py-6 space-y-4">
             {navLinks.map((link, index) => (
-              'isRoute' in link && link.isRoute ? (
-                <Link
-                  key={link.label}
-                  to={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-lg font-medium py-2 opacity-0 animate-fade-in-up"
-                  style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "forwards" }}
-                >
-                  {link.label}
-                </Link>
-              ) : (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-lg font-medium py-2 opacity-0 animate-fade-in-up"
-                  style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "forwards" }}
-                >
-                  {link.label}
-                </a>
-              )
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-lg font-medium py-2 opacity-0 animate-fade-in-up"
+                style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "forwards" }}
+              >
+                {link.label}
+              </a>
             ))}
             <Link
               to="/login"
@@ -136,8 +113,8 @@ export function Navbar() {
               Log In
             </Link>
             <div className="pt-4 opacity-0 animate-fade-in-up" style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}>
-              <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button className="w-full btn-primary-clean">Get Access</Button>
+              <Link to="/quiz" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full btn-primary-clean">Build My Course</Button>
               </Link>
             </div>
           </nav>

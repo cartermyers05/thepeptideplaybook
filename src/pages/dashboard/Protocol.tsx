@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useProtocol, Peptide } from "@/hooks/useProtocol";
 import { Button } from "@/components/ui/button";
@@ -5,12 +6,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Play, Pause, RotateCcw, FileText, Clock, Calendar, Pill } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Play, Pause, RotateCcw, FileText, Clock, Calendar, Pill, Beaker, Syringe, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ReconGuide } from "@/components/coach/ReconGuide";
+import { InjectionGuide } from "@/components/coach/InjectionGuide";
+import { cn } from "@/lib/utils";
 
 export default function Protocol() {
   const { protocol, isLoading, startProtocol, pauseProtocol, resumeProtocol } = useProtocol();
   const navigate = useNavigate();
+  const [reconOpen, setReconOpen] = useState(false);
+  const [injectionOpen, setInjectionOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -30,9 +37,9 @@ export default function Protocol() {
           <FileText className="w-16 h-16 text-muted-foreground mb-4" />
           <h1 className="text-2xl font-semibold mb-2">No Protocol Yet</h1>
           <p className="text-muted-foreground mb-6 max-w-md">
-            Take our quick quiz to get a personalized peptide protocol tailored to your goals.
+            Take our quick quiz to get a personalized peptide course tailored to your goals.
           </p>
-          <Button onClick={() => navigate("/quiz")}>Get Your Free Protocol</Button>
+          <Button onClick={() => navigate("/quiz")} className="btn-primary-clean">Build My Course</Button>
         </div>
       </DashboardLayout>
     );
@@ -101,7 +108,7 @@ export default function Protocol() {
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-3">
           {protocol.status === "not_started" && (
-            <Button onClick={() => startProtocol.mutate(protocol.id)} disabled={startProtocol.isPending}>
+            <Button onClick={() => startProtocol.mutate(protocol.id)} disabled={startProtocol.isPending} className="btn-primary-clean">
               <Play className="w-4 h-4 mr-2" />
               Start Protocol
             </Button>
@@ -135,6 +142,71 @@ export default function Protocol() {
               <PeptideCard key={index} peptide={peptide} />
             ))}
           </div>
+        </div>
+
+        {/* Guides Section */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium">Guides</h2>
+          
+          {/* Reconstitution Guide */}
+          <Collapsible open={reconOpen} onOpenChange={setReconOpen}>
+            <Card>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="cursor-pointer hover:bg-secondary/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Beaker className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base">Reconstitution Guide</CardTitle>
+                        <CardDescription>Step-by-step mixing instructions</CardDescription>
+                      </div>
+                    </div>
+                    <ChevronDown className={cn(
+                      "w-5 h-5 text-muted-foreground transition-transform",
+                      reconOpen && "rotate-180"
+                    )} />
+                  </div>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="pt-0">
+                  <ReconGuide />
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+
+          {/* Injection Guide */}
+          <Collapsible open={injectionOpen} onOpenChange={setInjectionOpen}>
+            <Card>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="cursor-pointer hover:bg-secondary/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Syringe className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base">Injection Guide</CardTitle>
+                        <CardDescription>Complete injection walkthrough</CardDescription>
+                      </div>
+                    </div>
+                    <ChevronDown className={cn(
+                      "w-5 h-5 text-muted-foreground transition-transform",
+                      injectionOpen && "rotate-180"
+                    )} />
+                  </div>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="pt-0">
+                  <InjectionGuide />
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
         </div>
       </div>
     </DashboardLayout>

@@ -4,43 +4,18 @@ import { Link } from "react-router-dom";
 import { Check } from "lucide-react";
 
 const features = [
-  "Personalized peptide protocol",
-  "Daily AI Coach guidance",
-  "Step-by-step reconstitution guides",
-  "Progress tracking & streaks",
-  "24/7 AI chat support",
-  "Research updates & alerts",
+  "Personalized protocol for your goals",
+  "Step-by-step reconstitution guide",
+  "Injection walkthrough",
+  "Daily guidance through your cycle",
+  "24/7 AI coach access",
+  "Progress tracking",
+  "Cancel anytime",
 ];
-
-const plans = [
-  {
-    name: "Monthly",
-    price: "$29",
-    period: "/month",
-    description: "Full access, cancel anytime",
-    popular: false,
-  },
-  {
-    name: "Annual",
-    price: "$249",
-    period: "/year",
-    description: "2 months free ($20.75/mo)",
-    popular: true,
-  },
-];
-
-const featureVariants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: { 
-    opacity: 1, 
-    x: 0,
-    transition: { duration: 0.3, ease: "easeOut" as const }
-  },
-};
 
 export function PricingCTA() {
   return (
-    <section id="pricing" className="py-20 md:py-28 bg-secondary/30 relative section-gradient-top">
+    <section id="pricing" className="py-20 md:py-28 bg-secondary/30">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -48,94 +23,53 @@ export function PricingCTA() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <p className="text-sm font-medium text-primary tracking-wide uppercase mb-6">
-            AI-Powered Coaching
-          </p>
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
-            Start Your Guided Peptide Journey
+            One price. Everything included.
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Get a personalized protocol and daily AI coaching to guide you every step of the way.
-          </p>
         </motion.div>
 
-        {/* Pricing Cards */}
+        {/* Pricing Card */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-12"
+          className="max-w-md mx-auto"
         >
-          {plans.map((plan, index) => (
-            <div
-              key={plan.name}
-              className={`content-card p-6 relative ${
-                plan.popular ? "border-primary/40 ring-2 ring-primary/20" : ""
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary text-primary-foreground text-xs font-medium px-3 py-1 rounded-full">
-                    Best Value
-                  </span>
-                </div>
-              )}
-              <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">{plan.name}</h3>
-                <div className="flex items-baseline justify-center gap-1 mb-2">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground">{plan.period}</span>
-                </div>
-                <p className="text-sm text-muted-foreground">{plan.description}</p>
+          <div className="bg-card border-2 border-primary/30 rounded-2xl p-8 relative shadow-xl">
+            {/* Price */}
+            <div className="text-center mb-6">
+              <div className="flex items-baseline justify-center gap-1 mb-2">
+                <span className="text-5xl font-bold">$29</span>
+                <span className="text-muted-foreground">/month</span>
               </div>
+              <p className="text-sm text-muted-foreground">
+                Or save 29% with annual ($249/year)
+              </p>
             </div>
-          ))}
-        </motion.div>
 
-        {/* Features List */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-md mx-auto mb-8"
-        >
-          <motion.ul 
-            className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            transition={{ staggerChildren: 0.06, delayChildren: 0.2 }}
-          >
-            {features.map((feature, index) => (
-              <motion.li 
-                key={index} 
-                className="flex items-center gap-2"
-                variants={featureVariants}
-              >
-                <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                <span className="text-sm">{feature}</span>
-              </motion.li>
-            ))}
-          </motion.ul>
-        </motion.div>
+            {/* Features List */}
+            <ul className="space-y-3 mb-8">
+              {features.map((feature, index) => (
+                <li key={index} className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <Link to="/quiz">
-            <Button size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-              Get Your Free Protocol
-              <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
-            </Button>
-          </Link>
-          <p className="text-sm text-muted-foreground mt-4">
-            Free protocol • No credit card required • Cancel anytime
-          </p>
+            {/* CTA */}
+            <Link to="/quiz" className="block">
+              <Button size="lg" className="w-full btn-primary-clean h-12 text-base group">
+                Start My Course
+                <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
+              </Button>
+            </Link>
+
+            <p className="text-xs text-muted-foreground text-center mt-4">
+              30-day money-back guarantee. No questions asked.
+            </p>
+          </div>
         </motion.div>
 
         <motion.p

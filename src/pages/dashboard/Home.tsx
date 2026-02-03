@@ -1,15 +1,18 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ClipboardCheck, MessageSquare, FileText, Trophy, Flame } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useProtocol } from "@/hooks/useProtocol";
 import { useStreak } from "@/hooks/useStreak";
 import { useCheckIn } from "@/hooks/useCheckIn";
 import { useMilestones, MILESTONE_DETAILS } from "@/hooks/useMilestones";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CheckInFlow } from "@/components/coach/CheckInFlow";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -18,6 +21,7 @@ export default function Dashboard() {
   const { currentStreak } = useStreak();
   const { hasCheckedInToday } = useCheckIn();
   const { recentMilestones } = useMilestones();
+  const [showCheckIn, setShowCheckIn] = useState(false);
 
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "there";
   const isLoading = isLoadingProtocol;
@@ -34,26 +38,51 @@ export default function Dashboard() {
     );
   }
 
+  const getStatusMessage = () => {
+    if (!protocol) return null;
+    if (hasCheckedInToday) return { text: "On track", color: "text-primary bg-primary/10" };
+    return { text: "Check in today", color: "text-amber-600 bg-amber-100" };
+  };
+
+  const status = getStatusMessage();
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Welcome Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-          <div>
-            <h1 className="text-2xl font-semibold">
-              Welcome back, {firstName}! 
-              {currentStreak > 0 && <span className="ml-2">🔥 {currentStreak}-day streak</span>}
-            </h1>
-            {protocol?.status === "active" && (
-              <p className="text-muted-foreground">
-                Week {protocol.current_week}, Day {protocol.current_day} of your {protocol.cycle_length_weeks}-week cycle
-              </p>
+        {/* Status Bar */}
+        {protocol?.status === "active" && (
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            {currentStreak > 0 && (
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium">
+                <Flame className="w-4 h-4" />
+                {currentStreak}-day streak
+              </span>
+            )}
+            <span className="px-3 py-1.5 rounded-full bg-muted text-muted-foreground">
+              Week {protocol.current_week} of {protocol.cycle_length_weeks}
+            </span>
+            {status && (
+              <span className={`px-3 py-1.5 rounded-full font-medium ${status.color}`}>
+                {status.text}
+              </span>
             )}
           </div>
+        )}
+
+        {/* Welcome Header */}
+        <div>
+          <h1 className="text-2xl font-semibold">
+            Welcome back, {firstName}!
+          </h1>
+          {protocol?.status === "active" && (
+            <p className="text-muted-foreground">
+              Day {protocol.current_day} of your {protocol.cycle_length_weeks * 7}-day cycle
+            </p>
+          )}
         </div>
 
-        {/* Today's Check-In Card - Prominent CTA */}
-        <Card className={hasCheckedInToday ? "border-primary/50 bg-primary/5" : "border-2 border-primary"}>
+        {/* Today's Focus - Check-In Card */}
+        <Card className={hasCheckedInToday ? "border-primary/30 bg-primary/5" : "border-2 border-primary shadow-lg"}>
           <CardContent className="py-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
@@ -62,7 +91,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold">
-                    {hasCheckedInToday ? "Check-In Complete! ✓" : "Today's Check-In"}
+                    {hasCheckedInToday ? "Today's Check-In Complete! ✓" : "Today's Check-In"}
                   </h2>
                   <p className="text-muted-foreground">
                     {hasCheckedInToday 
@@ -72,7 +101,7 @@ export default function Dashboard() {
                 </div>
               </div>
               {!hasCheckedInToday && (
-                <Button size="lg" onClick={() => navigate("/dashboard/coach")}>
+                <Button size="lg" onClick={() => setShowCheckIn(true)} className="btn-primary-clean">
                   Complete Check-In
                 </Button>
               )}
@@ -83,15 +112,15 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <div className="grid gap-4 md:grid-cols-2">
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/dashboard/coach")}>
+            <Card className="cursor-pointer hover:border-primary/50 transition-colors h-full" onClick={() => navigate("/dashboard/coach")}>
               <CardContent className="py-6">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-lg bg-muted">
                     <MessageSquare className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-medium">Talk to AI Coach</h3>
-                    <p className="text-sm text-muted-foreground">Get guidance on dosing, timing, and technique</p>
+                    <h3 className="font-medium">Need Help?</h3>
+                    <p className="text-sm text-muted-foreground">Ask your AI coach anything</p>
                   </div>
                 </div>
               </CardContent>
@@ -99,7 +128,7 @@ export default function Dashboard() {
           </motion.div>
 
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => navigate("/dashboard/protocol")}>
+            <Card className="cursor-pointer hover:border-primary/50 transition-colors h-full" onClick={() => navigate("/dashboard/protocol")}>
               <CardContent className="py-6">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-lg bg-muted">
@@ -108,7 +137,7 @@ export default function Dashboard() {
                   <div>
                     <h3 className="font-medium">View Protocol</h3>
                     <p className="text-sm text-muted-foreground">
-                      {protocol ? `${protocol.protocol_name}` : "Get your personalized protocol"}
+                      {protocol ? `${protocol.protocol_name}` : "See your full plan"}
                     </p>
                   </div>
                 </div>
@@ -153,13 +182,23 @@ export default function Dashboard() {
             <CardContent className="py-8 text-center">
               <h3 className="font-medium mb-2">No Protocol Yet</h3>
               <p className="text-muted-foreground mb-4">
-                Take our quick quiz to get a personalized peptide protocol.
+                Take our quick quiz to get a personalized peptide course.
               </p>
-              <Button onClick={() => navigate("/quiz")}>Get Your Free Protocol</Button>
+              <Button onClick={() => navigate("/quiz")} className="btn-primary-clean">Build My Course</Button>
             </CardContent>
           </Card>
         )}
       </div>
+
+      {/* Check-In Modal */}
+      <Dialog open={showCheckIn} onOpenChange={setShowCheckIn}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Daily Check-In</DialogTitle>
+          </DialogHeader>
+          <CheckInFlow onComplete={() => setShowCheckIn(false)} />
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
