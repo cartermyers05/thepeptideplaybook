@@ -189,6 +189,48 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          content: string
+          course_id: string | null
+          created_at: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "user_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       check_ins: {
         Row: {
           completed: boolean | null
@@ -351,6 +393,39 @@ export type Database = {
         }
         Relationships: []
       }
+      course_templates: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          duration_days: number
+          goal: string
+          id: string
+          lessons: Json
+          peptides: Json
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          duration_days: number
+          goal: string
+          id?: string
+          lessons?: Json
+          peptides?: Json
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          duration_days?: number
+          goal?: string
+          id?: string
+          lessons?: Json
+          peptides?: Json
+          title?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           created_at: string | null
@@ -374,6 +449,51 @@ export type Database = {
           source?: string | null
         }
         Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          course_id: string
+          day: number
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          course_id: string
+          day: number
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          course_id?: string
+          day?: number
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "user_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
@@ -758,6 +878,7 @@ export type Database = {
       purchases: {
         Row: {
           amount: number
+          course_goal: string | null
           created_at: string | null
           id: string
           stripe_payment_id: string | null
@@ -767,6 +888,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          course_goal?: string | null
           created_at?: string | null
           id?: string
           stripe_payment_id?: string | null
@@ -776,6 +898,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          course_goal?: string | null
           created_at?: string | null
           id?: string
           stripe_payment_id?: string | null
@@ -895,6 +1018,72 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      user_courses: {
+        Row: {
+          created_at: string | null
+          current_day: number | null
+          duration_days: number
+          goal: string
+          id: string
+          lessons: Json
+          peptides: Json
+          purchased_at: string | null
+          started_at: string | null
+          status: string | null
+          supplies_status: string | null
+          template_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_day?: number | null
+          duration_days: number
+          goal: string
+          id?: string
+          lessons?: Json
+          peptides?: Json
+          purchased_at?: string | null
+          started_at?: string | null
+          status?: string | null
+          supplies_status?: string | null
+          template_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_day?: number | null
+          duration_days?: number
+          goal?: string
+          id?: string
+          lessons?: Json
+          peptides?: Json
+          purchased_at?: string | null
+          started_at?: string | null
+          status?: string | null
+          supplies_status?: string | null
+          template_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_courses_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "course_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_courses_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
