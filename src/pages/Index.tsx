@@ -1,13 +1,12 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { SocialProof } from "@/components/landing/SocialProof";
-import { ChatbotDemo } from "@/components/landing/ChatbotDemo";
 import { ProblemSection } from "@/components/landing/ProblemSection";
-import { ProductPreview } from "@/components/landing/ProductPreview";
-import { HowItWorks } from "@/components/landing/HowItWorks";
-import { WhoThisIsFor } from "@/components/landing/WhoThisIsFor";
-import { FAQ } from "@/components/landing/FAQ";
+import { CourseFeatures } from "@/components/landing/CourseFeatures";
+import { CurriculumSection } from "@/components/landing/CurriculumSection";
+import { ComparisonSection } from "@/components/landing/ComparisonSection";
 import { PricingCTA } from "@/components/landing/PricingCTA";
+import { FAQ } from "@/components/landing/FAQ";
+import { FinalCTA } from "@/components/landing/FinalCTA";
 import { Footer } from "@/components/landing/Footer";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { HomepageSchemas } from "@/components/seo/HomepageSchemas";
@@ -20,8 +19,8 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="Peptide Playbook | Evidence-Based Peptide Research Library"
-        description="Ask anything about peptides. Get instant, research-backed answers from an AI trained on 41+ peptides and 200+ studies. Know FDA status, compare peptides, and understand the science."
+        title="The $2,000 Peptide Course for $29 | Peptide Playbook"
+        description="Personalized peptide protocols, step-by-step guidance, and 24/7 AI coaching. Everything expensive courses offer, for the price of a protein tub."
         canonical="/"
       />
       <HomepageSchemas />
@@ -29,14 +28,13 @@ const Index = () => {
         <Navbar />
         <main>
           <HeroSection />
-          <SocialProof />
-          <ChatbotDemo />
           <ProblemSection />
-          <ProductPreview />
-          <HowItWorks />
-          <WhoThisIsFor />
-          <FAQ />
+          <CourseFeatures />
+          <CurriculumSection />
+          <ComparisonSection />
           <PricingCTA />
+          <FAQ />
+          <FinalCTA />
         </main>
         <Footer />
         

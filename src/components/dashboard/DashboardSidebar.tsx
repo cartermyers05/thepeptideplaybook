@@ -1,7 +1,6 @@
 import { 
   Home, 
-  ClipboardCheck, 
-  Database, 
+  FileText, 
   MessageSquare, 
   Settings,
   LogOut,
@@ -22,9 +21,8 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
-  { icon: ClipboardCheck, label: "My Protocol", path: "/dashboard/protocol" },
+  { icon: FileText, label: "My Protocol", path: "/dashboard/protocol" },
   { icon: MessageSquare, label: "AI Coach", path: "/dashboard/coach" },
-  { icon: Database, label: "Progress", path: "/dashboard/progress" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
@@ -53,7 +51,7 @@ export function DashboardSidebar() {
         {/* Header */}
         <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
           {!collapsed && (
-            <span className="font-semibold text-sidebar-foreground">Peptide Playbook AI</span>
+            <span className="font-semibold text-sidebar-foreground">Peptide Playbook</span>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}

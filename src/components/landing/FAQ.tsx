@@ -9,27 +9,23 @@ import {
 const faqs = [
   {
     question: "Is this medical advice?",
-    answer: "No. Peptide Playbook AI is educational content based on published research. It explains what studies show about mechanisms, safety, and research status. It does not tell you what to take, how much to take, or where to buy. Always work with a healthcare provider for medical decisions.",
+    answer: "No. Peptide Playbook provides educational information based on published research. It explains what studies show about mechanisms, safety, and research status. It does not tell you what to take, how much to take, or where to buy. Always work with a healthcare provider for medical decisions.",
   },
   {
-    question: "How is this different from free information online?",
-    answer: "Free information is scattered, often wrong, and usually trying to sell you something. Peptide Playbook AI organizes verified research into one place, cites sources, stays updated with FDA changes, and doesn't have an agenda to sell you peptides.",
+    question: "How is this different from ChatGPT?",
+    answer: "ChatGPT gives generic answers. Peptide Playbook knows YOUR protocol, YOUR goals, and guides you day-by-day through YOUR specific journey. It's like the difference between Googling 'how to learn Spanish' and using Duolingo.",
   },
   {
-    question: "What if I'm not satisfied?",
-    answer: "You have 30 days to request a full refund. No questions asked. Email us and we'll process it immediately.",
+    question: "What if I'm a complete beginner?",
+    answer: "Perfect. We built this for you. The guides assume zero prior knowledge and walk you through every single step, from reconstitution to your first injection.",
   },
   {
-    question: "Is this a subscription?",
-    answer: "No. You pay once ($67) and get lifetime access to everything, including all future updates. No recurring charges ever.",
+    question: "Can I cancel anytime?",
+    answer: "Yes. No contracts, no commitments. Cancel with one click in your account settings. You'll keep access until the end of your billing period.",
   },
   {
-    question: "Will this tell me what peptides to take?",
-    answer: "No. It explains what the research shows so you can have informed conversations with your doctor. The decision of what's right for you is between you and your healthcare provider.",
-  },
-  {
-    question: "I'm not interested in taking peptides. Is this still useful?",
-    answer: "Yes — if you want to understand what peptides are, how they work, and what the research landscape looks like. Many people use this to have better conversations with their doctors or simply to understand a topic they keep hearing about.",
+    question: "Do you sell peptides?",
+    answer: "No. We provide education only. We don't sell peptides, recommend vendors, or have any affiliate relationships with peptide suppliers.",
   },
 ];
 
@@ -63,7 +59,7 @@ export function FAQ() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Questions You're Probably Asking
+            Frequently Asked Questions
           </h2>
         </motion.div>
 

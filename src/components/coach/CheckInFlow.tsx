@@ -26,7 +26,11 @@ const SIDE_EFFECTS = [
 
 const EMOJI_SCALE = ["😫", "😕", "😐", "🙂", "😄"];
 
-export function CheckInFlow() {
+interface CheckInFlowProps {
+  onComplete?: () => void;
+}
+
+export function CheckInFlow({ onComplete }: CheckInFlowProps) {
   const { protocol } = useProtocol();
   const { hasCheckedInToday, submitCheckIn, todayCheckIn } = useCheckIn();
   const { updateStreak, currentStreak } = useStreak();
@@ -77,6 +81,7 @@ export function CheckInFlow() {
 
       setStep("complete");
       toast.success("Check-in complete! 🎉");
+      onComplete?.();
     } catch (error) {
       toast.error("Failed to save check-in");
     }

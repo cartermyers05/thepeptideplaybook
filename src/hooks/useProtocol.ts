@@ -9,6 +9,7 @@ export interface Peptide {
   dosage: string;
   frequency: string;
   timing: string;
+  site?: string;
 }
 
 export interface Protocol {
@@ -26,118 +27,127 @@ export interface Protocol {
   updated_at: string;
 }
 
-// Protocol templates based on quiz goals
-const PROTOCOL_TEMPLATES: Record<string, { name: string; peptides: Peptide[]; weeks: number }> = {
+// Protocol templates based on quiz goals - Updated per product rebuild spec
+const PROTOCOL_TEMPLATES: Record<string, { name: string; peptides: Peptide[]; weeks: number; notes: string }> = {
   fat_loss: {
-    name: "GLP-1 Weight Management Protocol",
+    name: "Fat Loss Protocol",
     weeks: 8,
+    notes: "Start low, increase gradually. Nausea is common first 2 weeks.",
     peptides: [
       {
         name: "Semaglutide",
-        purpose: "Appetite suppression & fat metabolism",
-        dosage: "0.25mg → 1mg weekly",
-        frequency: "Once per week",
-        timing: "Same day each week, any time",
-      },
-      {
-        name: "BPC-157",
-        purpose: "Gut health & recovery support",
-        dosage: "250mcg",
-        frequency: "Daily",
-        timing: "Morning, empty stomach",
+        purpose: "Appetite regulation, metabolic optimization",
+        dosage: "Start 0.25mg, increase to 0.5mg week 3, 1mg week 5",
+        frequency: "Once weekly",
+        timing: "Same day each week, morning",
+        site: "Subcutaneous, abdomen or thigh",
       },
     ],
   },
   muscle_recovery: {
-    name: "Performance & Recovery Stack",
+    name: "Muscle & Recovery Protocol",
     weeks: 8,
+    notes: "BPC and TB stack well together. Expect improved recovery by week 2.",
     peptides: [
       {
         name: "BPC-157",
-        purpose: "Tissue repair & recovery",
-        dosage: "250-500mcg",
-        frequency: "Daily",
-        timing: "Post-workout or morning",
+        purpose: "Tissue repair, gut health, recovery",
+        dosage: "250mcg",
+        frequency: "Twice daily",
+        timing: "Morning and post-workout",
+        site: "Subcutaneous, near muscle worked or abdomen",
       },
       {
         name: "TB-500",
-        purpose: "Systemic healing & flexibility",
+        purpose: "Systemic healing, flexibility, recovery",
         dosage: "2.5mg",
-        frequency: "2x per week",
-        timing: "Any time, consistent days",
+        frequency: "Twice weekly",
+        timing: "Non-consecutive days",
+        site: "Subcutaneous, abdomen",
       },
     ],
   },
   injury_recovery: {
-    name: "Injury Healing Focus Protocol",
+    name: "Injury Recovery Protocol",
     weeks: 6,
+    notes: "Higher BPC dose for acute injuries. Inject near injury site when possible.",
     peptides: [
       {
         name: "BPC-157",
-        purpose: "Local tissue repair",
-        dosage: "250mcg",
-        frequency: "2x daily",
-        timing: "Morning and evening, near injury site",
+        purpose: "Localized tissue repair",
+        dosage: "250-500mcg",
+        frequency: "Twice daily",
+        timing: "Morning and evening",
+        site: "Subcutaneous, as close to injury as possible",
       },
       {
         name: "TB-500",
         purpose: "Systemic healing support",
-        dosage: "2.5mg",
-        frequency: "2x per week",
-        timing: "Any consistent days",
+        dosage: "2.5mg twice weekly (weeks 1-2), then 2.5mg once weekly",
+        frequency: "See dosage",
+        timing: "Non-consecutive days",
+        site: "Subcutaneous, abdomen",
       },
     ],
   },
   anti_aging: {
-    name: "Longevity & Vitality Stack",
+    name: "Anti-Aging & Longevity Protocol",
     weeks: 12,
+    notes: "Epithalon works in cycles. GHK-Cu has visible skin benefits by week 4.",
     peptides: [
       {
         name: "Epithalon",
-        purpose: "Telomere support & cellular health",
+        purpose: "Telomere support, cellular health",
         dosage: "5mg",
-        frequency: "Daily for 10 days, repeat every 6 months",
-        timing: "Evening, before bed",
+        frequency: "Once daily for 20 days, then 10 day break, repeat",
+        timing: "Evening",
+        site: "Subcutaneous, abdomen",
       },
       {
         name: "GHK-Cu",
-        purpose: "Skin regeneration & collagen",
-        dosage: "200mcg",
-        frequency: "Daily",
+        purpose: "Skin health, collagen, healing",
+        dosage: "1-2mg",
+        frequency: "Once daily",
         timing: "Morning",
+        site: "Subcutaneous, or topical if using cream",
       },
     ],
   },
   cognitive: {
-    name: "Cognitive Enhancement Stack",
+    name: "Cognitive Enhancement Protocol",
     weeks: 8,
+    notes: "Nasal peptides. No injections needed. Effects often felt within days.",
     peptides: [
       {
         name: "Semax",
-        purpose: "Focus & mental clarity",
+        purpose: "Focus, memory, neuroprotection",
         dosage: "200-600mcg",
-        frequency: "Daily",
-        timing: "Morning, intranasal",
+        frequency: "Once daily",
+        timing: "Morning",
+        site: "Intranasal (nose spray)",
       },
       {
         name: "Selank",
-        purpose: "Anxiety reduction & mood",
+        purpose: "Anxiety reduction, focus, mood",
         dosage: "250-500mcg",
-        frequency: "Daily",
-        timing: "Morning or as needed, intranasal",
+        frequency: "Once daily",
+        timing: "Morning or early afternoon",
+        site: "Intranasal (nose spray)",
       },
     ],
   },
   general_wellness: {
-    name: "Beginner Wellness Protocol",
+    name: "Beginner Protocol",
     weeks: 6,
+    notes: "The safest starting point. One peptide, once daily, well-researched.",
     peptides: [
       {
         name: "BPC-157",
-        purpose: "Overall healing & gut health",
+        purpose: "General healing, gut health, beginner-friendly",
         dosage: "250mcg",
-        frequency: "Daily",
+        frequency: "Once daily",
         timing: "Morning, empty stomach",
+        site: "Subcutaneous, abdomen",
       },
     ],
   },
