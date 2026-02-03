@@ -7,12 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Subscription Price IDs
-const PRICES = {
-  monthly: "price_1Swp9PKivWYlZk5KSwPGJVn8",
-  annual: "price_1Swp9QKivWYlZk5KqEERCYOV",
-};
-
 const logStep = (step: string, details?: unknown) => {
   console.log(`[CREATE-CHECKOUT] ${step}`, details ? JSON.stringify(details) : "");
 };
@@ -51,14 +45,21 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const body = await req.json();
-    const { plan = "monthly", successUrl, cancelUrl } = body;
+    const { goal } = body;
     
-    // Validate plan
-    const priceId = PRICES[plan as keyof typeof PRICES];
-    if (!priceId) {
-      throw new Error(`Invalid plan: ${plan}. Must be 'monthly' or 'annual'`);
+    if (!goal) {
+      throw new Error("Goal is required");
     }
-    logStep("Plan selected", { plan, priceId });
+
+    // Get course template to get title
+    const { data: template } = await supabase
+      .from("course_templates")
+      .select("title")
+      .eq("goal", goal.replace('-', '_'))
+      .single();
+
+    const courseTitle = template?.title || `${goal} Course`;
+    logStep("Course selected", { goal, courseTitle });
 
     const stripe = new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
@@ -74,7 +75,6 @@ serve(async (req) => {
     let customerId = profile?.stripe_customer_id;
 
     if (!customerId) {
-      // Create new Stripe customer
       logStep("Creating new Stripe customer");
       const customer = await stripe.customers.create({
         email: user.email,
@@ -84,7 +84,6 @@ serve(async (req) => {
       });
       customerId = customer.id;
 
-      // Save customer ID to profile
       await supabase
         .from("profiles")
         .update({ stripe_customer_id: customerId })
@@ -95,38 +94,40 @@ serve(async (req) => {
       logStep("Using existing Stripe customer", { customerId });
     }
 
-    // Check for existing active subscription
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
-    });
+    // Check if user already purchased this course
+    const { data: existingCourse } = await supabase
+      .from("user_courses")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("goal", goal.replace('-', '_'))
+      .maybeSingle();
 
-    if (subscriptions.data.length > 0) {
-      logStep("User already has active subscription");
-      throw new Error("You already have an active subscription. Manage it from your account settings.");
+    if (existingCourse) {
+      throw new Error("You already own this course. Go to your dashboard to access it.");
     }
 
+    // Create one-time payment session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: courseTitle,
+              description: 'Lifetime access to your personalized peptide course',
+            },
+            unit_amount: 9900, // $99.00
+          },
           quantity: 1,
         },
       ],
-      mode: "subscription",
-      success_url: successUrl || `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: cancelUrl || `${req.headers.get("origin")}/pricing`,
-      subscription_data: {
-        metadata: {
-          user_id: user.id,
-          plan: plan,
-        },
-      },
+      mode: "payment",
+      success_url: `${req.headers.get("origin")}/dashboard?welcome=true&goal=${goal}`,
+      cancel_url: `${req.headers.get("origin")}/course/${goal}`,
       metadata: {
         user_id: user.id,
-        plan: plan,
+        goal: goal.replace('-', '_'),
       },
     });
 

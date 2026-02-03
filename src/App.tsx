@@ -37,6 +37,9 @@ import DashboardSettings from "./pages/dashboard/Settings";
 import DashboardProtocol from "./pages/dashboard/Protocol";
 import DashboardCoach from "./pages/dashboard/Coach";
 import DashboardProgress from "./pages/dashboard/Progress";
+import CourseLessons from "./pages/dashboard/CourseLessons";
+import MyPlan from "./pages/dashboard/MyPlan";
+import CoursePreview from "./pages/CoursePreview";
 
 // SEO Guide pages
 import Guides from "./pages/Guides";
@@ -118,12 +121,17 @@ const App = () => (
             <Route path="/quiz" element={<Quiz />} />
             <Route path="/quiz/results" element={<QuizResults />} />
             
+            {/* Course preview (pre-purchase) */}
+            <Route path="/course/:goal" element={<CoursePreview />} />
+            
             {/* Referral link handler */}
             <Route path="/ref/:code" element={<ReferralLanding />} />
             
             {/* Protected routes - Dashboard */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/dashboard/protocol" element={<ProtectedRoute><DashboardProtocol /></ProtectedRoute>} />
+            <Route path="/dashboard/course" element={<ProtectedRoute><CourseLessons /></ProtectedRoute>} />
+            <Route path="/dashboard/plan" element={<ProtectedRoute><MyPlan /></ProtectedRoute>} />
+            <Route path="/dashboard/protocol" element={<ProtectedRoute><MyPlan /></ProtectedRoute>} />
             <Route path="/dashboard/coach" element={<ProtectedRoute><DashboardCoach /></ProtectedRoute>} />
             <Route path="/dashboard/progress" element={<ProtectedRoute><DashboardProgress /></ProtectedRoute>} />
             <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardSettings /></ProtectedRoute>} />
