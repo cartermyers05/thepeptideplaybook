@@ -29,9 +29,9 @@
     --muted: 210 20% 98%;
     --muted-foreground: 215 16% 47%;
 
-    /* Accent - Warm amber for highlights */
-    --accent: 38 92% 50%;
-    --accent-foreground: 0 0% 0%;
+    /* Accent - Soft teal-gray for highlights */
+    --accent: 173 30% 94%;
+    --accent-foreground: 222 47% 11%;
 
     /* Destructive */
     --destructive: 0 84% 60%;
@@ -54,7 +54,7 @@
     --sidebar-foreground: 222 47% 11%;
     --sidebar-primary: 173 82% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent: 173 30% 92%;
     --sidebar-accent-foreground: 222 47% 11%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 173 82% 40%;
@@ -85,9 +85,9 @@
     --muted: 217 33% 12%;
     --muted-foreground: 215 20% 55%;
 
-    /* Amber accent in dark */
-    --accent: 38 92% 45%;
-    --accent-foreground: 0 0% 0%;
+    /* Teal-gray accent in dark */
+    --accent: 173 25% 18%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
@@ -104,7 +104,7 @@
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 173 82% 50%;
     --sidebar-primary-foreground: 222 47% 3%;
-    --sidebar-accent: 217 33% 12%;
+    --sidebar-accent: 173 25% 18%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 217 33% 15%;
     --sidebar-ring: 173 82% 50%;
