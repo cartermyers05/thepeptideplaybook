@@ -46,8 +46,13 @@ serve(async (req) => {
       { path: "/terms", priority: "0.3", changefreq: "yearly" },
       { path: "/privacy", priority: "0.3", changefreq: "yearly" },
       { path: "/disclaimer", priority: "0.3", changefreq: "yearly" },
+      // Tool pages
+      { path: "/tools/peptide-calculator", priority: "0.9", changefreq: "weekly" },
       // SEO Guide pages
       { path: "/guides", priority: "0.9", changefreq: "weekly" },
+      { path: "/guides/how-to-reconstitute-peptides", priority: "0.9", changefreq: "monthly" },
+      { path: "/guides/semaglutide-dosing", priority: "0.9", changefreq: "monthly" },
+      { path: "/guides/semaglutide-side-effects", priority: "0.9", changefreq: "monthly" },
       { path: "/guides/bpc-157-complete-guide", priority: "0.8", changefreq: "monthly" },
       { path: "/guides/peptides-fda-legal-status-2026", priority: "0.9", changefreq: "weekly" },
       { path: "/guides/are-peptides-safe", priority: "0.8", changefreq: "monthly" },
@@ -55,6 +60,15 @@ serve(async (req) => {
       { path: "/guides/semaglutide-complete-guide", priority: "0.9", changefreq: "monthly" },
       { path: "/guides/tirzepatide-vs-semaglutide", priority: "0.8", changefreq: "monthly" },
       { path: "/guides/growth-hormone-peptides-guide", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/peptide-injection-sites", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/bpc-157-cancer-risk", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/bpc-157-drug-test", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/bpc-157-infection-risk", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/tb-500-side-effects", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/cjc-1295-safety", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/verify-peptide-coa", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/peptide-contamination", priority: "0.8", changefreq: "monthly" },
+      { path: "/guides/peptide-tiktok-myths", priority: "0.8", changefreq: "monthly" },
     ];
 
     // Generate XML sitemap with enhanced structure
