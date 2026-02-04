@@ -1,50 +1,56 @@
 
+# Update Quiz/Onboarding to Use Gray Styling
 
-# Fix: Hero Header Animation Not Showing
+## Overview
+Replace all green/teal (`primary`) colors in the quiz and onboarding flow with neutral gray styling to match the updated landing page aesthetic.
 
-## The Problem
-The headline "Your AI Peptide Journey" is invisible because of incorrect Framer Motion animation configuration. The `motion.h1` element has `initial="hidden"` and `animate="visible"`, but:
+## Files to Update
 
-1. The `motion.h1` doesn't have a `variants` prop, so it's not connected to the animation system
-2. The child `motion.span` elements have `lineVariants` but aren't receiving the animation state from their parent
+### 1. `src/components/quiz/ConversationalQuiz.tsx`
+| Line | Before | After |
+|------|--------|-------|
+| 129 | `bg-primary` (progress bar fill) | `bg-foreground` |
 
-The result: the spans remain stuck in their `hidden` state (opacity: 0, x: -30) and never animate in.
+### 2. `src/components/quiz/QuizProgressSidebar.tsx`
+| Line | Before | After |
+|------|--------|-------|
+| 52 | `bg-primary text-primary-foreground` (complete checkmark circle) | `bg-foreground text-background` |
+| 54 | `bg-primary/20 text-primary` (current step spinner) | `bg-muted-foreground/20 text-muted-foreground` |
 
-## The Solution
-Add the parent container's animation orchestration properly so children receive the animation trigger.
+### 3. `src/components/quiz/QuizMessage.tsx`
+| Line | Before | After |
+|------|--------|-------|
+| 29 | `bg-primary/10 text-primary` (AI avatar) | `bg-muted text-foreground` |
+| 40 | `bg-primary text-primary-foreground` (user message bubble) | `bg-foreground text-background` |
+| 4 | Remove `Bot` icon import | Keep `Bot` icon but style differently, OR replace with "PP" text |
 
-### File: `src/components/landing/HeroSection.tsx`
+**Avatar Change**: Replace the Bot icon with "PP" text initials to match the editorial style guidelines that remove robotic icons.
 
-**Change the `motion.h1` to use variants that connect to its children:**
+### 4. `src/components/quiz/BuildingAnimation.tsx`
+| Line | Before | After |
+|------|--------|-------|
+| 100, 112, 124, 136 | `text-primary` (checkmarks) | `text-foreground` |
+| 155 | `text-primary` (completed step checkmark) | `text-foreground` |
+| 157 | `text-primary` (spinner) | `text-muted-foreground` |
 
-```tsx
-// Before (broken):
-<motion.h1
-  className="..."
-  initial="hidden"
-  animate="visible"
->
-  <motion.span variants={lineVariants} custom={0} className="block">
+---
 
-// After (fixed):
-<motion.h1
-  className="..."
-  variants={containerVariants}  // Add this to connect to children
-  initial="hidden"
-  animate="visible"
->
-  <motion.span variants={lineVariants} custom={0} className="block">
-```
+## Visual Changes
 
-The key fix is adding `variants={containerVariants}` to the `motion.h1` so it properly orchestrates the child animations. The `containerVariants` already has `staggerChildren` which works perfectly with the `lineVariants`.
+| Element | Before (Green) | After (Gray) |
+|---------|---------------|--------------|
+| Progress bar fill | Teal | Dark (foreground) |
+| Sidebar checkmark circles | Teal background | Dark background |
+| AI avatar | Teal tint with Bot icon | Muted gray with "PP" text |
+| User message bubble | Teal background | Dark (foreground) background |
+| Building animation checkmarks | Teal | Dark |
+| Loading spinners | Teal | Muted gray |
 
-Alternatively, we can keep it simpler and just remove the redundant `initial/animate` from the h1 since the parent `motion.div` already handles orchestration - but the children need to inherit properly.
-
-## Implementation
-- Line 50-53: Add `variants={containerVariants}` to `motion.h1` OR remove `initial/animate` from h1 and let parent div handle it
+---
 
 ## Summary
-- The header disappeared because child animations weren't triggered
-- Fix by properly connecting parent variants to children
-- Single line change to restore the staggered headline animation
-
+- Edit 4 files: `ConversationalQuiz.tsx`, `QuizProgressSidebar.tsx`, `QuizMessage.tsx`, `BuildingAnimation.tsx`
+- Replace `text-primary` → `text-foreground` or `text-muted-foreground`
+- Replace `bg-primary` → `bg-foreground` or `bg-muted`
+- Replace Bot icon with "PP" initials to match the editorial design system
+- Creates consistent gray/neutral aesthetic throughout the onboarding experience
