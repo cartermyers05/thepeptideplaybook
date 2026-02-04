@@ -67,7 +67,9 @@ export default function CoursePreview() {
       if (response.error) throw new Error(response.error.message);
       
       if (response.data?.url) {
-        window.location.href = response.data.url;
+        window.open(response.data.url, '_blank');
+        toast.info("Checkout opened in new tab");
+        setIsCheckingOut(false);
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to start checkout";
