@@ -6,11 +6,6 @@ export type MilestoneType =
   | "first_checkin"
   | "first_recon"
   | "week_1"
-  | "streak_7"
-  | "streak_14"
-  | "streak_30"
-  | "streak_60"
-  | "streak_90"
   | "cycle_complete";
 
 export interface Milestone {
@@ -24,11 +19,6 @@ export const MILESTONE_DETAILS: Record<MilestoneType, { label: string; icon: str
   first_checkin: { label: "First Check-In", icon: "Target", description: "Completed your first daily check-in" },
   first_recon: { label: "First Reconstitution", icon: "FlaskConical", description: "Completed the reconstitution guide" },
   week_1: { label: "Week 1 Complete", icon: "Calendar", description: "One week into your protocol" },
-  streak_7: { label: "7-Day Streak", icon: "Flame", description: "7 consecutive days of check-ins" },
-  streak_14: { label: "14-Day Streak", icon: "Zap", description: "14 consecutive days of check-ins" },
-  streak_30: { label: "30-Day Streak", icon: "Dumbbell", description: "30 consecutive days of check-ins" },
-  streak_60: { label: "60-Day Streak", icon: "Trophy", description: "60 consecutive days of check-ins" },
-  streak_90: { label: "90-Day Streak", icon: "Crown", description: "90 consecutive days of check-ins" },
   cycle_complete: { label: "Cycle Complete", icon: "Award", description: "Finished your entire protocol cycle" },
 };
 
