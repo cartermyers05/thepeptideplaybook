@@ -1,213 +1,227 @@
 
 
-# Complete the Peptide Playbook Deliverable System
+# Complete Peptide Playbook Content Implementation
 
-## Current State Analysis
+## Overview
 
-After exploring the codebase, here's what exists vs. what's missing:
+This plan implements the complete content from the uploaded `peptide-playbook-complete-content.md` document across all system components. The goal is to ensure users receive a full 56-day course experience with interactive guides, personalized AI coaching, and proper milestones.
 
-### What Already Exists ✓
-| Feature | Status | Location |
-|---------|--------|----------|
-| Daily Lessons UI | ✓ Working | `/dashboard/course` (CourseLessons.tsx) |
-| Lesson Modal with Content | ✓ Working | Dialog in CourseLessons.tsx |
-| AI Coach | ✓ Working | `/dashboard/coach` with context-aware responses |
-| My Plan (Reference) | ✓ Working | `/dashboard/plan` with peptides, schedules, guides |
-| Reconstitution Guide | ✓ Built | Accordion in MyPlan.tsx |
-| Injection Guide | ✓ Built | Accordion in MyPlan.tsx |
-| Progress Ring | ✓ Built | Dashboard home |
-| Welcome Flow | ✓ Built | 3-step supplies check |
-| Milestones Timeline | ✓ Built | Dashboard home |
-| Week Calendar Strip | ✓ Built | Dashboard home |
+---
 
-### Critical Gaps ✗
+## Current State
 
-| Gap | Problem | Impact |
-|-----|---------|--------|
-| **Only 8 lessons seeded** | Course templates have 8 lessons but claim 42-84 days | Users hit "no content" on Day 9 |
-| **Goal not passed to checkout** | `useCheckout.ts` doesn't send goal to `create-checkout` | Courses created with wrong goal |
-| **Quiz data not used after payment** | Quiz saves to localStorage but `verify-payment` doesn't read it | User's preferences ignored |
-| **Dosing Calculator missing** | Not built | Users can't calculate units to draw |
-| **Interactive checkboxes missing** | Guides are read-only, not interactive | Users can't confirm steps |
+| Component | Current State | Target State |
+|-----------|--------------|--------------|
+| Fat Loss Course | 57 lessons | 57 lessons (complete) |
+| Other Courses (5) | 8 lessons each | Full lessons per goal |
+| AI Coach Prompt | Basic version | Full enhanced version from doc |
+| Reconstitution Guide | Basic in courseContent.ts | Enhanced interactive version |
+| Injection Guide | Basic in courseContent.ts | Enhanced interactive version |
+| Dosing Calculator | Working | Already complete |
+| Milestones | Basic tracking | Full 12-milestone system |
+| Course Templates | Partial data | Complete with phases, supplies, schedules |
 
 ---
 
 ## Implementation Plan
 
-### Phase 1: Fix Critical Data Flow (Priority)
+### Phase 1: Seed Remaining Course Content (Database)
 
-#### 1.1 Fix Goal Passing Through Checkout Flow
+**Priority: Critical**
 
-**Problem**: When user clicks "Get Your Course" on `/course/[goal]`, the goal IS passed correctly. But `useCheckout.ts` (used by `/checkout` page) doesn't pass any goal.
+The Fat Loss course has 57 lessons but the other 5 courses only have 8 each. We need to seed complete lesson content for:
 
-**Solution**: Since the CoursePreview page already handles checkout correctly (line 67-68 in CoursePreview.tsx passes `{ goal }`), we just need to ensure users always go through the course preview, not the old checkout page.
+1. **Muscle & Recovery Course** (56 days) - BPC-157 + TB-500
+2. **Injury Recovery Course** (42 days) - BPC-157
+3. **Anti-Aging Course** (84 days) - Epithalon + GHK-Cu  
+4. **Cognitive Course** (56 days) - Semax + Selank (nasal, no injections)
+5. **Beginner Course** (42 days) - BPC-157
 
-**Files to update:**
-- Remove or redirect `/checkout` to `/quiz` since it's no longer part of the flow
-- The CoursePreview already correctly calls `create-checkout` with goal
-
-#### 1.2 Seed Full 56-Day Course Content
-
-**Problem**: Course templates only have 8 lessons but promise 56 days.
-
-**Solution**: Create database migration to populate all 56 lessons for each course template with proper:
-- Day number (0-55)
-- Phase (Preparation, Getting Started, Week 1-8, Mastery)
-- Title
-- Content (200-400 words each)
-- Action item
-
-**Content structure per the spec:**
-```
-Days 0-3: Preparation
-- Day 0: Welcome & Your Plan
-- Day 1: Understanding your peptide
-- Day 2: Supplies checklist
-- Day 3: Reconstitution prep
-
-Days 4-7: Getting Started
-- Day 4: Reconstitution day (link to guide)
-- Day 5: First injection (link to guide)
-- Day 6: Day after - what's normal
-- Day 7: Week 1 complete
-
-Days 8-14: Building Routine
-- Managing side effects
-- Second injection
-- What to eat
-- Tracking progress
-
-Days 15-28: Optimization
-- Dose increase consideration
-- Non-scale victories
-- One month milestone
-
-Days 29-56: Mastery
-- Fine-tuning
-- Maintenance habits
-- Course completion
-```
-
-### Phase 2: Enhance User Experience
-
-#### 2.1 Add Dosing Calculator to My Plan
-
-**New component**: `src/components/dashboard/DosingCalculator.tsx`
-
-Features:
-- Input: Vial size (mg), Water added (ml)
-- Output: Units to draw for each dose tier
-- Formula: `(desired_dose / vial_size) * water_added * 100 = units`
-- Auto-populated based on user's current week/dose
-
-#### 2.2 Make Guides Interactive (Checkboxes)
-
-**Update**: `src/pages/dashboard/MyPlan.tsx`
-
-Convert guide steps from read-only to interactive:
-- Add checkboxes to each step
-- Save completion state to localStorage or database
-- Show progress indicator
-- Prevent proceeding to injection until reconstitution is confirmed
-
-#### 2.3 Enhance Today's Lesson Card
-
-**Update**: `src/components/dashboard/home/TodayLessonCard.tsx`
-
-Add quick links based on current day:
-- Day 3-4: Show "Open Reconstitution Guide" button
-- Day 4-5: Show "Open Injection Guide" button  
-- Any day: Show "Ask AI Coach" button
-
-### Phase 3: Progress & Engagement
-
-#### 3.1 Enhance Milestones System
-
-**Update**: Milestones should unlock based on actual actions:
-- First check-in ✓
-- Reconstitution complete (when guide checkboxes done)
-- First injection ✓
-- Week 1 complete
-- First dose increase
-- One month complete
-- Course complete
-
-#### 3.2 Add Streak System
-
-Already partially built in `useLessons.ts`. Enhance to show:
-- Current streak on dashboard
-- Longest streak
-- Visual streak calendar
+**Approach:**
+- Create database migration to update each course template with full lesson arrays
+- Lessons follow same structure: day, phase, title, content (200-400 words), action_item
+- Content adapted per peptide and administration method (injection vs nasal)
 
 ---
 
-## Technical Implementation Details
+### Phase 2: Enhanced AI Coach System Prompt
 
-### Database Migration: Seed Full Lesson Content
+**File:** `supabase/functions/coach/index.ts`
+
+Update the `buildSystemPrompt` function with the complete prompt from the document:
+
+**Key Additions:**
+- More detailed personality guidelines
+- Specific response formatting rules
+- Enhanced example responses
+- Additional context fields (injections completed, next injection date)
+- Stricter "NEVER DO" guidelines
+- Emoji usage guidance
+
+**Updated Context Fields:**
+```typescript
+- Name: {{user.name}}
+- Course: {{course.title}}
+- Current Day: {{progress.currentDay}} of {{course.duration}}
+- Current Phase: {{progress.currentPhase}}
+- Peptide: {{course.peptide}}
+- Current Dose: {{progress.currentDose}}
+- Next Injection: {{progress.nextInjectionDate}}
+- Experience Level: {{onboarding.experience}}
+- Main Concern: {{onboarding.mainConcern}}
+- Injections Completed: {{progress.injectionsCompleted}}
+```
+
+---
+
+### Phase 3: Interactive Guides with Checkboxes
+
+**Files to Update:**
+- `src/lib/courseContent.ts` - Enhanced guide content
+- `src/pages/dashboard/MyPlan.tsx` - Interactive checkbox functionality
+
+**Reconstitution Guide Enhancements:**
+```typescript
+// Add step-by-step checkbox tracking
+const [reconSteps, setReconSteps] = useState<Record<string, boolean>>({
+  supplies: false,
+  mathUnderstood: false,
+  vialsClean: false,
+  waterDrawn: false,
+  waterAdded: false,
+  dissolved: false,
+  labeled: false,
+});
+```
+
+**Features:**
+- Checkbox for each step that must be confirmed
+- Progress indicator showing X/7 steps complete
+- "Can't proceed" logic until previous step confirmed
+- LocalStorage persistence for progress
+- Completion celebration when all steps done
+
+**Injection Guide Enhancements:**
+- Same checkbox pattern (6 steps)
+- Site selection with visual indicator
+- Tips section for reducing anxiety
+- "What to do if something goes wrong" section
+
+---
+
+### Phase 4: Enhanced Milestone System
+
+**Files to Update:**
+- `src/lib/milestoneDefinitions.ts` (new file)
+- `src/hooks/useMilestones.ts` - Enhanced logic
+- `src/components/dashboard/home/MilestonesTimeline.tsx` - Updated UI
+
+**12 Milestones from Document:**
+```typescript
+const milestones = [
+  { id: "first-checkin", title: "First Check-In", targetDay: 0, celebration: "simple" },
+  { id: "supplies-ready", title: "Supplies Ready", targetDay: 2, celebration: "simple" },
+  { id: "reconstitution-complete", title: "Reconstitution Complete", targetDay: 4, celebration: "medium" },
+  { id: "first-injection", title: "First Injection 💉", targetDay: 5, celebration: "major" },
+  { id: "week-1-complete", title: "Week 1 Complete", targetDay: 7, celebration: "medium" },
+  { id: "week-2-complete", title: "Week 2 Complete", targetDay: 14, celebration: "simple" },
+  { id: "first-dose-increase", title: "First Dose Increase", targetDay: 15, celebration: "medium" },
+  { id: "one-month", title: "One Month Complete 🎉", targetDay: 28, celebration: "major" },
+  { id: "halfway", title: "Halfway There!", targetDay: 28, celebration: "medium" },
+  { id: "full-dose", title: "Full Dose Reached", targetDay: 29, celebration: "medium" },
+  { id: "week-6-complete", title: "Week 6 Complete", targetDay: 42, celebration: "medium" },
+  { id: "course-complete", title: "Course Complete! 🏆", targetDay: 56, celebration: "major" },
+];
+```
+
+**Celebration Types:**
+- `simple`: Subtle checkmark animation
+- `medium`: Toast notification with celebration message
+- `major`: Confetti animation + modal
+
+---
+
+### Phase 5: Course Template Data Enhancement
+
+**Database Migration Updates:**
+
+Update `course_templates` table entries with complete data:
 
 ```sql
--- Update course_templates with complete 56-day content
--- Example for fat_loss course (would do for all 6 goals)
-
 UPDATE course_templates 
-SET lessons = '[
-  {"day": 0, "phase": "Preparation", "title": "Welcome & Your Plan", "content": "...", "action_item": "..."},
-  {"day": 1, "phase": "Preparation", "title": "Understanding Semaglutide", "content": "...", "action_item": "..."},
-  -- ... 54 more lessons
-]'::jsonb
+SET 
+  peptides = '[
+    {
+      "name": "Semaglutide",
+      "purpose": "GLP-1 receptor agonist for appetite control",
+      "dosing_research": "0.25mg → 0.5mg → 1.0mg weekly",
+      "frequency": "Once weekly",
+      "timing": "Same day each week",
+      "site": "Subcutaneous - abdomen, thigh, or arm"
+    }
+  ]'::jsonb
 WHERE goal = 'fat_loss';
 ```
 
-### Dosing Calculator Component
+**Data to Add Per Course:**
+- `schedule` array with weeks, dose, units, frequency
+- `supplies` array with required items and notes
+- `phases` array with name, days range, description
+- Complete `lessons` array (56+ items)
 
-```tsx
-interface DosingCalculatorProps {
-  vialSizeMg: number;
-  waterMl: number;
-  currentWeek: number;
-}
+---
 
-function DosingCalculator({ vialSizeMg, waterMl, currentWeek }: DosingCalculatorProps) {
-  // Calculate: (dose_mg / vial_mg) * water_ml * 100 = units
-  const calculateUnits = (doseMg: number) => {
-    return Math.round((doseMg / vialSizeMg) * waterMl * 100);
-  };
-  
-  // Show units for each dose tier
-  return (
-    <div>
-      <p>0.25mg = {calculateUnits(0.25)} units</p>
-      <p>0.5mg = {calculateUnits(0.5)} units</p>
-      <p>1.0mg = {calculateUnits(1.0)} units</p>
-    </div>
-  );
-}
-```
+### Phase 6: Update courseContent.ts
 
-### Interactive Guide State
+**File:** `src/lib/courseContent.ts`
 
-```tsx
-// Store guide completion state
-const [reconSteps, setReconSteps] = useState<boolean[]>([false, false, false, false, false, false]);
+**Enhancements:**
+1. Add complete semaglutide information from document Section 5
+2. Add interactive step definitions with checkbox requirements
+3. Add troubleshooting sections for guides
+4. Add common mistakes section
+5. Ensure all peptide details match document specifications
 
-// Save to localStorage or database
-useEffect(() => {
-  localStorage.setItem('recon_progress', JSON.stringify(reconSteps));
-}, [reconSteps]);
+**Key Data Structures:**
+```typescript
+export const semaglutideInfo = {
+  name: "Semaglutide",
+  category: "GLP-1 Receptor Agonist",
+  brandNames: ["Ozempic", "Wegovy", "Rybelsus"],
+  howItWorks: {
+    summary: "Mimics the GLP-1 hormone that signals fullness to your brain",
+    mechanisms: [
+      "Reduces appetite by acting on hunger centers in the brain",
+      "Slows gastric emptying (food stays in stomach longer)",
+      "Regulates blood sugar to prevent cravings",
+      "Reduces 'food noise' - constant thoughts about eating"
+    ]
+  },
+  research: {
+    trials: [
+      "STEP 1: 14.9% average body weight loss",
+      "STEP 2: 9.6% weight loss in diabetic patients",
+      "STEP 3: Maintained weight loss over 68 weeks"
+    ],
+    approval: "FDA approved for weight loss (Wegovy) and diabetes (Ozempic)"
+  },
+  // ... rest of detailed info
+};
 ```
 
 ---
 
-## Summary of Changes
+## File Changes Summary
 
-| Priority | Change | Files |
-|----------|--------|-------|
-| 🔴 Critical | Seed 56 lessons per course | Database migration |
-| 🔴 Critical | Ensure goal flows from quiz → preview → checkout → course creation | Verify existing flow works |
-| 🟡 Important | Add dosing calculator | New component + MyPlan.tsx |
-| 🟡 Important | Make guides interactive | MyPlan.tsx |
-| 🟢 Enhancement | Add guide links to TodayLessonCard | TodayLessonCard.tsx |
-| 🟢 Enhancement | Enhance milestones tracking | useMilestones.ts |
+| File | Action | Description |
+|------|--------|-------------|
+| Database Migration | Create | Seed all 5 remaining courses with full lessons |
+| `supabase/functions/coach/index.ts` | Update | Enhanced AI system prompt |
+| `src/lib/courseContent.ts` | Update | Complete peptide info + interactive guide data |
+| `src/lib/milestoneDefinitions.ts` | Create | 12-milestone definitions |
+| `src/hooks/useMilestones.ts` | Update | Enhanced milestone tracking logic |
+| `src/pages/dashboard/MyPlan.tsx` | Update | Interactive checkboxes for guides |
+| `src/components/dashboard/home/MilestonesTimeline.tsx` | Update | Celebration animations |
 
 ---
 
@@ -215,12 +229,41 @@ useEffect(() => {
 
 After implementation:
 
-1. **User completes quiz** → Answers stored
-2. **Sees course preview** → Shows their peptide, schedule preview
-3. **Pays $67** → Course created with their goal
-4. **Welcome flow** → Supplies check, status saved
-5. **Dashboard** → Day 0 ready with full 56 lessons
-6. **My Plan** → Interactive guides, dosing calculator, peptide info
-7. **AI Coach** → Knows their context, provides personalized answers
-8. **Progress** → Milestones unlock as they complete actions
+1. **Users get full 56-day course content** regardless of goal selected
+2. **AI Coach responses are personalized** with deep context awareness
+3. **Interactive guides** track completion step-by-step with checkboxes
+4. **12 milestones** trigger appropriate celebrations at key moments
+5. **Dosing calculator** already working (no changes needed)
+6. **Complete peptide information** displayed in My Plan
+
+---
+
+## Technical Notes
+
+### Database Lesson Structure
+
+Each lesson in the JSONB array follows this format:
+```json
+{
+  "day": 0,
+  "phase": "Preparation",
+  "title": "Welcome to Your Fat Loss Journey",
+  "content": "Congratulations. You just made a decision...",
+  "action_item": "Check out the My Plan tab. Familiarize yourself with your peptide, your schedule, and what supplies you'll need.",
+  "read_time": "4 min"
+}
+```
+
+### LocalStorage Keys for Guide Progress
+
+- `peptide_playbook_recon_progress` - Reconstitution steps completed
+- `peptide_playbook_injection_progress` - Injection steps completed
+- `peptide_playbook_supplies_checklist` - Supplies checked off
+
+### Milestone Trigger Logic
+
+Milestones trigger based on:
+- Day-based: When `currentDay` reaches `targetDay`
+- Action-based: When specific actions complete (reconstitution, first injection)
+- Hybrid: Some milestones may need both conditions
 
