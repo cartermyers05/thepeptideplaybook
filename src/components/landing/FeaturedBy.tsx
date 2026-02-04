@@ -33,7 +33,7 @@ export function FeaturedBy() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="text-sm font-medium text-muted-foreground/80 hover:text-primary transition-colors duration-200 hover:underline underline-offset-4"
+                className="text-sm font-medium text-muted-foreground/80 hover:text-foreground transition-colors duration-200 hover:underline underline-offset-4"
               >
                 {source.name}
               </motion.a>

@@ -87,7 +87,7 @@ export function WhatsInsideSection() {
               className="group relative"
             >
               {/* Card with gradient top bar */}
-              <div className="relative bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-xl">
+              <div className="relative bg-card rounded-2xl overflow-hidden border border-border hover:border-muted-foreground/30 transition-all duration-300 hover:shadow-xl">
                 {/* Gradient bar at top */}
                 <div 
                   className="h-2"
@@ -96,7 +96,7 @@ export function WhatsInsideSection() {
                 
                 {/* Content */}
                 <div className="p-8">
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-foreground transition-colors">
                     {feature.title}
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">

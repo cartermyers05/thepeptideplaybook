@@ -79,7 +79,7 @@ export function CourseFeatures() {
             <motion.div
               key={index}
               variants={itemVariants}
-              className="bg-card border rounded-2xl p-6 hover:border-primary/40 transition-colors"
+              className="bg-card border rounded-2xl p-6 hover:border-muted-foreground/40 transition-colors"
             >
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                 <feature.icon className="w-6 h-6 text-primary" />
