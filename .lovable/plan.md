@@ -1,139 +1,132 @@
 
-# End-to-End Post-Purchase Flow Audit
+# Fix Goal Cards to Link to Quiz (Demo Flow)
 
-## Flow Verification Summary
+## Problem Summary
 
-I traced the complete user journey from quiz to dashboard and identified the following:
+Currently, the "Pick Your Goal" cards on the landing page:
+1. Say "Start Course" (implies immediate access)
+2. Link directly to `/course/{goal}` (CoursePreview page)
+3. Bypass the conversational quiz entirely
+4. Show a purchase-ready preview without any personalization
 
-### Working Components
-- **Quiz Flow**: Quiz → BuildingAnimation → navigates to `/course/{goal}` ✅
-- **Course Preview**: Shows correct template data with peptides and duration ✅
-- **Checkout Initiation**: CoursePreview passes `goal` to `create-checkout` edge function ✅
-- **Stripe Session**: Includes `goal` in metadata ✅
-- **Course Templates**: All 6 courses have full lesson content (42-60 days each) ✅
-- **Dashboard Pages**: `Home.tsx`, `CourseLessons.tsx`, `MyPlan.tsx` all correctly use `useCourse()` hook ✅
-
-### Issues Found
-
-| Issue | Severity | Location | Impact |
-|-------|----------|----------|--------|
-| Promo codes don't create courses | High | `redeem-promo-code` | VIP users have no course after redemption |
-| `/checkout` page missing goal | Medium | `Checkout.tsx` → `useCheckout.ts` | Users going directly to `/checkout` get "general" goal (no template) |
-| QuizResults shows old pricing | Low | `QuizResults.tsx` | Shows "$29/mo" instead of "$67 one-time" |
+This breaks the intended user journey:
+- **Intended:** Landing → Quiz → Preview → Auth → Checkout
+- **Current:** Landing → Preview → Checkout (broken, no auth)
 
 ---
 
-## Issue 1: Promo Code Redemption Doesn't Create Course
+## Solution Overview
 
-**Current Behavior:**
-- User enters promo code like `VIP2025`
-- `redeem-promo-code` upgrades user to `tier: "insider"`
-- User redirected to dashboard with **no course** assigned
+Reframe the goal cards as the **entry point to the quiz**, not the course preview. When users click a goal, they should enter the quiz flow with that goal pre-selected.
 
-**Impact:** VIP users see "No course found. Purchase a course to get started."
+---
 
-**Fix:** After upgrading tier, create a default course (beginner) or prompt user to select a goal:
+## Changes Required
+
+### 1. Update GoalSelectionSection.tsx
+
+**File:** `src/components/landing/GoalSelectionSection.tsx`
+
+| Current | Updated |
+|---------|---------|
+| Links to `/course/{goal}` | Links to `/quiz?goal={goal}` |
+| "Start Course" text | "See Your Course" or "Preview" text |
 
 ```typescript
-// In redeem-promo-code, after upgrading tier:
-// Create a default beginner course for promo code users
-const { data: template } = await supabaseAdmin
-  .from("course_templates")
-  .select("*")
-  .eq("goal", "beginner")
-  .single();
+// Change from:
+<Link to={`/course/${goal.id}`}>
 
-if (template) {
-  await supabaseAdmin.from("user_courses").insert({
-    user_id: userId,
-    goal: "beginner",
-    title: template.title,
-    duration_days: template.duration_days,
-    lessons: template.lessons,
-    peptides: template.peptides,
-    template_id: template.id,
-    status: "not_started",
-    purchased_at: new Date().toISOString(),
-  });
-}
+// Change to:
+<Link to={`/quiz?goal=${goal.id}`}>
+
+// Change CTA text from:
+<span>Start Course</span>
+
+// Change to:
+<span>See Your Course</span>
 ```
 
 ---
 
-## Issue 2: Direct /checkout Access Without Goal
+### 2. Update Quiz to Accept Pre-Selected Goal
 
-**Current Behavior:**
-- User navigates directly to `/checkout` (not through quiz flow)
-- `Checkout.tsx` uses `useCheckout` which doesn't pass `goal`
-- Edge function defaults to `goal: "general"` which has no template
-- `verify-payment` falls back to `goal: "beginner"`
+**File:** `src/components/quiz/ConversationalQuiz.tsx`
 
-**Impact:** Minor - fallback works, but user may get beginner course when they wanted something else.
+Read the `goal` query parameter and:
+- Skip the goal selection step if already provided
+- Pre-fill the goal value
+- Jump to experience level question
 
-**The normal flow (quiz → course preview → checkout) works correctly** because CoursePreview passes the goal.
+```typescript
+// Read from URL params
+const [searchParams] = useSearchParams();
+const preSelectedGoal = searchParams.get('goal');
 
----
-
-## Issue 3: QuizResults Shows Old Subscription Pricing
-
-**Location:** `src/pages/QuizResults.tsx` line 308
-
-Shows:
-- "Unlock My Protocol – $29/mo"
-- "Or $249/year (save 29%)"
-
-Should show:
-- "$67 one-time" (current pricing model)
-
----
-
-## Database Verification
-
-### User Courses Table
-```
-goal: muscle
-lesson_count: 57 ✅
-peptide_count: 2 ✅
-template_id: linked ✅
-status: not_started
+// If goal provided, skip to next step
+useEffect(() => {
+  if (preSelectedGoal) {
+    // Set the goal value and advance to next question
+    setExtractedValues(prev => ({ ...prev, goal: preSelectedGoal }));
+    // Skip the goal question in the flow
+  }
+}, [preSelectedGoal]);
 ```
 
-### Course Templates (All Complete)
-| Goal | Days | Lessons |
-|------|------|---------|
-| fat_loss | 56 | 57 ✅ |
-| muscle | 56 | 57 ✅ |
-| beginner | 42 | 43 ✅ |
-| recovery | 42 | 43 ✅ |
-| cognitive | 56 | 57 ✅ |
-| anti_aging | 60 | 61 ✅ |
+---
+
+### 3. Update Section Copy (Optional Enhancement)
+
+**File:** `src/components/landing/GoalSelectionSection.tsx`
+
+Update the section description to reinforce the preview/demo nature:
+
+```typescript
+// Current:
+<p>Choose what matters most to you, and we'll build your personalized course.</p>
+
+// Updated:
+<p>Choose what matters most to you. We'll show you exactly what your personalized course looks like.</p>
+```
 
 ---
 
-## Recommended Fixes (Priority Order)
+## Flow After Fix
 
-### 1. Fix Promo Code to Create Course
-- Update `redeem-promo-code` to create a beginner course after upgrading tier
-- OR redirect user to quiz to pick their goal before going to dashboard
-
-### 2. Update QuizResults Pricing
-- Change "$29/mo" to "$67 one-time"
-- Remove annual pricing reference
-- Update CTA to link to `/course/{goal}` instead of `/signup`
-
-### 3. Optional: Make /checkout Goal-Aware
-- Store selected goal in localStorage during quiz
-- Read from localStorage in `useCheckout` if goal not passed
+```text
+User clicks "Build Muscle" card
+        ↓
+/quiz?goal=muscle (goal pre-selected)
+        ↓
+Quiz asks: Experience level, concerns, timeline
+        ↓
+BuildingAnimation (shows "building" steps)
+        ↓
+/course/muscle (CoursePreview - now feels earned)
+        ↓
+"Get Your Course — $67" → Requires login → Checkout
+```
 
 ---
 
-## Launch Readiness
+## Technical Notes
 
-**For the PRIMARY flow (Quiz → Course Preview → Stripe → Dashboard):**
-🟢 **READY** - This flow works correctly end-to-end.
+- The quiz stores responses in localStorage for the preview page
+- CoursePreview already handles the goal parameter correctly
+- No backend changes needed
+- The goal ID format matches between landing cards and quiz (`fat-loss`, `muscle`, etc.)
 
-**For PROMO CODE users:**
-🔴 **BLOCKED** - They get no course assigned. Fix required before VIP access works.
+---
 
-**For DIRECT CHECKOUT users:**
-🟡 **FALLBACK** - Gets beginner course (acceptable but not ideal).
+## Files to Modify
+
+1. `src/components/landing/GoalSelectionSection.tsx` - Update links and CTA text
+2. `src/components/quiz/ConversationalQuiz.tsx` - Accept pre-selected goal from URL
+
+---
+
+## Expected Outcome
+
+- Goal cards feel like a preview/demo, not a purchase commitment
+- Users go through personalization before seeing the course
+- The "building your course" animation feels earned after answering questions
+- Clear authentication gate before checkout
