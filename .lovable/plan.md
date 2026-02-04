@@ -1,106 +1,127 @@
 
 
-# Remove Green/Teal and Replace with Neutral Gray Accent
+# Add Goal-Specific Colors to Quiz Quick Answer Buttons
 
 ## Overview
-The teal/green color (HSL 173 82% 32%) is currently set as `--primary` and used in 1890 places across 120 files. Rather than manually editing each file, we'll change the CSS variable definitions to a sophisticated neutral gray palette that matches your editorial aesthetic.
+Match the quick answer buttons on the quiz page (`/quiz`) to their corresponding gradient colors from the homepage's Goal Selection section, creating visual consistency across the user journey.
 
-## The Solution
-Update the `--primary` color in `src/index.css` from teal to a dark charcoal/slate gray. This single change will cascade across:
-- All buttons (default variant uses `bg-primary`)
-- All text highlights using `text-primary`
-- All borders using `border-primary`
-- All custom gradient and glow utilities
+## Color Mapping
 
----
-
-## Color Palette Change
-
-### Before (Teal Green)
-| Token | Light Mode | Dark Mode |
-|-------|------------|-----------|
-| `--primary` | 173 82% 32% (teal) | 173 82% 45% |
-| `--ring` | 173 82% 40% | 173 82% 50% |
-| `--sidebar-primary` | 173 82% 40% | 173 82% 50% |
-
-### After (Neutral Charcoal)
-| Token | Light Mode | Dark Mode |
-|-------|------------|-----------|
-| `--primary` | 0 0% 15% (charcoal) | 0 0% 90% (off-white) |
-| `--ring` | 0 0% 20% | 0 0% 85% |
-| `--sidebar-primary` | 0 0% 20% | 0 0% 85% |
+| Goal | Homepage Gradient | Button Style |
+|------|-------------------|--------------|
+| Fat Loss | `hsl(25 90% 55%)` → `hsl(15 85% 45%)` (Orange) | Orange hover/active |
+| Build Muscle | `hsl(210 80% 55%)` → `hsl(220 75% 45%)` (Blue) | Blue hover/active |
+| Heal Injury | `hsl(350 80% 55%)` → `hsl(340 75% 45%)` (Red/Pink) | Red hover/active |
+| Anti-Aging | `hsl(270 70% 55%)` → `hsl(280 65% 45%)` (Purple) | Purple hover/active |
+| Cognitive | `hsl(160 70% 45%)` → `hsl(170 65% 35%)` (Teal/Green) | Teal hover/active |
+| Not Sure | `hsl(45 80% 50%)` → `hsl(35 75% 40%)` (Amber/Gold) | Amber hover/active |
 
 ---
 
-## Files to Update
+## File to Update
 
-### 1. `src/index.css` - Core CSS Variables
+### `src/components/quiz/ConversationalQuiz.tsx`
 
-**Light mode changes (lines 20-22, 43, 55-56, 60):**
-```css
-/* Before */
---primary: 173 82% 32%;
---primary-foreground: 0 0% 100%;
---ring: 173 82% 40%;
---sidebar-primary: 173 82% 40%;
---sidebar-ring: 173 82% 40%;
+**Changes:**
+1. Add a `gradient` property to each quick answer in the `quickAnswers` array
+2. Apply the gradient as the hover background using inline styles
+3. Update button styling to show color on hover while keeping outline style at rest
 
-/* After */
---primary: 0 0% 15%;
---primary-foreground: 0 0% 100%;
---ring: 0 0% 20%;
---sidebar-primary: 0 0% 20%;
---sidebar-ring: 0 0% 20%;
+**Updated quickAnswers array (lines 12-19):**
+```tsx
+const quickAnswers = [
+  { 
+    value: 'fat_loss', 
+    label: 'Fat Loss', 
+    icon: Flame,
+    gradient: 'linear-gradient(135deg, hsl(25 90% 55%) 0%, hsl(15 85% 45%) 100%)',
+    hoverBg: 'hsl(25 90% 55%)'
+  },
+  { 
+    value: 'muscle', 
+    label: 'Build Muscle', 
+    icon: Dumbbell,
+    gradient: 'linear-gradient(135deg, hsl(210 80% 55%) 0%, hsl(220 75% 45%) 100%)',
+    hoverBg: 'hsl(210 80% 55%)'
+  },
+  { 
+    value: 'recovery', 
+    label: 'Heal Injury', 
+    icon: Heart,
+    gradient: 'linear-gradient(135deg, hsl(350 80% 55%) 0%, hsl(340 75% 45%) 100%)',
+    hoverBg: 'hsl(350 80% 55%)'
+  },
+  { 
+    value: 'anti_aging', 
+    label: 'Anti-Aging', 
+    icon: Clock,
+    gradient: 'linear-gradient(135deg, hsl(270 70% 55%) 0%, hsl(280 65% 45%) 100%)',
+    hoverBg: 'hsl(270 70% 55%)'
+  },
+  { 
+    value: 'cognitive', 
+    label: 'Cognitive', 
+    icon: Brain,
+    gradient: 'linear-gradient(135deg, hsl(160 70% 45%) 0%, hsl(170 65% 35%) 100%)',
+    hoverBg: 'hsl(160 70% 45%)'
+  },
+  { 
+    value: 'beginner', 
+    label: 'Not Sure', 
+    icon: HelpCircle,
+    gradient: 'linear-gradient(135deg, hsl(45 80% 50%) 0%, hsl(35 75% 40%) 100%)',
+    hoverBg: 'hsl(45 80% 50%)'
+  },
+];
 ```
 
-**Dark mode changes (lines 78-80, 97, 105-106, 110):**
-```css
-/* Before */
---primary: 173 82% 45%;
---primary-foreground: 222 47% 3%;
---accent: 173 25% 18%;
---ring: 173 82% 50%;
---sidebar-primary: 173 82% 50%;
---sidebar-ring: 173 82% 50%;
+**Updated button rendering (lines 182-193):**
 
-/* After */
---primary: 0 0% 90%;
---primary-foreground: 0 0% 5%;
---accent: 0 0% 18%;
---ring: 0 0% 85%;
---sidebar-primary: 0 0% 85%;
---sidebar-ring: 0 0% 85%;
+Use a custom hover state with React's `useState` to apply the gradient on hover, since Tailwind can't handle dynamic inline styles:
+
+```tsx
+{quickAnswers.map(({ value, label, icon: Icon, gradient }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  return (
+    <button
+      key={value}
+      onClick={() => handleQuickAnswer(value, label)}
+      disabled={isLoading}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="rounded-full px-4 py-2.5 flex items-center gap-2 border border-border 
+                 font-medium text-sm transition-all duration-300 disabled:opacity-50"
+      style={{
+        background: isHovered ? gradient : 'transparent',
+        color: isHovered ? 'white' : 'inherit',
+        borderColor: isHovered ? 'transparent' : undefined,
+      }}
+    >
+      <Icon className="w-4 h-4" />
+      {label}
+    </button>
+  );
+})}
 ```
 
-**Update custom utilities (lines 155-170, 269-280, 286-340, 359-370, 406-420, 510, 557):**
+---
 
-Replace all hardcoded teal values like:
-- `rgba(13, 148, 136, ...)` → `rgba(38, 38, 38, ...)` (charcoal)
-- `hsl(173 82% 32%)` → `hsl(0 0% 15%)`
+## Visual Result
+
+| State | Appearance |
+|-------|------------|
+| Default | Outline button with icon + label |
+| Hover | Fills with goal-specific gradient, white text |
+| Disabled | 50% opacity |
+
+This creates a direct visual connection between the homepage goal cards and the quiz quick answers, making the design feel cohesive and intentional.
 
 ---
 
-## Visual Impact Summary
-
-| Element | Before (Green) | After (Charcoal) |
-|---------|----------------|------------------|
-| Primary buttons | Teal | Dark charcoal |
-| Link text | Teal | Charcoal |
-| Focus rings | Teal glow | Subtle gray |
-| Progress bars | Teal | Charcoal |
-| Highlighted accents | Teal tint | Neutral gray tint |
-| Gradient text | Teal gradient | Charcoal gradient |
-| Glow effects | Teal shadows | Gray shadows |
-| Icon containers | Teal background | Charcoal background |
-
----
-
-## Technical Summary
-
-- **1 file to edit**: `src/index.css`
-- **~20 CSS variable changes**: Update `--primary`, `--ring`, `--accent` (dark mode), `--sidebar-primary`, `--sidebar-ring`
-- **~15 hardcoded color value replacements**: Update rgba/hsl values in custom utilities
-- **0 component files need editing**: All 120 files using `bg-primary`, `text-primary`, etc. will automatically inherit the new color
-
-This approach is efficient because it uses the design system properly - all components reference CSS variables, so changing the source updates everything at once.
+## Summary
+- **1 file to edit**: `src/components/quiz/ConversationalQuiz.tsx`
+- Add gradient colors to `quickAnswers` array
+- Apply gradient backgrounds on hover using inline styles
+- Creates visual consistency with homepage Goal Selection cards
 
