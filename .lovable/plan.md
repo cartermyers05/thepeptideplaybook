@@ -1,175 +1,74 @@
 
-# Standardize All Pricing to $67 with Early Access Messaging
+# Fix Checkout Page Display Issue
 
-## Audit Summary
+## Problem Analysis
 
-I found pricing references across multiple files. Some already show $67 correctly, but several still show old subscription pricing ($29/mo) or need the "early access" urgency messaging added.
+The screenshot shows a skeleton/loading UI. Based on my investigation:
+
+1. **What the screenshot shows**: This is **Stripe's hosted checkout page** loading with its skeleton placeholders - a two-column layout with gray boxes. This is normal Stripe behavior while their payment form loads.
+
+2. **Why you might not see our checkout page**: The `/checkout` page auto-redirects to Stripe immediately when an authenticated user arrives. The flow is:
+   - Page loads → checks auth & tier status (loading state shown)
+   - Once loaded, `useEffect` triggers `startCheckout()` automatically
+   - Browser redirects to Stripe before you see the actual checkout content
+
+3. **The code is correct**: The pricing updates ARE in the code (lines 140-144):
+   ```typescript
+   <p className="text-xs text-primary font-medium mb-1">Early Access Pricing</p>
+   <h1 className="text-xl font-semibold mb-1">Complete Your Purchase</h1>
+   <p className="text-sm text-muted-foreground">
+     One-time payment: <span className="line-through opacity-60">$99</span> $67
+   </p>
+   ```
+
+## Potential Fixes
+
+### Option A: Stop Auto-Redirect (Show Checkout Page First)
+
+Currently the page auto-redirects authenticated users to Stripe. We could change this to:
+- Show the checkout page content with pricing
+- Require user to click "Pay $67" button to redirect to Stripe
+
+**Change in `src/pages/Checkout.tsx`:**
+- Remove the auto-redirect in `useEffect` (lines 79-83)
+- Keep only the manual button trigger
+
+This would let users see the pricing/early access messaging before going to Stripe.
+
+### Option B: Keep Auto-Redirect (Current Behavior)
+
+If the skeleton is Stripe's page loading - this is expected and not something we control. The Stripe checkout should fully load within 1-3 seconds normally.
 
 ---
 
-## Files Requiring Updates
+## My Recommendation
 
-### 1. ComparisonSection.tsx (HIGH PRIORITY)
+**Option A** - Remove the auto-redirect so users can see the checkout page with:
+- "Early Access Pricing" label
+- "$67" price with "$99" strikethrough
+- "Pay $67 — Get Full Access" button
+- Promo code input
+- Trust elements
 
-**Location:** `src/components/landing/ComparisonSection.tsx`
+This makes the pricing clear before they go to Stripe and gives them the option to enter a promo code first.
 
-**Issues:**
-- Line 8: Shows `$29/month` instead of `$67`
-- Line 54: Headline says "Why pay $2,000 when you can pay $29?"
+---
 
-**Changes:**
+## Files to Modify
+
+**`src/pages/Checkout.tsx`** - Remove the auto-`startCheckout()` call from useEffect so users must click the button to proceed.
+
 ```typescript
-// Line 8: Update price in comparison data
-us: "$67 one-time",
-
-// Line 39: Update refund row
-us: "30-day refund",  // Instead of "Cancel anytime"
-
-// Line 54: Update headline
-"Why pay $2,000 when you can pay $67?"
+// Remove lines 79-83:
+// Authenticated but not paid → trigger checkout
+if (user && !isPaid && !hasStartedRef.current && !promoApplied && !isRedeeming) {
+  hasStartedRef.current = true;
+  startCheckout();
+}
 ```
 
----
-
-### 2. QuizResults.tsx (HIGH PRIORITY)
-
-**Location:** `src/pages/QuizResults.tsx`
-
-**Issues:**
-- Line 278: Still shows `$29/month` in value stack
-
-**Changes:**
-```typescript
-// Line 276-279: Update "Your price" section
-<div className="flex items-center justify-between text-primary mt-2">
-  <span className="font-medium">Your price:</span>
-  <span className="font-bold text-xl">$67</span>
-</div>
-<p className="text-xs text-muted-foreground mt-2">
-  Early access pricing. Going to $99 soon.
-</p>
-```
-
----
-
-### 3. PricingCTA.tsx (ADD URGENCY)
-
-**Location:** `src/components/landing/PricingCTA.tsx`
-
-**Current:** Shows $67 correctly but missing early access messaging
-
-**Changes:**
-```typescript
-// After line 53-54, add early access badge
-<div className="mb-8">
-  <span className="inline-block text-xs font-medium bg-primary/10 text-primary px-2.5 py-1 rounded-full mb-3">
-    Early Access Pricing
-  </span>
-  <div className="flex items-baseline gap-2">
-    <span className="text-6xl md:text-7xl font-bold">$67</span>
-    <span className="text-muted-foreground text-lg">one-time</span>
-  </div>
-  <p className="mt-2 text-sm text-muted-foreground">
-    <span className="line-through opacity-60">$99</span> — Price increases soon
-  </p>
-</div>
-```
-
----
-
-### 4. CoursePreview.tsx (ADD URGENCY)
-
-**Location:** `src/pages/CoursePreview.tsx`
-
-**Current:** Shows $67 correctly, needs early access messaging
-
-**Changes (around line 294):**
-```typescript
-"Get Your Course — $67"
-
-// Add after the button (line 297-299):
-<p className="mt-4 text-sm text-muted-foreground">
-  <span className="text-primary font-medium">Early access pricing.</span> Going to $99 soon.
-</p>
-<p className="text-xs text-muted-foreground mt-1">
-  One-time purchase. Lifetime access. 30-day money-back guarantee.
-</p>
-```
-
----
-
-### 5. Checkout.tsx (ADD URGENCY)
-
-**Location:** `src/pages/Checkout.tsx`
-
-**Current:** Shows $67 correctly, needs early access messaging
-
-**Changes (around line 140-142):**
-```typescript
-<div className="mb-6">
-  <p className="text-xs text-primary font-medium mb-1">Early Access Pricing</p>
-  <h1 className="text-xl font-semibold mb-1">Complete Your Purchase</h1>
-  <p className="text-sm text-muted-foreground">
-    One-time payment: <span className="line-through opacity-60">$99</span> $67
-  </p>
-</div>
-```
-
----
-
-### 6. UpgradePrompt.tsx (ADD URGENCY)
-
-**Location:** `src/components/dashboard/UpgradePrompt.tsx`
-
-**Current:** Shows $67 correctly, needs early access messaging
-
-**Changes:**
-```typescript
-<p className="text-muted-foreground max-w-md mb-4">
-  Get full access to {feature.toLowerCase()} and all other features.
-</p>
-<p className="text-sm text-primary font-medium mb-4">
-  Early access: $67 <span className="line-through opacity-60 text-muted-foreground">$99</span>
-</p>
-
-<Button asChild size="lg" className="btn-primary-clean">
-  <Link to="/checkout">
-    Unlock Now — $67
-  </Link>
-</Button>
-```
-
----
-
-### 7. ProblemSection.tsx (OPTIONAL)
-
-**Location:** `src/components/landing/ProblemSection.tsx`
-
-**Current:** Line 7 mentions "$2,000" for competitor courses — this is fine (it's about competitors, not us)
-
-**No change needed** — keeping this creates contrast with our $67 price
-
----
-
-## Summary of All Changes
-
-| File | Current | Updated |
-|------|---------|---------|
-| ComparisonSection.tsx | $29/month | $67 one-time |
-| QuizResults.tsx | $29/month | $67 + early access |
-| PricingCTA.tsx | $67 (no urgency) | $67 + early access badge + $99 strikethrough |
-| CoursePreview.tsx | $67 (no urgency) | $67 + early access messaging |
-| Checkout.tsx | $67 (no urgency) | $67 + early access + $99 strikethrough |
-| UpgradePrompt.tsx | $67 (no urgency) | $67 + early access + $99 strikethrough |
-
----
-
-## Consistent Messaging Pattern
-
-All pricing displays will follow this pattern:
-1. **Early Access** badge or label (visual urgency)
-2. **$67** as the current price (prominent)
-3. **$99** strikethrough (anchors value, creates urgency)
-4. **"Going to $99 soon"** or similar (deadline implication)
-
-This creates FOMO without requiring an actual countdown timer.
+This way:
+1. User arrives at `/checkout`
+2. Sees the full checkout page with early access pricing
+3. Can enter promo code OR click "Pay $67" to go to Stripe
+4. Stripe redirect only happens on button click
