@@ -59,6 +59,12 @@ import CJC1295Safety from "./pages/guides/CJC1295Safety";
 import VerifyPeptideCOA from "./pages/guides/VerifyPeptideCOA";
 import PeptideContamination from "./pages/guides/PeptideContamination";
 import PeptideTikTokMyths from "./pages/guides/PeptideTikTokMyths";
+import ReconstitutionGuide from "./pages/guides/ReconstitutionGuide";
+import SemaglutideDosing from "./pages/guides/SemaglutideDosing";
+import SemaglutideSideEffects from "./pages/guides/SemaglutideSideEffects";
+
+// Tool pages
+import PeptideCalculator from "./pages/tools/PeptideCalculator";
 
 // Trust signal pages
 import EditorialPolicy from "./pages/EditorialPolicy";
@@ -113,6 +119,12 @@ const App = () => (
             <Route path="/guides/verify-peptide-coa" element={<VerifyPeptideCOA />} />
             <Route path="/guides/peptide-contamination" element={<PeptideContamination />} />
             <Route path="/guides/peptide-tiktok-myths" element={<PeptideTikTokMyths />} />
+            <Route path="/guides/how-to-reconstitute-peptides" element={<ReconstitutionGuide />} />
+            <Route path="/guides/semaglutide-dosing" element={<SemaglutideDosing />} />
+            <Route path="/guides/semaglutide-side-effects" element={<SemaglutideSideEffects />} />
+            
+            {/* Tool pages */}
+            <Route path="/tools/peptide-calculator" element={<PeptideCalculator />} />
             
             {/* Trust signal pages */}
             <Route path="/editorial-policy" element={<EditorialPolicy />} />
