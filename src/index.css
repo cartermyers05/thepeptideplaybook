@@ -17,8 +17,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    /* Primary - Keep teal for CTAs */
-    --primary: 173 82% 32%;
+    /* Primary - Charcoal for CTAs */
+    --primary: 0 0% 15%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - Warm off-white */
@@ -40,7 +40,7 @@
     /* Borders and inputs - softer */
     --border: 45 5% 88%;
     --input: 45 5% 88%;
-    --ring: 173 82% 40%;
+    --ring: 0 0% 20%;
 
     --radius: 1rem;
 
@@ -52,12 +52,12 @@
     /* Sidebar */
     --sidebar-background: 45 10% 96%;
     --sidebar-foreground: 0 0% 10%;
-    --sidebar-primary: 173 82% 40%;
+    --sidebar-primary: 0 0% 20%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 45 5% 92%;
     --sidebar-accent-foreground: 0 0% 10%;
     --sidebar-border: 45 5% 88%;
-    --sidebar-ring: 173 82% 40%;
+    --sidebar-ring: 0 0% 20%;
 
     /* Success state */
     --success: 142 71% 45%;
@@ -75,9 +75,9 @@
     --popover: 222 47% 5%;
     --popover-foreground: 0 0% 98%;
 
-    /* Teal primary in dark mode */
-    --primary: 173 82% 45%;
-    --primary-foreground: 222 47% 3%;
+    /* Light primary in dark mode */
+    --primary: 0 0% 90%;
+    --primary-foreground: 0 0% 5%;
 
     --secondary: 217 33% 10%;
     --secondary-foreground: 0 0% 98%;
@@ -85,8 +85,8 @@
     --muted: 217 33% 12%;
     --muted-foreground: 215 20% 55%;
 
-    /* Teal-gray accent in dark */
-    --accent: 173 25% 18%;
+    /* Neutral accent in dark */
+    --accent: 0 0% 18%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 63% 31%;
@@ -94,7 +94,7 @@
 
     --border: 217 33% 14%;
     --input: 217 33% 14%;
-    --ring: 173 82% 50%;
+    --ring: 0 0% 85%;
 
     --surface-elevated: 222 47% 6%;
     --surface-sunken: 222 47% 2%;
@@ -102,12 +102,12 @@
 
     --sidebar-background: 222 47% 4%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 173 82% 50%;
-    --sidebar-primary-foreground: 222 47% 3%;
-    --sidebar-accent: 173 25% 18%;
+    --sidebar-primary: 0 0% 85%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 0 0% 18%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 217 33% 15%;
-    --sidebar-ring: 173 82% 50%;
+    --sidebar-ring: 0 0% 85%;
 
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
@@ -284,12 +284,12 @@
      ======================================== */
 
   .btn-primary-clean {
-    background: linear-gradient(135deg, hsl(173 82% 32%) 0%, hsl(173 82% 28%) 100%);
+    background: linear-gradient(135deg, hsl(0 0% 15%) 0%, hsl(0 0% 10%) 100%);
     color: white;
     border-radius: 6px;
     font-weight: 600;
     letter-spacing: 0.01em;
-    border: 1px solid hsl(173 82% 25%);
+    border: 1px solid hsl(0 0% 8%);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: all 0.2s ease;
     position: relative;
@@ -297,8 +297,8 @@
   }
 
   .btn-primary-clean:hover {
-    background: linear-gradient(135deg, hsl(173 82% 28%) 0%, hsl(173 82% 24%) 100%);
-    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+    background: linear-gradient(135deg, hsl(0 0% 10%) 0%, hsl(0 0% 5%) 100%);
+    box-shadow: 0 2px 8px rgba(38, 38, 38, 0.25);
     transform: translateY(-1px);
   }
 
@@ -307,22 +307,22 @@
     color: white;
     border-radius: 6px;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.2);
+    box-shadow: 0 2px 8px rgba(38, 38, 38, 0.2);
     transition: all 0.2s ease;
   }
 
   .btn-primary-glow:hover {
-    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.3);
+    box-shadow: 0 4px 16px rgba(38, 38, 38, 0.3);
     transform: translateY(-1px);
   }
 
   .glow-primary {
-    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.15);
+    box-shadow: 0 2px 8px rgba(38, 38, 38, 0.15);
     transition: all 0.2s ease;
   }
 
   .glow-primary:hover {
-    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+    box-shadow: 0 4px 12px rgba(38, 38, 38, 0.25);
     transform: translateY(-1px);
   }
 
@@ -332,12 +332,12 @@
 
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(173 82% 32%) 0%, hsl(173 82% 45%) 100%);
+    background-image: linear-gradient(135deg, hsl(0 0% 15%) 0%, hsl(0 0% 35%) 100%);
   }
 
   .text-gradient-animated {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(90deg, hsl(173 82% 35%), hsl(173 82% 50%), hsl(173 82% 35%));
+    background-image: linear-gradient(90deg, hsl(0 0% 20%), hsl(0 0% 40%), hsl(0 0% 20%));
     background-size: 200% auto;
     animation: shimmer 3s linear infinite;
   }
@@ -358,14 +358,14 @@
 
   .shadow-glow {
     box-shadow: 
-      0 4px 16px -4px rgba(13, 148, 136, 0.2),
-      0 0 0 1px rgba(13, 148, 136, 0.08);
+      0 4px 16px -4px rgba(38, 38, 38, 0.2),
+      0 0 0 1px rgba(38, 38, 38, 0.08);
   }
 
   .shadow-glow-lg {
     box-shadow: 
-      0 8px 24px -6px rgba(13, 148, 136, 0.25),
-      0 0 0 1px rgba(13, 148, 136, 0.1);
+      0 8px 24px -6px rgba(38, 38, 38, 0.25),
+      0 0 0 1px rgba(38, 38, 38, 0.1);
   }
 
   /* ========================================
@@ -392,11 +392,11 @@
   @keyframes pulse-glow {
     0%, 100% { 
       opacity: 1;
-      box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4);
+      box-shadow: 0 0 0 0 rgba(38, 38, 38, 0.4);
     }
     50% { 
       opacity: 0.8;
-      box-shadow: 0 0 0 8px rgba(13, 148, 136, 0);
+      box-shadow: 0 0 0 8px rgba(38, 38, 38, 0);
     }
   }
 
