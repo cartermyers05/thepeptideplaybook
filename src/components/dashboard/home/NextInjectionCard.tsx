@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import { Syringe, Calendar } from "lucide-react";
 import { format, addDays, getDay, differenceInDays } from "date-fns";
+import { GoalTheme } from "@/lib/goalThemes";
 
 interface NextInjectionCardProps {
   currentDay: number;
   courseStartDate?: string | null;
   currentWeek: number;
   courseStatus?: string | null;
+  goalTheme?: GoalTheme;
 }
 
 function calculateNextInjection(currentDay: number, courseStartDate?: string | null) {
@@ -38,10 +40,14 @@ export function NextInjectionCard({
   currentDay, 
   courseStartDate, 
   currentWeek,
-  courseStatus 
+  courseStatus,
+  goalTheme
 }: NextInjectionCardProps) {
   const nextInjection = calculateNextInjection(currentDay, courseStartDate);
   const { dose, units } = getDoseForWeek(currentWeek);
+  
+  const iconBgClass = goalTheme?.iconBg || "bg-rose-100";
+  const iconColorClass = goalTheme?.iconColor || "text-rose-500";
 
   // Don't show injection info if course hasn't started
   if (courseStatus !== 'active') {
@@ -71,8 +77,8 @@ export function NextInjectionCard({
       </h3>
       
       <div className="flex items-start gap-4 mb-4">
-        <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center">
-          <Syringe className="w-6 h-6 text-rose-500" />
+        <div className={`w-12 h-12 ${iconBgClass} rounded-xl flex items-center justify-center`}>
+          <Syringe className={`w-6 h-6 ${iconColorClass}`} />
         </div>
         <div>
           <p className="font-bold text-black text-lg">{nextInjection.dateFormatted}</p>

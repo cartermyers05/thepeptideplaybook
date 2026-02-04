@@ -6,6 +6,7 @@ import { useMilestones } from "@/hooks/useMilestones";
 import { peptideDetails, reconstitutionGuide, injectionGuide, reconstitutionSteps, injectionSteps } from "@/lib/courseContent";
 import { DosingCalculator } from "@/components/dashboard/DosingCalculator";
 import { InteractiveGuide } from "@/components/dashboard/InteractiveGuide";
+import { getGoalTheme } from "@/lib/goalThemes";
 import {
   Accordion,
   AccordionContent,
@@ -29,6 +30,10 @@ const itemVariants = {
 export default function MyPlan() {
   const { userCourse } = useCourse();
   const { awardMilestone } = useMilestones();
+  
+  // Get goal-based theme
+  const goalTheme = getGoalTheme(userCourse?.goal);
+  const GoalIcon = goalTheme.Icon;
 
   if (!userCourse) {
     return (
@@ -54,13 +59,13 @@ export default function MyPlan() {
       <div className="max-w-3xl mx-auto animate-fade-up">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-            <ClipboardList className="w-5 h-5 text-orange-600" />
+          <div className={`w-10 h-10 rounded-xl ${goalTheme.iconBg} flex items-center justify-center`}>
+            <GoalIcon className={`w-5 h-5 ${goalTheme.iconColor}`} />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-black">My Plan</h1>
             <p className="text-gray-500 text-sm">
-              {weekCount}-week program · {userCourse.peptides.length} peptide{userCourse.peptides.length > 1 ? 's' : ''}
+              {weekCount}-week {goalTheme.name.toLowerCase()} program · {userCourse.peptides.length} peptide{userCourse.peptides.length > 1 ? 's' : ''}
             </p>
           </div>
         </div>
@@ -81,14 +86,19 @@ export default function MyPlan() {
                 variants={itemVariants}
                 className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
               >
-                {/* Coral gradient top bar */}
-                <div className="h-1 bg-gradient-to-r from-[#fda4af] to-[#fb7185]" />
+                {/* Goal-specific gradient top bar */}
+                <div 
+                  className="h-1" 
+                  style={{ 
+                    background: `linear-gradient(to right, ${goalTheme.gradientFrom}, ${goalTheme.gradientTo})` 
+                  }}
+                />
                 
                 {/* Header */}
                 <div className="p-6 pb-4">
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center flex-shrink-0">
-                      <Syringe className="w-6 h-6 text-pink-600" />
+                    <div className={`w-12 h-12 rounded-xl ${goalTheme.iconBg} flex items-center justify-center flex-shrink-0`}>
+                      <Syringe className={`w-6 h-6 ${goalTheme.iconColor}`} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
