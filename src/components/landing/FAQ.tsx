@@ -89,7 +89,7 @@ export function FAQ() {
               <br />
               Asked
               <br />
-              <span className="text-primary">Questions</span>
+              Questions
             </h2>
           </motion.div>
 
