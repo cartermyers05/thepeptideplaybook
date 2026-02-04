@@ -61,26 +61,57 @@ const readinessLabels: Record<string, string> = {
   exploring: 'Just Exploring'
 };
 
-export function useQuizChat() {
+export function useQuizChat(preSelectedGoal?: string | null) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [state, setState] = useState<QuizChatState>({
-    messages: [{
-      id: 'initial',
-      role: 'assistant',
-      content: INITIAL_MESSAGE
-    }],
-    extractedValues: {
-      goal: null,
-      experience: null,
-      concern: null,
-      readiness: null
-    },
-    currentStep: 0,
-    isLoading: false,
-    isComplete: false,
-    error: null
-  });
+  
+  // If goal is pre-selected, start at step 1 with a different initial message
+  const getInitialState = (): QuizChatState => {
+    if (preSelectedGoal) {
+      const goalLabel = goalLabels[preSelectedGoal] || preSelectedGoal;
+      return {
+        messages: [{
+          id: 'initial',
+          role: 'assistant',
+          content: `Great choice! You've selected **${goalLabel}** as your goal.
+
+Now let me ask a few more questions to personalize your course.
+
+What's your experience level with peptides?`
+        }],
+        extractedValues: {
+          goal: preSelectedGoal,
+          experience: null,
+          concern: null,
+          readiness: null
+        },
+        currentStep: 1, // Skip goal step
+        isLoading: false,
+        isComplete: false,
+        error: null
+      };
+    }
+    
+    return {
+      messages: [{
+        id: 'initial',
+        role: 'assistant',
+        content: INITIAL_MESSAGE
+      }],
+      extractedValues: {
+        goal: null,
+        experience: null,
+        concern: null,
+        readiness: null
+      },
+      currentStep: 0,
+      isLoading: false,
+      isComplete: false,
+      error: null
+    };
+  };
+  
+  const [state, setState] = useState<QuizChatState>(getInitialState);
 
   const sendMessage = useCallback(async (userMessage: string) => {
     if (!userMessage.trim() || state.isLoading) return;
