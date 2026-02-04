@@ -1,174 +1,256 @@
 
 
-# Redesign: Premium Lusion-Style Landing Page
+# Hero Visual Cards: Product Demo Showcases
 
 ## Overview
 
-Transform the current landing page from a typical SaaS course page into a high-end creative agency aesthetic inspired by Lusion. The design will emphasize bold typography, generous whitespace, large visual cards with abstract 3D molecular imagery, and a sophisticated navigation system.
+Replace the abstract gradient squares in the hero section with sophisticated, animated product mockups that showcase the three core features of Peptide Playbook:
 
-## Design Philosophy
+1. **AI Chatbot Demo** - Interactive chat interface preview
+2. **Personalized Course** - Goal selection visualization  
+3. **Weekly Newsletter/Digest** - Research digest preview
 
-The Lusion aesthetic is characterized by:
-- Clean, off-white/light gray backgrounds
-- Bold, oversized typography (especially for headlines)
-- Asymmetric grid layouts with large image cards
-- Pill-shaped buttons with dark backgrounds
-- Minimal navigation with premium feel
-- "Scroll to explore" prompts with cross markers
-- Strong visual hierarchy through scale contrast
+These will be rendered as polished UI mockups with subtle animations, giving visitors an immediate sense of what they're getting—not generic colored shapes.
 
-## Technical Approach
+---
 
-### 1. New Color Palette
+## Visual Design
 
-Shift from teal-heavy to a more neutral, sophisticated palette:
+Each card will be a "device frame" style mockup with:
+- Rounded corners (24px radius)
+- Subtle shadow and border
+- Semi-transparent glass effect background
+- Animated content inside (typing indicators, scrolling text, etc.)
+- Hover interactions for depth
 
-| Element | Current | New |
-|---------|---------|-----|
-| Background | Pure white | Warm off-white (#F5F5F3) |
-| Primary text | Dark navy | Near-black (#1A1A1A) |
-| Accent | Teal | Keep teal for CTAs, muted elsewhere |
-| Cards | White with borders | Rounded corners with subtle shadows |
+### Card 1: AI Chatbot (Large, top spanning)
 
-### 2. Navbar Redesign
-
-**Current**: Standard logo + links + CTA button
-
-**New Lusion-style**:
-- Logo on far left (wordmark: "PEPTIDE PLAYBOOK")
-- Minimal center links (removed or minimal)
-- Right side: Dash separator + "LET'S TALK" pill button (dark) + "MENU" pill button (light with dots icon)
-- Smaller descriptor text below logo area
+A miniature chat interface showing:
+- Chat bubble with a sample question: "What's the best peptide for recovery?"
+- AI response typing animation with the "PP" avatar
+- Category chips floating (Recovery, Compare, FDA Status)
+- Subtle gradient background
 
 ```text
-+----------------------------------------------------------+
-| PEPTIDE         —  [LET'S TALK •]  [MENU ••]            |
-| PLAYBOOK                                                  |
-+----------------------------------------------------------+
++--------------------------------------------------+
+|  [PP] Peptide Playbook AI                    [•] |
+|--------------------------------------------------|
+|                                                  |
+|                "What's the best     [user bubble]|
+|                 peptide for recovery?"           |
+|                                                  |
+|  [PP avatar]                                     |
+|  Based on the research, BPC-157 shows...        |
+|  [typing indicator ••• animating]               |
+|                                                  |
+|  [Recovery] [Compare] [FDA Status] [chips]      |
++--------------------------------------------------+
 ```
 
-### 3. Hero Section Redesign
+### Card 2: Personalized Course (Bottom left)
 
-**Current**: Centered text with badge and buttons
+A goal selector mockup showing:
+- 3-4 goal pills/cards (Burn Fat, Build Muscle, Heal Faster)
+- One highlighted as "selected" with checkmark
+- "Building your course..." progress text
+- Animated selection state
 
-**New Lusion-style**:
-- Large, bold headline on left side ("Featured Work" becomes "Your Course")
-- Two-column asymmetric image grid
-- Images replaced with 3D molecular/peptide abstract visuals
-- Below hero: Value proposition text with navigation controls
-
-**Layout structure**:
 ```text
-+----------------------------------------+
-| PEPTIDE PLAYBOOK    [nav controls]     |
-|                                        |
-| Your                    [IMAGE CARD 1] |
-| Peptide       [IMAGE CARD 2]          |
-| Journey                                |
-+----------------------------------------+
-| [VALUE PROP TEXT]    [LET'S TALK][MENU]|
-+----------------------------------------+
-| [LARGE SHOWCASE IMAGE/CARD]            |
-+----------------------------------------+
-| +  +  SCROLL TO EXPLORE  +  +          |
-+----------------------------------------+
++------------------------+
+| Your Goal              |
+|------------------------|
+| [✓ Burn Fat      ]     |
+| [  Build Muscle  ]     |
+| [  Heal Faster   ]     |
+|                        |
+| Building your course...|
+| [=====>        ] 60%   |
++------------------------+
 ```
 
-### 4. Feature Showcase Cards
+### Card 3: Newsletter Digest (Bottom right)
 
-Replace the 6-item icon grid with large, immersive image cards:
-- Each card represents a course module or feature
-- Large rounded corners (16-24px radius)
-- Hover states with subtle scale/shadow animations
-- Abstract 3D molecular imagery in each card
-- Text overlays for feature titles
+A digest/newsletter preview showing:
+- "This Week in Peptides" header
+- 2-3 bullet point highlights scrolling
+- Sources badge
+- Mail icon
 
-### 5. Goal Selection Redesign
+```text
++------------------------+
+| 📬 Weekly Digest       |
+|------------------------|
+| This Week's Research   |
+|                        |
+| • New BPC-157 study... |
+| • FDA guidance on...   |
+| • Semaglutide update...|
+|                        |
+| [12 Sources] [Read →]  |
++------------------------+
+```
 
-Transform from small icon cards to larger, more impactful selection tiles:
-- Two-column layout on desktop
-- Each goal gets a full-width card with subtle gradient background
-- Large icons replaced with abstract visual elements
-- Hover reveals more detail
+---
 
-### 6. Footer Enhancement
+## Implementation
 
-Maintain current functionality but update styling:
-- Lighter footer (off-white instead of dark slate)
-- Cross (+) decorative elements
-- More generous spacing
+### New Component
 
-## Implementation Plan
+Create `HeroProductCards.tsx` containing three specialized card components:
 
-### File Changes
+**ChatPreviewCard**
+- Static/animated chat UI mockup
+- Uses framer-motion for typing indicator
+- Displays sample conversation
+
+**CoursePreviewCard**
+- Goal selection UI mockup
+- Animated "selection" and progress bar
+- Shows personalization concept
+
+**DigestPreviewCard**
+- Newsletter/digest mockup
+- Scrolling highlights animation
+- Weekly research theme
+
+### HeroSection Updates
+
+Replace the current `VisualCard` components with the new product showcase cards:
+
+```tsx
+{/* Right column - Product showcase cards */}
+<div className="relative grid grid-cols-2 gap-4 lg:gap-6">
+  {/* AI Chat - spans full width */}
+  <ChatPreviewCard className="col-span-2 h-64 md:h-80" delay={0.3} />
+  
+  {/* Course personalization */}
+  <CoursePreviewCard className="h-48 md:h-56" delay={0.5} />
+  
+  {/* Newsletter digest */}
+  <DigestPreviewCard className="h-48 md:h-56" delay={0.7} />
+</div>
+```
+
+---
+
+## Animations
+
+| Element | Animation |
+|---------|-----------|
+| Typing indicator | 3 dots pulsing in sequence |
+| Chat messages | Fade in from bottom |
+| Goal selection | Subtle pulse on selected item |
+| Progress bar | Animating fill from 0-60% |
+| Digest highlights | Slow vertical scroll loop |
+| Card hover | Scale 1.02 + shadow lift |
+
+---
+
+## Color Scheme
+
+Cards will use the new Lusion palette:
+- **Background**: Semi-transparent white/cream (`rgba(255,255,255,0.9)`)
+- **Borders**: Subtle gray (`border-border`)
+- **Accents**: Primary teal for interactive elements
+- **Text**: Near-black for headlines, muted for body
+
+---
+
+## Files to Create/Modify
 
 | File | Action |
 |------|--------|
-| `src/index.css` | Update CSS variables for new color palette, add Lusion-style utilities |
-| `src/components/landing/Navbar.tsx` | Complete redesign with pill buttons and new layout |
-| `src/components/landing/HeroSection.tsx` | Redesign with asymmetric grid and 3D placeholder cards |
-| `src/components/landing/WhatsInsideSection.tsx` | Transform to large showcase cards |
-| `src/components/landing/GoalSelectionSection.tsx` | Redesign as premium selection tiles |
-| `src/components/landing/HowItWorksSection.tsx` | Adapt to match new aesthetic |
-| `src/components/landing/PricingCTA.tsx` | Update styling to match |
-| `src/components/landing/Footer.tsx` | Lighter theme with cross decorations |
-| `src/pages/Index.tsx` | Add scroll indicator component |
+| `src/components/landing/HeroProductCards.tsx` | **Create** - New component with ChatPreviewCard, CoursePreviewCard, DigestPreviewCard |
+| `src/components/landing/HeroSection.tsx` | **Modify** - Replace VisualCard usage with new product cards |
 
-### New Components
-
-| Component | Purpose |
-|-----------|---------|
-| `ScrollIndicator.tsx` | "SCROLL TO EXPLORE" bar with cross markers |
-| `FeatureShowcase.tsx` | Large image-based feature display |
-| `PillButton.tsx` | Reusable Lusion-style pill buttons |
-
-### 3D Abstract Visuals
-
-Since we need abstract 3D molecular imagery, I will:
-1. Create placeholder cards with gradient backgrounds initially
-2. Use CSS gradients and shapes to simulate 3D molecular structures
-3. Consider using React Three Fiber (@react-three/fiber@^8.18 + @react-three/drei@^9.122.0) for animated 3D elements if desired
-
-## Visual Reference
-
-The key visual elements from Lusion to replicate:
-
-1. **Typography**: Large, bold sans-serif headlines (64-80px on desktop)
-2. **Grid**: Asymmetric 2-column layouts with varied image sizes
-3. **Colors**: Off-white (#F5F5F3) background, near-black text (#1A1A1A)
-4. **Buttons**: Dark pill buttons with icons, light outline variants
-5. **Spacing**: Generous padding (80-120px sections)
-6. **Decorations**: Cross (+) markers for visual rhythm
+---
 
 ## Technical Details
 
-### CSS Variable Updates
+### ChatPreviewCard Structure
 
-```css
-:root {
-  --background: 45 10% 96%; /* Off-white */
-  --foreground: 0 0% 10%; /* Near-black */
-  --card-radius: 1rem; /* Larger border radius */
+```tsx
+function ChatPreviewCard({ className, delay }: { className?: string; delay?: number }) {
+  return (
+    <motion.div
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      transition={{ delay }}
+      className={cn(
+        "relative overflow-hidden rounded-3xl bg-card/95 backdrop-blur border border-border shadow-xl",
+        className
+      )}
+    >
+      {/* Header bar */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/50">
+        <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
+          <span className="text-[10px] font-bold text-primary-foreground">PP</span>
+        </div>
+        <span className="text-sm font-medium">Peptide Playbook AI</span>
+      </div>
+      
+      {/* Chat content */}
+      <div className="p-4 space-y-3">
+        {/* User message */}
+        <div className="flex justify-end">
+          <div className="bg-primary text-primary-foreground text-xs px-3 py-2 rounded-xl rounded-br-sm max-w-[80%]">
+            What's the best peptide for recovery?
+          </div>
+        </div>
+        
+        {/* AI response with typing */}
+        <div className="flex gap-2">
+          <div className="w-5 h-5 rounded-md bg-primary flex-shrink-0 flex items-center justify-center">
+            <span className="text-[8px] font-bold text-primary-foreground">PP</span>
+          </div>
+          <div className="bg-muted rounded-xl rounded-bl-sm px-3 py-2 text-xs">
+            Based on research, BPC-157 and TB-500 show the most promise for...
+            <TypingDots />
+          </div>
+        </div>
+      </div>
+      
+      {/* Category chips */}
+      <div className="absolute bottom-3 left-4 flex gap-1.5">
+        {["Recovery", "Compare", "FDA"].map(chip => (
+          <span key={chip} className="text-[10px] px-2 py-1 rounded-full bg-primary/10 text-primary">
+            {chip}
+          </span>
+        ))}
+      </div>
+    </motion.div>
+  );
 }
 ```
 
-### New Tailwind Utilities
+### TypingDots Animation
 
-- `.pill-button-dark` - Dark rounded pill button
-- `.pill-button-light` - Light outline pill button  
-- `.text-hero` - Oversized headline class (clamp sizing)
-- `.card-showcase` - Large image card styling
-- `.scroll-indicator` - Bottom scroll prompt styling
+```tsx
+function TypingDots() {
+  return (
+    <span className="inline-flex gap-0.5 ml-1">
+      {[0, 1, 2].map(i => (
+        <motion.span
+          key={i}
+          className="w-1 h-1 rounded-full bg-muted-foreground"
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+        />
+      ))}
+    </span>
+  );
+}
+```
 
-### Animation Additions
+---
 
-- Subtle parallax on scroll for hero images
-- Card hover scale (1.02) with shadow lift
-- Smooth scroll reveal animations
+## Result
 
-## Responsive Behavior
+Instead of vague colored squares, visitors will immediately see:
+1. An AI chat interface they can use
+2. A personalized course builder for their goals
+3. A research digest keeping them informed
 
-- **Desktop (1024px+)**: Full asymmetric grid layout
-- **Tablet (768-1023px)**: Stacked cards, reduced text sizes
-- **Mobile (<768px)**: Single column, maintained visual impact with scaled-down elements
+This creates an instant connection between the product and the value proposition.
 
