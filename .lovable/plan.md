@@ -1,126 +1,138 @@
 
-# Make Courses Feel Personalized to User's Goal
-
-**STATUS: ✅ IMPLEMENTED**
+# Replace Sidebar with Top Navbar for Dashboard
 
 ## Overview
-Transform the dashboard and course experience to feel deeply personalized based on the user's specific wellness goal. Each goal will have its own color scheme, icons, messaging, and visual identity that carries throughout the entire dashboard experience.
+Transform the dashboard navigation from a side sidebar to a sleek top navbar with animated button interactions. This will give the dashboard a more modern, app-like feel with smooth transitions when switching between sections.
 
-## Design System: Goal-Based Theming
+## Design Concept
 
-### Goal Color Palettes
-| Goal | Primary Color | Gradient | Icon | Tagline |
-|------|--------------|----------|------|---------|
-| **Fat Loss** | Rose/Coral | `from-rose-400 to-orange-400` | Scale/Flame | "Your metabolism journey" |
-| **Muscle** | Blue/Indigo | `from-blue-400 to-indigo-500` | Dumbbell | "Your strength journey" |
-| **Recovery** | Green/Emerald | `from-green-400 to-emerald-500` | Heart/Bandage | "Your healing journey" |
-| **Anti-Aging** | Purple/Violet | `from-purple-400 to-violet-500` | Sparkles | "Your longevity journey" |
-| **Cognitive** | Amber/Yellow | `from-amber-400 to-yellow-500` | Brain | "Your mental clarity journey" |
-| **Beginner** | Teal/Cyan | `from-teal-400 to-cyan-500` | Rocket | "Your first peptide journey" |
+### Visual Layout
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  [Logo: PEPTIDE PLAYBOOK]                    [Avatar ▼] [⚙️]   │
+├─────────────────────────────────────────────────────────────────┤
+│   [  Dashboard  ]  [  My Course  ]  [  My Plan  ]  [  AI Coach  ]   │
+│      ════════                                                   │
+│      (active indicator slides between buttons)                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│                      PAGE CONTENT                               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Cool Button Interactions
+1. **Sliding Pill Indicator**: A background pill slides smoothly to the active tab using Framer Motion's `layoutId` (like the existing TabSwitcher)
+2. **Hover Scale**: Buttons scale up slightly on hover with spring animation
+3. **Click Ripple**: Subtle press animation (scale down then up)
+4. **Icon Animation**: Icon color transitions and slight rotation on hover
 
 ## Implementation
 
-### 1. Create Goal Theme Utility (`src/lib/goalThemes.ts`)
-New file with theme configuration:
-- Color mappings per goal
-- Icon component references
-- Motivational copy per goal
-- Helper function `getGoalTheme(goal: string)` that returns the full theme object
+### 1. Create New Navbar Component
+**New file: `src/components/dashboard/DashboardNavbar.tsx`**
 
-### 2. Update Dashboard Header (`src/pages/dashboard/Home.tsx`)
-**Current:**
+Features:
+- Fixed header with logo on the left
+- Centered navigation tabs with sliding indicator
+- User avatar dropdown and settings on the right
+- Uses `motion.div` with `layoutId="dashboard-nav-indicator"` for the sliding pill effect
+- `whileHover` and `whileTap` for satisfying micro-interactions
+- Responsive: On mobile, only show icons (no labels) in a compact row
+
+Structure:
+```tsx
+<header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b">
+  {/* Top row: Logo + User actions */}
+  <div className="flex items-center justify-between px-6 py-3">
+    <Logo />
+    <div className="flex items-center gap-2">
+      <UserAvatarDropdown />
+      <SettingsButton />
+    </div>
+  </div>
+  
+  {/* Navigation tabs row */}
+  <nav className="flex items-center justify-center gap-1 px-4 pb-3">
+    {navItems.map(item => (
+      <NavLink>
+        <Icon />
+        <span>{label}</span>
+        {isActive && <motion.div layoutId="nav-pill" />}
+      </NavLink>
+    ))}
+  </nav>
+</header>
 ```
-Good morning, Carter
-Day 0 of 56 · Fat Loss
+
+### 2. Update DashboardLayout
+**File: `src/components/dashboard/DashboardLayout.tsx`**
+
+Changes:
+- Remove `DashboardSidebar` import and usage
+- Add new `DashboardNavbar` component
+- Remove `md:ml-60` margin that was for sidebar spacing
+- Keep `MobileBottomNav` for mobile (it works well on small screens)
+
+### 3. Animation Details
+
+**Sliding Pill Indicator:**
+```tsx
+{isActive && (
+  <motion.div
+    layoutId="dashboard-nav-pill"
+    className="absolute inset-0 bg-black rounded-full"
+    style={{ zIndex: -1 }}
+    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+  />
+)}
 ```
 
-**New personalized version:**
+**Button Hover & Tap:**
+```tsx
+<motion.div
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+>
 ```
-Good morning, Carter
-Day 0 of 56 · Your metabolism journey 🔥
+
+**Icon Micro-animation:**
+```tsx
+<motion.div
+  whileHover={{ rotate: 5 }}
+  transition={{ type: "spring", stiffness: 300 }}
+>
+  <Icon />
+</motion.div>
 ```
-- Add goal-specific gradient accent bar at top
-- Add subtle background gradient based on goal color
-- Include goal-specific icon next to course title
 
-### 3. Update Today's Lesson Card (`src/components/dashboard/home/TodayLessonCard.tsx`)
-- Change the coral gradient bar to use goal-specific gradient
-- Add goal icon in the header
-- Update empty state to reference the specific goal
-
-### 4. Update Progress Card (`src/pages/dashboard/Home.tsx`)
-- ProgressRing stroke color matches goal theme
-- Phase label styled with goal accent
-
-### 5. Update Next Injection Card (`src/components/dashboard/home/NextInjectionCard.tsx`)
-- Icon background matches goal theme
-- Header accent matches goal
-
-### 6. Update Quick Action Cards (`src/components/dashboard/home/QuickActionCards.tsx`)
-- Add a goal-specific motivational message
-- Optional: theme the AI Coach card to reference goal
-
-### 7. Update My Plan Page (`src/pages/dashboard/MyPlan.tsx`)
-- Header icon/color matches goal
-- Add "Why this peptide for your goal" personalized section (already exists in data as `whyForYou`)
-
-### 8. Update Course Lessons Page (`src/pages/dashboard/CourseLessons.tsx`)
-- Progress bar uses goal color
-- Phase headers match goal theme
-- Current lesson indicator matches goal color
+### 4. User Actions Section
+The right side of the navbar will include:
+- **User Avatar**: Shows first letter of name, opens dropdown on click
+- **Dropdown Menu**: Contains Settings and Sign Out options
+- Uses existing shadcn DropdownMenu component
 
 ## File Changes
 
-### New File: `src/lib/goalThemes.ts`
-Contains all goal theme definitions with colors, icons, messaging
+### New Files
+| File | Purpose |
+|------|---------|
+| `src/components/dashboard/DashboardNavbar.tsx` | Main navbar component with animated tabs |
 
-### Modified Files:
-1. **`src/pages/dashboard/Home.tsx`**
-   - Import goal theme utility
-   - Apply goal gradient to header area
-   - Update subtitle with personalized journey text
-   - Pass goal theme to child components
+### Modified Files
+| File | Changes |
+|------|---------|
+| `src/components/dashboard/DashboardLayout.tsx` | Replace sidebar with navbar, adjust layout |
+| `src/components/dashboard/DashboardSidebar.tsx` | Can be deleted or kept for reference |
 
-2. **`src/components/dashboard/home/TodayLessonCard.tsx`**
-   - Accept `goalTheme` prop
-   - Replace hardcoded rose gradient with goal gradient
-   - Add goal icon
-
-3. **`src/components/dashboard/home/ProgressRing.tsx`**
-   - Accept optional `color` prop for stroke
-   - Default to current black if not provided
-
-4. **`src/components/dashboard/home/NextInjectionCard.tsx`**
-   - Accept `goalTheme` prop
-   - Update icon background color
-
-5. **`src/pages/dashboard/MyPlan.tsx`**
-   - Import goal theme
-   - Update header styling
-   - Show personalized "Why this peptide for YOUR goal" text
-
-6. **`src/pages/dashboard/CourseLessons.tsx`**
-   - Import goal theme
-   - Update progress bar color
-   - Update current lesson indicator color
-
-## Visual Result
-
-### Before (Generic)
-- All users see the same rose/coral accents
-- Generic "Day X of Y · Fat Loss Course" text
-- No visual connection between goal and UI
-
-### After (Personalized)
-- Fat Loss users: warm rose/coral theme, flame icon, "Your metabolism journey"
-- Muscle users: strong blue/indigo theme, dumbbell icon, "Your strength journey"
-- Recovery users: calming green/emerald theme, heart icon, "Your healing journey"
-- And so on...
-
-Every screen feels tailored specifically to their chosen goal, creating that personalized "aura" throughout the entire experience.
+## Mobile Behavior
+- **Keep the existing MobileBottomNav** for phones (it's a proven pattern for mobile apps)
+- **Navbar visible on tablets/desktop** only (`hidden md:block`)
+- The transition between mobile and desktop navigation will be seamless
 
 ## Technical Notes
-- The `userCourse.goal` field contains the goal type (e.g., "fat_loss", "muscle")
-- The theme system is centralized in one utility file for easy maintenance
-- All components receive theme via props or can access via hook
-- Graceful fallback to default theme if goal is unknown
+- Framer Motion's `layoutId` enables the smooth sliding indicator effect
+- The `AnimatePresence` wrapper may be needed for enter/exit animations
+- Using `NavLink` from react-router-dom (wrapped in motion.div) to track active state
+- Spring animations feel more natural than linear easing
