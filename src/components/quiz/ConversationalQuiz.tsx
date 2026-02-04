@@ -126,7 +126,7 @@ export function ConversationalQuiz() {
           </div>
           <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-primary rounded-full"
+              className="h-full bg-foreground rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
               transition={{ duration: 0.3 }}

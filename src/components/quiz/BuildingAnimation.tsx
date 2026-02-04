@@ -97,7 +97,7 @@ export function BuildingAnimation({
                   animate={{ opacity: 1, x: 0 }}
                   className="flex items-center gap-2 text-sm"
                 >
-                  <Check className="w-4 h-4 text-primary" />
+                  <Check className="w-4 h-4 text-foreground" />
                   <span className="text-muted-foreground">Goal:</span>
                   <span className="font-medium">{goalLabel}</span>
                 </motion.div>
@@ -109,7 +109,7 @@ export function BuildingAnimation({
                   transition={{ delay: 0.1 }}
                   className="flex items-center gap-2 text-sm"
                 >
-                  <Check className="w-4 h-4 text-primary" />
+                  <Check className="w-4 h-4 text-foreground" />
                   <span className="text-muted-foreground">Experience:</span>
                   <span className="font-medium">{getExperienceLabel(extractedValues.experience)}</span>
                 </motion.div>
@@ -121,7 +121,7 @@ export function BuildingAnimation({
                   transition={{ delay: 0.2 }}
                   className="flex items-center gap-2 text-sm"
                 >
-                  <Check className="w-4 h-4 text-primary" />
+                  <Check className="w-4 h-4 text-foreground" />
                   <span className="text-muted-foreground">Addressing:</span>
                   <span className="font-medium">{getConcernLabel(extractedValues.concern)}</span>
                 </motion.div>
@@ -133,7 +133,7 @@ export function BuildingAnimation({
                   transition={{ delay: 0.3 }}
                   className="flex items-center gap-2 text-sm"
                 >
-                  <Check className="w-4 h-4 text-primary" />
+                  <Check className="w-4 h-4 text-foreground" />
                   <span className="text-muted-foreground">Timeline:</span>
                   <span className="font-medium">{getTimelineLabel(extractedValues.timeline)}</span>
                 </motion.div>
@@ -142,7 +142,7 @@ export function BuildingAnimation({
 
             {/* Building progress */}
             <div className="space-y-2">
-              {buildingSteps.map((step, index) => (
+                {buildingSteps.map((step, index) => (
                 <motion.div
                   key={step}
                   initial={{ opacity: 0 }}
@@ -152,9 +152,9 @@ export function BuildingAnimation({
                   className="flex items-center justify-center gap-2 text-sm"
                 >
                   {index < currentBuildStep ? (
-                    <Check className="w-4 h-4 text-primary" />
+                    <Check className="w-4 h-4 text-foreground" />
                   ) : index === currentBuildStep ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                   ) : (
                     <div className="w-4 h-4" />
                   )}
