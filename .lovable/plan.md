@@ -1,402 +1,432 @@
 
 
-# Peptide Playbook - Complete Rebuild Plan
+# Conversational AI Quiz Onboarding
 
-## Executive Summary
+## Overview
 
-This is a **major product pivot** from a subscription-based AI chatbot ($29/month) to a **one-time purchase course platform** ($99 per course). The rebuild affects the business model, database schema, Stripe integration, routing, and the entire user experience.
+Transform the current static quiz (clickable cards) into an **AI-powered conversational onboarding** experience. Instead of picking from pre-defined options, users chat with an AI that asks questions, listens to their answers, and progressively builds their personalized course in real-time.
 
----
-
-## What's Being Kept (No Changes)
-
-| Component | Status |
-|-----------|--------|
-| Supabase auth system | Keep as-is |
-| Basic routing structure | Keep, add new routes |
-| Edge function infrastructure | Keep structure, update logic |
-| UI component library | Keep Shadcn/Tailwind |
-| Existing hooks structure | Keep pattern, rebuild logic |
+**Core Experience**: Each "step" of the quiz is a conversation with the AI. The AI asks a question, the user types a natural response, and the AI extracts the relevant information while responding in a warm, personalized way.
 
 ---
 
-## Phase 1: Database Schema Changes
+## User Flow
 
-### New Tables to Create
-
-**course_templates** (Admin-seeded, stores the 6 course types)
 ```text
-- id: uuid (primary key)
-- goal: text (unique: fat_loss, muscle, recovery, anti_aging, cognitive, beginner)
-- title: text
-- description: text
-- peptides: jsonb (array of peptide objects)
-- duration_days: integer (42-84 depending on course)
-- lessons: jsonb (array of lesson objects with day, phase, title, content, action_item)
-- created_at: timestamp
-```
-
-**user_courses** (Created when user purchases)
-```text
-- id: uuid (primary key)
-- user_id: uuid (references profiles)
-- template_id: uuid (references course_templates)
-- goal: text
-- title: text
-- peptides: jsonb
-- duration_days: integer
-- lessons: jsonb
-- current_day: integer (default 0)
-- status: text (not_started, waiting_supplies, active, completed)
-- supplies_status: text (have_them, this_week, ordering)
-- started_at: timestamp
-- purchased_at: timestamp
-- created_at: timestamp
-```
-
-**lesson_progress** (Tracks completion per lesson)
-```text
-- id: uuid (primary key)
-- user_id: uuid (references profiles)
-- course_id: uuid (references user_courses)
-- day: integer
-- completed: boolean
-- completed_at: timestamp
-- notes: text
-- UNIQUE(user_id, course_id, day)
-```
-
-**chat_messages** (Replaces conversations+messages for simpler coach chat)
-```text
-- id: uuid (primary key)
-- user_id: uuid (references profiles)
-- course_id: uuid (references user_courses, nullable)
-- role: text (user, assistant)
-- content: text
-- created_at: timestamp
-```
-
-### Tables to Update
-
-**purchases** - Add course_goal field
-```text
-- course_goal: text (which course was purchased)
-```
-
-**referrals** - Add discount/credit tracking
-```text
-- discount_amount: integer (default 2000 = $20)
-- credit_amount: integer (default 2000 = $20)
+Step 0: Welcome
+├── AI: "Hey! I'm going to build you a personalized peptide course. 
+│        But first, I need to understand what you're looking for. 
+│        What's your main goal - what are you hoping peptides can help with?"
+│
+Step 1: Goal Discovery (Conversational)
+├── User types: "I want to lose some stubborn belly fat"
+├── AI: "Got it - fat loss is a great goal! A lot of people come here 
+│        for that exact reason. Quick question - have you ever used 
+│        peptides before, or would this be your first time?"
+│
+Step 2: Experience Level (Conversational)
+├── User types: "Never, this is completely new to me"
+├── AI: "No problem at all - we built this course specifically for 
+│        beginners. One thing I want to address upfront: what worries 
+│        you most about starting? Is it the injections, the dosing, 
+│        or something else?"
+│
+Step 3: Biggest Concern (Conversational)
+├── User types: "honestly the needles scare me a bit"
+├── AI: "Totally normal! Most people feel that way at first. Your 
+│        course will include a step-by-step injection guide that makes 
+│        it way less scary. Last question - when are you thinking of 
+│        starting? This week, this month, or still researching?"
+│
+Step 4: Timeline (Conversational)
+├── User types: "probably this month once I get supplies"
+├── AI: "Perfect. Let me build your course..."
+│
+Step 5: Course Building Animation
+├── Show: "Analyzing your goals... Selecting peptides... Creating lessons..."
+├── Real-time display of extracted info:
+│   • Goal: Fat Loss ✓
+│   • Experience: Beginner ✓
+│   • Concern: Injections ✓
+│   • Timeline: This month ✓
+│
+Step 6: Email Capture
+├── AI: "Your Fat Loss Course is ready! 🎉 Enter your email to see 
+│        your personalized protocol and start learning."
+│
+└── Redirect to /course/fat-loss preview
 ```
 
 ---
 
-## Phase 2: New Route Structure
+## Technical Architecture
 
-### Routes to Add
+### New Edge Function: `supabase/functions/quiz-chat/index.ts`
+
+**Purpose**: Handle the conversational flow with structured output extraction
+
+**Flow per message**:
+1. Receive user message + current step + conversation history
+2. Call Lovable AI with a step-specific system prompt
+3. AI returns:
+   - `response`: The conversational reply to show the user
+   - `extracted_value`: The structured value extracted (e.g., `fat_loss`)
+   - `confidence`: How confident the AI is in the extraction
+   - `move_to_next`: Boolean - should we advance to next step?
+4. Return response + update quiz state
+
+**System Prompt Structure**:
 ```text
-/course/:goal       → Course preview page (pre-purchase)
-/dashboard/course   → Full course view (all lessons)
-/dashboard/plan     → Peptides & schedule view
+You are a friendly onboarding assistant for Peptide Playbook. Your job 
+is to have a natural conversation while extracting specific information.
+
+CURRENT STEP: Goal Discovery
+VALID VALUES: fat_loss, muscle, recovery, anti_aging, cognitive, beginner
+QUESTION TO ASK: What's your main goal with peptides?
+
+Your response MUST include:
+1. A warm, conversational reply (2-3 sentences)
+2. A natural transition to the next question
+3. Extraction of their answer into one of the valid values
+
+If their answer is unclear, ask a clarifying question instead of guessing.
+
+Return JSON:
+{
+  "response": "Your conversational reply...",
+  "extracted_value": "fat_loss" | null,
+  "confidence": 0.9,
+  "move_to_next": true | false,
+  "next_question": "The question for the next step if moving forward"
+}
 ```
 
-### Routes to Update
+### New Component: `src/components/quiz/ConversationalQuiz.tsx`
+
+**UI Structure**:
 ```text
-/                   → Complete landing page redesign
-/dashboard          → Today's lesson view (replace current)
-/dashboard/coach    → Simplified chat (keep but update)
-/dashboard/settings → Add purchases & referrals view
+┌─────────────────────────────────────────────────────────────────┐
+│  Progress: Step 2 of 5                                          │
+│  ████████████░░░░░░░░░░░░░░░░░░                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  [Bot Avatar]                                                   │
+│  "Hey! I'm going to build you a personalized peptide course.    │
+│   What's your main goal - what are you hoping peptides can      │
+│   help with?"                                                   │
+│                                                                 │
+│                                    "I want to burn fat and     │
+│                                     get more energy" [User]    │
+│                                                                 │
+│  [Bot Avatar]                                                   │
+│  "Fat loss is a great goal! Quick question - have you ever     │
+│   used peptides before?"                                       │
+│  [Typing indicator...]                                         │
+│                                                                 │
+├─────────────────────────────────────────────────────────────────┤
+│  [Text input: "Type your answer..."]              [Send →]     │
+└─────────────────────────────────────────────────────────────────┘
+
+SIDEBAR (collapsible on mobile):
+┌──────────────────────┐
+│ Building Your Course │
+├──────────────────────┤
+│ Goal: Fat Loss ✓     │
+│ Experience: ⏳        │
+│ Concern: ⏳          │
+│ Timeline: ⏳          │
+└──────────────────────┘
 ```
 
-### Routes to Remove
-```text
-/quiz/results       → Replace with /course/:goal flow
-/dashboard/protocol → Replace with /dashboard/plan
-/dashboard/progress → Remove (integrate into dashboard home)
-```
-
----
-
-## Phase 3: Landing Page Redesign
-
-### New Component Structure
+### State Machine for Quiz Steps
 
 ```text
-src/pages/Index.tsx
-├── HeroSection (rewrite - "First AI-Powered Peptide Course")
-├── HowItWorksSection (new - 3 steps with icons)
-├── WhatsInsideSection (new - 6 feature cards)
-├── GoalSelectionSection (new - 6 goal cards linking to /course/:goal)
-├── PricingSection (rewrite - single $99 card)
-├── FAQ (update content)
-└── Footer (update with legal disclaimer)
-```
+interface QuizStep {
+  id: string;
+  question: string;
+  validValues: string[];
+  valueKey: 'goal' | 'experience' | 'concern' | 'timeline';
+  systemPromptAddition: string;
+}
 
-### Key Messaging Changes
-
-| Old | New |
-|-----|-----|
-| "The $2,000 Peptide Course. For $29." | "The First AI-Powered Peptide Course" |
-| "Build My Course (Free)" | "Pick Your Goal" |
-| Subscription pricing | One-time $99 per course |
-| Protocol-focused | Lesson/course-focused |
-
----
-
-## Phase 4: Course Preview Page (/course/:goal)
-
-### New Page: `src/pages/CoursePreview.tsx`
-
-**Flow:**
-1. Show "Building your personalized course..." animation (3-4 seconds)
-2. Reveal course preview with:
-   - Course title
-   - What's included checklist
-   - Peptide list (no dosing shown pre-purchase)
-   - CTA: "Get Your Course - $99"
-3. If already purchased, show "Go to Dashboard" instead
-
----
-
-## Phase 5: Stripe Integration Update
-
-### Update: `supabase/functions/create-checkout/index.ts`
-
-**Change from subscription to one-time payment:**
-```text
-Current: mode: "subscription"
-New: mode: "payment"
-
-Current: Uses price IDs for monthly/annual
-New: Uses price_data with $99.00 unit_amount
-
-Current: subscription_data metadata
-New: payment metadata (user_id, goal)
-```
-
-### New Edge Function: `supabase/functions/handle-payment-success/index.ts`
-
-**Webhook handler for checkout.session.completed:**
-1. Extract user_id and goal from metadata
-2. Create purchase record
-3. Copy course template to user_courses
-4. Set status to 'not_started'
-
----
-
-## Phase 6: Dashboard Redesign
-
-### Updated: `src/pages/dashboard/Home.tsx`
-
-**New Layout:**
-```text
-┌─────────────────────────────────────────┐
-│ [Course Title]                          │
-│ Day X of Y                              │
-├─────────────────────────────────────────┤
-│ TODAY'S LESSON                          │
-│ Day X: [Lesson Title]                   │
-│ [Preview text...]                       │
-│ [Start Today's Lesson]                  │
-├─────────────────────────────────────────┤
-│ Progress: ████████░░ X%                 │
-├─────────────────────────────────────────┤
-│ [My Plan] [AI Coach]                    │
-└─────────────────────────────────────────┘
-```
-
-**Status-based views:**
-- `waiting_supplies`: "Waiting for supplies" message + "Ready to start" button
-- `active`: Today's lesson card
-- `completed`: Celebration + "Browse Courses" link
-
-### New Page: `src/pages/dashboard/CourseLessons.tsx`
-
-**Full course view with all lessons:**
-```text
-Phase 1: Preparation
-  Day 0: Welcome & Your Plan ✓
-  Day 1: Understanding Peptides ✓
-  Day 2: Supplies Checklist [Current]
-  Day 3: Reconstitution 🔒
-  ...
-
-Phase 2: Week 1
-  Day 4: Your First Injection 🔒
-  ...
-```
-
-### New Page: `src/pages/dashboard/MyPlan.tsx`
-
-**Replaces Protocol.tsx with course-appropriate naming:**
-- Peptide cards with research-based dosing language
-- Weekly schedule view
-- Supplies checklist
-- Move guides here from Protocol
-
----
-
-## Phase 7: Welcome Flow
-
-### New Component: `src/components/dashboard/WelcomeModal.tsx`
-
-**Shown when `?welcome=true` in URL:**
-```text
-🎉 Your [Goal] Course is Ready!
-
-Before we start, one question:
-When are your supplies arriving?
-
-[I have them] → status: active, start Day 0
-[This week] → status: waiting_supplies
-[Still ordering] → Show supplies checklist
+const quizSteps: QuizStep[] = [
+  {
+    id: 'goal',
+    question: "What's your main goal with peptides?",
+    validValues: ['fat_loss', 'muscle', 'recovery', 'anti_aging', 'cognitive', 'beginner'],
+    valueKey: 'goal',
+    systemPromptAddition: `Map their response to one of these goals:
+      - fat_loss: weight loss, burning fat, metabolism, body composition
+      - muscle: building muscle, recovery from workouts, strength, gains
+      - recovery: injury healing, surgery recovery, pain, tissue repair
+      - anti_aging: longevity, skin, vitality, aging, youthfulness
+      - cognitive: focus, memory, brain, clarity, mental performance
+      - beginner: unsure, exploring, don't know, general wellness`
+  },
+  {
+    id: 'experience',
+    question: "Have you used peptides before?",
+    validValues: ['beginner', 'some_experience', 'experienced'],
+    valueKey: 'experience',
+    systemPromptAddition: `Determine their experience level:
+      - beginner: never used, first time, no experience
+      - some_experience: tried once or twice, not confident
+      - experienced: multiple cycles, knows basics, regular user`
+  },
+  // ... more steps
+];
 ```
 
 ---
 
-## Phase 8: Course Templates Data
+## Files to Create
 
-### Seed 6 course templates:
+| File | Purpose |
+|------|---------|
+| `supabase/functions/quiz-chat/index.ts` | Edge function for conversational quiz AI |
+| `src/components/quiz/ConversationalQuiz.tsx` | Main chat-based quiz component |
+| `src/components/quiz/QuizMessage.tsx` | Individual message bubble component |
+| `src/components/quiz/QuizProgressSidebar.tsx` | Side panel showing extracted values |
+| `src/components/quiz/BuildingAnimation.tsx` | Final "building course" animation |
+| `src/hooks/useQuizChat.ts` | Hook for managing quiz conversation state |
 
-| Goal | Title | Peptides | Duration |
-|------|-------|----------|----------|
-| fat_loss | Fat Loss Course | Semaglutide | 56 days (8 weeks) |
-| muscle | Muscle & Recovery Course | BPC-157, TB-500 | 56 days |
-| recovery | Injury Recovery Course | BPC-157, TB-500 | 42 days (6 weeks) |
-| anti_aging | Anti-Aging & Longevity Course | Epithalon, GHK-Cu | 84 days (12 weeks) |
-| cognitive | Cognitive Enhancement Course | Semax, Selank | 56 days |
-| beginner | Beginner Course | BPC-157 | 42 days |
+## Files to Modify
 
-Each includes full lesson array with day, phase, title, content, action_item.
-
----
-
-## Phase 9: Hooks & State Management
-
-### New Hooks
-
-**useCourse.ts**
-```text
-- Fetch user's active course
-- Start/complete lessons
-- Update course status
-- Track current day
-```
-
-**useLessons.ts**
-```text
-- Fetch lesson progress
-- Mark lessons complete
-- Get today's lesson
-- Calculate streak (lessons completed consecutively)
-```
-
-**useChatMessages.ts** (simpler than current conversations)
-```text
-- Fetch chat history
-- Send message to coach
-- Store responses
-```
-
-### Hooks to Update
-
-**useProtocol.ts** → Rename to useCourse, update structure
-**useCheckIn.ts** → Merge into useLessons (lesson completion replaces check-in)
+| File | Change |
+|------|--------|
+| `src/pages/Quiz.tsx` | Replace static steps with ConversationalQuiz |
+| `supabase/config.toml` | Add quiz-chat function configuration |
 
 ---
 
-## Phase 10: AI Coach Updates
+## Edge Function Implementation Details
 
-### Update: `supabase/functions/coach/index.ts`
+### Request/Response Format
 
-**New system prompt:**
-```text
-You are an educational peptide coach helping a user through their course.
+**Request**:
+```typescript
+{
+  message: string;           // User's typed message
+  currentStep: number;       // 0-4
+  conversationHistory: {     // Previous messages
+    role: 'user' | 'assistant';
+    content: string;
+  }[];
+  extractedValues: {         // What we've collected so far
+    goal: string | null;
+    experience: string | null;
+    concern: string | null;
+    timeline: string | null;
+  };
+}
+```
 
-User's Course: {course_title}
-User's Goal: {goal}
-User's Peptides: {peptides}
-Current Day: {current_day} of {duration_days}
+**Response**:
+```typescript
+{
+  response: string;          // AI's conversational reply
+  extracted: {
+    key: string;             // 'goal', 'experience', etc.
+    value: string | null;    // The extracted value
+    confidence: number;      // 0-1
+  } | null;
+  shouldAdvance: boolean;    // Move to next step?
+  isComplete: boolean;       // All steps done?
+}
+```
 
-Guidelines:
-- Reference research: "Studies have shown...", "Research suggests..."
-- Never diagnose, prescribe, or give medical advice
-- If asked about sourcing, say you can't recommend specific sources
+### AI Tool Calling for Extraction
+
+Use structured output via tool calling to ensure reliable extraction:
+
+```typescript
+const tools = [{
+  type: "function",
+  function: {
+    name: "extract_quiz_answer",
+    description: "Extract the user's answer into a structured format",
+    parameters: {
+      type: "object",
+      properties: {
+        response: { 
+          type: "string", 
+          description: "Your conversational reply to the user" 
+        },
+        extracted_value: { 
+          type: "string", 
+          enum: currentStep.validValues,
+          description: "The extracted value from their answer"
+        },
+        confidence: { 
+          type: "number", 
+          description: "Confidence in extraction (0-1)" 
+        },
+        should_advance: { 
+          type: "boolean", 
+          description: "Should we move to the next question?" 
+        }
+      },
+      required: ["response", "should_advance"]
+    }
+  }
+}];
 ```
 
 ---
 
-## File Changes Summary
+## UI Component Details
 
-### New Files (Create)
-```text
-src/pages/CoursePreview.tsx
-src/pages/dashboard/CourseLessons.tsx
-src/pages/dashboard/MyPlan.tsx
-src/components/dashboard/WelcomeModal.tsx
-src/components/course/LessonCard.tsx
-src/components/course/LessonModal.tsx
-src/components/landing/HowItWorksSection.tsx
-src/components/landing/WhatsInsideSection.tsx
-src/components/landing/GoalSelectionSection.tsx
-src/hooks/useCourse.ts
-src/hooks/useLessons.ts
-src/hooks/useChatMessages.ts
-supabase/functions/handle-payment-success/index.ts
+### ConversationalQuiz.tsx
+
+**State**:
+```typescript
+interface QuizState {
+  currentStep: number;
+  messages: Message[];
+  extractedValues: {
+    goal: string | null;
+    experience: string | null;
+    concern: string | null;
+    timeline: string | null;
+  };
+  isLoading: boolean;
+  isBuilding: boolean;  // Final animation phase
+  email: string;
+}
 ```
 
-### Files to Rewrite
+**Key Features**:
+- Chat bubbles with typing animation
+- AI responses stream in with typewriter effect
+- Side panel shows "Building Your Course" with checkmarks as values are extracted
+- Smooth transitions between steps
+- Mobile-responsive (sidebar becomes collapsed drawer)
+
+### Message Styling
+
 ```text
-src/pages/Index.tsx (complete redesign)
-src/components/landing/HeroSection.tsx
-src/components/landing/PricingCTA.tsx
-src/components/landing/FAQ.tsx
-src/pages/dashboard/Home.tsx
-supabase/functions/create-checkout/index.ts
-supabase/functions/coach/index.ts
+AI Messages:
+- Left-aligned
+- Avatar with bot icon
+- Light background
+- Typewriter animation on new messages
+
+User Messages:
+- Right-aligned  
+- Primary color background
+- No avatar (or user avatar)
+- Instant display
+
+Suggested Responses (optional enhancement):
+- Show 2-3 clickable chips for common answers
+- "Fat loss", "Muscle building", "Injury recovery"
+- Clicking auto-fills and sends
 ```
 
-### Files to Deprecate/Remove
+---
+
+## Special Handling
+
+### Clarification Flow
+
+If the AI can't confidently extract a value:
+
 ```text
-src/pages/Quiz.tsx (replace with direct /course/:goal flow)
-src/pages/QuizResults.tsx (merge into CoursePreview)
-src/pages/dashboard/Protocol.tsx (replace with MyPlan)
-src/pages/dashboard/Progress.tsx (integrate into Home)
-src/hooks/useProtocol.ts (replace with useCourse)
-src/hooks/useCheckIn.ts (replace with useLessons)
+User: "I just want to feel better"
+AI: "I hear you! Can you tell me a bit more about what 'feeling better' 
+     means for you? Are you looking to have more energy, recover from 
+     something specific, or maybe something else?"
+→ Don't advance, ask for clarification
+```
+
+### Off-Topic Handling
+
+```text
+User: "Where can I buy peptides?"
+AI: "Great question, but I can't recommend specific vendors. Let's focus 
+     on building your course first - we can talk sourcing later! So, 
+     what's your main goal with peptides?"
+→ Don't advance, redirect to question
+```
+
+### Quick Answers
+
+Still allow quick selection for users who prefer it:
+
+```text
+Below the chat input, show:
+
+Quick answers:
+[Fat Loss] [Build Muscle] [Heal Injury] [Anti-Aging] [Cognitive] [Not Sure]
+```
+
+---
+
+## Final Animation Sequence
+
+After all 4 questions answered:
+
+```text
+1. AI says: "Perfect! Let me build your personalized course..."
+
+2. Chat area transitions to full-screen building animation:
+   
+   ┌─────────────────────────────────────────┐
+   │         Building Your Course...         │
+   │                                         │
+   │  ✓ Goal: Fat Loss                       │
+   │  ✓ Experience: Beginner                 │
+   │  ✓ Addressing: Injection anxiety        │
+   │  ✓ Timeline: This month                 │
+   │                                         │
+   │  [Progress bar animating...]            │
+   │                                         │
+   │  ⏳ Selecting optimal peptides...       │
+   │  ⏳ Creating 8-week program...          │
+   │  ⏳ Personalizing lessons...            │
+   └─────────────────────────────────────────┘
+
+3. After 3-4 seconds, show email capture:
+   
+   ┌─────────────────────────────────────────┐
+   │     🎉 Your Fat Loss Course is Ready!   │
+   │                                         │
+   │  8 weeks · Semaglutide · Beginner-      │
+   │  friendly · Injection guide included    │
+   │                                         │
+   │  [Email input field]                    │
+   │  □ Send me weekly peptide research      │
+   │                                         │
+   │  [See My Course →]                      │
+   └─────────────────────────────────────────┘
+
+4. On submit → Save to database → Redirect to /course/fat-loss
 ```
 
 ---
 
 ## Implementation Order
 
-1. **Database migrations** - Create new tables (course_templates, user_courses, lesson_progress, chat_messages)
-2. **Seed course templates** - Insert 6 course templates with full lesson content
-3. **Stripe update** - Change create-checkout to one-time payment mode
-4. **Payment webhook** - Create handle-payment-success edge function
-5. **New hooks** - Create useCourse, useLessons, useChatMessages
-6. **Course preview page** - Build /course/:goal with building animation
-7. **Landing page redesign** - New sections and goal selection
-8. **Dashboard redesign** - Today's lesson view, welcome modal
-9. **Course lessons page** - Full day-by-day view
-10. **My Plan page** - Peptides, schedule, supplies
-11. **Coach updates** - New system prompt and context
-12. **Settings updates** - Show purchases and referrals
-13. **Referral system** - $20 discount/credit flow
+1. **Edge function** - Create `quiz-chat` with tool calling for extraction
+2. **useQuizChat hook** - State management and API calls
+3. **QuizMessage component** - Chat bubble styling
+4. **ConversationalQuiz component** - Main chat UI
+5. **QuizProgressSidebar** - Side panel with extracted values
+6. **BuildingAnimation** - Final course building animation
+7. **Update Quiz.tsx** - Replace static quiz with new conversational flow
+8. **Testing** - End-to-end flow verification
 
 ---
 
-## Success Verification Checklist
+## Success Criteria
 
-- [ ] Landing page loads with "Pick Your Goal" cards
-- [ ] Clicking goal goes to /course/:goal with building animation
-- [ ] Course preview shows peptides without dosing
-- [ ] $99 checkout redirects to Stripe
-- [ ] Payment success creates user_course record
-- [ ] Welcome modal asks about supplies
-- [ ] Dashboard shows today's lesson
-- [ ] Lesson completion advances current_day
-- [ ] My Plan shows peptides with research-based language
-- [ ] AI Coach has course context
-- [ ] Referral codes generate $20 discount
+- [ ] User can type natural language and AI extracts structured values
+- [ ] Conversation feels natural, not robotic
+- [ ] AI asks clarifying questions when answers are unclear
+- [ ] Progress sidebar shows checkmarks as values are collected
+- [ ] Building animation plays after all questions answered
+- [ ] Email capture works and saves quiz response
+- [ ] Redirect to correct /course/:goal page
+- [ ] Mobile responsive with good UX
+- [ ] Streaming responses for natural feel
 
