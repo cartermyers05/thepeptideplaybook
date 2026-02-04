@@ -137,8 +137,11 @@ export default function Checkout() {
       <div className="text-center max-w-sm px-4">
         {/* Header */}
         <div className="mb-6">
+          <p className="text-xs text-primary font-medium mb-1">Early Access Pricing</p>
           <h1 className="text-xl font-semibold mb-1">Complete Your Purchase</h1>
-          <p className="text-sm text-muted-foreground">One-time payment: $67</p>
+          <p className="text-sm text-muted-foreground">
+            One-time payment: <span className="line-through opacity-60">$99</span> $67
+          </p>
         </div>
 
         {/* Pay button as fallback */}

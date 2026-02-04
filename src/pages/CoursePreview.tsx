@@ -295,6 +295,9 @@ export default function CoursePreview() {
                         )}
                       </Button>
                       <p className="mt-4 text-sm text-muted-foreground">
+                        <span className="text-primary font-medium">Early access pricing.</span> Going to $99 soon.
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
                         One-time purchase. Lifetime access. 30-day money-back guarantee.
                       </p>
                     </>

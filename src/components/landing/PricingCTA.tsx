@@ -48,12 +48,15 @@ export function PricingCTA() {
             <div className="bg-card border border-border rounded-3xl p-8 md:p-12 relative overflow-hidden">
               {/* Price */}
               <div className="mb-8">
+                <span className="inline-block text-xs font-medium bg-primary/10 text-primary px-2.5 py-1 rounded-full mb-3">
+                  Early Access Pricing
+                </span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-6xl md:text-7xl font-bold">$67</span>
-                  <span className="text-muted-foreground text-lg">one-time</span>
+                  <span className="text-muted-foreground text-lg line-through opacity-60">$99</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  30-day money-back guarantee
+                  Price increases soon • 30-day money-back guarantee
                 </p>
               </div>
 
