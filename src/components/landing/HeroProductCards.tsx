@@ -43,7 +43,8 @@ export function ChatPreviewCard({
       transition={{ delay }}
       whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
       className={cn(
-        "relative overflow-hidden rounded-3xl bg-card/95 backdrop-blur border border-border shadow-xl cursor-default",
+        "relative overflow-hidden rounded-3xl backdrop-blur border border-amber-300/50 shadow-xl cursor-default",
+        "bg-gradient-to-br from-orange-500/20 via-amber-400/10 to-yellow-300/20",
         className
       )}
     >
