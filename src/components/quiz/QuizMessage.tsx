@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bot, User } from "lucide-react";
+import { User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TypewriterMessage } from "@/components/dashboard/TypewriterMessage";
 
@@ -26,8 +26,8 @@ export function QuizMessage({ role, content, isStreaming, isLatest }: QuizMessag
     >
       {isAssistant && (
         <Avatar className="w-8 h-8 flex-shrink-0">
-          <AvatarFallback className="bg-primary/10 text-primary">
-            <Bot className="w-4 h-4" />
+          <AvatarFallback className="bg-muted text-foreground text-[10px] font-bold">
+            PP
           </AvatarFallback>
         </Avatar>
       )}
@@ -37,7 +37,7 @@ export function QuizMessage({ role, content, isStreaming, isLatest }: QuizMessag
           "rounded-2xl px-4 py-3",
           isAssistant 
             ? "bg-secondary text-foreground rounded-tl-sm" 
-            : "bg-primary text-primary-foreground rounded-tr-sm"
+            : "bg-foreground text-background rounded-tr-sm"
         )}
       >
         {isAssistant && isLatest && isStreaming ? (

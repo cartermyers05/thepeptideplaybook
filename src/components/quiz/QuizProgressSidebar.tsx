@@ -49,9 +49,9 @@ export function QuizProgressSidebar({
               <div className={cn(
                 "w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0",
                 isComplete 
-                  ? "bg-primary text-primary-foreground" 
+                  ? "bg-foreground text-background" 
                   : isCurrent 
-                    ? "bg-primary/20 text-primary"
+                    ? "bg-muted-foreground/20 text-muted-foreground"
                     : "bg-muted"
               )}>
                 {isComplete ? (
