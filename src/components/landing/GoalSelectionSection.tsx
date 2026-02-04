@@ -120,7 +120,7 @@ export function GoalSelectionSection() {
                     </p>
                     
                     {/* Arrow indicator */}
-                    <div className="mt-6 flex items-center gap-2 text-sm font-medium text-primary group-hover:text-white transition-colors duration-300">
+                    <div className="mt-6 flex items-center gap-2 text-sm font-medium text-muted-foreground group-hover:text-white transition-colors duration-300">
                       <span>Start Course</span>
                       <span className="group-hover:translate-x-1 transition-transform">→</span>
                     </div>
