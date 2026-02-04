@@ -174,7 +174,7 @@ export function useQuizChat() {
   const getConcernLabel = (concern: string | null) => concern ? concernLabels[concern] || concern : null;
   const getTimelineLabel = (timeline: string | null) => timeline ? timelineLabels[timeline] || timeline : null;
 
-  // Save quiz response - updates existing user_courses record
+  // Save quiz response - creates protocol and user_courses for new users
   const saveQuizResponse = useCallback(async () => {
     const { goal, experience, concern, timeline } = state.extractedValues;
     
@@ -195,38 +195,211 @@ export function useQuizChat() {
     };
     localStorage.setItem('quizResponse', JSON.stringify(quizData));
 
-    // Find and update the user's course with personalization data
     try {
-      // First, get the user's course
-      const { data: existingCourse, error: fetchError } = await supabase
-        .from('user_courses')
-        .select('id, goal')
+      // 1. Create protocol from template
+      const protocolTemplates: Record<string, { name: string; peptides: any[]; weeks: number }> = {
+        fat_loss: {
+          name: "Fat Loss Protocol",
+          weeks: 8,
+          peptides: [
+            {
+              name: "Semaglutide",
+              purpose: "Appetite regulation, metabolic optimization",
+              dosage: "Start 0.25mg, increase to 0.5mg week 3, 1mg week 5",
+              frequency: "Once weekly",
+              timing: "Same day each week, morning",
+              site: "Subcutaneous, abdomen or thigh",
+            },
+          ],
+        },
+        muscle: {
+          name: "Muscle & Recovery Protocol",
+          weeks: 8,
+          peptides: [
+            {
+              name: "BPC-157",
+              purpose: "Tissue repair, gut health, recovery",
+              dosage: "250mcg",
+              frequency: "Twice daily",
+              timing: "Morning and post-workout",
+              site: "Subcutaneous, near muscle worked or abdomen",
+            },
+            {
+              name: "TB-500",
+              purpose: "Systemic healing, flexibility, recovery",
+              dosage: "2.5mg",
+              frequency: "Twice weekly",
+              timing: "Non-consecutive days",
+              site: "Subcutaneous, abdomen",
+            },
+          ],
+        },
+        recovery: {
+          name: "Injury Recovery Protocol",
+          weeks: 6,
+          peptides: [
+            {
+              name: "BPC-157",
+              purpose: "Localized tissue repair",
+              dosage: "250-500mcg",
+              frequency: "Twice daily",
+              timing: "Morning and evening",
+              site: "Subcutaneous, as close to injury as possible",
+            },
+            {
+              name: "TB-500",
+              purpose: "Systemic healing support",
+              dosage: "2.5mg twice weekly (weeks 1-2), then 2.5mg once weekly",
+              frequency: "See dosage",
+              timing: "Non-consecutive days",
+              site: "Subcutaneous, abdomen",
+            },
+          ],
+        },
+        anti_aging: {
+          name: "Anti-Aging & Longevity Protocol",
+          weeks: 12,
+          peptides: [
+            {
+              name: "Epithalon",
+              purpose: "Telomere support, cellular health",
+              dosage: "5mg",
+              frequency: "Once daily for 20 days, then 10 day break, repeat",
+              timing: "Evening",
+              site: "Subcutaneous, abdomen",
+            },
+            {
+              name: "GHK-Cu",
+              purpose: "Skin health, collagen, healing",
+              dosage: "1-2mg",
+              frequency: "Once daily",
+              timing: "Morning",
+              site: "Subcutaneous, or topical if using cream",
+            },
+          ],
+        },
+        cognitive: {
+          name: "Cognitive Enhancement Protocol",
+          weeks: 8,
+          peptides: [
+            {
+              name: "Semax",
+              purpose: "Focus, memory, neuroprotection",
+              dosage: "200-600mcg",
+              frequency: "Once daily",
+              timing: "Morning",
+              site: "Intranasal (nose spray)",
+            },
+            {
+              name: "Selank",
+              purpose: "Anxiety reduction, focus, mood",
+              dosage: "250-500mcg",
+              frequency: "Once daily",
+              timing: "Morning or early afternoon",
+              site: "Intranasal (nose spray)",
+            },
+          ],
+        },
+        beginner: {
+          name: "Beginner Protocol",
+          weeks: 6,
+          peptides: [
+            {
+              name: "BPC-157",
+              purpose: "General healing, gut health, beginner-friendly",
+              dosage: "250mcg",
+              frequency: "Once daily",
+              timing: "Morning, empty stomach",
+              site: "Subcutaneous, abdomen",
+            },
+          ],
+        },
+      };
+
+      const template = protocolTemplates[goal] || protocolTemplates.beginner;
+
+      // Check if protocol already exists
+      const { data: existingProtocol } = await supabase
+        .from('protocols')
+        .select('id')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
         .maybeSingle();
 
-      if (fetchError) {
-        console.error('Error fetching course:', fetchError);
-      }
+      if (!existingProtocol) {
+        const { error: protocolError } = await supabase
+          .from('protocols')
+          .insert({
+            user_id: user.id,
+            goal,
+            protocol_name: template.name,
+            peptides: template.peptides,
+            cycle_length_weeks: template.weeks,
+            status: 'not_started',
+            current_day: 0,
+            current_week: 1,
+          });
 
-      if (existingCourse) {
-        // Update the existing course with personalization
-        // Store personalization in the lessons JSON for now
-        const { error: updateError } = await supabase
-          .from('user_courses')
-          .update({
-            status: 'active',
-            started_at: new Date().toISOString()
-          })
-          .eq('id', existingCourse.id);
-
-        if (updateError) {
-          console.error('Error updating course:', updateError);
+        if (protocolError) {
+          console.error('Error creating protocol:', protocolError);
         }
       }
 
-      // Also save to quiz_responses for analytics
+      // 2. Create user_courses from course_template
+      const { data: existingCourse } = await supabase
+        .from('user_courses')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!existingCourse) {
+        const { data: courseTemplate } = await supabase
+          .from('course_templates')
+          .select('*')
+          .eq('goal', goal)
+          .maybeSingle();
+
+        if (courseTemplate) {
+          const { error: courseError } = await supabase
+            .from('user_courses')
+            .insert({
+              user_id: user.id,
+              template_id: courseTemplate.id,
+              goal: courseTemplate.goal,
+              title: courseTemplate.title,
+              peptides: courseTemplate.peptides,
+              duration_days: courseTemplate.duration_days,
+              lessons: courseTemplate.lessons,
+              current_day: 0,
+              status: 'not_started',
+              purchased_at: new Date().toISOString(),
+            });
+
+          if (courseError) {
+            console.error('Error creating user_course:', courseError);
+          }
+        } else {
+          // Fallback: create a basic course if no template exists
+          const { error: courseError } = await supabase
+            .from('user_courses')
+            .insert({
+              user_id: user.id,
+              goal,
+              title: template.name,
+              peptides: template.peptides,
+              duration_days: template.weeks * 7,
+              lessons: [],
+              current_day: 0,
+              status: 'not_started',
+              purchased_at: new Date().toISOString(),
+            });
+
+          if (courseError) {
+            console.error('Error creating fallback user_course:', courseError);
+          }
+        }
+      }
+
+      // 3. Save to quiz_responses for analytics
       await supabase
         .from('quiz_responses')
         .insert({
