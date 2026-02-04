@@ -66,6 +66,11 @@ export function Navbar() {
                   Sign In
                 </PillButton>
               </Link>
+              <Link to="/guides">
+                <PillButton variant="light">
+                  Our Studies
+                </PillButton>
+              </Link>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="flex items-center"
@@ -123,6 +128,7 @@ export function Navbar() {
                 { label: "How It Works", href: "#how-it-works" },
                 { label: "Pricing", href: "#pricing" },
                 { label: "FAQ", href: "#faq" },
+                { label: "Our Studies", href: "/guides" },
               ].map((link, index) => (
                 <a
                   key={link.label}
