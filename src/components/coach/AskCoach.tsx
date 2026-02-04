@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -6,6 +6,10 @@ import { Send, User } from "lucide-react";
 import { AnimatedLogo } from "@/components/brand/AnimatedLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourse } from "@/hooks/useCourse";
+import { useCheckIn } from "@/hooks/useCheckIn";
+import { useLessons } from "@/hooks/useLessons";
+import { useProtocol } from "@/hooks/useProtocol";
+import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
@@ -14,7 +18,17 @@ interface Message {
   content: string;
 }
 
+interface CheckInSummary {
+  date: string;
+  energy: number | null;
+  mood: number | null;
+  sleepQuality: number | null;
+  sideEffects: string[];
+  injectionDone: string | null;
+}
+
 interface UserContext {
+  // Course info
   courseTitle: string;
   goal: string;
   peptides: { name: string; purpose: string; dosage: string; frequency: string; timing: string }[];
@@ -26,10 +40,46 @@ interface UserContext {
   mainConcern: string | null;
   suppliesStatus: string | null;
   status: string | null;
+  
+  // Check-in insights (NEW)
+  checkInSummary: {
+    last7Days: CheckInSummary[];
+    averageEnergy: number | null;
+    averageMood: number | null;
+    averageSleep: number | null;
+    commonSideEffects: { effect: string; count: number }[];
+    hasCheckedInToday: boolean;
+    todayCheckIn: CheckInSummary | null;
+    checkInStreak: number;
+  };
+  
+  // Lesson progress (NEW)
+  lessonProgress: {
+    completedDays: number[];
+    totalCompleted: number;
+    completionRate: number;
+    lessonStreak: number;
+  };
+  
+  // Protocol info (NEW)
+  protocolInfo: {
+    protocolName: string | null;
+    protocolStatus: string | null;
+    protocolCurrentDay: number | null;
+    protocolCurrentWeek: number | null;
+  } | null;
+  
+  // Profile info (NEW)
+  profileStreak: number;
 }
 
 export function AskCoach() {
   const { userCourse } = useCourse();
+  const { recentCheckIns, todayCheckIn, hasCheckedInToday } = useCheckIn();
+  const { lessonProgress, completedDays, streak: lessonStreak } = useLessons(userCourse?.id);
+  const { protocol } = useProtocol();
+  const { data: profile } = useProfile();
+  
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +91,92 @@ export function AskCoach() {
     }
   }, [messages]);
 
-  // Build user context from course data
+  // Calculate check-in insights from recent data
+  const checkInInsights = useMemo(() => {
+    const last7 = (recentCheckIns || []).slice(0, 7);
+    
+    // Calculate averages
+    const energyValues = last7.filter(c => c.energy_level !== null).map(c => c.energy_level!);
+    const moodValues = last7.filter(c => c.mood !== null).map(c => c.mood!);
+    const sleepValues = last7.filter(c => c.sleep_quality !== null).map(c => c.sleep_quality!);
+    
+    const averageEnergy = energyValues.length > 0 
+      ? Math.round((energyValues.reduce((a, b) => a + b, 0) / energyValues.length) * 10) / 10 
+      : null;
+    const averageMood = moodValues.length > 0 
+      ? Math.round((moodValues.reduce((a, b) => a + b, 0) / moodValues.length) * 10) / 10 
+      : null;
+    const averageSleep = sleepValues.length > 0 
+      ? Math.round((sleepValues.reduce((a, b) => a + b, 0) / sleepValues.length) * 10) / 10 
+      : null;
+    
+    // Count side effects
+    const sideEffectCounts: Record<string, number> = {};
+    last7.forEach(checkIn => {
+      (checkIn.side_effects || []).forEach(effect => {
+        sideEffectCounts[effect] = (sideEffectCounts[effect] || 0) + 1;
+      });
+    });
+    
+    const commonSideEffects = Object.entries(sideEffectCounts)
+      .map(([effect, count]) => ({ effect, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+    
+    // Calculate check-in streak
+    let checkInStreak = 0;
+    const sortedCheckIns = [...(recentCheckIns || [])].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    for (const checkIn of sortedCheckIns) {
+      if (checkIn.completed) {
+        checkInStreak++;
+      } else {
+        break;
+      }
+    }
+    
+    return {
+      last7Days: last7.map(c => ({
+        date: c.date,
+        energy: c.energy_level,
+        mood: c.mood,
+        sleepQuality: c.sleep_quality,
+        sideEffects: c.side_effects || [],
+        injectionDone: c.injection_done,
+      })),
+      averageEnergy,
+      averageMood,
+      averageSleep,
+      commonSideEffects,
+      hasCheckedInToday,
+      todayCheckIn: todayCheckIn ? {
+        date: todayCheckIn.date,
+        energy: todayCheckIn.energy_level,
+        mood: todayCheckIn.mood,
+        sleepQuality: todayCheckIn.sleep_quality,
+        sideEffects: todayCheckIn.side_effects || [],
+        injectionDone: todayCheckIn.injection_done,
+      } : null,
+      checkInStreak,
+    };
+  }, [recentCheckIns, todayCheckIn, hasCheckedInToday]);
+
+  // Calculate lesson progress insights
+  const lessonInsights = useMemo(() => {
+    const completed = lessonProgress?.filter(l => l.completed).map(l => l.day) || [];
+    const totalDays = userCourse?.duration_days || 0;
+    const completionRate = totalDays > 0 ? Math.round((completed.length / totalDays) * 100) : 0;
+    
+    return {
+      completedDays: completed,
+      totalCompleted: completed.length,
+      completionRate,
+      lessonStreak,
+    };
+  }, [lessonProgress, userCourse?.duration_days, lessonStreak]);
+
+  // Build comprehensive user context
   const buildUserContext = (): UserContext | null => {
     if (!userCourse) return null;
 
@@ -63,6 +198,7 @@ export function AskCoach() {
     const currentWeek = Math.ceil((userCourse.current_day || 1) / 7);
 
     return {
+      // Course info
       courseTitle: userCourse.title,
       goal: userCourse.goal,
       peptides: userCourse.peptides.map(p => ({
@@ -80,6 +216,23 @@ export function AskCoach() {
       mainConcern,
       suppliesStatus: userCourse.supplies_status,
       status: userCourse.status,
+      
+      // Check-in insights
+      checkInSummary: checkInInsights,
+      
+      // Lesson progress
+      lessonProgress: lessonInsights,
+      
+      // Protocol info
+      protocolInfo: protocol ? {
+        protocolName: protocol.protocol_name,
+        protocolStatus: protocol.status,
+        protocolCurrentDay: protocol.current_day,
+        protocolCurrentWeek: protocol.current_week,
+      } : null,
+      
+      // Profile streak
+      profileStreak: profile?.current_streak || 0,
     };
   };
 
