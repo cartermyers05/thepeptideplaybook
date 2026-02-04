@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Clock, ArrowRight, BookOpen } from "lucide-react";
+import { Clock, ArrowRight, BookOpen, FlaskConical, Syringe, MessageCircle } from "lucide-react";
 
 interface Lesson {
   day: number;
@@ -16,6 +16,10 @@ interface TodayLessonCardProps {
 }
 
 export function TodayLessonCard({ lesson, currentDay, hasCompletedToday }: TodayLessonCardProps) {
+  // Show contextual guide links based on current day
+  const showReconGuide = currentDay >= 3 && currentDay <= 5;
+  const showInjectionGuide = currentDay >= 4 && currentDay <= 7;
+
   if (!lesson) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -36,12 +40,10 @@ export function TodayLessonCard({ lesson, currentDay, hasCompletedToday }: Today
     );
   }
 
-  // Get preview text from content
   const preview = lesson.content?.slice(0, 140) || '';
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      {/* Coral gradient top bar */}
       <div className="h-1 bg-gradient-to-r from-rose-300 to-rose-400" />
       
       <div className="p-6">
@@ -55,9 +57,40 @@ export function TodayLessonCard({ lesson, currentDay, hasCompletedToday }: Today
         <h2 className="text-2xl font-bold text-black mb-2">
           {lesson.title}
         </h2>
-        <p className="text-gray-500 mb-6 line-clamp-2">
+        <p className="text-gray-500 mb-4 line-clamp-2">
           {preview}...
         </p>
+
+        {/* Contextual quick links */}
+        {(showReconGuide || showInjectionGuide) && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {showReconGuide && (
+              <Link
+                to="/dashboard/plan"
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+              >
+                <FlaskConical className="w-3 h-3" />
+                Reconstitution Guide
+              </Link>
+            )}
+            {showInjectionGuide && (
+              <Link
+                to="/dashboard/plan"
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-pink-50 text-pink-600 hover:bg-pink-100 transition-colors"
+              >
+                <Syringe className="w-3 h-3" />
+                Injection Guide
+              </Link>
+            )}
+            <Link
+              to="/dashboard/coach"
+              className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+            >
+              <MessageCircle className="w-3 h-3" />
+              Ask AI Coach
+            </Link>
+          </div>
+        )}
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-gray-400">
