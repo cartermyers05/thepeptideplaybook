@@ -295,9 +295,10 @@ export default function Signup() {
               Everything peptides, one place
             </h2>
             <div 
-              className="h-1 w-full rounded-full"
+              className="h-1 w-full rounded-full animate-shimmer"
               style={{
-                background: "linear-gradient(90deg, hsl(45, 80%, 50%), hsl(25, 90%, 55%), hsl(350, 80%, 55%), hsl(270, 70%, 55%), hsl(210, 80%, 55%), hsl(160, 70%, 45%))"
+                background: "linear-gradient(90deg, hsl(45, 80%, 50%), hsl(25, 90%, 55%), hsl(350, 80%, 55%), hsl(270, 70%, 55%), hsl(210, 80%, 55%), hsl(160, 70%, 45%), hsl(45, 80%, 50%), hsl(25, 90%, 55%), hsl(350, 80%, 55%))",
+                backgroundSize: "200% 100%"
               }}
             />
           </div>
