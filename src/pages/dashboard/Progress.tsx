@@ -1,22 +1,19 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { useStreak } from "@/hooks/useStreak";
 import { useCheckIn } from "@/hooks/useCheckIn";
-import { useMilestones, MILESTONE_DETAILS, MilestoneType } from "@/hooks/useMilestones";
+import { useMilestones } from "@/hooks/useMilestones";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StreakCalendar } from "@/components/progress/StreakCalendar";
 import { AchievementGrid } from "@/components/progress/AchievementGrid";
 import { TrendCharts } from "@/components/progress/TrendCharts";
-import { Flame, Trophy, Calendar, TrendingUp } from "lucide-react";
+import { Trophy, Calendar, TrendingUp } from "lucide-react";
 
 export default function Progress() {
-  const { currentStreak, longestStreak, isLoading: isLoadingStreak } = useStreak();
   const { allCheckIns, isLoadingAll } = useCheckIn();
   const { milestones, isLoading: isLoadingMilestones } = useMilestones();
 
   const totalCheckIns = allCheckIns?.length || 0;
 
-  if (isLoadingStreak || isLoadingMilestones) {
+  if (isLoadingMilestones) {
     return (
       <DashboardLayout>
         <div className="space-y-6">
@@ -36,39 +33,20 @@ export default function Progress() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           <StatCard
-            icon={<Flame className="w-5 h-5 text-destructive" />}
-            label="Current Streak"
-            value={`${currentStreak} days`}
-            sublabel="Keep it going!"
+            icon={<Calendar className="w-5 h-5 text-primary" />}
+            label="Days Active"
+            value={`${totalCheckIns}`}
+            sublabel="Total check-ins"
           />
           <StatCard
             icon={<Trophy className="w-5 h-5 text-accent-foreground" />}
-            label="Longest Streak"
-            value={`${longestStreak} days`}
-            sublabel="Personal best"
-          />
-          <StatCard
-            icon={<Calendar className="w-5 h-5 text-primary" />}
-            label="Total Check-Ins"
-            value={`${totalCheckIns}`}
-            sublabel="All-time"
+            label="Achievements"
+            value={`${milestones.length}`}
+            sublabel="Milestones earned"
           />
         </div>
-
-        {/* Streak Calendar */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              Streak Calendar
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <StreakCalendar checkIns={allCheckIns || []} />
-          </CardContent>
-        </Card>
 
         {/* Trend Charts */}
         {(allCheckIns?.length || 0) > 1 && (

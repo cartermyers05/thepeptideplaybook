@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Flame, ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useProtocol } from "@/hooks/useProtocol";
-import { useStreak } from "@/hooks/useStreak";
 import { useCheckIn } from "@/hooks/useCheckIn";
 import { useCourse } from "@/hooks/useCourse";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,7 +34,6 @@ export default function Dashboard() {
   const { data: profile } = useProfile();
   const { protocol, isLoading: isLoadingProtocol } = useProtocol();
   const { userCourse, courseLoading, progressPercent } = useCourse();
-  const { currentStreak } = useStreak();
   const { hasCheckedInToday } = useCheckIn();
   const [showCheckIn, setShowCheckIn] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -116,23 +114,14 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-up">
-        {/* Header with Streak */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black mb-1">
-              {getGreeting()}, {displayName}
-            </h1>
-            <p className="text-gray-500">
-              Day {currentDay} of {totalDays} · {courseTitle.replace(' Course', '')}
-            </p>
-          </div>
-          
-          {currentStreak > 0 && (
-            <div className="flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-full self-start">
-              <Flame className="w-4 h-4" />
-              <span className="font-semibold">{currentStreak} day streak</span>
-            </div>
-          )}
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black mb-1">
+            {getGreeting()}, {displayName}
+          </h1>
+          <p className="text-gray-500">
+            Day {currentDay} of {totalDays} · {courseTitle.replace(' Course', '')}
+          </p>
         </div>
 
         {/* Checked in success state */}
@@ -144,7 +133,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="font-medium text-green-700">Today's Check-In Complete</p>
-                <p className="text-sm text-green-600">Come back tomorrow to continue your streak</p>
+                <p className="text-sm text-green-600">Great job! See you tomorrow.</p>
               </div>
             </div>
           </div>

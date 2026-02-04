@@ -4,10 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCheckIn, CheckInData } from "@/hooks/useCheckIn";
-import { useStreak } from "@/hooks/useStreak";
 import { useMilestones } from "@/hooks/useMilestones";
 import { useProtocol } from "@/hooks/useProtocol";
-import { Check, Loader2, PartyPopper, Flame } from "lucide-react";
+import { Check, Loader2, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -32,8 +31,7 @@ interface CheckInFlowProps {
 
 export function CheckInFlow({ onComplete }: CheckInFlowProps) {
   const { protocol } = useProtocol();
-  const { hasCheckedInToday, submitCheckIn, todayCheckIn } = useCheckIn();
-  const { updateStreak, currentStreak } = useStreak();
+  const { hasCheckedInToday, submitCheckIn } = useCheckIn();
   const { awardMilestone, hasMilestone } = useMilestones();
 
   const [step, setStep] = useState<Step>("injection");
@@ -59,24 +57,9 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
         },
       });
 
-      // Update streak
-      await updateStreak.mutateAsync();
-
       // Check for first check-in milestone
       if (!hasMilestone("first_checkin")) {
         await awardMilestone.mutateAsync("first_checkin");
-      }
-
-      // Check streak milestones
-      const newStreak = currentStreak + 1;
-      if (newStreak >= 7 && !hasMilestone("streak_7")) {
-        await awardMilestone.mutateAsync("streak_7");
-      }
-      if (newStreak >= 14 && !hasMilestone("streak_14")) {
-        await awardMilestone.mutateAsync("streak_14");
-      }
-      if (newStreak >= 30 && !hasMilestone("streak_30")) {
-        await awardMilestone.mutateAsync("streak_30");
       }
 
       setStep("complete");
@@ -96,13 +79,9 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
               <Check className="w-8 h-8 text-primary" />
             </div>
             <h2 className="text-xl font-semibold mb-2">Already Checked In Today!</h2>
-            <p className="text-muted-foreground mb-4">
-              Great job! You've logged today's check-in. Come back tomorrow to continue your streak.
+            <p className="text-muted-foreground">
+              Great job! You've logged today's check-in. See you tomorrow.
             </p>
-            <div className="flex items-center gap-2 text-lg">
-              <Flame className="w-5 h-5 text-orange-500" />
-              <span className="font-medium">{currentStreak}-day streak</span>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -126,13 +105,9 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
               <PartyPopper className="w-16 h-16 text-primary mb-4" />
             </motion.div>
             <h2 className="text-2xl font-semibold mb-2">Check-In Complete!</h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground">
               You're building great habits. Keep it up!
             </p>
-            <div className="flex items-center gap-2 text-2xl font-bold text-primary">
-              <Flame className="w-6 h-6 text-orange-500" />
-              <span>{currentStreak + 1}-day streak</span>
-            </div>
           </motion.div>
         </CardContent>
       </Card>
