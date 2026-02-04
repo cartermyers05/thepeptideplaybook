@@ -23,6 +23,19 @@ const itemVariants = {
   },
 };
 
+const lineVariants = {
+  hidden: { opacity: 0, x: -30 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { 
+      delay: i * 0.15, 
+      duration: 0.6, 
+      ease: "easeOut" as const 
+    },
+  }),
+};
+
 export function HeroSection() {
   return (
     <section className="relative min-h-screen pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
@@ -35,14 +48,19 @@ export function HeroSection() {
             animate="visible"
           >
             <motion.h1
-              variants={itemVariants}
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]"
+              initial="hidden"
+              animate="visible"
             >
-              Your
-              <br />
-              AI Peptide
-              <br />
-              Journey
+              <motion.span variants={lineVariants} custom={0} className="block">
+                Your
+              </motion.span>
+              <motion.span variants={lineVariants} custom={1} className="block">
+                AI Peptide
+              </motion.span>
+              <motion.span variants={lineVariants} custom={2} className="block">
+                Journey
+              </motion.span>
             </motion.h1>
 
             <motion.p
