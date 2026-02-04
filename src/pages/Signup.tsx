@@ -295,7 +295,7 @@ export default function Signup() {
               Everything peptides, one place
             </h2>
             <div 
-              className="h-1 w-24 mx-auto rounded-full"
+              className="h-1 w-full rounded-full"
               style={{
                 background: "linear-gradient(90deg, hsl(45, 80%, 50%), hsl(25, 90%, 55%), hsl(350, 80%, 55%), hsl(270, 70%, 55%), hsl(210, 80%, 55%), hsl(160, 70%, 45%))"
               }}
