@@ -54,6 +54,7 @@ export function ConversationalQuiz() {
   const [input, setInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -75,9 +76,7 @@ export function ConversationalQuiz() {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // Focus input after AI responds
@@ -197,6 +196,7 @@ export function ConversationalQuiz() {
               {error}
             </motion.div>
           )}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
