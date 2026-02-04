@@ -1,132 +1,175 @@
 
-# Fix Goal Cards to Link to Quiz (Demo Flow)
+# Standardize All Pricing to $67 with Early Access Messaging
 
-## Problem Summary
+## Audit Summary
 
-Currently, the "Pick Your Goal" cards on the landing page:
-1. Say "Start Course" (implies immediate access)
-2. Link directly to `/course/{goal}` (CoursePreview page)
-3. Bypass the conversational quiz entirely
-4. Show a purchase-ready preview without any personalization
-
-This breaks the intended user journey:
-- **Intended:** Landing → Quiz → Preview → Auth → Checkout
-- **Current:** Landing → Preview → Checkout (broken, no auth)
+I found pricing references across multiple files. Some already show $67 correctly, but several still show old subscription pricing ($29/mo) or need the "early access" urgency messaging added.
 
 ---
 
-## Solution Overview
+## Files Requiring Updates
 
-Reframe the goal cards as the **entry point to the quiz**, not the course preview. When users click a goal, they should enter the quiz flow with that goal pre-selected.
+### 1. ComparisonSection.tsx (HIGH PRIORITY)
 
----
+**Location:** `src/components/landing/ComparisonSection.tsx`
 
-## Changes Required
+**Issues:**
+- Line 8: Shows `$29/month` instead of `$67`
+- Line 54: Headline says "Why pay $2,000 when you can pay $29?"
 
-### 1. Update GoalSelectionSection.tsx
-
-**File:** `src/components/landing/GoalSelectionSection.tsx`
-
-| Current | Updated |
-|---------|---------|
-| Links to `/course/{goal}` | Links to `/quiz?goal={goal}` |
-| "Start Course" text | "See Your Course" or "Preview" text |
-
+**Changes:**
 ```typescript
-// Change from:
-<Link to={`/course/${goal.id}`}>
+// Line 8: Update price in comparison data
+us: "$67 one-time",
 
-// Change to:
-<Link to={`/quiz?goal=${goal.id}`}>
+// Line 39: Update refund row
+us: "30-day refund",  // Instead of "Cancel anytime"
 
-// Change CTA text from:
-<span>Start Course</span>
-
-// Change to:
-<span>See Your Course</span>
+// Line 54: Update headline
+"Why pay $2,000 when you can pay $67?"
 ```
 
 ---
 
-### 2. Update Quiz to Accept Pre-Selected Goal
+### 2. QuizResults.tsx (HIGH PRIORITY)
 
-**File:** `src/components/quiz/ConversationalQuiz.tsx`
+**Location:** `src/pages/QuizResults.tsx`
 
-Read the `goal` query parameter and:
-- Skip the goal selection step if already provided
-- Pre-fill the goal value
-- Jump to experience level question
+**Issues:**
+- Line 278: Still shows `$29/month` in value stack
 
+**Changes:**
 ```typescript
-// Read from URL params
-const [searchParams] = useSearchParams();
-const preSelectedGoal = searchParams.get('goal');
-
-// If goal provided, skip to next step
-useEffect(() => {
-  if (preSelectedGoal) {
-    // Set the goal value and advance to next question
-    setExtractedValues(prev => ({ ...prev, goal: preSelectedGoal }));
-    // Skip the goal question in the flow
-  }
-}, [preSelectedGoal]);
+// Line 276-279: Update "Your price" section
+<div className="flex items-center justify-between text-primary mt-2">
+  <span className="font-medium">Your price:</span>
+  <span className="font-bold text-xl">$67</span>
+</div>
+<p className="text-xs text-muted-foreground mt-2">
+  Early access pricing. Going to $99 soon.
+</p>
 ```
 
 ---
 
-### 3. Update Section Copy (Optional Enhancement)
+### 3. PricingCTA.tsx (ADD URGENCY)
 
-**File:** `src/components/landing/GoalSelectionSection.tsx`
+**Location:** `src/components/landing/PricingCTA.tsx`
 
-Update the section description to reinforce the preview/demo nature:
+**Current:** Shows $67 correctly but missing early access messaging
 
+**Changes:**
 ```typescript
-// Current:
-<p>Choose what matters most to you, and we'll build your personalized course.</p>
-
-// Updated:
-<p>Choose what matters most to you. We'll show you exactly what your personalized course looks like.</p>
+// After line 53-54, add early access badge
+<div className="mb-8">
+  <span className="inline-block text-xs font-medium bg-primary/10 text-primary px-2.5 py-1 rounded-full mb-3">
+    Early Access Pricing
+  </span>
+  <div className="flex items-baseline gap-2">
+    <span className="text-6xl md:text-7xl font-bold">$67</span>
+    <span className="text-muted-foreground text-lg">one-time</span>
+  </div>
+  <p className="mt-2 text-sm text-muted-foreground">
+    <span className="line-through opacity-60">$99</span> — Price increases soon
+  </p>
+</div>
 ```
 
 ---
 
-## Flow After Fix
+### 4. CoursePreview.tsx (ADD URGENCY)
 
-```text
-User clicks "Build Muscle" card
-        ↓
-/quiz?goal=muscle (goal pre-selected)
-        ↓
-Quiz asks: Experience level, concerns, timeline
-        ↓
-BuildingAnimation (shows "building" steps)
-        ↓
-/course/muscle (CoursePreview - now feels earned)
-        ↓
-"Get Your Course — $67" → Requires login → Checkout
+**Location:** `src/pages/CoursePreview.tsx`
+
+**Current:** Shows $67 correctly, needs early access messaging
+
+**Changes (around line 294):**
+```typescript
+"Get Your Course — $67"
+
+// Add after the button (line 297-299):
+<p className="mt-4 text-sm text-muted-foreground">
+  <span className="text-primary font-medium">Early access pricing.</span> Going to $99 soon.
+</p>
+<p className="text-xs text-muted-foreground mt-1">
+  One-time purchase. Lifetime access. 30-day money-back guarantee.
+</p>
 ```
 
 ---
 
-## Technical Notes
+### 5. Checkout.tsx (ADD URGENCY)
 
-- The quiz stores responses in localStorage for the preview page
-- CoursePreview already handles the goal parameter correctly
-- No backend changes needed
-- The goal ID format matches between landing cards and quiz (`fat-loss`, `muscle`, etc.)
+**Location:** `src/pages/Checkout.tsx`
+
+**Current:** Shows $67 correctly, needs early access messaging
+
+**Changes (around line 140-142):**
+```typescript
+<div className="mb-6">
+  <p className="text-xs text-primary font-medium mb-1">Early Access Pricing</p>
+  <h1 className="text-xl font-semibold mb-1">Complete Your Purchase</h1>
+  <p className="text-sm text-muted-foreground">
+    One-time payment: <span className="line-through opacity-60">$99</span> $67
+  </p>
+</div>
+```
 
 ---
 
-## Files to Modify
+### 6. UpgradePrompt.tsx (ADD URGENCY)
 
-1. `src/components/landing/GoalSelectionSection.tsx` - Update links and CTA text
-2. `src/components/quiz/ConversationalQuiz.tsx` - Accept pre-selected goal from URL
+**Location:** `src/components/dashboard/UpgradePrompt.tsx`
+
+**Current:** Shows $67 correctly, needs early access messaging
+
+**Changes:**
+```typescript
+<p className="text-muted-foreground max-w-md mb-4">
+  Get full access to {feature.toLowerCase()} and all other features.
+</p>
+<p className="text-sm text-primary font-medium mb-4">
+  Early access: $67 <span className="line-through opacity-60 text-muted-foreground">$99</span>
+</p>
+
+<Button asChild size="lg" className="btn-primary-clean">
+  <Link to="/checkout">
+    Unlock Now — $67
+  </Link>
+</Button>
+```
 
 ---
 
-## Expected Outcome
+### 7. ProblemSection.tsx (OPTIONAL)
 
-- Goal cards feel like a preview/demo, not a purchase commitment
-- Users go through personalization before seeing the course
-- The "building your course" animation feels earned after answering questions
-- Clear authentication gate before checkout
+**Location:** `src/components/landing/ProblemSection.tsx`
+
+**Current:** Line 7 mentions "$2,000" for competitor courses — this is fine (it's about competitors, not us)
+
+**No change needed** — keeping this creates contrast with our $67 price
+
+---
+
+## Summary of All Changes
+
+| File | Current | Updated |
+|------|---------|---------|
+| ComparisonSection.tsx | $29/month | $67 one-time |
+| QuizResults.tsx | $29/month | $67 + early access |
+| PricingCTA.tsx | $67 (no urgency) | $67 + early access badge + $99 strikethrough |
+| CoursePreview.tsx | $67 (no urgency) | $67 + early access messaging |
+| Checkout.tsx | $67 (no urgency) | $67 + early access + $99 strikethrough |
+| UpgradePrompt.tsx | $67 (no urgency) | $67 + early access + $99 strikethrough |
+
+---
+
+## Consistent Messaging Pattern
+
+All pricing displays will follow this pattern:
+1. **Early Access** badge or label (visual urgency)
+2. **$67** as the current price (prominent)
+3. **$99** strikethrough (anchors value, creates urgency)
+4. **"Going to $99 soon"** or similar (deadline implication)
+
+This creates FOMO without requiring an actual countdown timer.
