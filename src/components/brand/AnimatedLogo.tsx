@@ -3,9 +3,10 @@ import { motion } from "framer-motion";
 interface AnimatedLogoProps {
   size?: number;
   className?: string;
+  animate?: boolean;
 }
 
-export function AnimatedLogo({ size = 40, className }: AnimatedLogoProps) {
+export function AnimatedLogo({ size = 40, className, animate = true }: AnimatedLogoProps) {
   const gradientId = `animated-rainbow-${size}`;
   const fillId = `animated-fill-${size}`;
 
@@ -17,12 +18,12 @@ export function AnimatedLogo({ size = 40, className }: AnimatedLogoProps) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      animate={{ rotate: 360 }}
-      transition={{ 
+      animate={animate ? { rotate: 360 } : { rotate: 0 }}
+      transition={animate ? { 
         duration: 20, 
         repeat: Infinity, 
         ease: "linear" 
-      }}
+      } : undefined}
     >
       <defs>
         <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -53,8 +54,8 @@ export function AnimatedLogo({ size = 40, className }: AnimatedLogoProps) {
         cy="16"
         r="3"
         fill={`url(#${gradientId})`}
-        animate={{ scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        animate={animate ? { scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8] } : { scale: 1, opacity: 1 }}
+        transition={animate ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : undefined}
       />
 
       {/* Connection lines */}
@@ -69,20 +70,20 @@ export function AnimatedLogo({ size = 40, className }: AnimatedLogoProps) {
       <motion.circle
         cx="16" cy="7" r="2"
         fill="hsl(45, 80%, 50%)"
-        animate={{ opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+        animate={animate ? { opacity: [0.7, 1, 0.7] } : { opacity: 1 }}
+        transition={animate ? { duration: 1.5, repeat: Infinity, delay: 0 } : undefined}
       />
       <motion.circle
         cx="23" cy="20" r="2"
         fill="hsl(270, 70%, 55%)"
-        animate={{ opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+        animate={animate ? { opacity: [0.7, 1, 0.7] } : { opacity: 1 }}
+        transition={animate ? { duration: 1.5, repeat: Infinity, delay: 0.5 } : undefined}
       />
       <motion.circle
         cx="9" cy="20" r="2"
         fill="hsl(160, 70%, 45%)"
-        animate={{ opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
+        animate={animate ? { opacity: [0.7, 1, 0.7] } : { opacity: 1 }}
+        transition={animate ? { duration: 1.5, repeat: Infinity, delay: 1 } : undefined}
       />
     </motion.svg>
   );
