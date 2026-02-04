@@ -93,22 +93,22 @@ export function ProductPreview() {
         >
           <div className="glass-card p-8 glow-border shadow-glow relative overflow-hidden">
             {/* Gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-br from-muted/50 via-transparent to-muted/80 pointer-events-none" />
             
             <div className="relative grid md:grid-cols-2 gap-8 items-center">
               <div>
                 <div className="flex items-center gap-3 mb-4">
                   <motion.div 
-                    className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center"
+                    className="w-14 h-14 rounded-xl bg-foreground flex items-center justify-center"
                     whileHover={{ scale: 1.1, rotate: 5 }}
                     transition={{ type: "spring", stiffness: 400 }}
                   >
-                    <span className="text-lg font-bold text-primary-foreground">PP</span>
+                    <span className="text-lg font-bold text-background">PP</span>
                   </motion.div>
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-xl font-semibold">AI Research Assistant</h3>
-                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-xs font-medium text-primary">Featured</span>
+                      <span className="px-2 py-0.5 rounded-full bg-muted text-xs font-medium text-muted-foreground">Featured</span>
                     </div>
                     <p className="text-sm text-muted-foreground">The core of Peptide Playbook AI</p>
                   </div>
@@ -130,7 +130,7 @@ export function ProductPreview() {
                       transition={{ delay: 0.1 * index }}
                       className="flex items-center gap-2 text-sm"
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground flex-shrink-0" />
                       <span>{feature}</span>
                     </motion.li>
                   ))}
@@ -192,11 +192,11 @@ export function ProductPreview() {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <motion.div 
-                className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-muted transition-colors"
+                className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-5 group-hover:bg-muted/80 transition-colors"
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 400 }}
               >
-                <span className="text-sm font-bold text-primary">{product.abbrev}</span>
+                <span className="text-sm font-bold text-foreground">{product.abbrev}</span>
               </motion.div>
               <h3 className="text-lg font-semibold mb-3 group-hover:text-foreground transition-colors">
                 {product.title}
@@ -204,7 +204,7 @@ export function ProductPreview() {
               <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                 {product.description}
               </p>
-              <p className="text-xs font-medium text-primary">{product.stats}</p>
+              <p className="text-xs font-medium text-muted-foreground">{product.stats}</p>
             </motion.div>
           ))}
         </motion.div>

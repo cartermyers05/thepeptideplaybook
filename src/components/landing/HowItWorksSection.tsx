@@ -133,7 +133,7 @@ export function HowItWorksSection() {
                       key={detailIndex} 
                       className="flex items-start gap-3 text-sm text-muted-foreground"
                     >
-                      <span className="mt-2 h-1 w-1 rounded-full bg-primary/60 shrink-0" />
+                      <span className="mt-2 h-1 w-1 rounded-full bg-muted-foreground/40 shrink-0" />
                       <span>{detail}</span>
                     </div>
                   ))}
