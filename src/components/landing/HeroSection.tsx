@@ -24,16 +24,45 @@ const itemVariants = {
 };
 
 const lineVariants = {
-  hidden: { opacity: 0, x: -30 },
+  hidden: { opacity: 0, x: -30, scale: 0.95 },
   visible: (i: number) => ({
     opacity: 1,
     x: 0,
+    scale: 1,
     transition: { 
       delay: i * 0.15, 
       duration: 0.6, 
       ease: "easeOut" as const 
     },
   }),
+};
+
+// Shimmer animation for the gradient text effect
+const shimmerVariants = {
+  initial: { backgroundPosition: "-200% 0" },
+  animate: { 
+    backgroundPosition: "200% 0",
+    transition: {
+      duration: 3,
+      ease: "easeInOut" as const,
+      repeat: Infinity,
+      repeatDelay: 2,
+    }
+  }
+};
+
+// Floating animation that starts after entrance
+const floatingVariants = {
+  initial: { y: 0 },
+  float: {
+    y: [-2, 2, -2],
+    transition: {
+      duration: 4,
+      ease: "easeInOut" as const,
+      repeat: Infinity,
+      delay: 1.5, // Wait for entrance animation
+    }
+  }
 };
 
 export function HeroSection() {
@@ -47,22 +76,51 @@ export function HeroSection() {
             initial="hidden"
             animate="visible"
           >
-            <motion.h1
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
+            <motion.div
+              variants={floatingVariants}
+              initial="initial"
+              animate="float"
             >
-              <motion.span variants={lineVariants} custom={0} className="block">
-                Your
-              </motion.span>
-              <motion.span variants={lineVariants} custom={1} className="block">
-                AI Peptide
-              </motion.span>
-              <motion.span variants={lineVariants} custom={2} className="block">
-                Journey
-              </motion.span>
-            </motion.h1>
+              <motion.h1
+                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <motion.span variants={lineVariants} custom={0} className="block">
+                  Your
+                </motion.span>
+                <motion.span 
+                  variants={lineVariants} 
+                  custom={1} 
+                  className="block relative"
+                >
+                  {/* Base text */}
+                  <span className="relative">
+                    AI Peptide
+                    {/* Shimmer overlay */}
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent bg-[length:200%_100%] bg-clip-text"
+                      variants={shimmerVariants}
+                      initial="initial"
+                      animate="animate"
+                      style={{ 
+                        WebkitBackgroundClip: "text",
+                        mixBlendMode: "overlay"
+                      }}
+                      aria-hidden="true"
+                    />
+                  </span>
+                </motion.span>
+                <motion.span 
+                  variants={lineVariants} 
+                  custom={2} 
+                  className="block"
+                >
+                  Journey
+                </motion.span>
+              </motion.h1>
+            </motion.div>
 
             <motion.p
               variants={itemVariants}

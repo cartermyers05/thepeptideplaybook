@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Flame, Dumbbell, Heart, Clock, Brain, Compass } from "lucide-react";
+import { FloatingOrbs } from "./FloatingOrbs";
 
 const goals = [
   {
@@ -68,8 +69,13 @@ const itemVariants = {
 
 export function GoalSelectionSection() {
   return (
-    <section id="goals" className="py-32 md:py-40">
-      <div className="container px-4 md:px-8">
+    <section id="goals" className="relative py-32 md:py-40 overflow-hidden">
+      {/* Background floating orbs */}
+      <div className="absolute inset-0 pointer-events-none">
+        <FloatingOrbs variant="subtle" />
+      </div>
+      
+      <div className="container px-4 md:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
