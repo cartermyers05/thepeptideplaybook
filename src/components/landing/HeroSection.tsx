@@ -49,6 +49,7 @@ export function HeroSection() {
           >
             <motion.h1
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]"
+              variants={containerVariants}
               initial="hidden"
               animate="visible"
             >
