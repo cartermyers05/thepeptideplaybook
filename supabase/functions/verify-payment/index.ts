@@ -214,7 +214,7 @@ serve(async (req) => {
       lessons: template?.lessons || {},
       peptides: template?.peptides || {},
       template_id: template?.id || null,
-      status: 'pending_quiz', // Will be set to 'active' after quiz completion
+      status: 'not_started', // Quiz already happened, waiting for supplies check
       purchased_at: new Date().toISOString(),
     };
 

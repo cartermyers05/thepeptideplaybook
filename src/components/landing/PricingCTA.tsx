@@ -49,7 +49,7 @@ export function PricingCTA() {
               {/* Price */}
               <div className="mb-8">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-6xl md:text-7xl font-bold">$99</span>
+                  <span className="text-6xl md:text-7xl font-bold">$67</span>
                   <span className="text-muted-foreground text-lg">one-time</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">

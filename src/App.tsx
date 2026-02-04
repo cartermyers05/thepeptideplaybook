@@ -18,6 +18,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Disclaimer from "./pages/Disclaimer";
 import ThankYou from "./pages/ThankYou";
+import Welcome from "./pages/Welcome";
 import ArticleGenerator from "./pages/admin/ArticleGenerator";
 import CitationsDashboard from "./pages/admin/CitationsDashboard";
 import NewsDetail from "./pages/NewsDetail";
@@ -117,9 +118,12 @@ const App = () => (
             <Route path="/editorial-policy" element={<EditorialPolicy />} />
             <Route path="/partners" element={<Partners />} />
             
-            {/* Quiz flow */}
-            <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
+            {/* Quiz flow - open for all users */}
+            <Route path="/quiz" element={<Quiz />} />
             <Route path="/quiz/results" element={<QuizResults />} />
+            
+            {/* Welcome flow - after payment */}
+            <Route path="/welcome" element={<ProtectedRoute><Welcome /></ProtectedRoute>} />
             
             {/* Course preview (pre-purchase) */}
             <Route path="/course/:goal" element={<CoursePreview />} />

@@ -103,7 +103,7 @@ export function HeroSection() {
               variants={itemVariants}
               className="mt-6 text-sm text-muted-foreground"
             >
-              $99 one-time · Lifetime access · 30-day guarantee
+              $67 one-time · Lifetime access · 30-day guarantee
             </motion.p>
           </motion.div>
 

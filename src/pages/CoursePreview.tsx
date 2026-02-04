@@ -291,7 +291,7 @@ export default function CoursePreview() {
                             Processing...
                           </>
                         ) : (
-                          "Get Your Course — $99"
+                          "Get Your Course — $67"
                         )}
                       </Button>
                       <p className="mt-4 text-sm text-muted-foreground">
