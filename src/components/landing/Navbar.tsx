@@ -49,9 +49,14 @@ export function Navbar() {
             {/* Desktop nav - Right aligned controls */}
             <div className="hidden md:flex items-center gap-4">
               <span className="text-muted-foreground mx-2">—</span>
-              <Link to="/quiz">
+              <Link to="/signup">
                 <PillButton variant="dark" icon={<span className="text-xs">•</span>}>
-                  Start Course
+                  Sign Up
+                </PillButton>
+              </Link>
+              <Link to="/login">
+                <PillButton variant="light">
+                  Sign In
                 </PillButton>
               </Link>
               <button
@@ -126,15 +131,11 @@ export function Navbar() {
                 </a>
               ))}
               <div className="pt-8 flex gap-4">
-                <Link
-                  to="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Log In
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <PillButton variant="light">Sign In</PillButton>
                 </Link>
-                <Link to="/quiz" onClick={() => setIsMobileMenuOpen(false)}>
-                  <PillButton variant="dark">Start Course</PillButton>
+                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                  <PillButton variant="dark">Sign Up</PillButton>
                 </Link>
               </div>
             </nav>
