@@ -144,6 +144,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [verifyPaymentStatus, redeemPendingPromoCode]);
 
   const signOut = async () => {
+    // Clear all React Query caches to prevent stale data after logout
+    queryClient.clear();
+    
+    // Clear any localStorage items that might persist purchase state
+    localStorage.removeItem('selectedCourseGoal');
+    
     await supabase.auth.signOut();
   };
 
