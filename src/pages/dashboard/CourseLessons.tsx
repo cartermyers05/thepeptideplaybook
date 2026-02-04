@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useCourse } from "@/hooks/useCourse";
 import { useLessons } from "@/hooks/useLessons";
+import { getGoalTheme } from "@/lib/goalThemes";
 
 interface Lesson {
   day: number;
@@ -19,6 +20,10 @@ interface Lesson {
 export default function CourseLessons() {
   const { userCourse, progressPercent, advanceDay } = useCourse();
   const { isDayCompleted, completeLesson } = useLessons(userCourse?.id);
+  
+  // Get goal-based theme
+  const goalTheme = getGoalTheme(userCourse?.goal);
+  const GoalIcon = goalTheme.Icon;
   
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set(['Preparation', 'Getting Started']));
@@ -77,8 +82,16 @@ export default function CourseLessons() {
       <div className="max-w-3xl mx-auto animate-fade-up">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black mb-2">{userCourse.title}</h1>
-          <p className="text-gray-500">
+          <div className="flex items-center gap-3 mb-2">
+            <div className={`w-10 h-10 rounded-xl ${goalTheme.iconBg} flex items-center justify-center`}>
+              <GoalIcon className={`w-5 h-5 ${goalTheme.iconColor}`} />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black">{userCourse.title}</h1>
+              <p className="text-gray-500 text-sm">{goalTheme.tagline}</p>
+            </div>
+          </div>
+          <p className="text-gray-500 mt-2">
             {userCourse.current_day} of {userCourse.duration_days} lessons complete
           </p>
         </div>
@@ -91,8 +104,11 @@ export default function CourseLessons() {
           </div>
           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-black rounded-full transition-all duration-500" 
-              style={{ width: `${progressPercent}%` }}
+              className="h-full rounded-full transition-all duration-500" 
+              style={{ 
+                width: `${progressPercent}%`,
+                background: `linear-gradient(to right, ${goalTheme.gradientFrom}, ${goalTheme.gradientTo})`
+              }}
             />
           </div>
         </div>
@@ -136,18 +152,21 @@ export default function CourseLessons() {
                             status === 'locked' 
                               ? 'opacity-50 cursor-not-allowed' 
                               : status === 'current'
-                                ? 'bg-gray-50 border-l-[3px] border-black'
+                                ? `${goalTheme.accentBg} border-l-[3px]`
                                 : status === 'completed'
                                   ? 'border-l-[3px] border-green-500'
                                   : 'hover:bg-gray-50'
                           }`}
+                          style={{
+                            borderLeftColor: status === 'current' ? goalTheme.progressColor : undefined
+                          }}
                         >
                           {/* Status icon */}
                           <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
                             status === 'completed' 
                               ? 'bg-green-100 text-green-600'
                               : status === 'current'
-                                ? 'bg-black text-white'
+                                ? `${goalTheme.iconBg} ${goalTheme.iconColor}`
                                 : 'bg-gray-100 text-gray-400'
                           }`}>
                             {status === 'completed' ? (
@@ -171,7 +190,10 @@ export default function CourseLessons() {
 
                           {/* Action */}
                           {status === 'current' && (
-                            <span className="text-xs font-medium bg-black text-white px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                            <span 
+                              className="text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 text-white"
+                              style={{ backgroundColor: goalTheme.progressColor }}
+                            >
                               Current
                             </span>
                           )}

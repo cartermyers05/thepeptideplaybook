@@ -12,6 +12,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckInFlow } from "@/components/coach/CheckInFlow";
 import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
+import { getGoalTheme } from "@/lib/goalThemes";
 
 // Dashboard components
 import { ProgressRing } from "@/components/dashboard/home/ProgressRing";
@@ -45,6 +46,10 @@ export default function Dashboard() {
   const totalDays = userCourse?.duration_days ?? 56;
   const courseTitle = userCourse?.title ?? 'Your Course';
   const currentWeek = Math.ceil((currentDay + 1) / 7);
+  
+  // Get goal-based theme
+  const goalTheme = getGoalTheme(userCourse?.goal);
+  const GoalIcon = goalTheme.Icon;
 
   // Get today's lesson
   const todayLesson = userCourse?.lessons?.find(
@@ -119,8 +124,12 @@ export default function Dashboard() {
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black mb-1">
             {getGreeting()}, {displayName}
           </h1>
-          <p className="text-gray-500">
-            Day {currentDay} of {totalDays} · {courseTitle.replace(' Course', '')}
+          <p className="text-gray-500 flex items-center gap-2">
+            Day {currentDay} of {totalDays} · 
+            <span className="inline-flex items-center gap-1.5">
+              <GoalIcon className={`w-4 h-4 ${goalTheme.iconColor}`} />
+              {goalTheme.tagline}
+            </span>
           </p>
         </div>
 
@@ -144,6 +153,7 @@ export default function Dashboard() {
           lesson={todayLesson} 
           currentDay={currentDay}
           hasCompletedToday={hasCheckedInToday}
+          goalTheme={goalTheme}
         />
 
         {/* Progress + Next Injection Row */}
@@ -155,7 +165,12 @@ export default function Dashboard() {
             </h3>
             
             <div className="flex items-center gap-6">
-              <ProgressRing percent={progressPercent} size={80} strokeWidth={6} />
+              <ProgressRing 
+                percent={progressPercent} 
+                size={80} 
+                strokeWidth={6} 
+                progressColor={goalTheme.progressColor}
+              />
               
               <div>
                 <p className="text-2xl font-bold text-black">{currentDay}</p>
@@ -165,7 +180,7 @@ export default function Dashboard() {
             
             <div className="mt-4 pt-4 border-t border-gray-100">
               <p className="text-sm text-gray-500">
-                Phase: <span className="font-medium text-black">{currentPhase}</span>
+                Phase: <span className={`font-medium ${goalTheme.accentText}`}>{currentPhase}</span>
               </p>
             </div>
           </div>
@@ -176,6 +191,7 @@ export default function Dashboard() {
             courseStartDate={userCourse?.started_at}
             currentWeek={currentWeek}
             courseStatus={userCourse?.status}
+            goalTheme={goalTheme}
           />
         </div>
 

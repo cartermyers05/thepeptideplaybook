@@ -5,13 +5,15 @@ interface ProgressRingProps {
   size?: number;
   strokeWidth?: number;
   className?: string;
+  progressColor?: string;
 }
 
 export function ProgressRing({ 
   percent, 
   size = 80, 
   strokeWidth = 6,
-  className 
+  className,
+  progressColor = "#000000"
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -40,12 +42,12 @@ export function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="currentColor"
+          stroke={progressColor}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
-          className="text-black transition-all duration-500 ease-out"
+          className="transition-all duration-500 ease-out"
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
