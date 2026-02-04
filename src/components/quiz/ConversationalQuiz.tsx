@@ -67,7 +67,7 @@ export function ConversationalQuiz() {
     getGoalLabel,
     getExperienceLabel,
     getConcernLabel,
-    getTimelineLabel,
+    getReadinessLabel,
     totalSteps
   } = useQuizChat();
 
@@ -117,7 +117,7 @@ export function ConversationalQuiz() {
         getGoalLabel={getGoalLabel}
         getExperienceLabel={getExperienceLabel}
         getConcernLabel={getConcernLabel}
-        getTimelineLabel={getTimelineLabel}
+        getReadinessLabel={getReadinessLabel}
         onComplete={handleBuildingComplete}
         isSubmitting={isSubmitting}
       />

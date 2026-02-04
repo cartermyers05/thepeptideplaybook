@@ -13,7 +13,7 @@ export interface ExtractedValues {
   goal: string | null;
   experience: string | null;
   concern: string | null;
-  timeline: string | null;
+  readiness: string | null;
 }
 
 interface QuizChatState {
@@ -25,37 +25,39 @@ interface QuizChatState {
   error: string | null;
 }
 
-const INITIAL_MESSAGE = `Hey! I'm going to personalize your course based on your needs. Let's start with your goals.
+const INITIAL_MESSAGE = `Hey! I'm here to help you build your personalized peptide course.
 
-What are you hoping peptides can help you with?`;
+I'll ask you a few questions to understand your goals, and then I'll create a custom program just for you.
+
+What's your main goal with peptides?`;
 
 const goalLabels: Record<string, string> = {
-  fat_loss: 'Fat Loss',
-  muscle: 'Muscle & Recovery',
+  fat_loss: 'Fat Loss & Metabolism',
+  muscle: 'Muscle Building & Recovery',
   recovery: 'Injury Recovery',
-  anti_aging: 'Anti-Aging',
+  anti_aging: 'Anti-Aging & Longevity',
   cognitive: 'Cognitive Enhancement',
-  beginner: 'Beginner Exploration'
+  beginner: 'Not Sure Yet'
 };
 
 const experienceLabels: Record<string, string> = {
-  beginner: 'Beginner',
-  some_experience: 'Some Experience',
+  never: 'Never Used',
+  researched: 'Researched Only',
   experienced: 'Experienced'
 };
 
 const concernLabels: Record<string, string> = {
-  injections: 'Injection Anxiety',
-  dosing: 'Dosing Concerns',
+  injection_fear: 'Injection Anxiety',
+  dosing_confusion: 'Dosing Confusion',
+  peptide_choice: 'Peptide Selection',
   side_effects: 'Side Effects',
-  reconstitution: 'Reconstitution',
-  nothing: 'No Concerns'
+  all: 'All Concerns'
 };
 
-const timelineLabels: Record<string, string> = {
-  this_week: 'This Week',
-  this_month: 'This Month',
-  researching: 'Still Researching'
+const readinessLabels: Record<string, string> = {
+  ready_now: 'Ready to Start ASAP',
+  soon: 'Planning in Weeks',
+  exploring: 'Just Exploring'
 };
 
 export function useQuizChat() {
@@ -70,7 +72,7 @@ export function useQuizChat() {
       goal: null,
       experience: null,
       concern: null,
-      timeline: null
+      readiness: null
     },
     currentStep: 0,
     isLoading: false,
@@ -172,13 +174,13 @@ export function useQuizChat() {
   const getGoalLabel = (goal: string | null) => goal ? goalLabels[goal] || goal : null;
   const getExperienceLabel = (exp: string | null) => exp ? experienceLabels[exp] || exp : null;
   const getConcernLabel = (concern: string | null) => concern ? concernLabels[concern] || concern : null;
-  const getTimelineLabel = (timeline: string | null) => timeline ? timelineLabels[timeline] || timeline : null;
+  const getReadinessLabel = (readiness: string | null) => readiness ? readinessLabels[readiness] || readiness : null;
 
   // Save quiz response - creates protocol and user_courses for new users
   const saveQuizResponse = useCallback(async () => {
-    const { goal, experience, concern, timeline } = state.extractedValues;
+    const { goal, experience, concern, readiness } = state.extractedValues;
     
-    if (!goal || !experience || !timeline) {
+    if (!goal || !experience || !readiness) {
       throw new Error('Quiz not complete');
     }
 
@@ -191,7 +193,7 @@ export function useQuizChat() {
       goal,
       experience,
       concern,
-      timeline
+      readiness
     };
     localStorage.setItem('quizResponse', JSON.stringify(quizData));
 
@@ -407,7 +409,7 @@ export function useQuizChat() {
           primary_goal: goal,
           experience_level: experience,
           main_concerns: concern ? [concern] : [],
-          timeline: timeline === 'this_week' ? 'ready_now' : timeline === 'this_month' ? 'soon' : 'researching',
+          timeline: readiness,
           completed_at: new Date().toISOString()
         });
 
@@ -431,7 +433,7 @@ export function useQuizChat() {
     getGoalLabel,
     getExperienceLabel,
     getConcernLabel,
-    getTimelineLabel,
+    getReadinessLabel,
     totalSteps: 4
   };
 }

@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Loader2, Bot, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useProtocol } from "@/hooks/useProtocol";
+import { useCourse } from "@/hooks/useCourse";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
@@ -15,12 +15,26 @@ interface Message {
   content: string;
 }
 
+interface UserContext {
+  courseTitle: string;
+  goal: string;
+  peptides: { name: string; purpose: string; dosage: string; frequency: string; timing: string }[];
+  currentDay: number;
+  totalDays: number;
+  currentWeek: number;
+  cycleLength: number;
+  experienceLevel: string | null;
+  mainConcern: string | null;
+  suppliesStatus: string | null;
+  status: string | null;
+}
+
 export function AskCoach() {
-  const { protocol } = useProtocol();
+  const { userCourse } = useCourse();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: `Hi! I'm your AI Coach. I'm here to answer any questions about your peptide protocol, dosing, timing, or anything else you're curious about. What can I help you with today?`,
+      content: `Hi! I'm your AI Coach. I'm here to answer any questions about your peptide course, dosing, timing, reconstitution, or anything else you're curious about. What can I help you with today?`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -33,6 +47,48 @@ export function AskCoach() {
     }
   }, [messages]);
 
+  // Build user context from course data
+  const buildUserContext = (): UserContext | null => {
+    if (!userCourse) return null;
+
+    // Try to get quiz response from localStorage for experience and concern
+    let experienceLevel = null;
+    let mainConcern = null;
+    try {
+      const quizData = localStorage.getItem('quizResponse');
+      if (quizData) {
+        const parsed = JSON.parse(quizData);
+        experienceLevel = parsed.experience;
+        mainConcern = parsed.concern;
+      }
+    } catch (e) {
+      // Ignore parsing errors
+    }
+
+    const weekCount = Math.ceil(userCourse.duration_days / 7);
+    const currentWeek = Math.ceil((userCourse.current_day || 1) / 7);
+
+    return {
+      courseTitle: userCourse.title,
+      goal: userCourse.goal,
+      peptides: userCourse.peptides.map(p => ({
+        name: p.name,
+        purpose: p.purpose,
+        dosage: p.dosing_research || '',
+        frequency: p.frequency,
+        timing: p.timing,
+      })),
+      currentDay: userCourse.current_day || 0,
+      totalDays: userCourse.duration_days,
+      currentWeek,
+      cycleLength: weekCount,
+      experienceLevel,
+      mainConcern,
+      suppliesStatus: userCourse.supplies_status,
+      status: userCourse.status,
+    };
+  };
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -42,18 +98,12 @@ export function AskCoach() {
     setIsLoading(true);
 
     try {
+      const userContext = buildUserContext();
+
       const { data, error } = await supabase.functions.invoke("coach", {
         body: {
           message: userMessage,
-          protocol: protocol
-            ? {
-                name: protocol.protocol_name,
-                peptides: protocol.peptides,
-                currentDay: protocol.current_day,
-                currentWeek: protocol.current_week,
-                cycleLength: protocol.cycle_length_weeks,
-              }
-            : null,
+          userContext,
         },
       });
 
