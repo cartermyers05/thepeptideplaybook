@@ -1,87 +1,139 @@
 
+# End-to-End Post-Purchase Flow Audit
 
-# Fix Checkout Page Loading Bug
+## Flow Verification Summary
 
-## Problem Identified
+I traced the complete user journey from quiz to dashboard and identified the following:
 
-The checkout page gets stuck in a perpetual loading state due to a bug in `useTier.ts`.
+### Working Components
+- **Quiz Flow**: Quiz → BuildingAnimation → navigates to `/course/{goal}` ✅
+- **Course Preview**: Shows correct template data with peptides and duration ✅
+- **Checkout Initiation**: CoursePreview passes `goal` to `create-checkout` edge function ✅
+- **Stripe Session**: Includes `goal` in metadata ✅
+- **Course Templates**: All 6 courses have full lesson content (42-60 days each) ✅
+- **Dashboard Pages**: `Home.tsx`, `CourseLessons.tsx`, `MyPlan.tsx` all correctly use `useCourse()` hook ✅
 
-**Root Cause:**
-```typescript
-const checkSubscription = useCallback(async () => {
-  if (!user) return;
-  
-  setIsCheckingSubscription(true);  // ← Sets to true
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) return;  // ← EARLY RETURN - skips finally block!
-    // ...
-  } finally {
-    setIsCheckingSubscription(false);  // ← Never reached on early return
-  }
-}, [user]);
-```
+### Issues Found
 
-When `getSession()` returns no session or access_token, the function returns early **before** the `finally` block executes, leaving `isCheckingSubscription` stuck as `true`.
-
-This causes `useTier.isLoading` to always be `true`, which keeps Checkout.tsx showing the loading spinner forever.
+| Issue | Severity | Location | Impact |
+|-------|----------|----------|--------|
+| Promo codes don't create courses | High | `redeem-promo-code` | VIP users have no course after redemption |
+| `/checkout` page missing goal | Medium | `Checkout.tsx` → `useCheckout.ts` | Users going directly to `/checkout` get "general" goal (no template) |
+| QuizResults shows old pricing | Low | `QuizResults.tsx` | Shows "$29/mo" instead of "$67 one-time" |
 
 ---
 
-## Solution
+## Issue 1: Promo Code Redemption Doesn't Create Course
 
-Fix the early return to properly reset the loading state:
+**Current Behavior:**
+- User enters promo code like `VIP2025`
+- `redeem-promo-code` upgrades user to `tier: "insider"`
+- User redirected to dashboard with **no course** assigned
 
-### File: `src/hooks/useTier.ts`
+**Impact:** VIP users see "No course found. Purchase a course to get started."
 
-**Change (lines 20-42):**
+**Fix:** After upgrading tier, create a default course (beginner) or prompt user to select a goal:
 
 ```typescript
-const checkSubscription = useCallback(async () => {
-  if (!user) return;
-  
-  setIsCheckingSubscription(true);
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) {
-      setIsCheckingSubscription(false);  // ← Reset before early return
-      return;
-    }
+// In redeem-promo-code, after upgrading tier:
+// Create a default beginner course for promo code users
+const { data: template } = await supabaseAdmin
+  .from("course_templates")
+  .select("*")
+  .eq("goal", "beginner")
+  .single();
 
-    const response = await supabase.functions.invoke("check-subscription", {
-      headers: {
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    });
-
-    if (response.data && !response.error) {
-      setSubscriptionStatus(response.data);
-    }
-  } catch (error) {
-    console.error("Error checking subscription:", error);
-  } finally {
-    setIsCheckingSubscription(false);
-  }
-}, [user]);
+if (template) {
+  await supabaseAdmin.from("user_courses").insert({
+    user_id: userId,
+    goal: "beginner",
+    title: template.title,
+    duration_days: template.duration_days,
+    lessons: template.lessons,
+    peptides: template.peptides,
+    template_id: template.id,
+    status: "not_started",
+    purchased_at: new Date().toISOString(),
+  });
+}
 ```
 
 ---
 
-## Technical Details
+## Issue 2: Direct /checkout Access Without Goal
 
-| Aspect | Current | Fixed |
-|--------|---------|-------|
-| Early return handling | Skips `finally` block | Explicitly resets state |
-| Loading state cleanup | Only in `finally` | Guaranteed in all paths |
-| User experience | Infinite loading | Proper checkout UI |
+**Current Behavior:**
+- User navigates directly to `/checkout` (not through quiz flow)
+- `Checkout.tsx` uses `useCheckout` which doesn't pass `goal`
+- Edge function defaults to `goal: "general"` which has no template
+- `verify-payment` falls back to `goal: "beginner"`
+
+**Impact:** Minor - fallback works, but user may get beginner course when they wanted something else.
+
+**The normal flow (quiz → course preview → checkout) works correctly** because CoursePreview passes the goal.
 
 ---
 
-## Testing Checklist
+## Issue 3: QuizResults Shows Old Subscription Pricing
 
-After the fix:
-1. ✅ Checkout page loads for authenticated users
-2. ✅ Checkout page redirects unauthenticated users to signup
-3. ✅ Loading spinner only shows briefly during auth/tier check
-4. ✅ Stripe checkout URL is generated and redirect works
+**Location:** `src/pages/QuizResults.tsx` line 308
 
+Shows:
+- "Unlock My Protocol – $29/mo"
+- "Or $249/year (save 29%)"
+
+Should show:
+- "$67 one-time" (current pricing model)
+
+---
+
+## Database Verification
+
+### User Courses Table
+```
+goal: muscle
+lesson_count: 57 ✅
+peptide_count: 2 ✅
+template_id: linked ✅
+status: not_started
+```
+
+### Course Templates (All Complete)
+| Goal | Days | Lessons |
+|------|------|---------|
+| fat_loss | 56 | 57 ✅ |
+| muscle | 56 | 57 ✅ |
+| beginner | 42 | 43 ✅ |
+| recovery | 42 | 43 ✅ |
+| cognitive | 56 | 57 ✅ |
+| anti_aging | 60 | 61 ✅ |
+
+---
+
+## Recommended Fixes (Priority Order)
+
+### 1. Fix Promo Code to Create Course
+- Update `redeem-promo-code` to create a beginner course after upgrading tier
+- OR redirect user to quiz to pick their goal before going to dashboard
+
+### 2. Update QuizResults Pricing
+- Change "$29/mo" to "$67 one-time"
+- Remove annual pricing reference
+- Update CTA to link to `/course/{goal}` instead of `/signup`
+
+### 3. Optional: Make /checkout Goal-Aware
+- Store selected goal in localStorage during quiz
+- Read from localStorage in `useCheckout` if goal not passed
+
+---
+
+## Launch Readiness
+
+**For the PRIMARY flow (Quiz → Course Preview → Stripe → Dashboard):**
+🟢 **READY** - This flow works correctly end-to-end.
+
+**For PROMO CODE users:**
+🔴 **BLOCKED** - They get no course assigned. Fix required before VIP access works.
+
+**For DIRECT CHECKOUT users:**
+🟡 **FALLBACK** - Gets beginner course (acceptable but not ideal).
