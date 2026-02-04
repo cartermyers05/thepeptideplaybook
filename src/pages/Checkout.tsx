@@ -18,8 +18,27 @@ export default function Checkout() {
   const hasStartedRef = useRef(false);
   const [promoApplied, setPromoApplied] = useState(false);
   const [isRedeeming, setIsRedeeming] = useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Check if user just signed up - skip tier loading for fresh signups
+  const isFreshSignup = useRef(localStorage.getItem("fresh_signup") === "true");
+  
+  // Clear fresh signup flag on mount
+  useEffect(() => {
+    if (isFreshSignup.current) {
+      localStorage.removeItem("fresh_signup");
+    }
+  }, []);
+  
+  // Add timeout fallback - show checkout after 5 seconds even if still loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoadingTimeout(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handlePromoSuccess = async (code: string, type: string) => {
     if (type === "free_access") {
@@ -78,14 +97,18 @@ export default function Checkout() {
     // User sees checkout page and must click button to proceed to Stripe
   }, [authLoading, tierLoading, user, isPaid, isRedeemingPromoCode, navigate]);
 
+  // Determine if we should show loading - skip for fresh signups or after timeout
+  const shouldShowLoading = !isFreshSignup.current && !loadingTimeout && (authLoading || tierLoading || isRedeemingPromoCode);
+  
   // Show loading while checking auth, tier, or redeeming promo
-  if (authLoading || tierLoading || isRedeemingPromoCode) {
+  if (shouldShowLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
         <div className="text-center">
-          <div className="w-8 h-8 rounded-lg bg-primary animate-pulse mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            {isRedeemingPromoCode ? "Applying promo code..." : "Preparing checkout..."}
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 animate-pulse mx-auto mb-4" />
+          <h2 className="text-lg font-medium mb-2">Getting things ready...</h2>
+          <p className="text-sm text-muted-foreground">
+            {isRedeemingPromoCode ? "Applying promo code..." : "Preparing your checkout..."}
           </p>
         </div>
       </div>
