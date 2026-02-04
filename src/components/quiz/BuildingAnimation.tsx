@@ -62,6 +62,8 @@ export function BuildingAnimation({
       const timer = setTimeout(() => {
         // Navigate to personalized course preview
         const goal = extractedValues.goal?.replace('_', '-') || 'beginner';
+        // Store goal in localStorage for checkout fallback
+        localStorage.setItem('selectedCourseGoal', extractedValues.goal || 'beginner');
         navigate(`/course/${goal}`, { replace: true });
       }, 1500);
       return () => clearTimeout(timer);

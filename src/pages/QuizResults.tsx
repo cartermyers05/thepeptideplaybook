@@ -302,16 +302,16 @@ export default function QuizResults() {
               </>
             ) : (
               <>
-                <Link to="/signup">
+                <Link to={`/course/${quizData.goal?.replace('_', '-') || 'beginner'}`}>
                   <Button size="lg" className="h-14 px-10 text-lg btn-primary-clean">
-                    Unlock My Protocol – $29/mo
+                    Get My Course — $67
                   </Button>
                 </Link>
                 <p className="text-sm text-muted-foreground mt-4">
-                  Or $249/year (save 29%)
+                  One-time payment · Lifetime access
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Cancel anytime · 30-day money-back guarantee
+                  30-day money-back guarantee
                 </p>
                 <p className="text-sm text-muted-foreground mt-6">
                   Already have an account?{" "}
