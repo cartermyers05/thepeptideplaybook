@@ -10,7 +10,7 @@ export function useCheckout() {
   const isProcessingRef = useRef(false);
   const { toast } = useToast();
 
-  const startCheckout = useCallback(async (plan: Plan = "monthly") => {
+  const startCheckout = useCallback(async (plan: Plan = "monthly", goal?: string) => {
     // Only block if we're currently redirecting to Stripe
     if (redirectingRef.current) return;
     // Allow retry if not currently loading
@@ -33,9 +33,13 @@ export function useCheckout() {
         return;
       }
 
+      // Use provided goal, or fallback to localStorage, or default to "beginner"
+      const courseGoal = goal || localStorage.getItem('selectedCourseGoal') || 'beginner';
+
       const response = await supabase.functions.invoke("create-checkout", {
         body: {
           plan,
+          goal: courseGoal,
           successUrl: `${window.location.origin}/thank-you`,
           cancelUrl: `${window.location.origin}/pricing`,
         },
