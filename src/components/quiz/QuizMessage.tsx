@@ -20,13 +20,13 @@ export function QuizMessage({ role, content, isStreaming, isLatest }: QuizMessag
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "flex gap-3 max-w-[85%]",
+        "flex gap-4 max-w-[85%]",
         isAssistant ? "mr-auto" : "ml-auto flex-row-reverse"
       )}
     >
       {isAssistant && (
-        <Avatar className="w-8 h-8 flex-shrink-0">
-          <AvatarFallback className="bg-muted text-foreground text-[10px] font-bold">
+        <Avatar className="w-10 h-10 flex-shrink-0">
+          <AvatarFallback className="bg-muted text-foreground text-xs font-bold">
             PP
           </AvatarFallback>
         </Avatar>
@@ -34,7 +34,7 @@ export function QuizMessage({ role, content, isStreaming, isLatest }: QuizMessag
       
       <div
         className={cn(
-          "rounded-2xl px-4 py-3",
+          "rounded-2xl px-5 py-4",
           isAssistant 
             ? "bg-secondary text-foreground rounded-tl-sm" 
             : "bg-foreground text-background rounded-tr-sm"
@@ -43,14 +43,14 @@ export function QuizMessage({ role, content, isStreaming, isLatest }: QuizMessag
         {isAssistant && isLatest && isStreaming ? (
           <TypewriterMessage content={content} isStreaming={isStreaming} />
         ) : (
-          <p className="text-sm whitespace-pre-wrap">{content}</p>
+          <p className="text-base leading-relaxed whitespace-pre-wrap">{content}</p>
         )}
       </div>
 
       {!isAssistant && (
-        <Avatar className="w-8 h-8 flex-shrink-0">
+        <Avatar className="w-10 h-10 flex-shrink-0">
           <AvatarFallback className="bg-muted text-muted-foreground">
-            <User className="w-4 h-4" />
+            <User className="w-5 h-5" />
           </AvatarFallback>
         </Avatar>
       )}

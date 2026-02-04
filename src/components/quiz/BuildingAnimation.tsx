@@ -63,41 +63,46 @@ export function BuildingAnimation({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="min-h-[400px] flex flex-col items-center justify-center px-4"
-    >
+    <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
       <AnimatePresence mode="wait">
         {phase === 'building' && (
           <motion.div
             key="building"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-center space-y-8 w-full max-w-md"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="text-center space-y-10 w-full max-w-lg"
           >
             <div>
               <motion.div
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200 }}
-                className="text-5xl mb-4"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                className="text-6xl md:text-7xl mb-6"
               >
                 🧬
               </motion.div>
-              <h2 className="text-2xl font-bold mb-2">Building Your Course...</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+                Building Your Course...
+              </h2>
             </div>
 
             {/* Extracted values summary */}
-            <div className="bg-secondary/50 rounded-xl p-4 text-left space-y-2">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-secondary/50 backdrop-blur-sm rounded-2xl p-6 text-left space-y-3 border border-border/50"
+            >
               {extractedValues.goal && (
                 <motion.div 
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-3"
                 >
-                  <Check className="w-4 h-4 text-foreground" />
+                  <div className="w-6 h-6 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3.5 h-3.5 text-background" />
+                  </div>
                   <span className="text-muted-foreground">Goal:</span>
                   <span className="font-medium">{goalLabel}</span>
                 </motion.div>
@@ -107,9 +112,11 @@ export function BuildingAnimation({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-3"
                 >
-                  <Check className="w-4 h-4 text-foreground" />
+                  <div className="w-6 h-6 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3.5 h-3.5 text-background" />
+                  </div>
                   <span className="text-muted-foreground">Experience:</span>
                   <span className="font-medium">{getExperienceLabel(extractedValues.experience)}</span>
                 </motion.div>
@@ -119,9 +126,11 @@ export function BuildingAnimation({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-3"
                 >
-                  <Check className="w-4 h-4 text-foreground" />
+                  <div className="w-6 h-6 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3.5 h-3.5 text-background" />
+                  </div>
                   <span className="text-muted-foreground">Addressing:</span>
                   <span className="font-medium">{getConcernLabel(extractedValues.concern)}</span>
                 </motion.div>
@@ -131,32 +140,34 @@ export function BuildingAnimation({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="flex items-center gap-2 text-sm"
+                  className="flex items-center gap-3"
                 >
-                  <Check className="w-4 h-4 text-foreground" />
+                  <div className="w-6 h-6 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3.5 h-3.5 text-background" />
+                  </div>
                   <span className="text-muted-foreground">Timeline:</span>
                   <span className="font-medium">{getTimelineLabel(extractedValues.timeline)}</span>
                 </motion.div>
               )}
-            </div>
+            </motion.div>
 
             {/* Building progress */}
-            <div className="space-y-2">
-                {buildingSteps.map((step, index) => (
+            <div className="space-y-3">
+              {buildingSteps.map((step, index) => (
                 <motion.div
                   key={step}
                   initial={{ opacity: 0 }}
                   animate={{ 
                     opacity: index <= currentBuildStep ? 1 : 0.3 
                   }}
-                  className="flex items-center justify-center gap-2 text-sm"
+                  className="flex items-center justify-center gap-3"
                 >
                   {index < currentBuildStep ? (
-                    <Check className="w-4 h-4 text-foreground" />
+                    <Check className="w-5 h-5 text-foreground" />
                   ) : index === currentBuildStep ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                   ) : (
-                    <div className="w-4 h-4" />
+                    <div className="w-5 h-5" />
                   )}
                   <span className={index <= currentBuildStep ? "text-foreground" : "text-muted-foreground"}>
                     {step}
@@ -172,30 +183,32 @@ export function BuildingAnimation({
             key="email"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center space-y-6 w-full max-w-md"
+            className="text-center space-y-8 w-full max-w-md"
           >
             <div>
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200 }}
-                className="text-5xl mb-4"
+                className="text-6xl md:text-7xl mb-6"
               >
                 🎉
               </motion.div>
-              <h2 className="text-2xl font-bold mb-2">Your {goalLabel} Course is Ready!</h2>
-              <p className="text-muted-foreground text-sm">
-                8 weeks · Personalized protocol · Beginner-friendly · Step-by-step guides
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+                Your {goalLabel} Course is Ready!
+              </h2>
+              <p className="text-muted-foreground">
+                8 weeks · Personalized protocol · Step-by-step guides
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <Input
                 type="email"
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-12 text-center text-lg"
+                className="h-14 text-center text-lg bg-background border-border/50"
                 autoFocus
               />
               
@@ -212,11 +225,12 @@ export function BuildingAnimation({
 
               <Button
                 type="submit"
+                size="lg"
                 disabled={!email.includes('@') || isSubmitting}
-                className="w-full h-12"
+                className="w-full h-14 text-lg"
               >
                 {isSubmitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   "See My Course →"
                 )}
@@ -229,6 +243,6 @@ export function BuildingAnimation({
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
