@@ -23,31 +23,40 @@ const itemVariants = {
   },
 };
 
-const lineVariants = {
-  hidden: { opacity: 0, x: -30, scale: 0.95 },
+// Enhanced line variants with blur-to-sharp reveal
+const enhancedLineVariants = {
+  hidden: { opacity: 0, x: -50, filter: "blur(8px)" },
   visible: (i: number) => ({
     opacity: 1,
     x: 0,
-    scale: 1,
+    filter: "blur(0px)",
     transition: { 
-      delay: i * 0.15, 
+      delay: i * 0.25, 
       duration: 0.6, 
-      ease: "easeOut" as const 
+      ease: [0.25, 0.46, 0.45, 0.94] as const
     },
   }),
 };
 
-// Shimmer animation for the gradient text effect
-const shimmerVariants = {
-  initial: { backgroundPosition: "-200% 0" },
-  animate: { 
-    backgroundPosition: "200% 0",
+// Letter-by-letter stagger for "AI Peptide"
+const letterContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
     transition: {
-      duration: 3,
-      ease: "easeInOut" as const,
-      repeat: Infinity,
-      repeatDelay: 2,
+      staggerChildren: 0.03,
+      delayChildren: 0.3,
     }
+  }
+};
+
+const letterVariants = {
+  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.4, ease: "easeOut" as const }
   }
 };
 
@@ -60,12 +69,17 @@ const floatingVariants = {
       duration: 4,
       ease: "easeInOut" as const,
       repeat: Infinity,
-      delay: 1.5, // Wait for entrance animation
+      delay: 1.5,
     }
   }
 };
 
+// Rainbow gradient colors from brand logo
+const rainbowGradient = "linear-gradient(90deg, hsl(45, 80%, 50%), hsl(25, 90%, 55%), hsl(350, 80%, 55%), hsl(270, 70%, 55%), hsl(210, 80%, 55%), hsl(160, 70%, 45%), hsl(45, 80%, 50%))";
+
 export function HeroSection() {
+  const aiPeptideText = "AI Peptide";
+  
   return (
     <section className="relative min-h-screen pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
       <div className="container px-4 md:px-8">
@@ -87,33 +101,86 @@ export function HeroSection() {
                 initial="hidden"
                 animate="visible"
               >
-                <motion.span variants={lineVariants} custom={0} className="block">
+                {/* "Your" - slides in from left with blur */}
+                <motion.span 
+                  variants={enhancedLineVariants} 
+                  custom={0} 
+                  className="block"
+                >
                   Your
                 </motion.span>
+                
+                {/* "AI Peptide" - rainbow gradient with letter stagger */}
                 <motion.span 
-                  variants={lineVariants} 
-                  custom={1} 
+                  variants={letterContainerVariants}
+                  initial="hidden"
+                  animate="visible"
                   className="block relative"
                 >
-                  {/* Base text */}
-                  <span className="relative">
-                    AI Peptide
-                    {/* Shimmer overlay */}
-                    <motion.span
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent bg-[length:200%_100%] bg-clip-text"
-                      variants={shimmerVariants}
-                      initial="initial"
-                      animate="animate"
-                      style={{ 
-                        WebkitBackgroundClip: "text",
-                        mixBlendMode: "overlay"
-                      }}
-                      aria-hidden="true"
-                    />
-                  </span>
+                  <motion.span
+                    className="inline-block bg-clip-text text-transparent"
+                    style={{
+                      backgroundImage: rainbowGradient,
+                      backgroundSize: "200% 100%",
+                    }}
+                    animate={{
+                      backgroundPosition: ["0% 0%", "100% 0%", "0% 0%"],
+                    }}
+                    transition={{
+                      duration: 4,
+                      ease: "linear",
+                      repeat: Infinity,
+                    }}
+                  >
+                    {aiPeptideText.split("").map((char, index) => (
+                      <motion.span
+                        key={index}
+                        variants={letterVariants}
+                        className="inline-block"
+                        style={{ 
+                          whiteSpace: char === " " ? "pre" : "normal",
+                        }}
+                      >
+                        {char === " " ? "\u00A0" : char}
+                      </motion.span>
+                    ))}
+                  </motion.span>
+                  
+                  {/* Subtle glow effect behind the text */}
+                  <motion.span
+                    className="absolute inset-0 bg-clip-text text-transparent pointer-events-none select-none"
+                    style={{
+                      backgroundImage: rainbowGradient,
+                      backgroundSize: "200% 100%",
+                      filter: "blur(20px)",
+                      opacity: 0,
+                    }}
+                    animate={{
+                      opacity: [0.2, 0.4, 0.2],
+                      backgroundPosition: ["0% 0%", "100% 0%", "0% 0%"],
+                    }}
+                    transition={{
+                      opacity: {
+                        duration: 2,
+                        ease: "easeInOut",
+                        repeat: Infinity,
+                        delay: 1.5,
+                      },
+                      backgroundPosition: {
+                        duration: 4,
+                        ease: "linear",
+                        repeat: Infinity,
+                      },
+                    }}
+                    aria-hidden="true"
+                  >
+                    {aiPeptideText}
+                  </motion.span>
                 </motion.span>
+                
+                {/* "Journey" - slides in from left (completing the statement) */}
                 <motion.span 
-                  variants={lineVariants} 
+                  variants={enhancedLineVariants} 
                   custom={2} 
                   className="block"
                 >
