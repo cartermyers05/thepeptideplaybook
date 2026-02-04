@@ -3,6 +3,7 @@ import { FlaskConical, Clock, MapPin, Calendar, AlertCircle, Check, Lightbulb, A
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useCourse } from "@/hooks/useCourse";
 import { peptideDetails, reconstitutionGuide, injectionGuide } from "@/lib/courseContent";
+import { DosingCalculator } from "@/components/dashboard/DosingCalculator";
 import {
   Accordion,
   AccordionContent,
@@ -269,6 +270,11 @@ export default function MyPlan() {
               </motion.div>
             );
           })}
+
+          {/* Dosing Calculator */}
+          <motion.div variants={itemVariants}>
+            <DosingCalculator />
+          </motion.div>
 
           {/* Guides */}
           <motion.div variants={itemVariants}>
