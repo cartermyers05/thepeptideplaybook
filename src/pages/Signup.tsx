@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, Mail, Lock, User, Check, RefreshCw } from "lucide-react";
+import { ArrowRight, ArrowLeft, Mail, Lock, User, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PromoCodeInput } from "@/components/auth/PromoCodeInput";
@@ -14,11 +14,11 @@ import { Logo } from "@/components/brand/Logo";
 const steps = [
   { id: 1, title: "Email" },
   { id: 2, title: "Account" },
-  { id: 3, title: "Welcome" },
 ];
 
 export default function Signup() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialPromoCode = searchParams.get("code") || "";
   const redirect = searchParams.get("redirect") || "/checkout";
   
@@ -28,7 +28,6 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isResending, setIsResending] = useState(false);
   const [validPromoCode, setValidPromoCode] = useState<string | null>(null);
   const [promoCodeType, setPromoCodeType] = useState<string | null>(null);
   const { toast } = useToast();
@@ -46,20 +45,16 @@ export default function Signup() {
 
     setIsLoading(true);
     try {
-      // Persist promo code to localStorage BEFORE signup so it survives email confirmation
+      // Persist promo code to localStorage BEFORE signup so it's available after redirect
       if (validPromoCode) {
         localStorage.setItem("pending_promo_code", validPromoCode);
         localStorage.setItem("pending_promo_type", promoCodeType || "");
       }
 
-      // Store intended redirect in localStorage for after email confirmation
-      localStorage.setItem("post_signup_redirect", redirect);
-
       const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}${redirect}`,
           data: {
             full_name: name,
           },
@@ -72,7 +67,6 @@ export default function Signup() {
       const referralCode = localStorage.getItem("referral_code");
       if (referralCode && signUpData.user) {
         try {
-          // Find the referral entry with this code and update with the new user's ID
           const { error: referralError } = await supabase
             .from("referrals")
             .update({ referred_id: signUpData.user.id })
@@ -80,18 +74,16 @@ export default function Signup() {
             .is("referred_id", null);
           
           if (!referralError) {
-            // Clear the referral code from localStorage after successful linking
             localStorage.removeItem("referral_code");
           }
         } catch (refError) {
-          // Don't block signup if referral linking fails
           console.error("Failed to link referral:", refError);
         }
       }
 
-      setStep(3);
+      // User is now logged in (auto-confirm enabled), redirect to checkout
+      navigate(redirect);
     } catch (error: any) {
-      // Clear localStorage on signup failure
       localStorage.removeItem("pending_promo_code");
       localStorage.removeItem("pending_promo_type");
       toast({
@@ -101,34 +93,6 @@ export default function Signup() {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleResendEmail = async () => {
-    setIsResending(true);
-    try {
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}${redirect}`,
-        },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Email sent!",
-        description: "Check your inbox for the confirmation link.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to resend email",
-        variant: "destructive",
-      });
-    } finally {
-      setIsResending(false);
     }
   };
 
@@ -317,65 +281,6 @@ export default function Signup() {
             </motion.div>
           )}
 
-          {/* Step 3: Check Email */}
-          {step === 3 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center"
-            >
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                <Mail className="w-8 h-8 text-primary" />
-              </div>
-
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                Check your email
-              </h1>
-              <p className="text-muted-foreground mb-4">
-                We sent a confirmation link to
-              </p>
-              <p className="font-medium text-foreground mb-6">{email}</p>
-              <p className="text-sm text-muted-foreground mb-8">
-                Click the link in the email to verify your account.
-                {validPromoCode && promoCodeType === "free_access" 
-                  ? " You'll get full access after confirming."
-                  : " You'll be redirected to checkout after confirming."
-                }
-              </p>
-
-              <div className="space-y-4">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full h-12"
-                  onClick={handleResendEmail}
-                  disabled={isResending}
-                >
-                  {isResending ? (
-                    <>
-                      <RefreshCw className="mr-2 w-4 h-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="mr-2 w-4 h-4" />
-                      Resend confirmation email
-                    </>
-                  )}
-                </Button>
-
-                <p className="text-xs text-muted-foreground">
-                  Didn't receive it? Check your spam folder or{" "}
-                  <button
-                    onClick={() => setStep(1)}
-                    className="text-primary hover:underline"
-                  >
-                    try a different email
-                  </button>
-                </p>
-              </div>
-            </motion.div>
-          )}
         </div>
       </div>
 

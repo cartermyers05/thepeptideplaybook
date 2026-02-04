@@ -25,7 +25,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRedeemingPromoCode, setIsRedeemingPromoCode] = useState(false);
   const redemptionAttemptedRef = useRef(false);
-  const redirectHandledRef = useRef(false);
   const queryClient = useQueryClient();
 
   // Redeem pending promo code from localStorage (saved during signup)
@@ -68,21 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [queryClient]);
 
-  // Handle post-signup redirect (after email confirmation)
-  const handlePostSignupRedirect = useCallback(() => {
-    // Prevent duplicate redirects
-    if (redirectHandledRef.current) return;
-    
-    const pendingRedirect = localStorage.getItem("post_signup_redirect");
-    if (pendingRedirect) {
-      redirectHandledRef.current = true;
-      localStorage.removeItem("post_signup_redirect");
-      console.log("[Auth] Redirecting to post-signup destination:", pendingRedirect);
-      // Use window.location since AuthProvider is outside Router context
-      window.location.href = pendingRedirect;
-    }
-  }, []);
-
   // Backup payment verification for users who may have had verification fail on thank-you page
   const verifyPaymentStatus = useCallback(async (userId: string) => {
     try {
@@ -121,9 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Run promo code redemption and backup payment verification on login/signup
         if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED") && session?.user) {
-          // Handle post-signup redirect (after email confirmation)
-          handlePostSignupRedirect();
-          
           // Check for pending promo code - await it before proceeding
           const hasPendingPromo = localStorage.getItem("pending_promo_code");
           if (hasPendingPromo) {
@@ -160,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [verifyPaymentStatus, redeemPendingPromoCode, handlePostSignupRedirect]);
+  }, [verifyPaymentStatus, redeemPendingPromoCode]);
 
   const signOut = async () => {
     // Clear all React Query caches to prevent stale data after logout
