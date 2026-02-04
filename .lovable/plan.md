@@ -1,138 +1,132 @@
 
-# Replace Sidebar with Top Navbar for Dashboard
+# Animate Hero Headline + Add Background Effects to Landing Page
 
 ## Overview
-Transform the dashboard navigation from a side sidebar to a sleek top navbar with animated button interactions. This will give the dashboard a more modern, app-like feel with smooth transitions when switching between sections.
+Enhance the "Your AI Peptide Journey" headline with more dynamic, eye-catching animations and add subtle background effects to sections further down the page to create visual continuity and a premium feel.
 
-## Design Concept
+## Part 1: Hero Headline Animation Enhancements
 
-### Visual Layout
+### Current State
+The headline already has a staggered slide-in animation (`x: -30 → 0`), but it's relatively subtle.
+
+### Enhanced Animation Concept
+Add more visual interest with:
+
+1. **Character-by-character reveal** for the word "AI" (like a terminal/tech effect)
+2. **Gradient text shimmer** that sweeps across the headline after it loads
+3. **Subtle floating motion** on the full headline after initial animation
+
+### Animation Details
+
+**Word-by-Word Stagger (enhanced):**
+- "Your" slides in from left with slight scale
+- "AI Peptide" has a glowing text effect with animated gradient
+- "Journey" slides in last with emphasis
+
+**Text Shimmer Effect:**
 ```text
-┌─────────────────────────────────────────────────────────────────┐
-│  [Logo: PEPTIDE PLAYBOOK]                    [Avatar ▼] [⚙️]   │
-├─────────────────────────────────────────────────────────────────┤
-│   [  Dashboard  ]  [  My Course  ]  [  My Plan  ]  [  AI Coach  ]   │
-│      ════════                                                   │
-│      (active indicator slides between buttons)                  │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│                      PAGE CONTENT                               │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+After headline loads → gradient highlight sweeps left-to-right
+Creates a "shine" effect like light reflecting off text
 ```
 
-### Cool Button Interactions
-1. **Sliding Pill Indicator**: A background pill slides smoothly to the active tab using Framer Motion's `layoutId` (like the existing TabSwitcher)
-2. **Hover Scale**: Buttons scale up slightly on hover with spring animation
-3. **Click Ripple**: Subtle press animation (scale down then up)
-4. **Icon Animation**: Icon color transitions and slight rotation on hover
+**Floating Idle Animation:**
+- Very subtle Y oscillation (±2px) after initial animation
+- Creates a "breathing" effect that feels alive
 
-## Implementation
+### Implementation
+Update `HeroSection.tsx`:
+- Add new motion variants for enhanced entrance
+- Add gradient shimmer overlay using CSS animation
+- Add post-load floating animation with `AnimatePresence`
 
-### 1. Create New Navbar Component
-**New file: `src/components/dashboard/DashboardNavbar.tsx`**
+## Part 2: Background Effects for Lower Sections
 
-Features:
-- Fixed header with logo on the left
-- Centered navigation tabs with sliding indicator
-- User avatar dropdown and settings on the right
-- Uses `motion.div` with `layoutId="dashboard-nav-indicator"` for the sliding pill effect
-- `whileHover` and `whileTap` for satisfying micro-interactions
-- Responsive: On mobile, only show icons (no labels) in a compact row
+### Section Mapping
 
-Structure:
-```tsx
-<header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b">
-  {/* Top row: Logo + User actions */}
-  <div className="flex items-center justify-between px-6 py-3">
-    <Logo />
-    <div className="flex items-center gap-2">
-      <UserAvatarDropdown />
-      <SettingsButton />
-    </div>
-  </div>
-  
-  {/* Navigation tabs row */}
-  <nav className="flex items-center justify-center gap-1 px-4 pb-3">
-    {navItems.map(item => (
-      <NavLink>
-        <Icon />
-        <span>{label}</span>
-        {isActive && <motion.div layoutId="nav-pill" />}
-      </NavLink>
-    ))}
-  </nav>
-</header>
-```
+| Section | Background Enhancement |
+|---------|----------------------|
+| **HowItWorksSection** | Subtle floating particles + grid pattern |
+| **WhatsInsideSection** | Already has `bg-secondary/50`, add aurora gradient |
+| **GoalSelectionSection** | Add animated gradient orbs behind cards |
+| **PricingCTA** | Add "energy pulse" effect centered on pricing card |
 
-### 2. Update DashboardLayout
-**File: `src/components/dashboard/DashboardLayout.tsx`**
+### Background Components to Reuse
+The project already has great background components:
+- `FloatingOrbs` - aurora gradients, particles, light beams
+- `GridPattern` - animated dot pattern
+- `InteractiveBackground` - combines orbs + grid + energy pulse
 
-Changes:
-- Remove `DashboardSidebar` import and usage
-- Add new `DashboardNavbar` component
-- Remove `md:ml-60` margin that was for sidebar spacing
-- Keep `MobileBottomNav` for mobile (it works well on small screens)
+### Implementation Approach
 
-### 3. Animation Details
+**Option A: Wrap sections with InteractiveBackground**
+Wrap each section with the existing `InteractiveBackground` component using the "subtle" variant.
 
-**Sliding Pill Indicator:**
-```tsx
-{isActive && (
-  <motion.div
-    layoutId="dashboard-nav-pill"
-    className="absolute inset-0 bg-black rounded-full"
-    style={{ zIndex: -1 }}
-    transition={{ type: "spring", stiffness: 500, damping: 35 }}
-  />
-)}
-```
+**Option B: Add targeted effects per section**
+Add specific effects to each section for more control:
 
-**Button Hover & Tap:**
-```tsx
-<motion.div
-  whileHover={{ scale: 1.05 }}
-  whileTap={{ scale: 0.95 }}
-  transition={{ type: "spring", stiffness: 400, damping: 25 }}
->
-```
-
-**Icon Micro-animation:**
-```tsx
-<motion.div
-  whileHover={{ rotate: 5 }}
-  transition={{ type: "spring", stiffness: 300 }}
->
-  <Icon />
-</motion.div>
-```
-
-### 4. User Actions Section
-The right side of the navbar will include:
-- **User Avatar**: Shows first letter of name, opens dropdown on click
-- **Dropdown Menu**: Contains Settings and Sign Out options
-- Uses existing shadcn DropdownMenu component
+1. **HowItWorksSection**: Add `GridPattern` behind the steps
+2. **GoalSelectionSection**: Add `FloatingOrbs variant="subtle"` 
+3. **PricingCTA**: Add centered glow pulse behind the pricing card
 
 ## File Changes
 
-### New Files
-| File | Purpose |
-|------|---------|
-| `src/components/dashboard/DashboardNavbar.tsx` | Main navbar component with animated tabs |
-
 ### Modified Files
+
 | File | Changes |
 |------|---------|
-| `src/components/dashboard/DashboardLayout.tsx` | Replace sidebar with navbar, adjust layout |
-| `src/components/dashboard/DashboardSidebar.tsx` | Can be deleted or kept for reference |
+| `src/components/landing/HeroSection.tsx` | Enhanced headline animations with shimmer and floating effects |
+| `src/components/landing/HowItWorksSection.tsx` | Add GridPattern background |
+| `src/components/landing/GoalSelectionSection.tsx` | Add FloatingOrbs background |
+| `src/components/landing/PricingCTA.tsx` | Add centered glow effect behind card |
+| `src/pages/Index.tsx` | Optionally wrap hero with InteractiveBackground |
 
-## Mobile Behavior
-- **Keep the existing MobileBottomNav** for phones (it's a proven pattern for mobile apps)
-- **Navbar visible on tablets/desktop** only (`hidden md:block`)
-- The transition between mobile and desktop navigation will be seamless
+## Technical Details
 
-## Technical Notes
-- Framer Motion's `layoutId` enables the smooth sliding indicator effect
-- The `AnimatePresence` wrapper may be needed for enter/exit animations
-- Using `NavLink` from react-router-dom (wrapped in motion.div) to track active state
-- Spring animations feel more natural than linear easing
+### Hero Shimmer Animation
+```css
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+```
+
+Applied as a pseudo-element overlay with:
+- `background: linear-gradient(90deg, transparent, white/10, transparent)`
+- `background-size: 200% 100%`
+- `animation: shimmer 3s ease-in-out infinite`
+
+### Floating Animation
+```tsx
+<motion.h1
+  animate={{ y: [0, -3, 0] }}
+  transition={{ 
+    duration: 4, 
+    repeat: Infinity, 
+    ease: "easeInOut",
+    delay: 2 // Wait for entrance animation
+  }}
+>
+```
+
+### Section Background Pattern
+Each section gets a `position: relative` wrapper with an absolutely positioned background layer that has `pointer-events: none` and `z-index: 0`, keeping content on top.
+
+## Visual Result
+
+### Hero
+- Headline slides in line-by-line (current behavior, enhanced)
+- "AI" text gets a subtle glow/tech effect
+- After load: gentle shimmer sweeps across, headline floats slightly
+- Creates a "premium, alive" feel
+
+### Lower Sections
+- Subtle dot grid appears behind "How It Works"
+- Soft aurora gradients float behind goal selection cards
+- Pricing card has a gentle glow pulse behind it
+- Effects are subtle enough not to distract from content
+
+## Performance Notes
+- All animations use CSS transforms (GPU accelerated)
+- Particles are memoized to prevent re-renders
+- Background effects use `pointer-events: none` so they don't interfere with clicks
+- Effects are subtle enough to work on lower-end devices
