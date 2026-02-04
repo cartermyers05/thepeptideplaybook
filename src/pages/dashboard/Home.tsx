@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ClipboardCheck, MessageSquare, FileText, Trophy, Flame } from "lucide-react";
+import { ClipboardCheck, MessageSquare, FileText, Trophy, Flame, Target, FlaskConical, Calendar, Zap, Dumbbell, Crown, Award } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -159,9 +159,15 @@ export default function Dashboard() {
               <div className="space-y-3">
                 {recentMilestones.slice(0, 3).map((milestone) => {
                   const details = MILESTONE_DETAILS[milestone.milestone_type as keyof typeof MILESTONE_DETAILS];
+                  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+                    Target, FlaskConical, Calendar, Flame, Zap, Dumbbell, Trophy, Crown, Award
+                  };
+                  const IconComponent = iconMap[details?.icon || "Trophy"] || Trophy;
                   return (
                     <div key={milestone.id} className="flex items-center gap-3">
-                      <span className="text-2xl">{details?.icon || "🏆"}</span>
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <IconComponent className="w-5 h-5 text-primary" />
+                      </div>
                       <div>
                         <p className="font-medium">{details?.label || milestone.milestone_type}</p>
                         <p className="text-xs text-muted-foreground">

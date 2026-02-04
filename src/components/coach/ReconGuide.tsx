@@ -62,7 +62,7 @@ export function ReconGuide() {
     setCompleted(true);
     if (!hasMilestone("first_recon")) {
       await awardMilestone.mutateAsync("first_recon");
-      toast.success("Achievement unlocked: First Reconstitution! 🎉");
+      toast.success("Achievement unlocked: First Reconstitution!");
     }
   };
 

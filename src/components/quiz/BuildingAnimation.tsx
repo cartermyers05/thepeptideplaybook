@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Dna, PartyPopper } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -78,9 +78,9 @@ export function BuildingAnimation({
                 initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                className="text-6xl md:text-7xl mb-6"
+                className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6"
               >
-                🧬
+                <Dna className="w-10 h-10 md:w-12 md:h-12 text-primary" />
               </motion.div>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
                 Building Your Course...
@@ -190,9 +190,9 @@ export function BuildingAnimation({
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 200 }}
-                className="text-6xl md:text-7xl mb-6"
+                className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6"
               >
-                🎉
+                <PartyPopper className="w-10 h-10 md:w-12 md:h-12 text-primary" />
               </motion.div>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
                 Your {goalLabel} Course is Ready!

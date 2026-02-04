@@ -191,7 +191,7 @@ export default function Stats() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-6xl">🔥</p>
+                      <Flame className="w-16 h-16" />
                     </div>
                   </div>
                 )}

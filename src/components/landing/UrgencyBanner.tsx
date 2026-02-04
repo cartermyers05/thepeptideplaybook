@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Sparkles } from "lucide-react";
 
 export function UrgencyBanner() {
   const [isVisible, setIsVisible] = useState(true);
@@ -57,7 +58,7 @@ export function UrgencyBanner() {
   return (
     <div className="bg-primary text-primary-foreground py-2.5 px-4 relative">
       <div className="container flex items-center justify-center gap-2 text-sm">
-        <span>🎉</span>
+        <Sparkles className="w-4 h-4" />
         <span>
           New Year Special: Get 20% off Pro with code{" "}
           <span className="font-bold">PEPTIDE2026</span> — Ends in{" "}
