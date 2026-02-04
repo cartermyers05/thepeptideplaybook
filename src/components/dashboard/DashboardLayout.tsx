@@ -8,7 +8,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#fafafa]">
       <DashboardSidebar />
       <MobileBottomNav />
       <main className="md:ml-60 min-h-screen pb-20 md:pb-0">

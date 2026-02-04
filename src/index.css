@@ -6,59 +6,59 @@
 
 @layer base {
   :root {
-    /* Primary - Deep teal/emerald (health, trust, premium) */
-    --primary: 168 76% 42%;
+    /* Primary - Near black (matching landing page PillButton dark) */
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 100%;
 
-    /* Warm grays (not cold/sterile) */
-    --background: 30 6% 98%;
-    --foreground: 20 14% 11%;
+    /* Clean backgrounds */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
 
     /* Card and surface */
     --card: 0 0% 100%;
-    --card-foreground: 20 14% 11%;
+    --card-foreground: 0 0% 9%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 20 14% 11%;
+    --popover-foreground: 0 0% 9%;
 
-    /* Secondary - Warm off-white */
-    --secondary: 30 6% 94%;
-    --secondary-foreground: 20 14% 11%;
+    /* Secondary - Subtle off-white */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
 
-    /* Muted - For subtle text and backgrounds */
-    --muted: 30 6% 94%;
-    --muted-foreground: 24 5% 45%;
+    /* Muted - Soft gray */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Accent - Subtle warm tint */
-    --accent: 168 30% 95%;
-    --accent-foreground: 20 14% 11%;
+    /* Accent - Clean gray tint */
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
 
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders and inputs - softer */
-    --border: 30 6% 88%;
-    --input: 30 6% 88%;
-    --ring: 168 76% 42%;
+    /* Borders and inputs - light gray */
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
+    --ring: 0 0% 9%;
 
     --radius: 1rem;
 
     /* Custom tokens */
     --surface-elevated: 0 0% 100%;
-    --surface-sunken: 30 6% 94%;
-    --headline: 20 14% 11%;
+    --surface-sunken: 0 0% 96%;
+    --headline: 0 0% 0%;
 
-    /* Dark Sidebar */
-    --sidebar-background: 20 14% 11%;
-    --sidebar-foreground: 30 6% 96%;
-    --sidebar-primary: 168 76% 42%;
+    /* Light Sidebar (matching landing page) */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-primary: 0 0% 9%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 168 76% 42%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 20 14% 18%;
-    --sidebar-ring: 168 76% 42%;
-    --sidebar-muted: 24 5% 45%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 94%;
+    --sidebar-ring: 0 0% 9%;
+    --sidebar-muted: 0 0% 45%;
 
     /* Success state */
     --success: 142 76% 36%;
@@ -66,7 +66,14 @@
 
     /* Amber accent for celebrations */
     --amber: 43 96% 56%;
-    --amber-foreground: 20 14% 11%;
+    --amber-foreground: 0 0% 9%;
+
+    /* Pastel accent colors for gradient cards */
+    --accent-coral: 0 84% 85%;
+    --accent-purple: 260 80% 80%;
+    --accent-orange: 30 95% 72%;
+    --accent-blue: 210 95% 78%;
+    --accent-green: 140 75% 73%;
   }
 
   .dark {
@@ -80,8 +87,8 @@
     --popover: 222 47% 5%;
     --popover-foreground: 0 0% 98%;
 
-    /* Teal primary in dark mode */
-    --primary: 168 76% 50%;
+    /* Near white in dark mode */
+    --primary: 0 0% 90%;
     --primary-foreground: 0 0% 5%;
 
     --secondary: 217 33% 10%;
@@ -90,7 +97,7 @@
     --muted: 217 33% 12%;
     --muted-foreground: 215 20% 55%;
 
-    --accent: 168 40% 15%;
+    --accent: 217 33% 15%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 63% 31%;
@@ -98,7 +105,7 @@
 
     --border: 217 33% 14%;
     --input: 217 33% 14%;
-    --ring: 168 76% 50%;
+    --ring: 0 0% 90%;
 
     --surface-elevated: 222 47% 6%;
     --surface-sunken: 222 47% 2%;
@@ -106,19 +113,26 @@
 
     --sidebar-background: 222 47% 4%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 168 76% 50%;
+    --sidebar-primary: 0 0% 90%;
     --sidebar-primary-foreground: 0 0% 5%;
-    --sidebar-accent: 168 40% 20%;
+    --sidebar-accent: 217 33% 15%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 217 33% 15%;
-    --sidebar-ring: 168 76% 50%;
+    --sidebar-ring: 0 0% 90%;
     --sidebar-muted: 215 20% 55%;
 
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
     --amber: 43 96% 56%;
-    --amber-foreground: 20 14% 11%;
+    --amber-foreground: 0 0% 9%;
+
+    /* Pastel accent colors */
+    --accent-coral: 0 84% 85%;
+    --accent-purple: 260 80% 80%;
+    --accent-orange: 30 95% 72%;
+    --accent-blue: 210 95% 78%;
+    --accent-green: 140 75% 73%;
   }
 }
 
@@ -160,32 +174,52 @@
     transform: translateY(-2px);
   }
 
-  /* Featured card (gradient teal) */
+  /* Featured card with coral gradient top bar (matching landing page) */
   .card-featured {
-    @apply rounded-2xl text-white;
-    background: linear-gradient(135deg, hsl(168 76% 42%) 0%, hsl(168 76% 36%) 100%);
+    @apply bg-white rounded-2xl border border-gray-100 overflow-hidden relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
   }
 
-  .card-featured-subtle {
-    @apply rounded-2xl;
-    background: linear-gradient(135deg, hsl(168 76% 42% / 0.1) 0%, hsl(168 76% 36% / 0.05) 100%);
-    border: 1px solid hsl(168 76% 42% / 0.2);
+  .card-featured::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #fda4af 0%, #fb7185 100%);
   }
+
+  /* Featured card variants with different gradient tops */
+  .card-featured-coral::before { background: linear-gradient(135deg, #fda4af 0%, #fb7185 100%); }
+  .card-featured-purple::before { background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%); }
+  .card-featured-orange::before { background: linear-gradient(135deg, #fdba74 0%, #fb923c 100%); }
+  .card-featured-blue::before { background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%); }
+  .card-featured-green::before { background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); }
 
   /* ========================================
-     PREMIUM BUTTONS
+     PREMIUM BUTTONS - Black primary (matching landing page)
      ======================================== */
 
+  .btn-primary-dark {
+    @apply bg-foreground text-background font-semibold px-6 py-3 rounded-lg;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary-dark:hover {
+    @apply bg-foreground/90;
+    transform: translateY(-1px);
+  }
+
+  /* Legacy teal button - now black */
   .btn-teal {
-    @apply text-white font-semibold px-6 py-3 rounded-xl;
-    background: linear-gradient(135deg, hsl(168 76% 42%) 0%, hsl(168 76% 36%) 100%);
-    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+    @apply bg-foreground text-background font-semibold px-6 py-3 rounded-lg;
     transition: all 0.2s ease;
   }
 
   .btn-teal:hover {
+    @apply bg-foreground/90;
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(20, 184, 166, 0.4);
   }
 
   .btn-teal:active {
@@ -193,29 +227,27 @@
   }
 
   .btn-primary-clean {
-    @apply text-white font-semibold px-6 py-3 rounded-xl;
-    background: linear-gradient(135deg, hsl(168 76% 42%) 0%, hsl(168 76% 36%) 100%);
-    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+    @apply bg-foreground text-background font-semibold px-6 py-3 rounded-lg;
     transition: all 0.2s ease;
   }
 
   .btn-primary-clean:hover {
+    @apply bg-foreground/90;
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(20, 184, 166, 0.4);
   }
 
   /* Secondary button */
   .btn-secondary-premium {
-    @apply bg-white text-foreground font-semibold px-6 py-3 rounded-xl border border-border;
+    @apply bg-white text-foreground font-semibold px-6 py-3 rounded-lg border border-border;
     transition: all 0.2s ease;
   }
 
   .btn-secondary-premium:hover {
-    @apply bg-muted border-primary/30;
+    @apply bg-muted border-foreground/20;
   }
 
   /* ========================================
-     TEAL PROGRESS BAR
+     PROGRESS BAR - Black fill (matching landing page minimalism)
      ======================================== */
 
   .progress-teal {
@@ -224,8 +256,7 @@
   }
 
   .progress-teal-fill {
-    @apply h-full rounded-full transition-all duration-500 ease-out;
-    background: linear-gradient(90deg, hsl(168 76% 52%) 0%, hsl(168 76% 42%) 100%);
+    @apply h-full rounded-full transition-all duration-500 ease-out bg-foreground;
   }
 
   /* ========================================
@@ -441,16 +472,15 @@
   }
 
   /* ========================================
-     CHAT BUBBLES
+     CHAT BUBBLES - Black/white (matching landing page)
      ======================================== */
 
   .chat-bubble-user {
-    @apply text-white rounded-2xl rounded-br-md px-4 py-3;
-    background: linear-gradient(135deg, hsl(168 76% 42%) 0%, hsl(168 76% 38%) 100%);
+    @apply text-white rounded-2xl rounded-br-md px-4 py-3 bg-foreground;
   }
 
   .chat-bubble-assistant {
-    @apply bg-muted text-foreground rounded-2xl rounded-bl-md px-4 py-3;
+    @apply bg-white text-foreground rounded-2xl rounded-bl-md px-4 py-3 border border-gray-200;
   }
 
   /* ========================================

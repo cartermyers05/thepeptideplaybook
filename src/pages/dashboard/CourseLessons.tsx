@@ -27,7 +27,7 @@ export default function CourseLessons() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <p className="text-muted-foreground">No course found. Purchase a course to get started.</p>
+          <p className="text-gray-500">No course found. Purchase a course to get started.</p>
         </div>
       </DashboardLayout>
     );
@@ -77,21 +77,21 @@ export default function CourseLessons() {
       <div className="max-w-3xl mx-auto animate-fade-up">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">{userCourse.title}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black mb-2">{userCourse.title}</h1>
+          <p className="text-gray-500">
             {userCourse.current_day} of {userCourse.duration_days} lessons complete
           </p>
         </div>
 
         {/* Progress bar */}
-        <div className="card-premium p-4 mb-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Progress</span>
-            <span className="text-sm font-bold text-primary">{progressPercent}%</span>
+            <span className="text-sm font-medium text-gray-500">Progress</span>
+            <span className="text-sm font-bold text-black">{progressPercent}%</span>
           </div>
-          <div className="progress-teal">
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div 
-              className="progress-teal-fill" 
+              className="h-full bg-black rounded-full transition-all duration-500" 
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -104,24 +104,24 @@ export default function CourseLessons() {
             const phaseEndDay = Math.max(...lessons.map(l => l.day));
             
             return (
-              <div key={phase} className="card-premium overflow-hidden">
+              <div key={phase} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 {/* Phase header */}
                 <button
                   onClick={() => togglePhase(phase)}
-                  className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors"
+                  className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                   <div>
-                    <span className="font-semibold">{phase}</span>
-                    <span className="text-xs text-muted-foreground ml-2">
+                    <span className="font-semibold text-black">{phase}</span>
+                    <span className="text-xs text-gray-400 ml-2">
                       Days {phaseStartDay}-{phaseEndDay}
                     </span>
                   </div>
-                  <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${expandedPhases.has(phase) ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${expandedPhases.has(phase) ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Lessons */}
                 {expandedPhases.has(phase) && (
-                  <div className="divide-y divide-border">
+                  <div className="divide-y divide-gray-100">
                     {lessons.map((lesson) => {
                       const status = getLessonStatus(lesson.day);
                       
@@ -136,19 +136,19 @@ export default function CourseLessons() {
                             status === 'locked' 
                               ? 'opacity-50 cursor-not-allowed' 
                               : status === 'current'
-                                ? 'bg-accent border-l-3 border-primary'
+                                ? 'bg-gray-50 border-l-[3px] border-black'
                                 : status === 'completed'
-                                  ? 'border-l-3 border-success'
-                                  : 'hover:bg-muted/30'
+                                  ? 'border-l-[3px] border-green-500'
+                                  : 'hover:bg-gray-50'
                           }`}
                         >
                           {/* Status icon */}
                           <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
                             status === 'completed' 
-                              ? 'bg-success text-white'
+                              ? 'bg-green-100 text-green-600'
                               : status === 'current'
-                                ? 'bg-primary text-white'
-                                : 'bg-muted text-muted-foreground'
+                                ? 'bg-black text-white'
+                                : 'bg-gray-100 text-gray-400'
                           }`}>
                             {status === 'completed' ? (
                               <Check className="w-4 h-4" />
@@ -161,19 +161,18 @@ export default function CourseLessons() {
 
                           {/* Lesson info */}
                           <div className="flex-1 min-w-0">
-                            <div className={`font-medium ${status === 'completed' ? 'text-muted-foreground' : 'text-foreground'}`}>
+                            <div className={`font-medium ${status === 'completed' ? 'text-gray-500' : 'text-black'}`}>
                               Day {lesson.day}: {lesson.title}
                             </div>
                             {status === 'current' && (
-                              <span className="text-xs text-primary font-medium">Current lesson</span>
+                              <span className="text-xs text-gray-500 font-medium">Current lesson</span>
                             )}
                           </div>
 
                           {/* Action */}
                           {status === 'current' && (
-                            <span className="btn-teal text-sm px-4 py-2 flex items-center gap-1.5">
-                              Continue
-                              <ArrowRight className="w-3 h-3" />
+                            <span className="text-xs font-medium bg-black text-white px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                              Current
                             </span>
                           )}
                         </motion.button>
@@ -193,29 +192,29 @@ export default function CourseLessons() {
           {selectedLesson && (
             <>
               <DialogHeader>
-                <div className="text-xs font-medium text-primary uppercase tracking-wide mb-1">
+                <div className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
                   Day {selectedLesson.day}
                 </div>
-                <DialogTitle className="text-2xl">
+                <DialogTitle className="text-2xl text-black">
                   {selectedLesson.title}
                 </DialogTitle>
               </DialogHeader>
               
               <div className="prose prose-sm dark:prose-invert max-w-none mt-4">
                 {selectedLesson.content.split('\n').map((paragraph, i) => (
-                  <p key={i} className="text-foreground/90 leading-relaxed">{paragraph}</p>
+                  <p key={i} className="text-gray-600 leading-relaxed">{paragraph}</p>
                 ))}
               </div>
 
               {/* Action Item */}
-              <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/10">
+              <div className="mt-6 p-4 rounded-xl bg-gray-50 border border-gray-200">
                 <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Check className="w-3 h-3 text-primary" />
+                  <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm text-foreground">Today's Action</p>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="font-semibold text-sm text-black">Today's Action</p>
+                    <p className="text-sm text-gray-500 mt-1">
                       {selectedLesson.action_item}
                     </p>
                   </div>
@@ -228,22 +227,22 @@ export default function CourseLessons() {
                   <Button 
                     onClick={handleCompleteLesson}
                     disabled={completeLesson.isPending}
-                    className="btn-teal flex-1"
+                    className="bg-black text-white hover:bg-black/90 flex-1 rounded-lg"
                   >
                     <Check className="w-4 h-4 mr-2" />
                     Mark Complete & Continue
                   </Button>
                 )}
-                <Button variant="outline" onClick={() => setSelectedLesson(null)} className="flex-1 sm:flex-none">
+                <Button variant="outline" onClick={() => setSelectedLesson(null)} className="flex-1 sm:flex-none border-gray-200">
                   Close
                 </Button>
               </div>
 
               {/* Coach prompt */}
-              <div className="mt-4 pt-4 border-t border-border">
+              <div className="mt-4 pt-4 border-t border-gray-200">
                 <Link 
                   to="/dashboard/coach"
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-black transition-colors"
                 >
                   <MessageCircle className="w-4 h-4" />
                   Questions about this lesson? Ask AI Coach
