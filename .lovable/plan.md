@@ -1,133 +1,111 @@
 
-# Fix Course Purchase Flow - hasPurchasedCourse Bug
+
+# Fix Signup Flow: Email Confirmation Handling
 
 ## Problem Summary
 
-The Course Preview page incorrectly shows "Go to Dashboard" instead of "Get Your Course — $67" for unauthenticated users. This happens because:
+After completing signup, users are redirected back to the signup page instead of proceeding to checkout. This happens because:
 
-1. React Query caches `allCourses` data from a previous session
-2. When the user logs out, this cache isn't cleared
-3. `hasPurchasedCourse()` returns stale cached data even for logged-out users
+1. **Email confirmation is enabled** in the authentication system
+2. The signup page shows Step 3 (Welcome) immediately after calling `signUp()`, even though the user isn't actually logged in yet
+3. When the user clicks "Continue to Checkout", the checkout page detects no authenticated user and redirects back to `/signup`
 
-## Root Cause Analysis
+## Solution Overview
 
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ User Session A (logged in, purchased course)                │
-│   → allCourses cached with purchase data                    │
-└─────────────────────────────────────────────────────────────┘
-                         ↓
-┌─────────────────────────────────────────────────────────────┐
-│ User logs out                                               │
-│   → signOut() called                                        │
-│   → React Query cache NOT cleared ⚠️                        │
-└─────────────────────────────────────────────────────────────┘
-                         ↓
-┌─────────────────────────────────────────────────────────────┐
-│ New user visits /course/muscle (not logged in)              │
-│   → hasPurchasedCourse('muscle') called                     │
-│   → Returns stale cached data → true ❌                     │
-│   → Shows "Go to Dashboard" instead of $67 CTA              │
-└─────────────────────────────────────────────────────────────┘
-```
+We need to modify the signup flow to properly handle email confirmation:
 
----
+1. **Step 3 should inform users to check their email** for confirmation instead of pretending they can proceed
+2. **After email confirmation**, users should be redirected to checkout automatically
+3. The `emailRedirectTo` option should include the redirect destination
 
-## Implementation Plan
+## Technical Changes
 
-### 1. Clear React Query Cache on Logout
+### 1. Update Signup Page (`src/pages/Signup.tsx`)
 
-**File:** `src/hooks/useAuth.tsx`
+**Changes:**
+- Extract `redirect` parameter from URL search params
+- Update `emailRedirectTo` to include the redirect destination (e.g., `/checkout`)
+- Change Step 3 messaging to inform users they need to confirm their email
+- Remove the "Continue to Checkout" button since they can't proceed without email confirmation
+- Add a "Resend confirmation email" option
 
-Update the `signOut` function to clear all React Query caches when user logs out:
+### 2. Handle Email Confirmation Redirect
 
-```typescript
-// Current (lines 146-148):
-const signOut = async () => {
-  await supabase.auth.signOut();
-};
+When users click the confirmation link in their email, they'll be redirected to the origin. We need to:
+- Ensure the auth callback properly handles the redirect
+- Consider creating a dedicated callback handler or updating `App.tsx` to handle the confirmation flow
 
-// Updated:
-const signOut = async () => {
-  // Clear all React Query caches to prevent stale data
-  queryClient.clear();
-  
-  // Clear any localStorage items that might persist purchase state
-  localStorage.removeItem('selectedCourseGoal');
-  
-  await supabase.auth.signOut();
-};
-```
+### 3. Update useAuth Hook (`src/hooks/useAuth.tsx`)
 
-### 2. Make hasPurchasedCourse Auth-Aware
+**Changes:**
+- On `SIGNED_IN` event (which fires after email confirmation), check localStorage for pending redirect
+- Automatically navigate users to their intended destination (checkout)
 
-**File:** `src/hooks/useCourse.ts`
+## Implementation Details
 
-Update the `hasPurchasedCourse` function to explicitly return `false` when no user is authenticated:
+### Step 1: Signup Page Changes
 
 ```typescript
-// Current (lines 109-112):
-const hasPurchasedCourse = (goal: string) => {
-  return allCourses?.some(course => course.goal === goal);
-};
+// Extract redirect param
+const redirect = searchParams.get("redirect") || "/checkout";
 
-// Updated:
-const hasPurchasedCourse = (goal: string) => {
-  // No user = no purchase possible
-  if (!user) return false;
-  
-  return allCourses?.some(course => course.goal === goal) ?? false;
-};
+// Update emailRedirectTo to include redirect
+const { data: signUpData, error } = await supabase.auth.signUp({
+  email,
+  password,
+  options: {
+    emailRedirectTo: `${window.location.origin}${redirect}`,
+    data: { full_name: name },
+  },
+});
+
+// Store intended redirect in localStorage
+localStorage.setItem("post_signup_redirect", redirect);
+
+// Update Step 3 UI to show email confirmation message
 ```
 
-### 3. Add Loading State to CoursePreview CTA
+### Step 2: Welcome Step UI Changes
 
-**File:** `src/pages/CoursePreview.tsx`
+Replace the current "Continue to Checkout" button with:
+- "Check your email for a confirmation link" message
+- Email icon visual
+- "Didn't receive it? Resend" button
+- Note that they'll be redirected to checkout after confirming
 
-The current code (line 116-118) shows loading state while `courseLoading` is true, but we should also ensure `isPurchased` is only evaluated after loading completes:
+### Step 3: Auth Hook Changes
 
 ```typescript
-// Current (line 116):
-const isPurchased = goal && hasPurchasedCourse(goal.replace('-', '_'));
-
-// This is already guarded by the loading check on line 118, but let's
-// make the isPurchased check more explicit:
-
-// Show loading while any data is being fetched
-if (templateLoading || courseLoading) {
-  return <LoadingState />;
+// In onAuthStateChange, when SIGNED_IN fires:
+if (event === "SIGNED_IN" && session?.user) {
+  const pendingRedirect = localStorage.getItem("post_signup_redirect");
+  if (pendingRedirect) {
+    localStorage.removeItem("post_signup_redirect");
+    // Navigation will happen in the component
+  }
 }
-
-// Only evaluate purchase status AFTER loading is complete AND user is verified
-const isPurchased = user && goal && hasPurchasedCourse(goal.replace('-', '_'));
 ```
 
----
+## Files to Modify
 
-## Technical Details
+1. `src/pages/Signup.tsx` - Update email redirect URL and Step 3 UI
+2. `src/hooks/useAuth.tsx` - Handle post-confirmation redirect (optional, can be handled in component)
 
-### Files to Modify
+## Expected User Flow After Fix
 
-| File | Changes |
-|------|---------|
-| `src/hooks/useAuth.tsx` | Add `queryClient.clear()` and localStorage cleanup to `signOut()` |
-| `src/hooks/useCourse.ts` | Add `!user` guard to `hasPurchasedCourse()` |
-| `src/pages/CoursePreview.tsx` | Add explicit `user &&` check to `isPurchased` evaluation |
+1. User enters email → Step 1
+2. User enters name/password → Step 2
+3. User sees "Check your email" message → Step 3
+4. User clicks confirmation link in email
+5. User is redirected to `/checkout` with active session
+6. User completes checkout
 
-### Key Principle
+## Alternative Approach (Disable Email Confirmation)
 
-**Unauthenticated users should ALWAYS see the purchase CTA ($67), never the dashboard CTA.**
+If immediate access is more important than email verification, we could disable email confirmation:
+- Users would be logged in immediately after signup
+- The current flow would work as intended
+- Trade-off: Less security, potential for fake emails
 
-The fix ensures:
-1. Logout clears all cached data
-2. `hasPurchasedCourse` never returns `true` for logged-out users
-3. The UI explicitly checks both auth state AND purchase status
+This would require updating the authentication settings in Lovable Cloud.
 
-### Testing Checklist
-
-After implementation, verify:
-- [ ] New incognito visitor sees "$67" CTA on Course Preview
-- [ ] Logged out user sees "$67" CTA on Course Preview  
-- [ ] User who purchased sees "Go to Dashboard" on Course Preview
-- [ ] After logout, visiting Course Preview shows "$67" CTA
-- [ ] Checkout page displays $67 with early access messaging
