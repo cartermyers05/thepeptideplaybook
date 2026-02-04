@@ -1,86 +1,50 @@
 
-# Plan: Change Green Highlight Color to Gray
 
-## Overview
-Replace the teal/green (`primary`) highlight color with a neutral gray throughout the landing page sections. This creates a more muted, editorial aesthetic.
+# Fix: Hero Header Animation Not Showing
 
-## Affected Areas
+## The Problem
+The headline "Your AI Peptide Journey" is invisible because of incorrect Framer Motion animation configuration. The `motion.h1` element has `initial="hidden"` and `animate="visible"`, but:
 
-### 1. GoalSelectionSection.tsx
-**Line 123:** "Start Course" arrow text uses `text-primary`
-- Change: `text-primary` → `text-muted-foreground`
+1. The `motion.h1` doesn't have a `variants` prop, so it's not connected to the animation system
+2. The child `motion.span` elements have `lineVariants` but aren't receiving the animation state from their parent
 
-### 2. HowItWorksSection.tsx  
-**Line 136:** Detail bullet dots use `bg-primary/60`
-- Change: `bg-primary/60` → `bg-muted-foreground/40`
+The result: the spans remain stuck in their `hidden` state (opacity: 0, x: -30) and never animate in.
 
-### 3. ProductPreview.tsx
-Multiple instances of teal highlighting:
-- **Line 63:** Accent line uses purple gradient (kept as decorative)
-- **Line 96:** Card gradient uses `from-primary/5 to-primary/10`
-- **Line 102:** PP avatar uses `bg-primary`
-- **Line 111:** "Featured" badge uses `bg-primary/10 text-primary`
-- **Line 133:** Feature bullets use `bg-primary`
-- **Line 195:** Abbreviation boxes use `bg-primary/10`
-- **Line 199:** Abbreviation text uses `text-primary`
-- **Line 207:** Stats text uses `text-primary`
+## The Solution
+Add the parent container's animation orchestration properly so children receive the animation trigger.
 
-### 4. Other Landing Components (text-primary usage)
-Files that use `text-primary` for highlight accents:
-- `CurriculumSection.tsx` - Module icons and section label
-- `ComparisonSection.tsx` - Checkmarks and column header
-- `PricingCTA.tsx` - Checkmarks and email link
-- `HeroProductCards.tsx` - Chips and AI bubbles
+### File: `src/components/landing/HeroSection.tsx`
 
----
+**Change the `motion.h1` to use variants that connect to its children:**
 
-## Change Strategy
+```tsx
+// Before (broken):
+<motion.h1
+  className="..."
+  initial="hidden"
+  animate="visible"
+>
+  <motion.span variants={lineVariants} custom={0} className="block">
 
-Instead of editing every component individually, the cleanest solution is to **create a new utility color** for these muted accents. However, since the user wants a quick change to gray specifically in those visible sections, I'll make targeted changes:
-
-### Files to Edit
-
-| File | Change |
-|------|--------|
-| `GoalSelectionSection.tsx` | `text-primary` → `text-muted-foreground` for "Start Course" |
-| `HowItWorksSection.tsx` | `bg-primary/60` → `bg-muted-foreground/40` for bullets |
-| `ProductPreview.tsx` | Multiple `text-primary`/`bg-primary` → `text-muted-foreground`/`bg-muted` |
-
-### Specific Replacements
-
-```text
-GoalSelectionSection.tsx (Line 123):
-  Before: text-primary group-hover:text-white
-  After:  text-muted-foreground group-hover:text-white
-
-HowItWorksSection.tsx (Line 136):
-  Before: bg-primary/60
-  After:  bg-muted-foreground/40
-
-ProductPreview.tsx:
-  - Line 96:  from-primary/5 to-primary/10 → from-muted/50 to-muted/80
-  - Line 102: bg-primary → bg-foreground
-  - Line 111: bg-primary/10 text-primary → bg-muted text-muted-foreground
-  - Line 133: bg-primary → bg-muted-foreground
-  - Line 195: bg-primary/10 → bg-muted
-  - Line 199: text-primary → text-foreground
-  - Line 207: text-primary → text-muted-foreground
+// After (fixed):
+<motion.h1
+  className="..."
+  variants={containerVariants}  // Add this to connect to children
+  initial="hidden"
+  animate="visible"
+>
+  <motion.span variants={lineVariants} custom={0} className="block">
 ```
 
----
+The key fix is adding `variants={containerVariants}` to the `motion.h1` so it properly orchestrates the child animations. The `containerVariants` already has `staggerChildren` which works perfectly with the `lineVariants`.
 
-## Result
-- The "Start Course" arrows become gray instead of teal
-- The bullet point dots become gray
-- The product abbreviations (DB, SC, RD) become gray/dark instead of teal
-- The "Featured" badge becomes a neutral gray
-- The stats text becomes muted gray
-- Maintains visual hierarchy while removing the green accent
+Alternatively, we can keep it simpler and just remove the redundant `initial/animate` from the h1 since the parent `motion.div` already handles orchestration - but the children need to inherit properly.
 
----
+## Implementation
+- Line 50-53: Add `variants={containerVariants}` to `motion.h1` OR remove `initial/animate` from h1 and let parent div handle it
 
 ## Summary
-- Edit 3 files: `GoalSelectionSection.tsx`, `HowItWorksSection.tsx`, `ProductPreview.tsx`
-- Replace `text-primary` with `text-muted-foreground` or `text-foreground`
-- Replace `bg-primary` with `bg-foreground` or `bg-muted`
-- Creates a more neutral, editorial look without teal highlights
+- The header disappeared because child animations weren't triggered
+- Fix by properly connecting parent variants to children
+- Single line change to restore the staggered headline animation
+
