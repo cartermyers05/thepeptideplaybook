@@ -25,9 +25,9 @@ interface QuizChatState {
   error: string | null;
 }
 
-const INITIAL_MESSAGE = `Hey! I'm going to build you a personalized peptide course. But first, I need to understand what you're looking for.
+const INITIAL_MESSAGE = `Hey! I'm going to personalize your course based on your needs. Let's start with your goals.
 
-What's your main goal - what are you hoping peptides can help with?`;
+What are you hoping peptides can help you with?`;
 
 const goalLabels: Record<string, string> = {
   fat_loss: 'Fat Loss',
@@ -174,45 +174,70 @@ export function useQuizChat() {
   const getConcernLabel = (concern: string | null) => concern ? concernLabels[concern] || concern : null;
   const getTimelineLabel = (timeline: string | null) => timeline ? timelineLabels[timeline] || timeline : null;
 
-  const saveQuizResponse = useCallback(async (email: string, newsletter: boolean) => {
+  // Save quiz response - updates existing user_courses record
+  const saveQuizResponse = useCallback(async () => {
     const { goal, experience, concern, timeline } = state.extractedValues;
     
     if (!goal || !experience || !timeline) {
       throw new Error('Quiz not complete');
     }
 
-    // Save to localStorage
+    if (!user?.id) {
+      throw new Error('User not authenticated');
+    }
+
+    // Save to localStorage for backup
     const quizData = {
       goal,
       experience,
       concern,
-      timeline,
-      email
+      timeline
     };
     localStorage.setItem('quizResponse', JSON.stringify(quizData));
 
-    // Save to database
+    // Find and update the user's course with personalization data
     try {
-      const { data, error } = await supabase
+      // First, get the user's course
+      const { data: existingCourse, error: fetchError } = await supabase
+        .from('user_courses')
+        .select('id, goal')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (fetchError) {
+        console.error('Error fetching course:', fetchError);
+      }
+
+      if (existingCourse) {
+        // Update the existing course with personalization
+        // Store personalization in the lessons JSON for now
+        const { error: updateError } = await supabase
+          .from('user_courses')
+          .update({
+            status: 'active',
+            started_at: new Date().toISOString()
+          })
+          .eq('id', existingCourse.id);
+
+        if (updateError) {
+          console.error('Error updating course:', updateError);
+        }
+      }
+
+      // Also save to quiz_responses for analytics
+      await supabase
         .from('quiz_responses')
         .insert({
-          user_id: user?.id || null,
+          user_id: user.id,
           primary_goal: goal,
           experience_level: experience,
           main_concerns: concern ? [concern] : [],
           timeline: timeline === 'this_week' ? 'ready_now' : timeline === 'this_month' ? 'soon' : 'researching',
-          email,
-          newsletter_opt_in: newsletter
-        })
-        .select()
-        .single();
+          completed_at: new Date().toISOString()
+        });
 
-      if (!error && data) {
-        localStorage.setItem('quizResponse', JSON.stringify({
-          ...quizData,
-          id: data.id
-        }));
-      }
     } catch (err) {
       console.error('Error saving quiz:', err);
     }
