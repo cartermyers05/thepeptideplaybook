@@ -1,75 +1,139 @@
 
 
-# Fix Auto-Scroll in Quiz Chat
+# Remove All Emojis and Replace with Lucide Icons
 
-## The Problem
-When you send a message in the quiz, the AI's response appears but the page doesn't automatically scroll down to show it. This causes the new message content to be cut off below the visible area.
+## Overview
+Remove all emoji usage across the site and replace them with clean Lucide icons to maintain the typography-first editorial aesthetic. The user specifically mentioned the party horn (🎉) and DNA (🧬) emojis on onboarding, but emojis are also used in milestones, streak displays, and banners.
 
-## The Solution
-Add a "scroll anchor" element at the bottom of the messages list and use `scrollIntoView()` instead of manually setting `scrollTop`. This is the same pattern used successfully in the ChatWidget component.
+## Files to Update
 
----
+### 1. `src/components/quiz/BuildingAnimation.tsx`
+Remove the large 🧬 and 🎉 emojis and replace with Lucide icons:
 
-## File to Update
+| Location | Current | Replacement |
+|----------|---------|-------------|
+| Line 83 (building phase) | 🧬 emoji | `Dna` icon from lucide-react |
+| Line 195 (email phase) | 🎉 emoji | `PartyPopper` icon from lucide-react |
 
-### `src/components/quiz/ConversationalQuiz.tsx`
-
-**Change 1: Add a new ref for the scroll anchor (line 57)**
-```tsx
-// Current
-const scrollRef = useRef<HTMLDivElement>(null);
-
-// Add after scrollRef
-const messagesEndRef = useRef<HTMLDivElement>(null);
-```
-
-**Change 2: Update the auto-scroll useEffect (lines 76-81)**
-```tsx
-// Current - doesn't work reliably
-useEffect(() => {
-  if (scrollRef.current) {
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }
-}, [messages]);
-
-// New - uses scrollIntoView for reliable scrolling
-useEffect(() => {
-  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-}, [messages]);
-```
-
-**Change 3: Add the scroll anchor div at the end of messages (after line 199, before the closing `</div>` of the messages container)**
-```tsx
-{/* Current messages list */}
-{messages.map((message, index) => (
-  <QuizMessage ... />
-))}
-
-{error && (
-  <motion.div ... />
-)}
-
-{/* Add this scroll anchor */}
-<div ref={messagesEndRef} />
-```
+**Changes:**
+- Import `Dna` and `PartyPopper` from lucide-react
+- Replace emoji spans with styled icon components
+- Use a circular background container to maintain visual presence
 
 ---
 
-## How It Works
+### 2. `src/components/landing/UrgencyBanner.tsx`
+Remove the 🎉 emoji from the promotional banner:
 
-| Approach | Behavior |
-|----------|----------|
-| **Before**: `scrollTop = scrollHeight` | Scrolls the container to its max scroll position, but can fail if container height changes |
-| **After**: `scrollIntoView({ behavior: "smooth" })` | Smoothly scrolls until the anchor element is visible in the viewport - more reliable |
+| Location | Current | Replacement |
+|----------|---------|-------------|
+| Line 60 | `<span>🎉</span>` | `<Sparkles className="w-4 h-4" />` or simply remove |
 
-The empty `<div ref={messagesEndRef} />` sits at the very bottom of the message list. When messages change, we tell the browser to scroll that element into view, which guarantees the latest content is visible.
+**Changes:**
+- Import `Sparkles` from lucide-react (or remove the icon entirely for cleaner look)
+- Replace emoji with icon
+
+---
+
+### 3. `src/components/coach/CheckInFlow.tsx`
+Remove streak fire emojis:
+
+| Location | Current | Replacement |
+|----------|---------|-------------|
+| Line 83 | `toast.success("Check-in complete! 🎉")` | `toast.success("Check-in complete!")` |
+| Line 103 | `<span>🔥</span>` | `<Flame className="w-5 h-5 text-orange-500" />` |
+| Line 133 | `<span>🔥</span>` | `<Flame className="w-6 h-6 text-orange-500" />` |
+
+**Changes:**
+- Import `Flame` from lucide-react
+- Replace fire emojis with Flame icons
+
+---
+
+### 4. `src/components/coach/ReconGuide.tsx`
+Remove emoji from toast:
+
+| Location | Current | Replacement |
+|----------|---------|-------------|
+| Line 65 | `toast.success("Achievement unlocked: First Reconstitution! 🎉")` | `toast.success("Achievement unlocked: First Reconstitution!")` |
+
+---
+
+### 5. `src/hooks/useMilestones.ts`
+Replace all milestone emoji icons with Lucide icon names:
+
+| Milestone | Current | Replacement Icon Name |
+|-----------|---------|----------------------|
+| first_checkin | 🎯 | `"Target"` |
+| first_recon | 🧪 | `"FlaskConical"` |
+| week_1 | 📅 | `"Calendar"` |
+| streak_7 | 🔥 | `"Flame"` |
+| streak_14 | ⚡ | `"Zap"` |
+| streak_30 | 💪 | `"Dumbbell"` |
+| streak_60 | 🏆 | `"Trophy"` |
+| streak_90 | 👑 | `"Crown"` |
+| cycle_complete | 🎉 | `"Award"` |
+
+**Technical Note:** This changes the `icon` property from an emoji string to a Lucide icon name string, requiring updates to components that render these icons.
+
+---
+
+### 6. `src/pages/dashboard/Home.tsx` (line 164)
+Update milestone icon rendering to use Lucide icons instead of emoji strings:
+
+**Changes:**
+- Import the icon map from lucide-react
+- Create a lookup to render the correct Lucide icon based on the icon name
+
+---
+
+### 7. `src/pages/Stats.tsx` (line 194)
+Replace the large fire emoji in stats:
+
+| Location | Current | Replacement |
+|----------|---------|-------------|
+| Line 194 | `<p className="text-6xl">🔥</p>` | `<Flame className="w-16 h-16 text-orange-500" />` |
+
+---
+
+### 8. `src/components/progress/TrendCharts.tsx` (line 38)
+Replace energy level emoji:
+
+| Location | Current | Replacement |
+|----------|---------|-------------|
+| Line 38 | `<span>⚡</span>` | `<Zap className="w-4 h-4" />` |
+
+---
+
+## Icon Mapping Reference
+
+| Emoji | Lucide Icon | Import |
+|-------|-------------|--------|
+| 🧬 | Dna | `import { Dna } from "lucide-react"` |
+| 🎉 | PartyPopper or Award | `import { PartyPopper } from "lucide-react"` |
+| 🔥 | Flame | `import { Flame } from "lucide-react"` |
+| ⚡ | Zap | `import { Zap } from "lucide-react"` |
+| 💪 | Dumbbell | `import { Dumbbell } from "lucide-react"` |
+| 🏆 | Trophy | `import { Trophy } from "lucide-react"` |
+| 👑 | Crown | `import { Crown } from "lucide-react"` |
+| 🎯 | Target | `import { Target } from "lucide-react"` |
+| 🧪 | FlaskConical | `import { FlaskConical } from "lucide-react"` |
+| 📅 | Calendar | `import { Calendar } from "lucide-react"` |
 
 ---
 
 ## Summary
-- **1 file to update**: `src/components/quiz/ConversationalQuiz.tsx`
-- Add `messagesEndRef` ref
-- Update `useEffect` to use `scrollIntoView()` instead of `scrollTop`
-- Add scroll anchor `<div>` at end of messages list
-- Result: Chat automatically scrolls to show AI responses
+
+| File | Changes |
+|------|---------|
+| `BuildingAnimation.tsx` | Replace 🧬 with Dna icon, 🎉 with PartyPopper icon |
+| `UrgencyBanner.tsx` | Remove or replace 🎉 with Sparkles icon |
+| `CheckInFlow.tsx` | Replace 🔥 with Flame icons, remove emoji from toast |
+| `ReconGuide.tsx` | Remove emoji from toast message |
+| `useMilestones.ts` | Change emoji strings to Lucide icon name strings |
+| `Home.tsx` (dashboard) | Update milestone rendering to use Lucide icons |
+| `Stats.tsx` | Replace 🔥 with Flame icon |
+| `TrendCharts.tsx` | Replace ⚡ with Zap icon |
+
+This creates a consistent, professional look aligned with the typography-first editorial design system.
 
