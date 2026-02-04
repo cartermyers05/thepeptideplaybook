@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Send, Flame, Dumbbell, Heart, Clock, Brain, HelpCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -48,6 +49,9 @@ const quickAnswers = [
 ];
 
 export function ConversationalQuiz() {
+  const [searchParams] = useSearchParams();
+  const preSelectedGoal = searchParams.get('goal');
+  
   const [input, setInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -69,7 +73,7 @@ export function ConversationalQuiz() {
     getConcernLabel,
     getReadinessLabel,
     totalSteps
-  } = useQuizChat();
+  } = useQuizChat(preSelectedGoal);
 
   // Auto-scroll to bottom
   useEffect(() => {

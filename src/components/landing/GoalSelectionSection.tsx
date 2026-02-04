@@ -83,7 +83,7 @@ export function GoalSelectionSection() {
             Goal
           </h2>
           <p className="mt-6 text-lg text-muted-foreground max-w-xl">
-            Choose what matters most to you, and we'll build your personalized course.
+            Choose what matters most to you. We'll show you exactly what your personalized course looks like.
           </p>
         </motion.div>
 
@@ -97,7 +97,7 @@ export function GoalSelectionSection() {
           {goals.map((goal) => (
             <motion.div key={goal.id} variants={itemVariants}>
               <Link
-                to={`/course/${goal.id}`}
+                to={`/quiz?goal=${goal.id}`}
                 className="block group"
               >
                 <div className="relative overflow-hidden rounded-2xl border border-border bg-card hover:border-transparent transition-all duration-300 hover:shadow-2xl">
@@ -121,7 +121,7 @@ export function GoalSelectionSection() {
                     
                     {/* Arrow indicator */}
                     <div className="mt-6 flex items-center gap-2 text-sm font-medium text-muted-foreground group-hover:text-white transition-colors duration-300">
-                      <span>Start Course</span>
+                      <span>See Your Course</span>
                       <span className="group-hover:translate-x-1 transition-transform">→</span>
                     </div>
                   </div>
