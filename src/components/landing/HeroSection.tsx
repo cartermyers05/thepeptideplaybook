@@ -42,7 +42,7 @@ export function HeroSection() {
               <br />
               Peptide
               <br />
-              <span className="text-foreground">Journey</span>
+              Journey
             </motion.h1>
 
             <motion.p
