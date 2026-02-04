@@ -146,12 +146,7 @@ export default function Checkout() {
           <Button 
             size="lg" 
             className="w-full btn-primary-clean h-12 mb-6"
-            onClick={() => {
-              if (!hasStartedRef.current) {
-                hasStartedRef.current = true;
-                startCheckout();
-              }
-            }}
+            onClick={() => startCheckout()}
           >
             Pay $67 — Get Full Access
           </Button>

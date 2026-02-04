@@ -123,7 +123,7 @@ serve(async (req) => {
               name: courseTitle,
               description: 'Lifetime access to your personalized peptide course',
             },
-            unit_amount: 9900, // $99.00
+            unit_amount: 6700, // $67.00
           },
           quantity: 1,
         },
