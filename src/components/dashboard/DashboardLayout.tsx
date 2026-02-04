@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { DashboardSidebar } from "./DashboardSidebar";
+import { DashboardNavbar } from "./DashboardNavbar";
 import { MobileBottomNav } from "./MobileBottomNav";
 
 interface DashboardLayoutProps {
@@ -9,9 +9,9 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-[#fafafa]">
-      <DashboardSidebar />
+      <DashboardNavbar />
       <MobileBottomNav />
-      <main className="md:ml-60 min-h-screen pb-20 md:pb-0">
+      <main className="min-h-screen pb-20 md:pb-0">
         <div className="max-w-5xl mx-auto p-4 md:p-8">
           {children}
         </div>
