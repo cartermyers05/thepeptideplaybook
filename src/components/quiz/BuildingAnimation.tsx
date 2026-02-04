@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dna, Check, PartyPopper } from "lucide-react";
+import { Dna, Check, PartyPopper, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import type { ExtractedValues } from "@/hooks/useQuizChat";
 
 interface BuildingAnimationProps {
@@ -33,6 +34,7 @@ export function BuildingAnimation({
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   // Run through building steps
   useEffect(() => {
@@ -41,22 +43,28 @@ export function BuildingAnimation({
         setCurrentStep(prev => prev + 1);
       }, buildSteps[currentStep].duration);
       return () => clearTimeout(timer);
-    } else if (currentStep === buildSteps.length && !isComplete) {
+    } else if (currentStep === buildSteps.length && !isComplete && !hasError) {
       // All steps done - mark complete and trigger save
       setIsComplete(true);
-      onComplete();
+      try {
+        onComplete();
+      } catch (error) {
+        console.error('Error in onComplete:', error);
+        setHasError(true);
+        toast.error('Failed to create your course. Please try again.');
+      }
     }
-  }, [currentStep, isComplete, onComplete]);
+  }, [currentStep, isComplete, hasError, onComplete]);
 
   // After complete + save done, redirect to dashboard
   useEffect(() => {
-    if (isComplete && !isSubmitting) {
+    if (isComplete && !isSubmitting && !hasError) {
       const timer = setTimeout(() => {
         navigate("/dashboard", { replace: true });
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [isComplete, isSubmitting, navigate]);
+  }, [isComplete, isSubmitting, hasError, navigate]);
 
   const progress = Math.min((currentStep / buildSteps.length) * 100, 100);
 
@@ -70,7 +78,16 @@ export function BuildingAnimation({
         {/* Icon */}
         <div className="mb-8">
           <AnimatePresence mode="wait">
-            {!isComplete ? (
+            {hasError ? (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-20 h-20 rounded-full bg-destructive/10 flex items-center justify-center mx-auto"
+              >
+                <AlertCircle className="w-10 h-10 md:w-12 md:h-12 text-destructive" />
+              </motion.div>
+            ) : !isComplete ? (
               <motion.div
                 key="building"
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -100,13 +117,28 @@ export function BuildingAnimation({
 
         {/* Title */}
         <h1 className="text-2xl md:text-3xl font-bold mb-2">
-          {isComplete ? "Your Course is Ready!" : "Building Your Course..."}
+          {hasError 
+            ? "Something went wrong" 
+            : isComplete 
+              ? "Your Course is Ready!" 
+              : "Building Your Course..."}
         </h1>
         <p className="text-muted-foreground mb-8">
-          {isComplete 
-            ? "Taking you to your personalized dashboard..." 
-            : "Personalizing your 8-week peptide program"}
+          {hasError
+            ? "We couldn't save your course. Please try the quiz again."
+            : isComplete 
+              ? "Taking you to your personalized dashboard..." 
+              : "Personalizing your 8-week peptide program"}
         </p>
+        
+        {hasError && (
+          <button
+            onClick={() => navigate("/quiz", { replace: true })}
+            className="mb-6 px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+          >
+            Try Again
+          </button>
+        )}
 
         {/* Progress bar */}
         <div className="h-2 bg-secondary rounded-full overflow-hidden mb-6">

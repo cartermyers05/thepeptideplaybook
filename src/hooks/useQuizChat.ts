@@ -348,6 +348,7 @@ export function useQuizChat() {
 
         if (protocolError) {
           console.error('Error updating protocol:', protocolError);
+          throw new Error(`Failed to update protocol: ${protocolError.message}`);
         }
       } else {
         // INSERT new protocol
@@ -366,6 +367,7 @@ export function useQuizChat() {
 
         if (protocolError) {
           console.error('Error creating protocol:', protocolError);
+          throw new Error(`Failed to create protocol: ${protocolError.message}`);
         }
       }
 
@@ -415,6 +417,7 @@ export function useQuizChat() {
 
         if (courseError) {
           console.error('Error updating user_course:', courseError);
+          throw new Error(`Failed to update course: ${courseError.message}`);
         }
       } else {
         // INSERT new course
@@ -436,6 +439,7 @@ export function useQuizChat() {
 
           if (courseError) {
             console.error('Error creating user_course:', courseError);
+            throw new Error(`Failed to create course: ${courseError.message}`);
           }
         } else {
           // Fallback: create a basic course if no template exists
@@ -455,6 +459,7 @@ export function useQuizChat() {
 
           if (courseError) {
             console.error('Error creating fallback user_course:', courseError);
+            throw new Error(`Failed to create course: ${courseError.message}`);
           }
         }
       }
@@ -478,6 +483,7 @@ export function useQuizChat() {
 
     } catch (err) {
       console.error('Error saving quiz:', err);
+      throw err; // Re-throw to let UI handle it
     }
 
     return goal;
