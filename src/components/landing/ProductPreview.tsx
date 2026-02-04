@@ -192,13 +192,13 @@ export function ProductPreview() {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <motion.div 
-                className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors"
+                className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-muted transition-colors"
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 400 }}
               >
                 <span className="text-sm font-bold text-primary">{product.abbrev}</span>
               </motion.div>
-              <h3 className="text-lg font-semibold mb-3 group-hover:text-primary transition-colors">
+              <h3 className="text-lg font-semibold mb-3 group-hover:text-foreground transition-colors">
                 {product.title}
               </h3>
               <p className="text-muted-foreground text-sm leading-relaxed mb-4">

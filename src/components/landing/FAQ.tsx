@@ -42,14 +42,14 @@ function FAQItem({
         onClick={onClick}
         className="w-full py-6 flex items-start justify-between gap-4 text-left group"
       >
-        <span className="text-lg md:text-xl font-medium group-hover:text-primary transition-colors">
+        <span className="text-lg md:text-xl font-medium group-hover:text-foreground transition-colors">
           {question}
         </span>
         <div className="flex-shrink-0 mt-1">
           {isOpen ? (
             <Minus className="w-5 h-5 text-primary" />
           ) : (
-            <Plus className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <Plus className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
           )}
         </div>
       </button>

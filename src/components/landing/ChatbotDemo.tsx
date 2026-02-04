@@ -149,7 +149,7 @@ export function ChatbotDemo() {
               className={`p-4 text-left rounded-xl border transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${
                 selectedQuestion === question
                   ? "bg-primary/10 border-primary"
-                  : "bg-muted/50 border-border hover:border-primary/50 hover:bg-primary/5"
+                  : "bg-muted/50 border-border hover:border-muted-foreground/50 hover:bg-muted/50"
               }`}
             >
               <span className="text-sm font-medium">{question}</span>

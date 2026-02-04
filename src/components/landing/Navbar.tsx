@@ -107,7 +107,7 @@ export function Navbar() {
                   key={link.label}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-4xl md:text-6xl font-bold py-3 hover:text-primary transition-colors opacity-0 animate-fade-in-up"
+                  className="block text-4xl md:text-6xl font-bold py-3 hover:text-foreground transition-colors opacity-0 animate-fade-in-up"
                   style={{
                     animationDelay: `${index * 0.1}s`,
                     animationFillMode: "forwards",

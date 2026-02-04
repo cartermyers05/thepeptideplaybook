@@ -37,22 +37,22 @@ export function Footer() {
               </h4>
               <ul className="space-y-3 text-sm">
                 <li>
-                  <a href="#curriculum" className="text-foreground hover:text-primary transition-colors">
+                  <a href="#curriculum" className="text-foreground hover:text-foreground transition-colors">
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
+                  <a href="#how-it-works" className="text-foreground hover:text-foreground transition-colors">
                     How It Works
                   </a>
                 </li>
                 <li>
-                  <a href="#pricing" className="text-foreground hover:text-primary transition-colors">
+                  <a href="#pricing" className="text-foreground hover:text-foreground transition-colors">
                     Pricing
                   </a>
                 </li>
                 <li>
-                  <a href="#faq" className="text-foreground hover:text-primary transition-colors">
+                  <a href="#faq" className="text-foreground hover:text-foreground transition-colors">
                     FAQ
                   </a>
                 </li>
@@ -65,17 +65,17 @@ export function Footer() {
               </h4>
               <ul className="space-y-3 text-sm">
                 <li>
-                  <Link to="/guides" className="text-foreground hover:text-primary transition-colors">
+                  <Link to="/guides" className="text-foreground hover:text-foreground transition-colors">
                     Free Guides
                   </Link>
                 </li>
                 <li>
-                  <Link to="/about" className="text-foreground hover:text-primary transition-colors">
+                  <Link to="/about" className="text-foreground hover:text-foreground transition-colors">
                     About Us
                   </Link>
                 </li>
                 <li>
-                  <Link to="/editorial-policy" className="text-foreground hover:text-primary transition-colors">
+                  <Link to="/editorial-policy" className="text-foreground hover:text-foreground transition-colors">
                     Editorial Policy
                   </Link>
                 </li>
@@ -88,17 +88,17 @@ export function Footer() {
               </h4>
               <ul className="space-y-3 text-sm">
                 <li>
-                  <Link to="/terms" className="text-foreground hover:text-primary transition-colors">
+                  <Link to="/terms" className="text-foreground hover:text-foreground transition-colors">
                     Terms of Service
                   </Link>
                 </li>
                 <li>
-                  <Link to="/privacy" className="text-foreground hover:text-primary transition-colors">
+                  <Link to="/privacy" className="text-foreground hover:text-foreground transition-colors">
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link to="/disclaimer" className="text-foreground hover:text-primary transition-colors">
+                  <Link to="/disclaimer" className="text-foreground hover:text-foreground transition-colors">
                     Medical Disclaimer
                   </Link>
                 </li>
@@ -126,7 +126,7 @@ export function Footer() {
           </p>
           <a
             href="mailto:hello@peptideplaybook.com"
-            className="text-sm text-foreground hover:text-primary transition-colors"
+            className="text-sm text-foreground hover:text-foreground transition-colors"
           >
             hello@peptideplaybook.com
           </a>
