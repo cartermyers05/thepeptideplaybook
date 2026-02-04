@@ -15,7 +15,7 @@ const Index = () => {
     <>
       <SEOHead
         title="The First AI-Powered Peptide Course | Peptide Playbook"
-        description="Not a generic course. Not a chatbot. A complete program built around YOUR goal — with day-by-day guidance through your first peptide cycle. $99 one-time."
+        description="Not a generic course. Not a chatbot. A complete program built around YOUR goal — with day-by-day guidance through your first peptide cycle. $67 one-time."
         canonical="/"
       />
       <HomepageSchemas />
