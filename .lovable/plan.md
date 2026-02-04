@@ -1,50 +1,67 @@
 
-# Plan: Change Green Hover Colors to Grey
+# Alternative Logo Animation Options
 
-## Overview
-Replace all green/teal (`primary`) hover effects across the landing page with grey (`muted-foreground` or similar neutral grey) to create a more subtle, consistent hover experience.
+## Current Issue
+The letter-by-letter staggered reveal animation isn't appealing. Let's try something different.
 
-## Files to Update
+## Option A: Smooth Hover Lift Effect (Recommended)
+A simple, elegant hover animation where the entire logo smoothly lifts up with a subtle shadow, creating a "floating" effect.
 
-### 1. WhatsInsideSection.tsx (lines 90, 99)
-- `hover:border-primary/30` → `hover:border-muted-foreground/30`
-- `group-hover:text-primary` → `group-hover:text-foreground`
+- On hover: Logo slides up slightly (-4px) with a soft drop shadow
+- Smooth scale increase (1.02x) for emphasis
+- Clean transition without letter-by-letter complexity
 
-### 2. FAQ.tsx (lines 45, 52)
-- `group-hover:text-primary` → `group-hover:text-foreground` (for question text)
-- `group-hover:text-primary` → `group-hover:text-foreground` (for plus icon)
+## Option B: Underline Reveal
+An animated underline that draws itself under each word on hover:
+- "Peptide" gets a thin animated underline on hover
+- Clean, editorial aesthetic matching the design system
 
-### 3. Footer.tsx (lines 40, 45, 50, 55, 68, 73, 78, 91, 96, 101, 129)
-- All `hover:text-primary` → `hover:text-foreground` (11 links)
-
-### 4. Navbar.tsx (line 110)
-- `hover:text-primary` → `hover:text-foreground` (menu links)
-
-### 5. ProductPreview.tsx (lines 195, 201)
-- `group-hover:bg-primary/20` → `group-hover:bg-muted`
-- `group-hover:text-primary` → `group-hover:text-foreground`
-
-### 6. FeaturedBy.tsx (line 36)
-- `hover:text-primary` → `hover:text-foreground`
-
-### 7. ChatbotDemo.tsx (line 152)
-- `hover:border-primary/50 hover:bg-primary/5` → `hover:border-muted-foreground/50 hover:bg-muted/50`
-
-### 8. CourseFeatures.tsx (line 82)
-- `hover:border-primary/40` → `hover:border-muted-foreground/40`
-
-## Summary of Changes
-- **Text hovers**: Change from `hover:text-primary` / `group-hover:text-primary` to `hover:text-foreground` / `group-hover:text-foreground`
-- **Border hovers**: Change from `hover:border-primary/*` to `hover:border-muted-foreground/*`
-- **Background hovers**: Change from `hover:bg-primary/*` to `hover:bg-muted/*`
+## Option C: Fade & Scale Pulse
+A subtle breathing animation on hover:
+- Slight scale up (1.03x)
+- Brief opacity pulse to draw attention
+- Feels alive without being distracting
 
 ---
 
-## Technical Details
+## Technical Implementation (Option A - Recommended)
 
-All changes use existing Tailwind color tokens:
-- `text-foreground` - standard dark text color
-- `muted-foreground` - grey text color for subtle elements
-- `muted` - grey background color
+### Changes to Navbar.tsx
 
-No new CSS or configuration changes required.
+Remove the letter-by-letter animation and replace with a clean hover lift:
+
+```tsx
+// Remove: letterVariants and AnimatedWord components
+
+// Replace logo section with:
+<Link to="/" className="flex flex-col group">
+  <motion.div
+    className="flex flex-col"
+    whileHover={{ 
+      y: -2, 
+      transition: { duration: 0.2, ease: "easeOut" } 
+    }}
+  >
+    <span className="text-lg md:text-xl font-bold tracking-tight uppercase">
+      Peptide
+    </span>
+    <span className="text-lg md:text-xl font-bold tracking-tight uppercase -mt-1">
+      Playbook
+    </span>
+  </motion.div>
+</Link>
+```
+
+### Benefits
+- Cleaner, more subtle animation
+- Maintains the editorial aesthetic
+- No jarring letter animations on page load
+- Professional and modern feel
+
+---
+
+## Summary
+- Remove complex letter-by-letter animation
+- Add simple hover lift effect (moves up 2px on hover)
+- Keep framer-motion for smooth transitions
+- Matches the minimal, typography-first design system
