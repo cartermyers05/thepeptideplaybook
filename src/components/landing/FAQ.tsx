@@ -1,10 +1,6 @@
 import { motion } from "framer-motion";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { useState } from "react";
+import { Plus, Minus } from "lucide-react";
 
 const faqs = [
   {
@@ -20,8 +16,8 @@ const faqs = [
     answer: "Perfect. We built this for you. The guides assume zero prior knowledge and walk you through every single step, from reconstitution to your first injection.",
   },
   {
-    question: "Can I cancel anytime?",
-    answer: "Yes. No contracts, no commitments. Cancel with one click in your account settings. You'll keep access until the end of your billing period.",
+    question: "Can I get a refund?",
+    answer: "Yes. 30-day money-back guarantee, no questions asked. If you're not satisfied, email us and we'll refund you immediately.",
   },
   {
     question: "Do you sell peptides?",
@@ -29,65 +25,94 @@ const faqs = [
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.3, ease: "easeOut" as const }
-  },
-};
+function FAQItem({ 
+  question, 
+  answer, 
+  isOpen, 
+  onClick 
+}: { 
+  question: string; 
+  answer: string; 
+  isOpen: boolean; 
+  onClick: () => void;
+}) {
+  return (
+    <div className="border-b border-border">
+      <button
+        onClick={onClick}
+        className="w-full py-6 flex items-start justify-between gap-4 text-left group"
+      >
+        <span className="text-lg md:text-xl font-medium group-hover:text-primary transition-colors">
+          {question}
+        </span>
+        <div className="flex-shrink-0 mt-1">
+          {isOpen ? (
+            <Minus className="w-5 h-5 text-primary" />
+          ) : (
+            <Plus className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+          )}
+        </div>
+      </button>
+      <motion.div
+        initial={false}
+        animate={{
+          height: isOpen ? "auto" : 0,
+          opacity: isOpen ? 1 : 0,
+        }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className="overflow-hidden"
+      >
+        <p className="pb-6 text-muted-foreground leading-relaxed max-w-2xl">
+          {answer}
+        </p>
+      </motion.div>
+    </div>
+  );
+}
 
 export function FAQ() {
-  return (
-    <section id="faq" className="py-20 md:py-28">
-      <div className="container px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Frequently Asked Questions
-          </h2>
-        </motion.div>
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          className="max-w-2xl mx-auto"
-        >
-          <Accordion type="single" collapsible className="space-y-3">
-            {faqs.map((faq, index) => (
-              <motion.div key={index} variants={itemVariants}>
-                <AccordionItem
-                  value={`item-${index}`}
-                  className="glass-card px-6 data-[state=open]:shadow-glow transition-all duration-300"
-                >
-                  <AccordionTrigger className="text-left font-medium hover:no-underline py-5 [&[data-state=open]>svg]:rotate-180">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              </motion.div>
-            ))}
-          </Accordion>
-        </motion.div>
+  return (
+    <section id="faq" className="py-32 md:py-40">
+      <div className="container px-4 md:px-8">
+        <div className="grid lg:grid-cols-2 gap-16">
+          {/* Left - Heading */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight sticky top-32">
+              Frequently
+              <br />
+              Asked
+              <br />
+              <span className="text-primary">Questions</span>
+            </h2>
+          </motion.div>
+
+          {/* Right - Accordion */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="border-t border-border">
+              {faqs.map((faq, index) => (
+                <FAQItem
+                  key={index}
+                  question={faq.question}
+                  answer={faq.answer}
+                  isOpen={openIndex === index}
+                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                />
+              ))}
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

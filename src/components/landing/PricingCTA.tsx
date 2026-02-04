@@ -1,83 +1,95 @@
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Check } from "lucide-react";
+import { PillButton } from "./PillButton";
 
 const features = [
   "Personalized protocol for your goals",
   "Step-by-step reconstitution guide",
-  "Injection walkthrough",
+  "Complete injection walkthrough",
   "Daily guidance through your cycle",
   "24/7 AI coach access",
   "Progress tracking",
-  "Cancel anytime",
+  "Lifetime access",
 ];
 
 export function PricingCTA() {
   return (
-    <section id="pricing" className="py-20 md:py-28 bg-secondary/30">
-      <div className="container px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
-            One price. Everything included.
-          </h2>
-        </motion.div>
-
-        {/* Pricing Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="max-w-md mx-auto"
-        >
-          <div className="bg-card border-2 border-primary/30 rounded-2xl p-8 relative shadow-xl">
-            {/* Price */}
-            <div className="text-center mb-6">
-              <div className="flex items-baseline justify-center gap-1 mb-2">
-                <span className="text-5xl font-bold">$29</span>
-                <span className="text-muted-foreground">/month</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Or save 29% with annual ($249/year)
-              </p>
-            </div>
-
-            {/* Features List */}
-            <ul className="space-y-3 mb-8">
-              {features.map((feature, index) => (
-                <li key={index} className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                  <span className="text-sm">{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* CTA */}
-            <Link to="/quiz" className="block">
-              <Button size="lg" className="w-full btn-primary-clean h-12 text-base group">
-                Start My Course
-                <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
-              </Button>
-            </Link>
-
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              30-day money-back guarantee. No questions asked.
+    <section id="pricing" className="py-32 md:py-40 bg-secondary/50">
+      <div className="container px-4 md:px-8">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left - Heading */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+              One Price.
+              <br />
+              <span className="text-primary">Everything</span>
+              <br />
+              Included.
+            </h2>
+            <p className="mt-6 text-lg text-muted-foreground max-w-md">
+              No hidden fees. No monthly subscriptions. Pay once, get lifetime access 
+              to your personalized peptide course.
             </p>
-          </div>
-        </motion.div>
+          </motion.div>
+
+          {/* Right - Pricing card */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <div className="bg-card border border-border rounded-3xl p-8 md:p-12 relative overflow-hidden">
+              {/* Price */}
+              <div className="mb-8">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-6xl md:text-7xl font-bold">$99</span>
+                  <span className="text-muted-foreground text-lg">one-time</span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  30-day money-back guarantee
+                </p>
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-4 mb-10">
+                {features.map((feature, index) => (
+                  <li key={index} className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Check className="w-3 h-3 text-primary" />
+                    </div>
+                    <span className="text-foreground">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <Link to="/quiz" className="block">
+                <PillButton 
+                  variant="dark" 
+                  size="lg" 
+                  className="w-full justify-center"
+                  icon={<span>→</span>}
+                >
+                  Start My Course
+                </PillButton>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
 
         <motion.p
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="text-center text-sm text-muted-foreground mt-8"
+          transition={{ delay: 0.5 }}
+          className="text-center text-sm text-muted-foreground mt-16"
         >
           Questions? Email{" "}
           <a href="mailto:support@peptideplaybook.com" className="text-primary hover:underline">

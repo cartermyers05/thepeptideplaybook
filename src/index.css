@@ -6,57 +6,57 @@
 
 @layer base {
   :root {
-    /* Core neutrals - Pure, clean */
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    /* Lusion-style warm off-white background */
+    --background: 45 10% 96%;
+    --foreground: 0 0% 10%;
 
-    /* Card and surface */
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    /* Card and surface - slightly warmer */
+    --card: 45 10% 98%;
+    --card-foreground: 0 0% 10%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 10%;
 
-    /* Primary - Teal/Emerald #0D9488 */
+    /* Primary - Keep teal for CTAs */
     --primary: 173 82% 32%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Off-white */
-    --secondary: 210 20% 98%;
-    --secondary-foreground: 222 47% 11%;
+    /* Secondary - Warm off-white */
+    --secondary: 45 10% 94%;
+    --secondary-foreground: 0 0% 10%;
 
     /* Muted - For subtle text and backgrounds */
-    --muted: 210 20% 98%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 45 10% 94%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Accent - Soft teal-gray for highlights */
-    --accent: 173 30% 94%;
-    --accent-foreground: 222 47% 11%;
+    /* Accent - Very subtle warm gray */
+    --accent: 45 5% 92%;
+    --accent-foreground: 0 0% 10%;
 
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders and inputs */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    /* Borders and inputs - softer */
+    --border: 45 5% 88%;
+    --input: 45 5% 88%;
     --ring: 173 82% 40%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Custom tokens */
+    /* Custom tokens - Lusion style */
     --surface-elevated: 0 0% 100%;
-    --surface-sunken: 210 20% 98%;
-    --headline: 222 47% 11%;
+    --surface-sunken: 45 10% 94%;
+    --headline: 0 0% 8%;
 
     /* Sidebar */
-    --sidebar-background: 210 20% 98%;
-    --sidebar-foreground: 222 47% 11%;
+    --sidebar-background: 45 10% 96%;
+    --sidebar-foreground: 0 0% 10%;
     --sidebar-primary: 173 82% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 173 30% 92%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-accent: 45 5% 92%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 45 5% 88%;
     --sidebar-ring: 173 82% 40%;
 
     /* Success state */
