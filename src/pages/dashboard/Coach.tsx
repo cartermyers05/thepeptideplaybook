@@ -1,6 +1,6 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { AskCoach } from "@/components/coach/AskCoach";
-import { MessageCircle } from "lucide-react";
+import { AnimatedLogo } from "@/components/brand/AnimatedLogo";
 
 const suggestedQuestions = [
   "What should I expect in week 1?",
@@ -15,8 +15,8 @@ export default function Coach() {
       <div className="max-w-3xl mx-auto space-y-6 animate-fade-up">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-purple-600" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+            <AnimatedLogo size={28} />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-black">AI Coach</h1>
