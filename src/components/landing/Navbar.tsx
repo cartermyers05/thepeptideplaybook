@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PillButton } from "./PillButton";
+import { Logo } from "@/components/brand/Logo";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -28,21 +29,27 @@ export function Navbar() {
       >
         <div className="container px-4 md:px-8">
           <div className="flex items-center justify-between h-20 md:h-24">
-            {/* Logo - Animated Wordmark */}
-            <Link to="/" className="flex flex-col">
+            {/* Logo - Icon + Animated Wordmark */}
+            <Link to="/" className="flex items-center gap-3">
               <motion.div
-                className="flex flex-col"
+                className="flex items-center gap-3"
                 whileHover={{ 
                   y: -2,
                   transition: { duration: 0.2, ease: "easeOut" } 
                 }}
               >
-                <span className="text-lg md:text-xl font-bold tracking-tight uppercase">
-                  Peptide
-                </span>
-                <span className="text-lg md:text-xl font-bold tracking-tight uppercase -mt-1">
-                  Playbook
-                </span>
+                {/* Rainbow hexagon logo icon */}
+                <Logo showText={false} size="md" />
+                
+                {/* Stacked wordmark */}
+                <div className="flex flex-col">
+                  <span className="text-lg md:text-xl font-bold tracking-tight uppercase">
+                    Peptide
+                  </span>
+                  <span className="text-lg md:text-xl font-bold tracking-tight uppercase -mt-1">
+                    Playbook
+                  </span>
+                </div>
               </motion.div>
             </Link>
 
