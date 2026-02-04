@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { checkRateLimit, getClientIP } from "../_shared/rateLimiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,6 +18,18 @@ serve(async (req) => {
 
   try {
     logStep("Function started");
+
+    // Rate limiting: 10 attempts per 5 minutes per IP
+    const clientIP = getClientIP(req);
+    const rateLimit = checkRateLimit(`validate-promo:${clientIP}`, 10, 300);
+    
+    if (!rateLimit.allowed) {
+      logStep("Rate limit exceeded", { clientIP, resetIn: rateLimit.resetIn });
+      return new Response(
+        JSON.stringify({ valid: false, error: "Too many validation attempts. Please try again later." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 429 }
+      );
+    }
 
     const { code } = await req.json();
     
