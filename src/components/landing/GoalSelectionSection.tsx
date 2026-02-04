@@ -80,7 +80,7 @@ export function GoalSelectionSection() {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
             Pick Your
             <br />
-            <span className="text-primary">Goal</span>
+            Goal
           </h2>
           <p className="mt-6 text-lg text-muted-foreground max-w-xl">
             Choose what matters most to you, and we'll build your personalized course.
