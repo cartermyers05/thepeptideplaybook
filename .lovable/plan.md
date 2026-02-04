@@ -1,220 +1,226 @@
 
 
-# Fix Onboarding Flow to Match Desired User Journey
+# Complete the Peptide Playbook Deliverable System
 
-## Current vs Desired Flow
+## Current State Analysis
 
-```text
-CURRENT FLOW (broken):
-Landing → /quiz (BLOCKED - needs payment) → /signup → /checkout → Stripe → /thank-you → /quiz → Dashboard
+After exploring the codebase, here's what exists vs. what's missing:
 
-DESIRED FLOW:
-Landing → /quiz (OPEN) → Building Animation → /course-preview → Auth (if needed) → Stripe → /thank-you → /welcome → /dashboard
+### What Already Exists ✓
+| Feature | Status | Location |
+|---------|--------|----------|
+| Daily Lessons UI | ✓ Working | `/dashboard/course` (CourseLessons.tsx) |
+| Lesson Modal with Content | ✓ Working | Dialog in CourseLessons.tsx |
+| AI Coach | ✓ Working | `/dashboard/coach` with context-aware responses |
+| My Plan (Reference) | ✓ Working | `/dashboard/plan` with peptides, schedules, guides |
+| Reconstitution Guide | ✓ Built | Accordion in MyPlan.tsx |
+| Injection Guide | ✓ Built | Accordion in MyPlan.tsx |
+| Progress Ring | ✓ Built | Dashboard home |
+| Welcome Flow | ✓ Built | 3-step supplies check |
+| Milestones Timeline | ✓ Built | Dashboard home |
+| Week Calendar Strip | ✓ Built | Dashboard home |
+
+### Critical Gaps ✗
+
+| Gap | Problem | Impact |
+|-----|---------|--------|
+| **Only 8 lessons seeded** | Course templates have 8 lessons but claim 42-84 days | Users hit "no content" on Day 9 |
+| **Goal not passed to checkout** | `useCheckout.ts` doesn't send goal to `create-checkout` | Courses created with wrong goal |
+| **Quiz data not used after payment** | Quiz saves to localStorage but `verify-payment` doesn't read it | User's preferences ignored |
+| **Dosing Calculator missing** | Not built | Users can't calculate units to draw |
+| **Interactive checkboxes missing** | Guides are read-only, not interactive | Users can't confirm steps |
+
+---
+
+## Implementation Plan
+
+### Phase 1: Fix Critical Data Flow (Priority)
+
+#### 1.1 Fix Goal Passing Through Checkout Flow
+
+**Problem**: When user clicks "Get Your Course" on `/course/[goal]`, the goal IS passed correctly. But `useCheckout.ts` (used by `/checkout` page) doesn't pass any goal.
+
+**Solution**: Since the CoursePreview page already handles checkout correctly (line 67-68 in CoursePreview.tsx passes `{ goal }`), we just need to ensure users always go through the course preview, not the old checkout page.
+
+**Files to update:**
+- Remove or redirect `/checkout` to `/quiz` since it's no longer part of the flow
+- The CoursePreview already correctly calls `create-checkout` with goal
+
+#### 1.2 Seed Full 56-Day Course Content
+
+**Problem**: Course templates only have 8 lessons but promise 56 days.
+
+**Solution**: Create database migration to populate all 56 lessons for each course template with proper:
+- Day number (0-55)
+- Phase (Preparation, Getting Started, Week 1-8, Mastery)
+- Title
+- Content (200-400 words each)
+- Action item
+
+**Content structure per the spec:**
+```
+Days 0-3: Preparation
+- Day 0: Welcome & Your Plan
+- Day 1: Understanding your peptide
+- Day 2: Supplies checklist
+- Day 3: Reconstitution prep
+
+Days 4-7: Getting Started
+- Day 4: Reconstitution day (link to guide)
+- Day 5: First injection (link to guide)
+- Day 6: Day after - what's normal
+- Day 7: Week 1 complete
+
+Days 8-14: Building Routine
+- Managing side effects
+- Second injection
+- What to eat
+- Tracking progress
+
+Days 15-28: Optimization
+- Dose increase consideration
+- Non-scale victories
+- One month milestone
+
+Days 29-56: Mastery
+- Fine-tuning
+- Maintenance habits
+- Course completion
+```
+
+### Phase 2: Enhance User Experience
+
+#### 2.1 Add Dosing Calculator to My Plan
+
+**New component**: `src/components/dashboard/DosingCalculator.tsx`
+
+Features:
+- Input: Vial size (mg), Water added (ml)
+- Output: Units to draw for each dose tier
+- Formula: `(desired_dose / vial_size) * water_added * 100 = units`
+- Auto-populated based on user's current week/dose
+
+#### 2.2 Make Guides Interactive (Checkboxes)
+
+**Update**: `src/pages/dashboard/MyPlan.tsx`
+
+Convert guide steps from read-only to interactive:
+- Add checkboxes to each step
+- Save completion state to localStorage or database
+- Show progress indicator
+- Prevent proceeding to injection until reconstitution is confirmed
+
+#### 2.3 Enhance Today's Lesson Card
+
+**Update**: `src/components/dashboard/home/TodayLessonCard.tsx`
+
+Add quick links based on current day:
+- Day 3-4: Show "Open Reconstitution Guide" button
+- Day 4-5: Show "Open Injection Guide" button  
+- Any day: Show "Ask AI Coach" button
+
+### Phase 3: Progress & Engagement
+
+#### 3.1 Enhance Milestones System
+
+**Update**: Milestones should unlock based on actual actions:
+- First check-in ✓
+- Reconstitution complete (when guide checkboxes done)
+- First injection ✓
+- Week 1 complete
+- First dose increase
+- One month complete
+- Course complete
+
+#### 3.2 Add Streak System
+
+Already partially built in `useLessons.ts`. Enhance to show:
+- Current streak on dashboard
+- Longest streak
+- Visual streak calendar
+
+---
+
+## Technical Implementation Details
+
+### Database Migration: Seed Full Lesson Content
+
+```sql
+-- Update course_templates with complete 56-day content
+-- Example for fat_loss course (would do for all 6 goals)
+
+UPDATE course_templates 
+SET lessons = '[
+  {"day": 0, "phase": "Preparation", "title": "Welcome & Your Plan", "content": "...", "action_item": "..."},
+  {"day": 1, "phase": "Preparation", "title": "Understanding Semaglutide", "content": "...", "action_item": "..."},
+  -- ... 54 more lessons
+]'::jsonb
+WHERE goal = 'fat_loss';
+```
+
+### Dosing Calculator Component
+
+```tsx
+interface DosingCalculatorProps {
+  vialSizeMg: number;
+  waterMl: number;
+  currentWeek: number;
+}
+
+function DosingCalculator({ vialSizeMg, waterMl, currentWeek }: DosingCalculatorProps) {
+  // Calculate: (dose_mg / vial_mg) * water_ml * 100 = units
+  const calculateUnits = (doseMg: number) => {
+    return Math.round((doseMg / vialSizeMg) * waterMl * 100);
+  };
+  
+  // Show units for each dose tier
+  return (
+    <div>
+      <p>0.25mg = {calculateUnits(0.25)} units</p>
+      <p>0.5mg = {calculateUnits(0.5)} units</p>
+      <p>1.0mg = {calculateUnits(1.0)} units</p>
+    </div>
+  );
+}
+```
+
+### Interactive Guide State
+
+```tsx
+// Store guide completion state
+const [reconSteps, setReconSteps] = useState<boolean[]>([false, false, false, false, false, false]);
+
+// Save to localStorage or database
+useEffect(() => {
+  localStorage.setItem('recon_progress', JSON.stringify(reconSteps));
+}, [reconSteps]);
 ```
 
 ---
 
 ## Summary of Changes
 
-| Change | Description |
-|--------|-------------|
-| 1. Unprotect Quiz | Remove `ProtectedRoute` wrapper from `/quiz` |
-| 2. Fix CoursePreview price | Change button text from "$99" to "$67" |
-| 3. Fix BuildingAnimation redirect | Go to `/course-preview/:goal` instead of `/dashboard` |
-| 4. Fix ThankYou redirect | Go to `/welcome` instead of `/quiz` |
-| 5. Create /welcome route | Separate 3-step welcome page after payment |
-| 6. Ensure course creation | Course is created in `verify-payment`, not quiz |
-| 7. HeroSection CTA | Keep `/quiz` link (already correct) |
+| Priority | Change | Files |
+|----------|--------|-------|
+| 🔴 Critical | Seed 56 lessons per course | Database migration |
+| 🔴 Critical | Ensure goal flows from quiz → preview → checkout → course creation | Verify existing flow works |
+| 🟡 Important | Add dosing calculator | New component + MyPlan.tsx |
+| 🟡 Important | Make guides interactive | MyPlan.tsx |
+| 🟢 Enhancement | Add guide links to TodayLessonCard | TodayLessonCard.tsx |
+| 🟢 Enhancement | Enhance milestones tracking | useMilestones.ts |
 
 ---
 
-## Detailed Implementation
+## Expected Outcome
 
-### 1. Unprotect the Quiz Route
+After implementation:
 
-**File:** `src/App.tsx`
-
-Remove `ProtectedRoute` wrapper from quiz:
-
-```tsx
-// BEFORE
-<Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
-
-// AFTER
-<Route path="/quiz" element={<Quiz />} />
-```
-
----
-
-### 2. Fix CoursePreview Price
-
-**File:** `src/pages/CoursePreview.tsx`
-
-Update button text to match actual price ($67):
-
-```tsx
-// BEFORE (line 294)
-"Get Your Course — $99"
-
-// AFTER
-"Get Your Course — $67"
-```
-
----
-
-### 3. Fix BuildingAnimation Redirect
-
-**File:** `src/components/quiz/BuildingAnimation.tsx`
-
-After quiz completion, redirect to course preview instead of dashboard:
-
-```tsx
-// BEFORE (line 62-65)
-navigate("/dashboard", { replace: true });
-
-// AFTER
-const goal = extractedValues.goal?.replace('_', '-') || 'beginner';
-navigate(`/course/${goal}`, { replace: true });
-```
-
-Also update the "Course Ready" messaging to be about preview, not dashboard.
-
----
-
-### 4. Fix ThankYou Redirect
-
-**File:** `src/pages/ThankYou.tsx`
-
-After payment verification, redirect to `/welcome` instead of `/quiz`:
-
-```tsx
-// BEFORE (line 63-65)
-setTimeout(() => {
-  navigate("/quiz", { replace: true });
-}, 2000);
-
-// AFTER
-setTimeout(() => {
-  navigate("/welcome", { replace: true });
-}, 2000);
-```
-
-Also update messaging from "build your personalized course" to "get started".
-
----
-
-### 5. Create Welcome Page
-
-**New file:** `src/pages/Welcome.tsx`
-
-A dedicated 3-step welcome experience (celebration → supplies question → what's next):
-
-- Step 1: Celebration with confetti-style animation
-- Step 2: "Do you have your supplies?" with options
-- Step 3: "Here's what's next" with CTA to dashboard
-
-Uses existing `WelcomeModal` components but as a full page.
-
----
-
-### 6. Add Welcome Route
-
-**File:** `src/App.tsx`
-
-Add the new protected welcome route:
-
-```tsx
-<Route path="/welcome" element={<ProtectedRoute><Welcome /></ProtectedRoute>} />
-```
-
----
-
-### 7. Update verify-payment Edge Function
-
-**File:** `supabase/functions/verify-payment/index.ts`
-
-Currently sets `status: 'pending_quiz'` but quiz already happened. Change to:
-
-```tsx
-// BEFORE
-status: 'pending_quiz'
-
-// AFTER  
-status: 'not_started'
-```
-
----
-
-### 8. Update useQuizChat
-
-**File:** `src/hooks/useQuizChat.ts`
-
-Currently creates course/protocol on quiz save. Since payment hasn't happened yet at this point in the new flow, change this to:
-- Save quiz responses to localStorage only (for course preview)
-- Move actual course creation to after payment verification
-
-OR keep the current behavior but ensure it handles the case where user hasn't paid yet (by using upsert logic that already exists).
-
----
-
-### 9. Update Landing Page Price References
-
-**Files to update:**
-- `src/components/landing/HeroSection.tsx` - Change "$99" to "$67"
-- `src/components/landing/PricingCTA.tsx` - Change "$99" to "$67"
-
----
-
-## Technical Flow After Changes
-
-```text
-1. User clicks "Start Your Course" on landing page
-   → Goes to /quiz (no auth required)
-
-2. User completes 4-question AI chat
-   → Quiz saves extractedValues to localStorage
-   → Shows "Building your course..." animation (3-5 sec)
-
-3. BuildingAnimation completes
-   → Redirects to /course/[goal] (e.g., /course/fat-loss)
-
-4. User sees CoursePreview with:
-   - Their selected peptide + why
-   - Curriculum outline
-   - $67 price + guarantee
-   
-5. User clicks "Get My Course"
-   → If not logged in: redirect to /login?redirect=/course/[goal]
-   → If logged in: open Stripe checkout in new tab
-
-6. After Stripe payment
-   → Stripe redirects to /thank-you?session_id=xxx
-   → verify-payment edge function:
-     - Confirms payment
-     - Creates user_courses record
-     - Updates profile tier
-     - Records purchase
-
-7. ThankYou page
-   → Redirects to /welcome after 2 seconds
-
-8. Welcome page (3 steps)
-   → Step 1: Celebration
-   → Step 2: Supplies check
-   → Step 3: What's next
-
-9. User clicks final CTA
-   → Goes to /dashboard ready for Day 0
-```
-
----
-
-## Summary
-
-This plan restructures the flow so:
-- **Quiz is accessible without payment** (removes friction)
-- **Course preview shows personalized content** (builds desire)
-- **Payment happens after personalization** (higher conversion)
-- **Dedicated welcome experience after payment** (better UX)
-- **Course data is properly created on payment verification** (data integrity)
+1. **User completes quiz** → Answers stored
+2. **Sees course preview** → Shows their peptide, schedule preview
+3. **Pays $67** → Course created with their goal
+4. **Welcome flow** → Supplies check, status saved
+5. **Dashboard** → Day 0 ready with full 56 lessons
+6. **My Plan** → Interactive guides, dosing calculator, peptide info
+7. **AI Coach** → Knows their context, provides personalized answers
+8. **Progress** → Milestones unlock as they complete actions
 
