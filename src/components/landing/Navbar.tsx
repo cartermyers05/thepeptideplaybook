@@ -4,36 +4,6 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PillButton } from "./PillButton";
 
-const letterVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.05,
-      duration: 0.3,
-      ease: "easeOut" as const,
-    },
-  }),
-};
-
-const AnimatedWord = ({ word, startIndex = 0 }: { word: string; startIndex?: number }) => (
-  <span className="inline-flex overflow-hidden">
-    {word.split("").map((letter, i) => (
-      <motion.span
-        key={i}
-        custom={startIndex + i}
-        variants={letterVariants}
-        initial="hidden"
-        animate="visible"
-        className="inline-block"
-      >
-        {letter}
-      </motion.span>
-    ))}
-  </span>
-);
-
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -59,21 +29,21 @@ export function Navbar() {
         <div className="container px-4 md:px-8">
           <div className="flex items-center justify-between h-20 md:h-24">
             {/* Logo - Animated Wordmark */}
-            <Link to="/" className="flex flex-col group">
-              <motion.span 
-                className="text-lg md:text-xl font-bold tracking-tight uppercase"
-                whileHover={{ letterSpacing: "0.1em" }}
-                transition={{ duration: 0.3 }}
+            <Link to="/" className="flex flex-col">
+              <motion.div
+                className="flex flex-col"
+                whileHover={{ 
+                  y: -2,
+                  transition: { duration: 0.2, ease: "easeOut" } 
+                }}
               >
-                <AnimatedWord word="Peptide" />
-              </motion.span>
-              <motion.span 
-                className="text-lg md:text-xl font-bold tracking-tight uppercase -mt-1"
-                whileHover={{ letterSpacing: "0.1em" }}
-                transition={{ duration: 0.3 }}
-              >
-                <AnimatedWord word="Playbook" startIndex={7} />
-              </motion.span>
+                <span className="text-lg md:text-xl font-bold tracking-tight uppercase">
+                  Peptide
+                </span>
+                <span className="text-lg md:text-xl font-bold tracking-tight uppercase -mt-1">
+                  Playbook
+                </span>
+              </motion.div>
             </Link>
 
             {/* Desktop nav - Right aligned controls */}
