@@ -1,228 +1,203 @@
 
-# Peptide Playbook - 6 Month Goal Progress Audit
 
-## Executive Summary
+# Seed All Course Templates - Complete Implementation Plan
 
-Based on analyzing the master launch document against the current codebase, **you're approximately 85-90% complete** for launch. The core product flow works, but there are critical gaps in content seeding and some inconsistencies to address.
+## Overview
+
+The uploaded document contains complete lesson content for all 5 remaining courses that currently only have 8 lessons each. This plan will seed the database with full curriculum for each course.
 
 ---
 
-## Complete User Journey - Status Check
+## Current State vs. Target
 
-```text
-LANDING PAGE        ✅ Complete
-     ↓ [Start Your Course]
-ONBOARDING CHAT     ✅ Complete (quiz at /quiz)
-     ↓ 5 personalization questions
-BUILDING ANIMATION  ✅ Complete (in CoursePreview.tsx)
-     ↓ "Creating your course..."
-COURSE PREVIEW      ✅ Complete (/course/:goal)
-     ↓ [Get My Course]
-AUTH (if needed)    ✅ Complete (redirects to /login)
-     ↓ 
-STRIPE CHECKOUT     ✅ Complete (create-checkout function)
-     ↓ Payment
-WELCOME FLOW        ✅ Complete (WelcomeModal in dashboard)
-     ↓
-DASHBOARD           ✅ Complete (/dashboard)
+| Course | Current Lessons | Target Lessons | Status |
+|--------|-----------------|----------------|--------|
+| fat_loss | 57 | 57 | Complete |
+| muscle | 8 | 56 | **NEEDS SEEDING** |
+| recovery | 8 | 42 | **NEEDS SEEDING** |
+| anti_aging | 8 | 60 | **NEEDS SEEDING** |
+| cognitive | 8 | 56 | **NEEDS SEEDING** |
+| beginner | 8 | 42 | **NEEDS SEEDING** |
+
+**Note:** The document shows anti_aging as 60 days, but database has it at 84 days. We'll update duration_days to match the content.
+
+---
+
+## Course Content Summary (From Document)
+
+### 1. Muscle & Performance Course (56 Days)
+
+**Peptides:** BPC-157 + TB-500
+
+**Phases:**
+- Foundation (Days 0-7): Learning the stack, reconstitution, first injections
+- Loading (Days 8-28): Building therapeutic levels  
+- Optimization (Days 29-42): Maintenance phase begins
+- Completion (Days 43-56): Tapering and results
+
+**Full Lessons Provided:** 
+- Days 0-7: Detailed daily content (7 lessons with full text)
+- Days 8-28: Weekly summaries (condensed to key lessons)
+- Days 29-56: Maintenance and completion phases
+
+---
+
+### 2. Injury Recovery Course (42 Days)
+
+**Peptides:** BPC-157 + TB-500 (higher doses for acute injury)
+
+**Phases:**
+- Aggressive Healing (Days 0-21): Higher doses near injury
+- Continued Recovery (Days 22-42): Taper and maintenance
+
+**Key Difference:** Higher initial BPC-157 dose (500mcg vs 250mcg)
+
+---
+
+### 3. Anti-Aging & Longevity Course (60 Days)
+
+**Peptides:** Epithalon + GHK-Cu
+
+**Phases:**
+- First Epithalon Cycle + GHK-Cu Start (Days 0-14)
+- GHK-Cu Continuation (Days 15-35)
+- Second Epithalon Cycle (Days 36-45)
+- Completion (Days 46-60)
+
+**Unique:** Epithalon runs in 10-day cycles with gaps
+
+---
+
+### 4. Cognitive Enhancement Course (56 Days)
+
+**Peptides:** Semax + Selank (NASAL SPRAYS - No injections!)
+
+**Phases:**
+- Introduction (Days 0-7)
+- Building Effects (Days 8-14)
+- Dose Increase (Days 15-28)
+- Optimization (Days 29-56)
+
+**Key Difference:** No needles, nasal administration only
+
+---
+
+### 5. Beginner Course (42 Days)
+
+**Peptides:** BPC-157 only
+
+**Phases:**
+- Getting Started (Days 0-7)
+- Building Consistency (Days 8-21)
+- Seeing Results (Days 22-35)
+- Completion (Days 36-42)
+
+**Simplest Protocol:** One peptide, one injection per day
+
+---
+
+## Implementation Approach
+
+### Database Migrations
+
+Will create 5 separate database migrations, one per course, to:
+1. Update the `lessons` JSONB array with full daily content
+2. Update `duration_days` if needed (anti_aging: 84 → 60)
+3. Update `peptides` JSONB with complete peptide info from document
+
+### Lesson Structure
+
+Each lesson follows the existing format:
+```json
+{
+  "day": 0,
+  "phase": "Foundation",
+  "title": "Welcome to Your Muscle & Performance Course",
+  "content": "Full lesson content here...",
+  "action_item": "Review My Plan tab..."
+}
 ```
 
-**Flow Status: READY FOR LAUNCH**
+### Content Generation
+
+For courses with outline-only content (Recovery, Anti-Aging, Cognitive, Beginner), I will:
+- Expand the outlines into full 200-400 word lessons
+- Maintain consistency with the Muscle course's detailed style
+- Ensure phase-appropriate content for each day
 
 ---
 
-## Pre-Launch Checklist (From Master Document Part 6)
+## Files to Create/Modify
 
-### Flow Requirements
+### Database Migrations (5)
 
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Landing page converts to onboarding | ✅ | CTA goes to /quiz |
-| Onboarding captures 5 questions | ✅ | ConversationalQuiz captures goal, experience, concern, readiness, context |
-| Building animation shows | ✅ | CoursePreview.tsx has animated steps |
-| Course preview displays personalized content | ✅ | Shows peptides, schedule, what's included |
-| Auth works (signup/login) | ✅ | Supabase auth configured |
-| Stripe checkout works | ✅ | create-checkout function deployed |
-| Webhook creates course on payment | ✅ | verify-payment function handles this |
-| Welcome flow captures supplies status | ✅ | WelcomeModal has 3 steps |
-| Redirects to dashboard | ✅ | After welcome flow |
-
-### Product Requirements
-
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Dashboard shows today's lesson | ✅ | TodayLessonCard component |
-| Dashboard shows progress (ring, streak, stats) | ✅ | ProgressRing, streak in header |
-| Dashboard shows next injection | ✅ | NextInjectionCard component |
-| Dashboard shows week calendar | ✅ | WeekCalendarStrip component |
-| Dashboard shows milestones | ✅ | MilestonesTimeline component |
-| **All 56 lessons are seeded** | ⚠️ PARTIAL | Only fat_loss has 57 lessons. Other 5 courses only have 8 lessons each! |
-| Lesson view works, can mark complete | ✅ | Dialog in CourseLessons.tsx |
-| My Course page shows all lessons/phases | ✅ | /dashboard/course |
-| My Plan shows peptide info + schedule | ✅ | /dashboard/plan with full peptide details |
-| Reconstitution guide works (interactive) | ✅ | InteractiveGuide component with checkboxes |
-| Injection guide works (interactive) | ✅ | InteractiveGuide component with checkboxes |
-| Dosing calculator works | ✅ | DosingCalculator component |
-| AI Coach works with context | ✅ | /dashboard/coach with enhanced system prompt |
-| Settings page works | ✅ | /dashboard/settings |
-
-### Tech Requirements
-
-| Requirement | Status | Notes |
-|------------|--------|-------|
-| Supabase auth configured | ✅ | Lovable Cloud |
-| Stripe keys configured | ⚠️ Verify | Need to confirm live keys |
-| Webhook endpoint deployed | ✅ | verify-payment function |
-| AI API for coach | ✅ | Using Lovable AI Gateway |
-| Domain configured | ⚠️ Check | Custom domain needed for production |
-| SSL certificate | ✅ | Automatic with Lovable |
-| Mobile responsive | ✅ | Tailwind responsive design |
+| Migration | Course | Lessons | Notes |
+|-----------|--------|---------|-------|
+| Muscle Course | muscle | 56 | Full content from document |
+| Recovery Course | recovery | 42 | Expanded from outline |
+| Anti-Aging Course | anti_aging | 60 | Expanded from outline |
+| Cognitive Course | cognitive | 56 | Expanded from outline |
+| Beginner Course | beginner | 42 | Expanded from outline |
 
 ---
 
-## Critical Issues Found
+## Execution Plan
 
-### 🔴 CRITICAL: Course Content Only Seeded for 1 of 6 Goals
+### Step 1: Muscle Course (Full Content Available)
+- Use the complete 56-day lesson content from the document
+- This course has the most detailed content
 
-**Current Database State:**
-```
-fat_loss      → 57 lessons ✅
-muscle        → 8 lessons  ❌
-recovery      → 8 lessons  ❌
-anti_aging    → 8 lessons  ❌
-cognitive     → 8 lessons  ❌
-beginner      → 8 lessons  ❌
-```
+### Step 2: Beginner Course
+- Simple single-peptide protocol
+- 42 days, one injection daily
+- Good foundation for other courses
 
-**Impact:** If someone selects "Build Muscle" or any non-fat-loss goal, they'll hit "no content" on Day 9.
+### Step 3: Recovery Course
+- Similar to Muscle but shorter (42 days)
+- Higher initial doses, injury-focused
 
-**Fix Required:** Seed full lesson content for remaining 5 course templates.
+### Step 4: Cognitive Course
+- Unique: nasal sprays, no injections
+- Different tone (nootropic focus)
 
----
-
-### ⚠️ Price Inconsistency
-
-**Master Doc Says:** $99
-**Current Implementation:** $67 everywhere
-
-This appears intentional (price reduction), but SEO meta description still says "$99":
-- `src/pages/Index.tsx` line 18: "...cycle. $99 one-time."
-
-**Fix Required:** Update meta description to match $67 pricing.
+### Step 5: Anti-Aging Course
+- Unique cycling protocol (Epithalon cycles)
+- 60 days with two Epithalon cycles
 
 ---
 
-### ⚠️ Route Naming Difference
+## Quality Checks
 
-**Master Doc:** `/onboarding` for quiz
-**Current:** `/quiz` for onboarding
-
-This is fine, just noting the difference. The /quiz route works correctly.
-
----
-
-## SEO Status (6-Month Traffic Goal)
-
-### What's Built ✅
-
-| Page | Status | Traffic Potential |
-|------|--------|------------------|
-| /guides hub | ✅ 33 guides | Hub complete |
-| Semaglutide Guide | ✅ Complete | 8,000+/mo |
-| BPC-157 Guide | ✅ Complete | 6,000+/mo |
-| Reconstitution Guide | ✅ Complete | 5,000/mo |
-| Semaglutide Dosing | ✅ Complete | 10,000/mo |
-| Semaglutide Side Effects | ✅ Complete | 15,000/mo |
-| Peptide Calculator Tool | ✅ Complete | 3,000/mo |
-| Injection Sites Guide | ✅ Complete | 1,300/mo |
-| Tirzepatide vs Semaglutide | ✅ Complete | 8,000/mo |
-| BPC-157 vs TB-500 | ✅ Complete | 2,000/mo |
-| robots.txt (AI crawlers) | ✅ Complete | - |
-| Sitemap | ✅ Updated | - |
-| HowTo Schema | ✅ Component built | - |
-
-### Missing SEO Pages (Phase 2-3)
-
-| Page | Status | Traffic Potential |
-|------|--------|------------------|
-| /peptides/tb-500 | ❌ Not created | 6,000/mo |
-| /peptides/semax | ❌ Not created | 4,000/mo |
-| /peptides/selank | ❌ Not created | 2,500/mo |
-| /compare/ozempic-vs-wegovy | ❌ Not created | 6,000/mo |
-| /faq hub | ❌ Not created | 5,000+/mo |
-
-**Current SEO Traffic Potential:** ~60,000/mo from built pages
-**Missing Traffic Potential:** ~23,500/mo from unbuilt pages
+After seeding each course:
+1. Verify lesson count matches duration_days
+2. Confirm all phases are represented
+3. Check first/last lesson content
+4. Verify peptides JSONB is complete
 
 ---
 
-## Product Features Summary
+## Expected Outcome
 
-### What's Working Great ✅
-
-1. **User Flow** - Complete end-to-end from landing → payment → dashboard
-2. **Dashboard** - All core components (progress ring, calendar, milestones, lessons)
-3. **My Plan** - Full peptide details, interactive guides with checkboxes, dosing calculator
-4. **AI Coach** - Enhanced system prompt with deep personalization context
-5. **Interactive Guides** - Checkboxes that persist to localStorage, trigger milestones
-6. **Milestones System** - 12 milestones with celebration tiers (simple/medium/major)
-7. **SEO Foundation** - 30+ guides, proper schemas, AI crawler access
-
-### What Needs Work ⚠️
-
-1. **Lesson Content** - 5 of 6 course templates missing full lesson content
-2. **Price Meta** - SEO description says $99 but price is $67
-3. **Remaining SEO Pages** - TB-500, Semax, Selank, Ozempic vs Wegovy, FAQ hub
+After implementation:
+- All 6 courses have full daily lesson content
+- Users selecting any goal will have complete curriculum
+- No "breaks" after Day 8
+- Launch-ready content for all course types
 
 ---
 
-## Recommended Priority Actions
+## Technical Notes
 
-### Before Launch (Must Fix)
+### JSONB Lesson Array Size
 
-1. **Seed remaining 5 course templates** with full lesson content
-   - muscle: 56 days of lessons
-   - recovery: 42 days of lessons
-   - anti_aging: 84 days of lessons
-   - cognitive: 56 days of lessons
-   - beginner: 42 days of lessons
+- Muscle: ~56 lessons × ~500 chars = ~28KB
+- Total per course: Well within JSONB limits
 
-2. **Fix price inconsistency** in SEO meta description ($99 → $67)
+### Content Priorities
 
-### After Launch (Week 2+)
+Given the document provides full detailed content for Muscle only, I will:
+1. Seed Muscle exactly as documented (highest fidelity)
+2. Generate detailed content for other courses following the same patterns and voice
 
-3. Create remaining SEO pages:
-   - /peptides/tb-500
-   - /peptides/semax
-   - /peptides/selank
-   - /compare/ozempic-vs-wegovy
-   - /faq hub with individual pages
+This ensures consistency across all courses while respecting the source material.
 
-4. Set up re-engagement emails (anti-churn)
-
----
-
-## Launch Readiness Score
-
-| Category | Score | Notes |
-|----------|-------|-------|
-| Core Flow | 95% | Works end-to-end |
-| Dashboard | 100% | All components built |
-| Guides | 100% | Interactive with checkboxes |
-| AI Coach | 100% | Enhanced context-aware |
-| Course Content | 17% | Only 1/6 courses fully seeded |
-| SEO | 72% | Major pages built, some missing |
-| **Overall** | **85%** | Needs content seeding to launch |
-
----
-
-## Bottom Line
-
-**You're very close to launch.** The architecture is solid, the flow works, and the core product is built. The ONE critical blocker is that only the fat_loss course has full lesson content - the other 5 courses will break on Day 9.
-
-**To launch safely:**
-1. Seed the remaining 5 course templates with full lessons
-2. Fix the $99 → $67 in SEO meta
-3. Ship it
-
-Everything else (additional SEO pages, re-engagement emails, etc.) can be done post-launch as optimization.
