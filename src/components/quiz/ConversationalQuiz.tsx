@@ -6,16 +6,47 @@ import { Button } from "@/components/ui/button";
 import { useQuizChat } from "@/hooks/useQuizChat";
 import { QuizMessage } from "./QuizMessage";
 import { BuildingAnimation } from "./BuildingAnimation";
+import { GoalButton } from "./GoalButton";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const quickAnswers = [
-  { value: 'fat_loss', label: 'Fat Loss', icon: Flame },
-  { value: 'muscle', label: 'Build Muscle', icon: Dumbbell },
-  { value: 'recovery', label: 'Heal Injury', icon: Heart },
-  { value: 'anti_aging', label: 'Anti-Aging', icon: Clock },
-  { value: 'cognitive', label: 'Cognitive', icon: Brain },
-  { value: 'beginner', label: 'Not Sure', icon: HelpCircle },
+  { 
+    value: 'fat_loss', 
+    label: 'Fat Loss', 
+    icon: Flame,
+    gradient: 'linear-gradient(135deg, hsl(25 90% 55%) 0%, hsl(15 85% 45%) 100%)',
+  },
+  { 
+    value: 'muscle', 
+    label: 'Build Muscle', 
+    icon: Dumbbell,
+    gradient: 'linear-gradient(135deg, hsl(210 80% 55%) 0%, hsl(220 75% 45%) 100%)',
+  },
+  { 
+    value: 'recovery', 
+    label: 'Heal Injury', 
+    icon: Heart,
+    gradient: 'linear-gradient(135deg, hsl(350 80% 55%) 0%, hsl(340 75% 45%) 100%)',
+  },
+  { 
+    value: 'anti_aging', 
+    label: 'Anti-Aging', 
+    icon: Clock,
+    gradient: 'linear-gradient(135deg, hsl(270 70% 55%) 0%, hsl(280 65% 45%) 100%)',
+  },
+  { 
+    value: 'cognitive', 
+    label: 'Cognitive', 
+    icon: Brain,
+    gradient: 'linear-gradient(135deg, hsl(160 70% 45%) 0%, hsl(170 65% 35%) 100%)',
+  },
+  { 
+    value: 'beginner', 
+    label: 'Not Sure', 
+    icon: HelpCircle,
+    gradient: 'linear-gradient(135deg, hsl(45 80% 50%) 0%, hsl(35 75% 40%) 100%)',
+  },
 ];
 
 export function ConversationalQuiz() {
@@ -179,17 +210,16 @@ export function ConversationalQuiz() {
               animate={{ opacity: 1, y: 0 }}
               className="flex flex-wrap gap-2 justify-center mb-4"
             >
-              {quickAnswers.map(({ value, label, icon: Icon }) => (
-                <Button
+              {quickAnswers.map(({ value, label, icon, gradient }) => (
+                <GoalButton
                   key={value}
-                  variant="outline"
-                  onClick={() => handleQuickAnswer(value, label)}
+                  value={value}
+                  label={label}
+                  icon={icon}
+                  gradient={gradient}
+                  onClick={handleQuickAnswer}
                   disabled={isLoading}
-                  className="rounded-full px-4 py-2 h-auto gap-2 hover:bg-foreground hover:text-background transition-all"
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </Button>
+                />
               ))}
             </motion.div>
           )}
