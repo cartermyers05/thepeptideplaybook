@@ -75,13 +75,8 @@ export default function Checkout() {
       navigate("/dashboard", { replace: true });
       return;
     }
-    
-    // Authenticated but not paid → trigger checkout
-    if (user && !isPaid && !hasStartedRef.current && !promoApplied && !isRedeeming) {
-      hasStartedRef.current = true;
-      startCheckout();
-    }
-  }, [authLoading, tierLoading, user, isPaid, startCheckout, promoApplied, isRedeeming, isRedeemingPromoCode, navigate]);
+    // User sees checkout page and must click button to proceed to Stripe
+  }, [authLoading, tierLoading, user, isPaid, isRedeemingPromoCode, navigate]);
 
   // Show loading while checking auth, tier, or redeeming promo
   if (authLoading || tierLoading || isRedeemingPromoCode) {
