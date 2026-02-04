@@ -51,7 +51,7 @@ export function HowItWorksSection() {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
             How It
             <br />
-            <span className="text-primary">Works</span>
+            Works
           </h2>
         </motion.div>
 
