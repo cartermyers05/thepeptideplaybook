@@ -22,9 +22,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // Not logged in → go to login
+  // Not logged in → go to signup (new users clicking "Start Your Course")
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/signup" state={{ from: location }} replace />;
   }
 
   // Not paid → go to checkout
