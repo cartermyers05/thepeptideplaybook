@@ -59,9 +59,9 @@ export default function ThankYou() {
         await queryClient.invalidateQueries({ queryKey: ["profile"] });
         setVerificationState("success");
         
-        // Auto-redirect to quiz after short delay
+        // Auto-redirect to welcome flow after short delay
         setTimeout(() => {
-          navigate("/quiz", { replace: true });
+          navigate("/welcome", { replace: true });
         }, 2000);
       } else {
         const reasons: Record<string, string> = {
@@ -159,7 +159,7 @@ export default function ThankYou() {
               </motion.div>
               <h1 className="text-2xl font-bold">Payment Confirmed!</h1>
               <p className="text-muted-foreground">
-                Redirecting you to build your personalized course...
+                Redirecting you to get started...
               </p>
               <Loader2 className="w-6 h-6 mx-auto text-muted-foreground animate-spin" />
             </motion.div>

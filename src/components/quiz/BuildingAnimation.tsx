@@ -56,15 +56,17 @@ export function BuildingAnimation({
     }
   }, [currentStep, isComplete, hasError, onComplete]);
 
-  // After complete + save done, redirect to dashboard
+  // After complete + save done, redirect to course preview
   useEffect(() => {
     if (isComplete && !isSubmitting && !hasError) {
       const timer = setTimeout(() => {
-        navigate("/dashboard", { replace: true });
+        // Navigate to personalized course preview
+        const goal = extractedValues.goal?.replace('_', '-') || 'beginner';
+        navigate(`/course/${goal}`, { replace: true });
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [isComplete, isSubmitting, hasError, navigate]);
+  }, [isComplete, isSubmitting, hasError, navigate, extractedValues.goal]);
 
   const progress = Math.min((currentStep / buildSteps.length) * 100, 100);
 
@@ -127,7 +129,7 @@ export function BuildingAnimation({
           {hasError
             ? "We couldn't save your course. Please try the quiz again."
             : isComplete 
-              ? "Taking you to your personalized dashboard..." 
+              ? "Taking you to see your personalized program..." 
               : "Personalizing your 8-week peptide program"}
         </p>
         

@@ -178,7 +178,8 @@ export function useQuizChat() {
   const getConcernLabel = (concern: string | null) => concern ? concernLabels[concern] || concern : null;
   const getReadinessLabel = (readiness: string | null) => readiness ? readinessLabels[readiness] || readiness : null;
 
-  // Save quiz response - creates protocol and user_courses for new users
+  // Save quiz response - for non-authenticated users, just save to localStorage
+  // For authenticated users, also save to database
   const saveQuizResponse = useCallback(async () => {
     const { goal, experience, concern, readiness } = state.extractedValues;
     
@@ -186,18 +187,21 @@ export function useQuizChat() {
       throw new Error('Quiz not complete');
     }
 
-    if (!user?.id) {
-      throw new Error('User not authenticated');
-    }
-
-    // Save to localStorage for backup
+    // Always save to localStorage for course preview
     const quizData = {
       goal,
       experience,
       concern,
-      readiness
+      readiness,
+      completedAt: new Date().toISOString()
     };
     localStorage.setItem('quizResponse', JSON.stringify(quizData));
+
+    // If user is not authenticated, just return the goal (they'll create course after payment)
+    if (!user?.id) {
+      console.log('User not authenticated, quiz saved to localStorage only');
+      return goal;
+    }
 
     try {
       // 1. Create protocol from template
