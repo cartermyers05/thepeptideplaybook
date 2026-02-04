@@ -1,33 +1,38 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { AskCoach } from "@/components/coach/AskCoach";
+import { MessageCircle } from "lucide-react";
 
 const suggestedQuestions = [
   "What should I expect in week 1?",
-  "How do I know if my dose is right?",
-  "What are normal side effects?",
-  "Can I stack BPC-157 with TB-500?",
+  "Is nausea normal?",
+  "How do I store my peptide?",
+  "What if I miss a dose?",
 ];
 
 export default function Coach() {
   return (
     <DashboardLayout>
-      <div className="space-y-4">
+      <div className="max-w-3xl mx-auto space-y-6 animate-fade-up">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-semibold">AI Coach</h1>
-          <p className="text-muted-foreground">
-            Ask me anything about peptides
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <MessageCircle className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">AI Coach</h1>
+            <p className="text-muted-foreground text-sm">
+              Ask anything about your course
+            </p>
+          </div>
         </div>
 
         {/* Suggested Questions */}
-        <div className="flex flex-wrap gap-2 pb-2">
+        <div className="flex flex-wrap gap-2">
           {suggestedQuestions.map((question, index) => (
             <button
               key={index}
-              className="text-xs px-3 py-1.5 rounded-full border bg-secondary/50 hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+              className="text-sm px-4 py-2 rounded-full border border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-colors text-foreground"
               onClick={() => {
-                // The AskCoach component will handle this via a ref or state update
                 const textarea = document.querySelector('textarea');
                 if (textarea) {
                   const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
@@ -44,7 +49,9 @@ export default function Coach() {
         </div>
 
         {/* Chat Interface */}
-        <AskCoach />
+        <div className="card-premium p-0 overflow-hidden">
+          <AskCoach />
+        </div>
       </div>
     </DashboardLayout>
   );
