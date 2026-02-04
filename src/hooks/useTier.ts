@@ -23,7 +23,10 @@ export function useTier() {
     setIsCheckingSubscription(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) return;
+      if (!session?.access_token) {
+        setIsCheckingSubscription(false);
+        return;
+      }
 
       const response = await supabase.functions.invoke("check-subscription", {
         headers: {
