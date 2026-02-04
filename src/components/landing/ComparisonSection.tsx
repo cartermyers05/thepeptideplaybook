@@ -5,7 +5,7 @@ const comparisonData = [
   { 
     feature: "Price", 
     competitor: "$299 - $1,999", 
-    us: "$29/month",
+    us: "$67 one-time",
     usHighlight: true,
   },
   { 
@@ -35,7 +35,7 @@ const comparisonData = [
   { 
     feature: "Refund", 
     competitor: "\"No refunds\"", 
-    us: "Cancel anytime",
+    us: "30-day refund",
     usHighlight: true,
   },
 ];
@@ -51,7 +51,7 @@ export function ComparisonSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
-            Why pay $2,000 when you can pay $29?
+            Why pay $2,000 when you can pay $67?
           </h2>
         </motion.div>
 

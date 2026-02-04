@@ -275,8 +275,11 @@ export default function QuizResults() {
                 </div>
                 <div className="flex items-center justify-between text-primary mt-2">
                   <span className="font-medium">Your price:</span>
-                  <span className="font-bold text-xl">$29/month</span>
+                  <span className="font-bold text-xl">$67</span>
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Early access pricing. Going to $99 soon.
+                </p>
               </motion.div>
             </>
           )}
