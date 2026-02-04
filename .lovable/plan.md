@@ -1,74 +1,133 @@
 
-# Fix Checkout Page Display Issue
+# Fix Course Purchase Flow - hasPurchasedCourse Bug
 
-## Problem Analysis
+## Problem Summary
 
-The screenshot shows a skeleton/loading UI. Based on my investigation:
+The Course Preview page incorrectly shows "Go to Dashboard" instead of "Get Your Course — $67" for unauthenticated users. This happens because:
 
-1. **What the screenshot shows**: This is **Stripe's hosted checkout page** loading with its skeleton placeholders - a two-column layout with gray boxes. This is normal Stripe behavior while their payment form loads.
+1. React Query caches `allCourses` data from a previous session
+2. When the user logs out, this cache isn't cleared
+3. `hasPurchasedCourse()` returns stale cached data even for logged-out users
 
-2. **Why you might not see our checkout page**: The `/checkout` page auto-redirects to Stripe immediately when an authenticated user arrives. The flow is:
-   - Page loads → checks auth & tier status (loading state shown)
-   - Once loaded, `useEffect` triggers `startCheckout()` automatically
-   - Browser redirects to Stripe before you see the actual checkout content
+## Root Cause Analysis
 
-3. **The code is correct**: The pricing updates ARE in the code (lines 140-144):
-   ```typescript
-   <p className="text-xs text-primary font-medium mb-1">Early Access Pricing</p>
-   <h1 className="text-xl font-semibold mb-1">Complete Your Purchase</h1>
-   <p className="text-sm text-muted-foreground">
-     One-time payment: <span className="line-through opacity-60">$99</span> $67
-   </p>
-   ```
-
-## Potential Fixes
-
-### Option A: Stop Auto-Redirect (Show Checkout Page First)
-
-Currently the page auto-redirects authenticated users to Stripe. We could change this to:
-- Show the checkout page content with pricing
-- Require user to click "Pay $67" button to redirect to Stripe
-
-**Change in `src/pages/Checkout.tsx`:**
-- Remove the auto-redirect in `useEffect` (lines 79-83)
-- Keep only the manual button trigger
-
-This would let users see the pricing/early access messaging before going to Stripe.
-
-### Option B: Keep Auto-Redirect (Current Behavior)
-
-If the skeleton is Stripe's page loading - this is expected and not something we control. The Stripe checkout should fully load within 1-3 seconds normally.
-
----
-
-## My Recommendation
-
-**Option A** - Remove the auto-redirect so users can see the checkout page with:
-- "Early Access Pricing" label
-- "$67" price with "$99" strikethrough
-- "Pay $67 — Get Full Access" button
-- Promo code input
-- Trust elements
-
-This makes the pricing clear before they go to Stripe and gives them the option to enter a promo code first.
-
----
-
-## Files to Modify
-
-**`src/pages/Checkout.tsx`** - Remove the auto-`startCheckout()` call from useEffect so users must click the button to proceed.
-
-```typescript
-// Remove lines 79-83:
-// Authenticated but not paid → trigger checkout
-if (user && !isPaid && !hasStartedRef.current && !promoApplied && !isRedeeming) {
-  hasStartedRef.current = true;
-  startCheckout();
-}
+```text
+┌─────────────────────────────────────────────────────────────┐
+│ User Session A (logged in, purchased course)                │
+│   → allCourses cached with purchase data                    │
+└─────────────────────────────────────────────────────────────┘
+                         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ User logs out                                               │
+│   → signOut() called                                        │
+│   → React Query cache NOT cleared ⚠️                        │
+└─────────────────────────────────────────────────────────────┘
+                         ↓
+┌─────────────────────────────────────────────────────────────┐
+│ New user visits /course/muscle (not logged in)              │
+│   → hasPurchasedCourse('muscle') called                     │
+│   → Returns stale cached data → true ❌                     │
+│   → Shows "Go to Dashboard" instead of $67 CTA              │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-This way:
-1. User arrives at `/checkout`
-2. Sees the full checkout page with early access pricing
-3. Can enter promo code OR click "Pay $67" to go to Stripe
-4. Stripe redirect only happens on button click
+---
+
+## Implementation Plan
+
+### 1. Clear React Query Cache on Logout
+
+**File:** `src/hooks/useAuth.tsx`
+
+Update the `signOut` function to clear all React Query caches when user logs out:
+
+```typescript
+// Current (lines 146-148):
+const signOut = async () => {
+  await supabase.auth.signOut();
+};
+
+// Updated:
+const signOut = async () => {
+  // Clear all React Query caches to prevent stale data
+  queryClient.clear();
+  
+  // Clear any localStorage items that might persist purchase state
+  localStorage.removeItem('selectedCourseGoal');
+  
+  await supabase.auth.signOut();
+};
+```
+
+### 2. Make hasPurchasedCourse Auth-Aware
+
+**File:** `src/hooks/useCourse.ts`
+
+Update the `hasPurchasedCourse` function to explicitly return `false` when no user is authenticated:
+
+```typescript
+// Current (lines 109-112):
+const hasPurchasedCourse = (goal: string) => {
+  return allCourses?.some(course => course.goal === goal);
+};
+
+// Updated:
+const hasPurchasedCourse = (goal: string) => {
+  // No user = no purchase possible
+  if (!user) return false;
+  
+  return allCourses?.some(course => course.goal === goal) ?? false;
+};
+```
+
+### 3. Add Loading State to CoursePreview CTA
+
+**File:** `src/pages/CoursePreview.tsx`
+
+The current code (line 116-118) shows loading state while `courseLoading` is true, but we should also ensure `isPurchased` is only evaluated after loading completes:
+
+```typescript
+// Current (line 116):
+const isPurchased = goal && hasPurchasedCourse(goal.replace('-', '_'));
+
+// This is already guarded by the loading check on line 118, but let's
+// make the isPurchased check more explicit:
+
+// Show loading while any data is being fetched
+if (templateLoading || courseLoading) {
+  return <LoadingState />;
+}
+
+// Only evaluate purchase status AFTER loading is complete AND user is verified
+const isPurchased = user && goal && hasPurchasedCourse(goal.replace('-', '_'));
+```
+
+---
+
+## Technical Details
+
+### Files to Modify
+
+| File | Changes |
+|------|---------|
+| `src/hooks/useAuth.tsx` | Add `queryClient.clear()` and localStorage cleanup to `signOut()` |
+| `src/hooks/useCourse.ts` | Add `!user` guard to `hasPurchasedCourse()` |
+| `src/pages/CoursePreview.tsx` | Add explicit `user &&` check to `isPurchased` evaluation |
+
+### Key Principle
+
+**Unauthenticated users should ALWAYS see the purchase CTA ($67), never the dashboard CTA.**
+
+The fix ensures:
+1. Logout clears all cached data
+2. `hasPurchasedCourse` never returns `true` for logged-out users
+3. The UI explicitly checks both auth state AND purchase status
+
+### Testing Checklist
+
+After implementation, verify:
+- [ ] New incognito visitor sees "$67" CTA on Course Preview
+- [ ] Logged out user sees "$67" CTA on Course Preview  
+- [ ] User who purchased sees "Go to Dashboard" on Course Preview
+- [ ] After logout, visiting Course Preview shows "$67" CTA
+- [ ] Checkout page displays $67 with early access messaging
