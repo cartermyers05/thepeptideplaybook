@@ -49,8 +49,7 @@ export function HeroSection() {
               variants={itemVariants}
               className="mt-8 text-lg md:text-xl text-muted-foreground max-w-md leading-relaxed"
             >
-              The first AI-powered peptide course. Personalized protocols, 
-              day-by-day guidance through your first cycle.
+              The first AI powered peptide course personalized towards what goals you want to hit. From protocols to day by day guidance through your first cycle.
             </motion.p>
 
             <motion.div
