@@ -1,53 +1,151 @@
 
 
-# Animate Rainbow Gradient Line
+# Create a "Wow Moment" Hero Headline Animation
 
 ## Overview
-Add a smooth, flowing shimmer animation to the rainbow gradient line under "Everything peptides, one place" on the signup page.
+Transform the "Your AI Peptide Journey" headline into a show-stopping entrance animation that immediately captivates visitors. We'll add dramatic text reveals, rainbow gradient effects, and smooth choreography.
 
-## Animation Effect
-The gradient will continuously shift from left to right, creating a mesmerizing "flowing" effect that draws the eye without being distracting.
+## The "Wow" Effect
 
-## Implementation
+The animation will flow like this:
 
-### File: `src/pages/Signup.tsx`
+```text
+Timeline (seconds):
+0.0 ───────────────────────────────────────── 3.0s
 
-Update the rainbow line div to use a wider gradient that can animate:
+0.0s    "Your" slides in from left with blur-to-sharp
+        └── Subtle glow pulse on arrival
 
-**Current:**
-```tsx
-<div 
-  className="h-1 w-full rounded-full"
-  style={{
-    background: "linear-gradient(90deg, hsl(45, 80%, 50%), hsl(25, 90%, 55%), ...)"
-  }}
-/>
+0.3s    "AI Peptide" explodes in with:
+        ├── Character-by-character reveal
+        ├── Rainbow gradient text (our logo colors!)
+        └── Shimmer animation continues forever
+
+0.6s    "Journey" sweeps in from right
+        └── Completes the statement
+
+1.5s+   Gentle floating begins on whole headline
 ```
 
-**Updated:**
-```tsx
-<div 
-  className="h-1 w-full rounded-full animate-shimmer"
-  style={{
-    background: "linear-gradient(90deg, hsl(45, 80%, 50%), hsl(25, 90%, 55%), hsl(350, 80%, 55%), hsl(270, 70%, 55%), hsl(210, 80%, 55%), hsl(160, 70%, 45%), hsl(45, 80%, 50%), hsl(25, 90%, 55%), hsl(350, 80%, 55%))",
-    backgroundSize: "200% 100%"
-  }}
-/>
+## Animation Details
+
+| Word | Effect | Why It's "Wow" |
+|------|--------|----------------|
+| **"Your"** | Slide from left with blur-to-sharp reveal | Sets the stage, personal touch |
+| **"AI Peptide"** | Rainbow gradient text with letter stagger | The star - uses our brand colors flowing through |
+| **"Journey"** | Slide from right, completing the sentence | Satisfying closure |
+
+## Rainbow Gradient on "AI Peptide"
+
+Instead of plain text, "AI Peptide" will be styled with our signature rainbow gradient (same as the hexagon logo):
+
+- Yellow → Orange → Pink → Purple → Blue → Teal
+- Animated shimmer flowing through continuously
+- Creates immediate brand recognition
+
+## Technical Implementation
+
+### 1. New Animation Variants
+
+```typescript
+// Letter-by-letter stagger for "AI Peptide"
+const letterContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.03, // Fast stagger for snappy feel
+      delayChildren: 0.3,   // Wait for "Your" to land
+    }
+  }
+};
+
+const letterVariants = {
+  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.4, ease: "easeOut" }
+  }
+};
+
+// Enhanced line variants with blur
+const enhancedLineVariants = {
+  hidden: { opacity: 0, x: -50, filter: "blur(8px)" },
+  visible: (i) => ({
+    opacity: 1,
+    x: 0,
+    filter: "blur(0px)",
+    transition: { 
+      delay: i * 0.25, 
+      duration: 0.6, 
+      ease: [0.25, 0.46, 0.45, 0.94] // Custom easing
+    }
+  })
+};
 ```
 
-**Key changes:**
-- Add `animate-shimmer` class (already exists in tailwind config)
-- Extend the gradient to repeat the colors (seamless loop)
-- Set `backgroundSize: "200% 100%"` so the gradient can slide
+### 2. Rainbow Text Gradient
 
-## Technical Details
+```tsx
+<motion.span 
+  className="inline-block bg-clip-text text-transparent"
+  style={{
+    backgroundImage: "linear-gradient(90deg, hsl(45, 80%, 50%), hsl(25, 90%, 55%), hsl(350, 80%, 55%), hsl(270, 70%, 55%), hsl(210, 80%, 55%), hsl(160, 70%, 45%), hsl(45, 80%, 50%))",
+    backgroundSize: "200% 100%",
+  }}
+  animate={{
+    backgroundPosition: ["0% 0%", "100% 0%", "0% 0%"],
+  }}
+  transition={{
+    duration: 4,
+    ease: "linear",
+    repeat: Infinity,
+  }}
+>
+  AI Peptide
+</motion.span>
+```
 
-| Setting | Value | Purpose |
-|---------|-------|---------|
-| `animate-shimmer` | Existing animation | Shifts background position -200% to 200% |
-| `backgroundSize` | 200% 100% | Makes gradient 2x wider for smooth sliding |
-| Extended gradient | Repeat first 3 colors | Creates seamless loop |
+### 3. Subtle Glow Effect
+
+Add a text-shadow glow that pulses subtly:
+
+```typescript
+const glowVariants = {
+  initial: { textShadow: "0 0 0px transparent" },
+  glow: {
+    textShadow: [
+      "0 0 20px rgba(139, 92, 246, 0.3)",
+      "0 0 40px rgba(139, 92, 246, 0.5)",
+      "0 0 20px rgba(139, 92, 246, 0.3)",
+    ],
+    transition: {
+      duration: 2,
+      ease: "easeInOut",
+      repeat: Infinity,
+      delay: 1.5,
+    }
+  }
+};
+```
+
+## File to Modify
+
+| File | Changes |
+|------|---------|
+| `src/components/landing/HeroSection.tsx` | Complete animation overhaul with rainbow gradient text, blur reveals, and enhanced choreography |
 
 ## Result
-A subtle, elegant shimmer effect that makes the rainbow line feel alive and premium, matching the modern feel of the brand.
+
+When visitors land on the homepage, they'll see:
+
+1. **Smooth blur-to-sharp reveal** of "Your"
+2. **Stunning rainbow gradient "AI Peptide"** with letters dancing in
+3. **Satisfying completion** with "Journey" sliding in
+4. **Continuous shimmer** flowing through the rainbow text forever
+5. **Gentle floating** once everything settles
+
+This creates an immediate "premium product" impression that matches the modern, AI-forward branding.
 
