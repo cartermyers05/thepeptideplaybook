@@ -81,6 +81,9 @@ export default function Signup() {
         }
       }
 
+      // Set fresh signup flag to skip tier loading on checkout
+      localStorage.setItem("fresh_signup", "true");
+      
       // User is now logged in (auto-confirm enabled), redirect to checkout
       navigate(redirect);
     } catch (error: any) {
