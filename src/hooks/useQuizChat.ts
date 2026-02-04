@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface Message {
   id: string;
@@ -62,6 +63,7 @@ const readinessLabels: Record<string, string> = {
 
 export function useQuizChat() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [state, setState] = useState<QuizChatState>({
     messages: [{
       id: 'initial',
@@ -320,14 +322,35 @@ export function useQuizChat() {
 
       const template = protocolTemplates[goal] || protocolTemplates.beginner;
 
-      // Check if protocol already exists
+      // Check if protocol already exists - UPDATE if yes, INSERT if no
       const { data: existingProtocol } = await supabase
         .from('protocols')
         .select('id')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (!existingProtocol) {
+      if (existingProtocol) {
+        // UPDATE existing protocol with new goal data
+        const { error: protocolError } = await supabase
+          .from('protocols')
+          .update({
+            goal,
+            protocol_name: template.name,
+            peptides: template.peptides,
+            cycle_length_weeks: template.weeks,
+            status: 'not_started',
+            current_day: 0,
+            current_week: 1,
+            started_at: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', existingProtocol.id);
+
+        if (protocolError) {
+          console.error('Error updating protocol:', protocolError);
+        }
+      } else {
+        // INSERT new protocol
         const { error: protocolError } = await supabase
           .from('protocols')
           .insert({
@@ -346,20 +369,55 @@ export function useQuizChat() {
         }
       }
 
-      // 2. Create user_courses from course_template
+      // 2. Get course template for the new goal
+      const { data: courseTemplate } = await supabase
+        .from('course_templates')
+        .select('*')
+        .eq('goal', goal)
+        .maybeSingle();
+
+      // Check if user_course already exists - UPDATE if yes, INSERT if no
       const { data: existingCourse } = await supabase
         .from('user_courses')
         .select('id')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (!existingCourse) {
-        const { data: courseTemplate } = await supabase
-          .from('course_templates')
-          .select('*')
-          .eq('goal', goal)
-          .maybeSingle();
+      if (existingCourse) {
+        // UPDATE existing course with new goal data
+        const updateData = courseTemplate ? {
+          template_id: courseTemplate.id,
+          goal: courseTemplate.goal,
+          title: courseTemplate.title,
+          peptides: courseTemplate.peptides,
+          duration_days: courseTemplate.duration_days,
+          lessons: courseTemplate.lessons,
+          current_day: 0,
+          status: 'not_started',
+          supplies_status: null,
+          started_at: null,
+        } : {
+          goal,
+          title: template.name,
+          peptides: template.peptides,
+          duration_days: template.weeks * 7,
+          lessons: [],
+          current_day: 0,
+          status: 'not_started',
+          supplies_status: null,
+          started_at: null,
+        };
 
+        const { error: courseError } = await supabase
+          .from('user_courses')
+          .update(updateData)
+          .eq('id', existingCourse.id);
+
+        if (courseError) {
+          console.error('Error updating user_course:', courseError);
+        }
+      } else {
+        // INSERT new course
         if (courseTemplate) {
           const { error: courseError } = await supabase
             .from('user_courses')
@@ -413,12 +471,17 @@ export function useQuizChat() {
           completed_at: new Date().toISOString()
         });
 
+      // 4. Invalidate React Query cache so dashboard shows fresh data
+      queryClient.invalidateQueries({ queryKey: ['user-course'] });
+      queryClient.invalidateQueries({ queryKey: ['protocol'] });
+      queryClient.invalidateQueries({ queryKey: ['course'] });
+
     } catch (err) {
       console.error('Error saving quiz:', err);
     }
 
     return goal;
-  }, [state.extractedValues, user]);
+  }, [state.extractedValues, user, queryClient]);
 
   return {
     messages: state.messages,
