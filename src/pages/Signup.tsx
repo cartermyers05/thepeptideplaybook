@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, Mail, Lock, User, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Mail, Lock, User, Check, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PromoCodeInput } from "@/components/auth/PromoCodeInput";
@@ -20,6 +20,7 @@ const steps = [
 export default function Signup() {
   const [searchParams] = useSearchParams();
   const initialPromoCode = searchParams.get("code") || "";
+  const redirect = searchParams.get("redirect") || "/checkout";
   
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
@@ -27,10 +28,10 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [validPromoCode, setValidPromoCode] = useState<string | null>(null);
   const [promoCodeType, setPromoCodeType] = useState<string | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,11 +52,14 @@ export default function Signup() {
         localStorage.setItem("pending_promo_type", promoCodeType || "");
       }
 
+      // Store intended redirect in localStorage for after email confirmation
+      localStorage.setItem("post_signup_redirect", redirect);
+
       const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}${redirect}`,
           data: {
             full_name: name,
           },
@@ -100,12 +104,31 @@ export default function Signup() {
     }
   };
 
-  const handleContinue = () => {
-    // Check if user has valid promo code or needs to pay
-    if (validPromoCode && promoCodeType === "free_access") {
-      navigate("/dashboard");
-    } else {
-      navigate("/checkout");
+  const handleResendEmail = async () => {
+    setIsResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}${redirect}`,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Email sent!",
+        description: "Check your inbox for the confirmation link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to resend email",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -294,34 +317,63 @@ export default function Signup() {
             </motion.div>
           )}
 
-          {/* Step 3: Welcome */}
+          {/* Step 3: Check Email */}
           {step === 3 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="text-center"
             >
-              <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-6">
-                <Check className="w-8 h-8 text-success" />
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                <Mail className="w-8 h-8 text-primary" />
               </div>
 
               <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                Welcome to PeptideGPT!
+                Check your email
               </h1>
-              <p className="text-muted-foreground mb-8">
+              <p className="text-muted-foreground mb-4">
+                We sent a confirmation link to
+              </p>
+              <p className="font-medium text-foreground mb-6">{email}</p>
+              <p className="text-sm text-muted-foreground mb-8">
+                Click the link in the email to verify your account.
                 {validPromoCode && promoCodeType === "free_access" 
-                  ? "Your account is ready. You have full access to everything!"
-                  : "Your account is ready. Complete checkout to unlock full access."
+                  ? " You'll get full access after confirming."
+                  : " You'll be redirected to checkout after confirming."
                 }
               </p>
 
-              <Button size="lg" className="w-full h-12" onClick={handleContinue}>
-                {validPromoCode && promoCodeType === "free_access" 
-                  ? "Go to Dashboard"
-                  : "Continue to Checkout"
-                }
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
+              <div className="space-y-4">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-12"
+                  onClick={handleResendEmail}
+                  disabled={isResending}
+                >
+                  {isResending ? (
+                    <>
+                      <RefreshCw className="mr-2 w-4 h-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 w-4 h-4" />
+                      Resend confirmation email
+                    </>
+                  )}
+                </Button>
+
+                <p className="text-xs text-muted-foreground">
+                  Didn't receive it? Check your spam folder or{" "}
+                  <button
+                    onClick={() => setStep(1)}
+                    className="text-primary hover:underline"
+                  >
+                    try a different email
+                  </button>
+                </p>
+              </div>
             </motion.div>
           )}
         </div>
