@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User } from "lucide-react";
+import { Send, User } from "lucide-react";
+import { AnimatedLogo } from "@/components/brand/AnimatedLogo";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourse } from "@/hooks/useCourse";
 import { cn } from "@/lib/utils";
@@ -133,8 +134,8 @@ export function AskCoach() {
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <div className="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center mb-4">
-              <Bot className="w-8 h-8 text-purple-600" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center mb-4">
+              <AnimatedLogo size={40} />
             </div>
             <h3 className="font-semibold text-lg text-black mb-2">Start a conversation</h3>
             <p className="text-gray-500 text-sm max-w-xs">
@@ -152,8 +153,8 @@ export function AskCoach() {
                 )}
               >
                 {message.role === "assistant" && (
-                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-4 h-4 text-purple-600" />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center flex-shrink-0">
+                    <AnimatedLogo size={20} />
                   </div>
                 )}
                 <div
@@ -181,8 +182,8 @@ export function AskCoach() {
             ))}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-purple-600" />
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+                  <AnimatedLogo size={20} />
                 </div>
                 <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-3">
                   <div className="flex items-center gap-1.5">
