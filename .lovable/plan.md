@@ -1,103 +1,94 @@
 
-# Update Logo: Rainbow/Radiant Hexagon
+# Fix Quiz Completion: Create Protocol After Onboarding
 
-## Overview
-Replace the single-color teal hexagon logo with a vibrant rainbow gradient that incorporates all the goal colors from the homepage, creating a more dynamic and colorful brand identity.
+## Problem Summary
+After completing the quiz onboarding, the user gets redirected to the dashboard but no course/protocol is created. This happens because:
 
----
+1. The `saveQuizResponse` function only **updates** an existing `user_courses` record - it doesn't create one
+2. No protocol is being created in the `protocols` table
+3. The dashboard shows "No Protocol Yet" because there's no data
 
-## Color Palette (from Homepage Goals)
+## Root Cause Analysis
 
-| Goal | Color | HSL |
-|------|-------|-----|
-| Fat Loss | Orange | hsl(25, 90%, 55%) |
-| Muscle | Blue | hsl(210, 80%, 55%) |
-| Recovery | Pink/Red | hsl(350, 80%, 55%) |
-| Anti-aging | Purple | hsl(270, 70%, 55%) |
-| Cognitive | Teal | hsl(160, 70%, 45%) |
-| Beginner | Yellow | hsl(45, 80%, 50%) |
-
----
-
-## Design Approach
-
-The hexagon will use an SVG gradient that flows through all the homepage colors, creating a radiant rainbow effect. Each node (the 3 outer circles) will be a different color from the palette.
-
-### Visual Concept
 ```text
-           Yellow/Orange (top node)
-              ◉
-             /|\
-            / | \
-           /  |  \
-          /   ●   \  ← Center: gradient fill
-         /    |    \
-        ◉─────┼─────◉
-     Teal    (lines)  Purple/Pink
+Current Flow:
+Quiz Complete → saveQuizResponse() → looks for user_courses → none found → does nothing → dashboard empty
+
+Expected Flow:
+Quiz Complete → saveQuizResponse() → create protocol from template → redirect → dashboard shows course
 ```
 
----
+## Solution
 
-## Technical Implementation
+Update the `saveQuizResponse` function in `src/hooks/useQuizChat.ts` to:
 
-### File: `src/components/brand/Logo.tsx`
-
-**Changes:**
-1. Add SVG `<defs>` with gradient definitions
-2. Replace solid teal colors with gradient references
-3. Color each outer node differently (orange/yellow, purple/pink, teal/blue)
-4. Make the hexagon stroke use a rainbow gradient
-5. Center node uses the gradient
-
-### Also update: `public/favicon.svg`
-Same gradient treatment for the favicon.
+1. **Create a protocol** in the `protocols` table using the extracted goal
+2. **Create a user_courses record** by copying from the matching `course_templates` entry
+3. Properly handle the case where no existing course exists (which is the normal onboarding case)
 
 ---
 
-## Implementation Details
+## Technical Changes
 
-### New SVG Structure
+### File: `src/hooks/useQuizChat.ts`
 
-```tsx
-<svg width={size} height={size} viewBox="0 0 32 32">
-  <defs>
-    {/* Rainbow gradient for hexagon stroke */}
-    <linearGradient id="rainbow-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stopColor="hsl(45, 80%, 50%)" />      {/* Yellow */}
-      <stop offset="20%" stopColor="hsl(25, 90%, 55%)" />     {/* Orange */}
-      <stop offset="40%" stopColor="hsl(350, 80%, 55%)" />    {/* Pink */}
-      <stop offset="60%" stopColor="hsl(270, 70%, 55%)" />    {/* Purple */}
-      <stop offset="80%" stopColor="hsl(210, 80%, 55%)" />    {/* Blue */}
-      <stop offset="100%" stopColor="hsl(160, 70%, 45%)" />   {/* Teal */}
-    </linearGradient>
-    
-    {/* Radial gradient for fill */}
-    <radialGradient id="rainbow-fill" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stopColor="hsl(45, 80%, 50%)" stopOpacity="0.15" />
-      <stop offset="100%" stopColor="hsl(270, 70%, 55%)" stopOpacity="0.05" />
-    </radialGradient>
-  </defs>
-  
-  {/* Hexagon with gradient stroke */}
-  <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" 
-        stroke="url(#rainbow-stroke)" 
-        strokeWidth="2" 
-        fill="url(#rainbow-fill)" />
-  
-  {/* Center node - warm gradient */}
-  <circle cx="16" cy="16" r="3" fill="url(#rainbow-stroke)" />
-  
-  {/* Connection lines - gradient */}
-  <path d="M16 16L16 7M16 16L23 20M16 16L9 20" 
-        stroke="url(#rainbow-stroke)" 
-        strokeWidth="2" 
-        strokeLinecap="round" />
-  
-  {/* Outer nodes - different colors */}
-  <circle cx="16" cy="7" r="2" fill="hsl(45, 80%, 50%)" />     {/* Yellow - top */}
-  <circle cx="23" cy="20" r="2" fill="hsl(270, 70%, 55%)" />   {/* Purple - right */}
-  <circle cx="9" cy="20" r="2" fill="hsl(160, 70%, 45%)" />    {/* Teal - left */}
-</svg>
+**Current behavior (lines 177-246):**
+- Saves to localStorage
+- Looks for existing `user_courses` record (finds none for new users)
+- Only updates if found, otherwise silently does nothing useful
+- Saves to `quiz_responses` for analytics
+
+**Updated behavior:**
+1. Keep localStorage backup
+2. **Create a protocol** using the goal from extracted values (calling `useProtocol`'s template logic)
+3. **Copy course_template to user_courses** for the user's goal
+4. Save to `quiz_responses` as before
+
+### Implementation Details
+
+```typescript
+// In saveQuizResponse function:
+
+// 1. Create the protocol record
+const protocolTemplate = getProtocolTemplateForGoal(goal);
+const { data: newProtocol, error: protocolError } = await supabase
+  .from("protocols")
+  .insert({
+    user_id: user.id,
+    goal,
+    protocol_name: protocolTemplate.name,
+    peptides: protocolTemplate.peptides,
+    cycle_length_weeks: protocolTemplate.weeks,
+    status: "not_started",
+    current_day: 0,
+    current_week: 1,
+  })
+  .select()
+  .single();
+
+// 2. Copy course template to user_courses
+const { data: template } = await supabase
+  .from("course_templates")
+  .select("*")
+  .eq("goal", goal)
+  .maybeSingle();
+
+if (template) {
+  await supabase.from("user_courses").insert({
+    user_id: user.id,
+    template_id: template.id,
+    goal: template.goal,
+    title: template.title,
+    peptides: template.peptides,
+    duration_days: template.duration_days,
+    lessons: template.lessons,
+    current_day: 0,
+    status: "not_started",
+    purchased_at: new Date().toISOString(),
+  });
+}
+
+// 3. Save quiz_responses (keep existing code)
 ```
 
 ---
@@ -106,16 +97,24 @@ Same gradient treatment for the favicon.
 
 | File | Changes |
 |------|---------|
-| `src/components/brand/Logo.tsx` | Add gradient defs, apply to hexagon, color nodes |
-| `public/favicon.svg` | Same rainbow gradient treatment |
+| `src/hooks/useQuizChat.ts` | Update `saveQuizResponse` to create protocol and user_courses |
 
 ---
 
-## Result
+## Additional Context
 
-The logo will transform from a monochromatic teal hexagon to a vibrant, radiant design that:
-- Uses all 6 goal colors from the homepage
-- Creates visual cohesion between the logo and the goal selection cards
-- Feels more dynamic and modern
-- Each node represents a different wellness goal
+The protocol templates are already defined in `useProtocol.ts` (lines 31-154). We need to:
+- Either import and reuse that logic
+- Or inline the template lookup in the quiz hook
 
+The `course_templates` table already has templates for each goal (I can see `fat_loss` template with 56 days of lessons).
+
+---
+
+## Expected Result
+
+After this fix:
+1. User completes quiz → protocol created → user_courses created
+2. Dashboard Home shows their protocol status and check-in card
+3. My Plan page shows their peptides and curriculum
+4. AI Coach has context about their goal and progress
