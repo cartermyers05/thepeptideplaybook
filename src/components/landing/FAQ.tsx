@@ -16,10 +16,6 @@ const faqs = [
     answer: "Perfect. We built this for you. The guides assume zero prior knowledge and walk you through every single step, from reconstitution to your first injection.",
   },
   {
-    question: "Can I get a refund?",
-    answer: "Yes. 30-day money-back guarantee, no questions asked. If you're not satisfied, email us and we'll refund you immediately.",
-  },
-  {
     question: "Do you sell peptides?",
     answer: "No. We provide education only. We don't sell peptides, recommend vendors, or have any affiliate relationships with peptide suppliers.",
   },
