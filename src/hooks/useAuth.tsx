@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState, ReactNode, useCallback,
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
@@ -28,7 +27,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const redemptionAttemptedRef = useRef(false);
   const redirectHandledRef = useRef(false);
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   // Redeem pending promo code from localStorage (saved during signup)
   // Returns true if redemption was successful, false otherwise
@@ -80,9 +78,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       redirectHandledRef.current = true;
       localStorage.removeItem("post_signup_redirect");
       console.log("[Auth] Redirecting to post-signup destination:", pendingRedirect);
-      navigate(pendingRedirect);
+      // Use window.location since AuthProvider is outside Router context
+      window.location.href = pendingRedirect;
     }
-  }, [navigate]);
+  }, []);
 
   // Backup payment verification for users who may have had verification fail on thank-you page
   const verifyPaymentStatus = useCallback(async (userId: string) => {
