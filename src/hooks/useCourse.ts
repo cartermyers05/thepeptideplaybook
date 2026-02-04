@@ -108,7 +108,10 @@ export function useCourse() {
 
   // Check if user has purchased a specific course
   const hasPurchasedCourse = (goal: string) => {
-    return allCourses?.some(course => course.goal === goal);
+    // No user = no purchase possible - prevents stale cache issues
+    if (!user) return false;
+    
+    return allCourses?.some(course => course.goal === goal) ?? false;
   };
 
   // Update course status

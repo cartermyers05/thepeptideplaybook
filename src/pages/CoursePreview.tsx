@@ -113,7 +113,8 @@ export default function CoursePreview() {
     }
   };
 
-  const isPurchased = goal && hasPurchasedCourse(goal.replace('-', '_'));
+  // Only show "Go to Dashboard" if user is authenticated AND has purchased
+  const isPurchased = user && goal && hasPurchasedCourse(goal.replace('-', '_'));
 
   if (templateLoading || courseLoading) {
     return (
