@@ -1,123 +1,179 @@
 
-
-# Remove Streaks Feature
+# Replace AI Coach Icon with Animated Hexagon Logo
 
 ## Overview
 
-Remove all streak-related functionality from the dashboard and product. This includes the streak badge, streak hooks, streak-based milestones, and streak calendar components.
+Replace the `MessageCircle` icon in the AI Coach page header with the brand's rainbow hexagon logo, and add subtle animations to make it feel alive and intelligent.
 
 ---
 
-## Changes Summary
+## Locations to Update
 
-| File | Action |
-|------|--------|
-| `src/pages/dashboard/Home.tsx` | Remove streak import, usage, and badge display |
-| `src/pages/dashboard/Progress.tsx` | Remove streak stats, streak calendar section |
-| `src/hooks/useStreak.ts` | Delete file (no longer needed) |
-| `src/components/progress/StreakCalendar.tsx` | Delete file |
-| `src/components/progress/AchievementGrid.tsx` | Remove streak-based milestone types |
-| `src/hooks/useMilestones.ts` | Remove streak milestone types (streak_7, streak_14, etc.) |
+| File | Current Icon | Change |
+|------|--------------|--------|
+| `src/pages/dashboard/Coach.tsx` | `MessageCircle` (lucide) | Animated hexagon logo |
+| `src/components/dashboard/home/QuickActionCards.tsx` | `MessageCircle` (lucide) | Animated hexagon logo |
+
+*Note: The mobile bottom nav uses `MessageCircle` too, but that should stay as a simple icon for consistency with the other nav items.*
 
 ---
 
-## Detailed Changes
+## Animation Concept
 
-### 1. Dashboard Home (`src/pages/dashboard/Home.tsx`)
+Create an **"alive" pulsing hexagon** that suggests intelligence:
 
-**Remove:**
-- Import of `Flame` icon (line 3)
-- Import of `useStreak` hook (line 8)  
-- `const { currentStreak } = useStreak();` (line 38)
-- The entire streak badge display (lines 130-135)
-- The "continue your streak" text in the check-in success banner (line 147)
+1. **Gentle pulse** - The center node pulses subtly (scale 1 → 1.15 → 1)
+2. **Rotating gradient** - The rainbow gradient slowly rotates around the hexagon
+3. **Node glow** - The outer nodes have a soft pulsing glow
 
-**Update check-in success message:**
+This creates a "thinking" or "active" feel without being distracting.
+
+---
+
+## Implementation
+
+### 1. Create Animated Logo Component
+
+Create `src/components/brand/AnimatedLogo.tsx`:
+
+```tsx
+import { motion } from "framer-motion";
+
+interface AnimatedLogoProps {
+  size?: number;
+  className?: string;
+}
+
+export function AnimatedLogo({ size = 40, className }: AnimatedLogoProps) {
+  const gradientId = `animated-rainbow-${size}`;
+  const fillId = `animated-fill-${size}`;
+
+  return (
+    <motion.svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      animate={{ rotate: 360 }}
+      transition={{ 
+        duration: 20, 
+        repeat: Infinity, 
+        ease: "linear" 
+      }}
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="hsl(45, 80%, 50%)" />
+          <stop offset="20%" stopColor="hsl(25, 90%, 55%)" />
+          <stop offset="40%" stopColor="hsl(350, 80%, 55%)" />
+          <stop offset="60%" stopColor="hsl(270, 70%, 55%)" />
+          <stop offset="80%" stopColor="hsl(210, 80%, 55%)" />
+          <stop offset="100%" stopColor="hsl(160, 70%, 45%)" />
+        </linearGradient>
+        <radialGradient id={fillId} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="hsl(45, 80%, 50%)" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="hsl(270, 70%, 55%)" stopOpacity="0.05" />
+        </radialGradient>
+      </defs>
+
+      {/* Hexagon */}
+      <path
+        d="M16 2L28 9V23L16 30L4 23V9L16 2Z"
+        stroke={`url(#${gradientId})`}
+        strokeWidth="2"
+        fill={`url(#${fillId})`}
+      />
+
+      {/* Center node with pulse */}
+      <motion.circle
+        cx="16"
+        cy="16"
+        r="3"
+        fill={`url(#${gradientId})`}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Connection lines */}
+      <path
+        d="M16 16L16 7M16 16L23 20M16 16L9 20"
+        stroke={`url(#${gradientId})`}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+
+      {/* Outer nodes with staggered glow */}
+      <motion.circle
+        cx="16" cy="7" r="2"
+        fill="hsl(45, 80%, 50%)"
+        animate={{ opacity: [0.7, 1, 0.7] }}
+        transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+      />
+      <motion.circle
+        cx="23" cy="20" r="2"
+        fill="hsl(270, 70%, 55%)"
+        animate={{ opacity: [0.7, 1, 0.7] }}
+        transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+      />
+      <motion.circle
+        cx="9" cy="20" r="2"
+        fill="hsl(160, 70%, 45%)"
+        animate={{ opacity: [0.7, 1, 0.7] }}
+        transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
+      />
+    </motion.svg>
+  );
+}
 ```
-"Come back tomorrow to continue your streak" → "Great job! See you tomorrow."
+
+---
+
+### 2. Update Coach Page Header
+
+**File:** `src/pages/dashboard/Coach.tsx`
+
+Replace the `MessageCircle` icon with the animated logo:
+
+```tsx
+// Import AnimatedLogo instead of MessageCircle
+import { AnimatedLogo } from "@/components/brand/AnimatedLogo";
+
+// In the header section:
+<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+  <AnimatedLogo size={28} />
+</div>
 ```
 
 ---
 
-### 2. Progress Page (`src/pages/dashboard/Progress.tsx`)
+### 3. Update Quick Action Cards
 
-**Remove:**
-- Import of `useStreak` hook (line 2)
-- Import of `StreakCalendar` (line 7)
-- Import of `Flame` icon (line 10)
-- `useStreak()` hook call (line 13)
-- Loading check for `isLoadingStreak` (line 19)
-- Current Streak stat card (lines 40-45)
-- Longest Streak stat card (lines 46-51)
-- Entire Streak Calendar card section (lines 60-71)
+**File:** `src/components/dashboard/home/QuickActionCards.tsx`
 
-**Keep:**
-- Total Check-Ins stat (rename to "Days Active" or similar)
-- Trend Charts
-- Achievements (with streak milestones removed)
+Replace the AI Coach card icon with the animated logo:
 
----
+```tsx
+import { AnimatedLogo } from "@/components/brand/AnimatedLogo";
 
-### 3. Delete Files
+// In the AI Coach card:
+<div className="w-10 h-10 bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+  <AnimatedLogo size={24} />
+</div>
+```
 
-- `src/hooks/useStreak.ts` - No longer needed
-- `src/components/progress/StreakCalendar.tsx` - No longer needed
-
----
-
-### 4. Milestones (`src/hooks/useMilestones.ts`)
-
-**Remove these streak milestone types:**
-- `streak_7`
-- `streak_14`
-- `streak_30`
-- `streak_60`
-- `streak_90`
-
-**Keep these course-based milestones:**
-- `first_checkin`
-- `first_recon`
-- `week_1`
-- `cycle_complete`
-
----
-
-### 5. Achievement Grid (`src/components/progress/AchievementGrid.tsx`)
-
-**Update `ALL_MILESTONES` array to remove streak items:**
-```typescript
-const ALL_MILESTONES: MilestoneType[] = [
-  "first_checkin",
-  "first_recon",
-  "week_1",
-  "cycle_complete",
-];
+Also update the gradient bar to match the rainbow theme:
+```tsx
+<div className="h-1 bg-gradient-to-r from-yellow-400 via-purple-500 to-teal-400" />
 ```
 
 ---
 
-## What Stays
+## Visual Result
 
-- **Check-ins** still work (tracking daily engagement)
-- **Milestones** still work (course-based achievements)
-- **Trend Charts** still work (mood, energy, sleep tracking)
-- **Progress ring** and day counter on dashboard
+- **Coach page header**: Rainbow hexagon with slow rotation and pulsing center
+- **Quick action card**: Same animated logo, scales up on hover
+- **Mobile nav**: Keeps simple `MessageCircle` icon for consistency with other nav items
 
----
-
-## Result
-
-The dashboard will show:
-- Greeting with day counter (no streak badge)
-- Today's lesson
-- Progress ring
-- Next injection
-- Week calendar
-- Quick actions
-- Milestones (course-based only)
-
-Progress page will show:
-- Total check-ins / days active
-- Trend charts
-- Course achievements (no streak achievements)
-
+The animation is subtle enough to not be distracting while giving the AI Coach a unique, "alive" personality that differentiates it from static icons.
