@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroSection } from "@/components/landing/HeroSection";
+import { ScrollIndicator } from "@/components/landing/ScrollIndicator";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { WhatsInsideSection } from "@/components/landing/WhatsInsideSection";
 import { GoalSelectionSection } from "@/components/landing/GoalSelectionSection";
@@ -22,6 +23,7 @@ const Index = () => {
         <Navbar />
         <main>
           <HeroSection />
+          <ScrollIndicator />
           <HowItWorksSection />
           <WhatsInsideSection />
           <GoalSelectionSection />
