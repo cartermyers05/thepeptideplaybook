@@ -60,15 +60,36 @@ export default function CoursePreview() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
+      if (!session?.access_token) {
+        throw new Error("No active session - please log in again");
+      }
+
       const response = await supabase.functions.invoke("create-checkout", {
         body: { goal },
         headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
 
-      if (response.error) throw new Error(response.error.message);
+      console.log("Checkout response:", response);
+
+      // Handle edge function errors
+      if (response.error) {
+        let errorMsg = "Checkout failed";
+        if (response.error.context) {
+          try {
+            const errorData = await response.error.context.json();
+            errorMsg = errorData.error || errorMsg;
+          } catch {
+            errorMsg = response.error.message || errorMsg;
+          }
+        } else {
+          errorMsg = response.error.message || errorMsg;
+        }
+        throw new Error(errorMsg);
+      }
       
+      // Handle successful response
       if (response.data?.url && checkoutWindow) {
         checkoutWindow.location.href = response.data.url;
         toast.info("Checkout opened in new tab");
@@ -76,10 +97,17 @@ export default function CoursePreview() {
       } else if (!checkoutWindow) {
         toast.error("Popup blocked - please allow popups for this site");
         setIsCheckingOut(false);
+      } else {
+        // Handle case where tab opened but no URL returned
+        checkoutWindow.close();
+        console.error("No checkout URL in response:", response.data);
+        toast.error("Failed to create checkout session");
+        setIsCheckingOut(false);
       }
     } catch (error: unknown) {
       checkoutWindow?.close();
       const errorMessage = error instanceof Error ? error.message : "Failed to start checkout";
+      console.error("Checkout error:", errorMessage);
       toast.error(errorMessage);
       setIsCheckingOut(false);
     }
