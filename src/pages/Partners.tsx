@@ -53,7 +53,8 @@ export default function Partners() {
     socialHandle: "",
     followerCount: "",
     whyPartner: "",
-    howPromote: ""
+    howPromote: "",
+    honeypot: "" // Hidden field for bot detection
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -80,22 +81,36 @@ export default function Partners() {
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase
-        .from("partner_applications")
-        .insert({
+      const response = await supabase.functions.invoke("submit-partner-application", {
+        body: {
           name: formData.name,
           email: formData.email,
           social_handle: formData.socialHandle,
           follower_count: formData.followerCount,
           why_partner: formData.whyPartner,
           how_promote: formData.howPromote,
-        });
+          honeypot: formData.honeypot,
+        },
+      });
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error.message || "Submission failed");
+      }
+
+      const data = response.data;
+      
+      if (data?.error) {
+        toast({
+          title: "Submission Failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
         title: "Application Submitted!",
-        description: "We'll review your application and get back to you within 48 hours.",
+        description: data?.message || "We'll review your application and get back to you within 48 hours.",
       });
       
       setFormData({
@@ -104,13 +119,15 @@ export default function Partners() {
         socialHandle: "",
         followerCount: "",
         whyPartner: "",
-        howPromote: ""
+        howPromote: "",
+        honeypot: ""
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Partner application error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Please try again later.";
       toast({
         title: "Submission Failed",
-        description: "Please try again later.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -344,6 +361,18 @@ export default function Partners() {
                       required
                       placeholder="Describe your promotion strategy..."
                       rows={3}
+                    />
+                  </div>
+
+                  {/* Honeypot field - hidden from users, bots will fill it */}
+                  <div className="absolute -left-[9999px]" aria-hidden="true">
+                    <Input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={formData.honeypot}
+                      onChange={(e) => setFormData({ ...formData, honeypot: e.target.value })}
                     />
                   </div>
 
