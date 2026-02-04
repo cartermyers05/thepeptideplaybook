@@ -15,12 +15,12 @@ export default function Coach() {
       <div className="max-w-3xl mx-auto space-y-6 animate-fade-up">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-primary" />
+          <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+            <MessageCircle className="w-5 h-5 text-purple-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">AI Coach</h1>
-            <p className="text-muted-foreground text-sm">
+            <h1 className="text-2xl font-bold tracking-tight text-black">AI Coach</h1>
+            <p className="text-gray-500 text-sm">
               Ask anything about your course
             </p>
           </div>
@@ -31,7 +31,7 @@ export default function Coach() {
           {suggestedQuestions.map((question, index) => (
             <button
               key={index}
-              className="text-sm px-4 py-2 rounded-full border border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-colors text-foreground"
+              className="text-sm px-4 py-2 rounded-full border border-gray-200 bg-white hover:border-black hover:bg-gray-50 transition-colors text-gray-600 hover:text-black"
               onClick={() => {
                 const textarea = document.querySelector('textarea');
                 if (textarea) {
@@ -49,7 +49,7 @@ export default function Coach() {
         </div>
 
         {/* Chat Interface */}
-        <div className="card-premium p-0 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-0 overflow-hidden">
           <AskCoach />
         </div>
       </div>

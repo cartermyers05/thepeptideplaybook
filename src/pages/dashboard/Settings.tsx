@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, Mail, User, Shield, Check, Settings as SettingsIcon } from "lucide-react";
+import { CreditCard, User, Shield, Check, Settings as SettingsIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const allFeatures = [
@@ -55,54 +55,54 @@ export default function Settings() {
       <div className="max-w-2xl mx-auto animate-fade-up">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <SettingsIcon className="w-5 h-5 text-primary" />
+          <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+            <SettingsIcon className="w-5 h-5 text-gray-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Account Settings</h1>
-            <p className="text-muted-foreground text-sm">
+            <h1 className="text-2xl font-bold tracking-tight text-black">Account Settings</h1>
+            <p className="text-gray-500 text-sm">
               Manage your profile and account
             </p>
           </div>
         </div>
 
         {/* Profile Section */}
-        <div className="card-premium p-6 mb-6">
-          <h2 className="font-semibold mb-4 flex items-center gap-2">
-            <User className="w-5 h-5 text-primary" />
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+          <h2 className="font-semibold text-black mb-4 flex items-center gap-2">
+            <User className="w-5 h-5 text-gray-500" />
             Profile
           </h2>
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-black">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={user?.email || ""}
                 disabled
-                className="mt-1.5"
+                className="mt-1.5 border-gray-200"
               />
-              <p className="text-xs text-muted-foreground mt-1.5">
+              <p className="text-xs text-gray-400 mt-1.5">
                 Email cannot be changed
               </p>
             </div>
 
             <div>
-              <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
+              <Label htmlFor="name" className="text-sm font-medium text-black">Full Name</Label>
               <Input
                 id="name"
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="mt-1.5"
+                className="mt-1.5 border-gray-200"
               />
             </div>
 
             <Button
               onClick={handleSave}
               disabled={updateProfile.isPending}
-              className="btn-teal"
+              className="bg-black text-white hover:bg-black/90 rounded-lg"
             >
               {updateProfile.isPending ? "Saving..." : "Save Changes"}
             </Button>
@@ -110,25 +110,25 @@ export default function Settings() {
         </div>
 
         {/* Subscription Section */}
-        <div className="card-premium p-6 mb-6">
-          <h2 className="font-semibold mb-4 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-primary" />
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+          <h2 className="font-semibold text-black mb-4 flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-gray-500" />
             Membership
           </h2>
 
-          <div className="flex items-center justify-between p-4 bg-primary/5 rounded-xl border border-primary/10 mb-4">
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 mb-4">
             <div>
-              <p className="font-semibold">Member</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-semibold text-black">Member</p>
+              <p className="text-sm text-gray-500">
                 Full access to all features
               </p>
             </div>
-            <div className="milestone-badge">Active</div>
+            <span className="text-xs font-medium bg-green-100 text-green-700 px-3 py-1 rounded-full">Active</span>
           </div>
 
           {/* Feature Access List */}
           <div className="space-y-2">
-            <p className="text-sm font-medium mb-3">
+            <p className="text-sm font-medium text-black mb-3">
               {isPaid ? "Your features:" : "Included with membership:"}
             </p>
             <ul className="space-y-2.5">
@@ -138,11 +138,11 @@ export default function Settings() {
                   className="flex items-center gap-3 text-sm"
                 >
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                    isPaid ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'
+                    isPaid ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
                   }`}>
                     <Check className="w-3 h-3" />
                   </div>
-                  <span className={isPaid ? "text-foreground" : "text-muted-foreground"}>
+                  <span className={isPaid ? "text-black" : "text-gray-500"}>
                     {feature}
                   </span>
                 </li>
@@ -151,9 +151,9 @@ export default function Settings() {
           </div>
 
           {isPaid && (
-            <p className="text-sm text-muted-foreground mt-6 pt-4 border-t border-border">
+            <p className="text-sm text-gray-500 mt-6 pt-4 border-t border-gray-100">
               To request a refund, please contact{" "}
-              <a href="mailto:support@peptideplaybook.com" className="text-primary hover:underline">
+              <a href="mailto:support@peptideplaybook.com" className="text-black hover:underline">
                 support@peptideplaybook.com
               </a>
             </p>
@@ -161,25 +161,25 @@ export default function Settings() {
         </div>
 
         {/* Legal Section */}
-        <div className="card-premium p-6">
-          <h2 className="font-semibold mb-4 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-primary" />
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h2 className="font-semibold text-black mb-4 flex items-center gap-2">
+            <Shield className="w-5 h-5 text-gray-500" />
             Legal
           </h2>
 
           <ul className="space-y-3">
             <li>
-              <Link to="/terms" className="text-sm text-primary hover:underline">
+              <Link to="/terms" className="text-sm text-gray-600 hover:text-black hover:underline">
                 Terms of Service
               </Link>
             </li>
             <li>
-              <Link to="/privacy" className="text-sm text-primary hover:underline">
+              <Link to="/privacy" className="text-sm text-gray-600 hover:text-black hover:underline">
                 Privacy Policy
               </Link>
             </li>
             <li>
-              <Link to="/disclaimer" className="text-sm text-primary hover:underline">
+              <Link to="/disclaimer" className="text-sm text-gray-600 hover:text-black hover:underline">
                 Medical Disclaimer
               </Link>
             </li>

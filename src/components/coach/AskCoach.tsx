@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Loader2, Bot, User } from "lucide-react";
+import { Send, Bot, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourse } from "@/hooks/useCourse";
 import { cn } from "@/lib/utils";
@@ -133,11 +133,11 @@ export function AskCoach() {
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-              <Bot className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 rounded-2xl bg-purple-100 flex items-center justify-center mb-4">
+              <Bot className="w-8 h-8 text-purple-600" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Start a conversation</h3>
-            <p className="text-muted-foreground text-sm max-w-xs">
+            <h3 className="font-semibold text-lg text-black mb-2">Start a conversation</h3>
+            <p className="text-gray-500 text-sm max-w-xs">
               Ask me anything about your peptide course, dosing, side effects, or what to expect.
             </p>
           </div>
@@ -152,20 +152,20 @@ export function AskCoach() {
                 )}
               >
                 {message.role === "assistant" && (
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-4 h-4 text-primary" />
+                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-4 h-4 text-purple-600" />
                   </div>
                 )}
                 <div
                   className={cn(
-                    "max-w-[80%]",
+                    "max-w-[80%] rounded-2xl px-4 py-3",
                     message.role === "user"
-                      ? "chat-bubble-user"
-                      : "chat-bubble-assistant"
+                      ? "bg-black text-white rounded-br-md"
+                      : "bg-white border border-gray-200 text-black rounded-bl-md"
                   )}
                 >
                   {message.role === "assistant" ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
+                    <div className="prose prose-sm max-w-none text-sm">
                       <ReactMarkdown>{message.content}</ReactMarkdown>
                     </div>
                   ) : (
@@ -173,22 +173,22 @@ export function AskCoach() {
                   )}
                 </div>
                 {message.role === "user" && (
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-primary-foreground" />
+                  <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-white" />
                   </div>
                 )}
               </div>
             ))}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-primary" />
+                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-purple-600" />
                 </div>
-                <div className="chat-bubble-assistant">
+                <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-3">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-pulse" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-pulse" style={{ animationDelay: '200ms' }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-pulse" style={{ animationDelay: '400ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '200ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse" style={{ animationDelay: '400ms' }} />
                   </div>
                 </div>
               </div>
@@ -198,20 +198,20 @@ export function AskCoach() {
       </ScrollArea>
 
       {/* Input */}
-      <div className="border-t border-border p-4">
+      <div className="border-t border-gray-100 p-4">
         <div className="flex gap-2">
           <Textarea
             placeholder="Type your question..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="min-h-[44px] max-h-[120px] resize-none rounded-xl"
+            className="min-h-[44px] max-h-[120px] resize-none rounded-xl border-gray-200"
             rows={1}
           />
           <Button 
             onClick={handleSend} 
             disabled={isLoading || !input.trim()} 
-            className="btn-teal h-[44px] w-[44px] p-0 rounded-xl flex-shrink-0"
+            className="bg-black text-white hover:bg-black/90 h-[44px] w-[44px] p-0 rounded-xl flex-shrink-0"
           >
             <Send className="w-4 h-4" />
           </Button>

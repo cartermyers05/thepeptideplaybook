@@ -36,45 +36,43 @@ export function DashboardSidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'User';
-  const courseTitle = userCourse?.title || 'Getting Started';
+  const courseTitle = userCourse?.title?.replace(' Course', '') || 'Getting Started';
 
   return (
     <>
       {/* Mobile menu button */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="fixed top-4 left-4 z-50 md:hidden p-2 bg-card border border-border rounded-lg shadow-sm"
+        className="fixed top-4 left-4 z-50 md:hidden p-2 bg-white border border-gray-200 rounded-lg shadow-sm"
       >
-        <Menu className="w-5 h-5" />
+        <Menu className="w-5 h-5 text-gray-600" />
       </button>
 
       {/* Sidebar */}
       <aside
         className={cn(
           "fixed left-0 top-0 h-full flex flex-col transition-all duration-300 z-40",
-          "bg-sidebar-background border-r border-sidebar-border",
+          "bg-white border-r border-gray-100",
           collapsed ? "-translate-x-full md:translate-x-0 md:w-16" : "w-60",
           "md:translate-x-0"
         )}
       >
-        {/* Header */}
-        <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
+        {/* Header - Logo */}
+        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
           {!collapsed && (
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">P</span>
-              </div>
-              <span className="font-semibold text-sidebar-foreground">Peptide Playbook</span>
+            <div className="flex flex-col leading-tight">
+              <span className="text-base font-bold tracking-tight uppercase text-black">Peptide</span>
+              <span className="text-base font-bold tracking-tight uppercase text-black -mt-0.5">Playbook</span>
             </div>
           )}
           {collapsed && (
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center mx-auto">
-              <span className="text-primary-foreground font-bold text-sm">P</span>
+            <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center mx-auto">
+              <span className="text-white font-bold text-sm">P</span>
             </div>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-md hover:bg-sidebar-accent/10 hidden md:block text-sidebar-foreground/60 hover:text-sidebar-foreground"
+            className="p-1.5 rounded-md hover:bg-gray-100 hidden md:block text-gray-400 hover:text-gray-600"
           >
             <ChevronLeft className={cn("w-4 h-4 transition-transform", collapsed && "rotate-180")} />
           </button>
@@ -91,11 +89,11 @@ export function DashboardSidebar() {
                 to={item.path}
                 end={item.path === "/dashboard"}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
-                  "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-white/5",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                  "text-gray-500 hover:text-black hover:bg-gray-50",
                   collapsed && "justify-center px-2"
                 )}
-                activeClassName="bg-primary/10 text-primary border-l-2 border-primary -ml-px pl-[calc(0.75rem+1px)]"
+                activeClassName="bg-gray-100 text-black"
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 {!collapsed && <span className="flex-1">{item.label}</span>}
@@ -105,15 +103,15 @@ export function DashboardSidebar() {
         </nav>
 
         {/* Settings & Footer */}
-        <div className="p-3 border-t border-sidebar-border">
+        <div className="p-3 border-t border-gray-100">
           <NavLink
             to="/dashboard/settings"
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all mb-3",
-              "text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-white/5",
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-3",
+              "text-gray-500 hover:text-black hover:bg-gray-50",
               collapsed && "justify-center px-2"
             )}
-            activeClassName="bg-primary/10 text-primary"
+            activeClassName="bg-gray-100 text-black"
           >
             <Settings className="w-5 h-5 flex-shrink-0" />
             {!collapsed && <span>Settings</span>}
@@ -122,14 +120,14 @@ export function DashboardSidebar() {
           {/* User info */}
           {!collapsed && (
             <div className="flex items-center gap-3 px-3 py-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-sidebar-accent/20 flex items-center justify-center">
-                <span className="text-primary font-medium text-sm">
+              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-600 font-medium text-sm">
                   {displayName.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sidebar-foreground text-sm font-medium truncate">{displayName}</p>
-                <p className="text-sidebar-foreground/40 text-xs truncate">{courseTitle}</p>
+                <p className="text-black text-sm font-medium truncate">{displayName}</p>
+                <p className="text-gray-400 text-xs truncate">{courseTitle}</p>
               </div>
             </div>
           )}
@@ -139,7 +137,7 @@ export function DashboardSidebar() {
             size="sm"
             onClick={() => signOut()}
             className={cn(
-              "w-full justify-start gap-3 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-white/5",
+              "w-full justify-start gap-3 text-gray-500 hover:text-black hover:bg-gray-50",
               collapsed && "justify-center px-2"
             )}
           >
