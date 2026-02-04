@@ -1,76 +1,32 @@
 
-# Plan: Animate "Your AI Peptide Journey" Hero Header
+# Fix: Reduce White Space Between "How It Works" and "What You Get"
 
-## Overview
-Enhance the hero headline with a more dynamic, eye-catching animation that creates a memorable first impression while maintaining the editorial aesthetic.
+## The Problem
+There's currently **320px of white space** between the last step of "How It Works" (Step 05: Track & Improve) and the "What You Get" section header. This is caused by:
+- `py-32 md:py-40` on HowItWorksSection (160px bottom padding)
+- `py-32 md:py-40` on WhatsInsideSection (160px top padding)
 
-## Current State
-- Simple fade-in + slide-up animation on the entire `<h1>` block
-- All three lines ("Your", "AI Peptide", "Journey") animate together as one unit
+Combined, this creates an excessive gap that breaks the visual flow.
 
-## Proposed Animation: Staggered Line Reveal with Subtle Slide
+## The Solution
+Reduce the vertical padding on both sections to create a tighter, more cohesive layout:
 
-Each line of the headline animates in separately with a smooth cascade effect:
+### Changes to `HowItWorksSection.tsx`
+- Change `py-32 md:py-40` to `py-20 md:py-28`
+- This reduces padding from 128px/160px to 80px/112px
 
-```text
-Your           ← slides in from left, fades in (first)
-AI Peptide     ← slides in from left, fades in (0.15s delay)
-Journey        ← slides in from left, fades in (0.3s delay)
-```
+### Changes to `WhatsInsideSection.tsx`
+- Change `py-32 md:py-40` to `py-20 md:py-28`
+- Same reduction for consistency
 
-### Animation Details
-- **Direction**: Each line slides in from the left (x: -30 → 0)
-- **Opacity**: Fades from 0 → 1
-- **Timing**: 0.6s duration per line with 0.15s stagger between lines
-- **Easing**: Smooth ease-out for professional feel
-
-### Visual Effect
-Creates a "typing reveal" sensation without the complexity of letter-by-letter animation. Clean, bold, and editorial.
-
----
-
-## Technical Implementation
-
-### File: `src/components/landing/HeroSection.tsx`
-
-**Changes:**
-1. Create a new `lineVariants` animation config for the horizontal slide effect
-2. Wrap each line of the headline in its own `motion.span` with `display: block`
-3. Apply staggered delays to each line
-
-### Code Structure:
-```tsx
-const lineVariants = {
-  hidden: { opacity: 0, x: -30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    transition: { 
-      delay: i * 0.15, 
-      duration: 0.6, 
-      ease: "easeOut" 
-    },
-  }),
-};
-
-// In the h1:
-<motion.h1 className="...">
-  <motion.span variants={lineVariants} custom={0} className="block">
-    Your
-  </motion.span>
-  <motion.span variants={lineVariants} custom={1} className="block">
-    AI Peptide
-  </motion.span>
-  <motion.span variants={lineVariants} custom={2} className="block">
-    Journey
-  </motion.span>
-</motion.h1>
-```
-
----
+## Result
+- **Before**: 320px gap between sections
+- **After**: ~200px gap (80+80 mobile, 112+112 desktop)
+- Creates a tighter, more intentional flow between the journey steps and what users receive
 
 ## Summary
-- Split the headline into 3 animated lines
-- Each line slides in from the left with a staggered delay
-- Maintains the bold, editorial aesthetic
-- More dynamic than the current single-block fade without being overdone
+| Section | Before | After |
+|---------|--------|-------|
+| HowItWorksSection | `py-32 md:py-40` | `py-20 md:py-28` |
+| WhatsInsideSection | `py-32 md:py-40` | `py-20 md:py-28` |
+| **Total gap** | ~320px | ~200px |
