@@ -1,20 +1,12 @@
 
 
-# Add Goal-Specific Colors to Quiz Quick Answer Buttons
+# Fix Auto-Scroll in Quiz Chat
 
-## Overview
-Match the quick answer buttons on the quiz page (`/quiz`) to their corresponding gradient colors from the homepage's Goal Selection section, creating visual consistency across the user journey.
+## The Problem
+When you send a message in the quiz, the AI's response appears but the page doesn't automatically scroll down to show it. This causes the new message content to be cut off below the visible area.
 
-## Color Mapping
-
-| Goal | Homepage Gradient | Button Style |
-|------|-------------------|--------------|
-| Fat Loss | `hsl(25 90% 55%)` → `hsl(15 85% 45%)` (Orange) | Orange hover/active |
-| Build Muscle | `hsl(210 80% 55%)` → `hsl(220 75% 45%)` (Blue) | Blue hover/active |
-| Heal Injury | `hsl(350 80% 55%)` → `hsl(340 75% 45%)` (Red/Pink) | Red hover/active |
-| Anti-Aging | `hsl(270 70% 55%)` → `hsl(280 65% 45%)` (Purple) | Purple hover/active |
-| Cognitive | `hsl(160 70% 45%)` → `hsl(170 65% 35%)` (Teal/Green) | Teal hover/active |
-| Not Sure | `hsl(45 80% 50%)` → `hsl(35 75% 40%)` (Amber/Gold) | Amber hover/active |
+## The Solution
+Add a "scroll anchor" element at the bottom of the messages list and use `scrollIntoView()` instead of manually setting `scrollTop`. This is the same pattern used successfully in the ChatWidget component.
 
 ---
 
@@ -22,106 +14,62 @@ Match the quick answer buttons on the quiz page (`/quiz`) to their corresponding
 
 ### `src/components/quiz/ConversationalQuiz.tsx`
 
-**Changes:**
-1. Add a `gradient` property to each quick answer in the `quickAnswers` array
-2. Apply the gradient as the hover background using inline styles
-3. Update button styling to show color on hover while keeping outline style at rest
-
-**Updated quickAnswers array (lines 12-19):**
+**Change 1: Add a new ref for the scroll anchor (line 57)**
 ```tsx
-const quickAnswers = [
-  { 
-    value: 'fat_loss', 
-    label: 'Fat Loss', 
-    icon: Flame,
-    gradient: 'linear-gradient(135deg, hsl(25 90% 55%) 0%, hsl(15 85% 45%) 100%)',
-    hoverBg: 'hsl(25 90% 55%)'
-  },
-  { 
-    value: 'muscle', 
-    label: 'Build Muscle', 
-    icon: Dumbbell,
-    gradient: 'linear-gradient(135deg, hsl(210 80% 55%) 0%, hsl(220 75% 45%) 100%)',
-    hoverBg: 'hsl(210 80% 55%)'
-  },
-  { 
-    value: 'recovery', 
-    label: 'Heal Injury', 
-    icon: Heart,
-    gradient: 'linear-gradient(135deg, hsl(350 80% 55%) 0%, hsl(340 75% 45%) 100%)',
-    hoverBg: 'hsl(350 80% 55%)'
-  },
-  { 
-    value: 'anti_aging', 
-    label: 'Anti-Aging', 
-    icon: Clock,
-    gradient: 'linear-gradient(135deg, hsl(270 70% 55%) 0%, hsl(280 65% 45%) 100%)',
-    hoverBg: 'hsl(270 70% 55%)'
-  },
-  { 
-    value: 'cognitive', 
-    label: 'Cognitive', 
-    icon: Brain,
-    gradient: 'linear-gradient(135deg, hsl(160 70% 45%) 0%, hsl(170 65% 35%) 100%)',
-    hoverBg: 'hsl(160 70% 45%)'
-  },
-  { 
-    value: 'beginner', 
-    label: 'Not Sure', 
-    icon: HelpCircle,
-    gradient: 'linear-gradient(135deg, hsl(45 80% 50%) 0%, hsl(35 75% 40%) 100%)',
-    hoverBg: 'hsl(45 80% 50%)'
-  },
-];
+// Current
+const scrollRef = useRef<HTMLDivElement>(null);
+
+// Add after scrollRef
+const messagesEndRef = useRef<HTMLDivElement>(null);
 ```
 
-**Updated button rendering (lines 182-193):**
-
-Use a custom hover state with React's `useState` to apply the gradient on hover, since Tailwind can't handle dynamic inline styles:
-
+**Change 2: Update the auto-scroll useEffect (lines 76-81)**
 ```tsx
-{quickAnswers.map(({ value, label, icon: Icon, gradient }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  return (
-    <button
-      key={value}
-      onClick={() => handleQuickAnswer(value, label)}
-      disabled={isLoading}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="rounded-full px-4 py-2.5 flex items-center gap-2 border border-border 
-                 font-medium text-sm transition-all duration-300 disabled:opacity-50"
-      style={{
-        background: isHovered ? gradient : 'transparent',
-        color: isHovered ? 'white' : 'inherit',
-        borderColor: isHovered ? 'transparent' : undefined,
-      }}
-    >
-      <Icon className="w-4 h-4" />
-      {label}
-    </button>
-  );
-})}
+// Current - doesn't work reliably
+useEffect(() => {
+  if (scrollRef.current) {
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }
+}, [messages]);
+
+// New - uses scrollIntoView for reliable scrolling
+useEffect(() => {
+  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages]);
+```
+
+**Change 3: Add the scroll anchor div at the end of messages (after line 199, before the closing `</div>` of the messages container)**
+```tsx
+{/* Current messages list */}
+{messages.map((message, index) => (
+  <QuizMessage ... />
+))}
+
+{error && (
+  <motion.div ... />
+)}
+
+{/* Add this scroll anchor */}
+<div ref={messagesEndRef} />
 ```
 
 ---
 
-## Visual Result
+## How It Works
 
-| State | Appearance |
-|-------|------------|
-| Default | Outline button with icon + label |
-| Hover | Fills with goal-specific gradient, white text |
-| Disabled | 50% opacity |
+| Approach | Behavior |
+|----------|----------|
+| **Before**: `scrollTop = scrollHeight` | Scrolls the container to its max scroll position, but can fail if container height changes |
+| **After**: `scrollIntoView({ behavior: "smooth" })` | Smoothly scrolls until the anchor element is visible in the viewport - more reliable |
 
-This creates a direct visual connection between the homepage goal cards and the quiz quick answers, making the design feel cohesive and intentional.
+The empty `<div ref={messagesEndRef} />` sits at the very bottom of the message list. When messages change, we tell the browser to scroll that element into view, which guarantees the latest content is visible.
 
 ---
 
 ## Summary
-- **1 file to edit**: `src/components/quiz/ConversationalQuiz.tsx`
-- Add gradient colors to `quickAnswers` array
-- Apply gradient backgrounds on hover using inline styles
-- Creates visual consistency with homepage Goal Selection cards
+- **1 file to update**: `src/components/quiz/ConversationalQuiz.tsx`
+- Add `messagesEndRef` ref
+- Update `useEffect` to use `scrollIntoView()` instead of `scrollTop`
+- Add scroll anchor `<div>` at end of messages list
+- Result: Chat automatically scrolls to show AI responses
 
