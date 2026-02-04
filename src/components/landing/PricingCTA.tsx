@@ -28,7 +28,7 @@ export function PricingCTA() {
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               One Price.
               <br />
-              <span className="text-primary">Everything</span>
+              Everything
               <br />
               Included.
             </h2>
