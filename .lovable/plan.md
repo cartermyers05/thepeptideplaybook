@@ -1,269 +1,338 @@
 
 
-# Complete Peptide Playbook Content Implementation
+# SEO & AI Search Strategy Implementation Plan
 
-## Overview
+## Current State Analysis
 
-This plan implements the complete content from the uploaded `peptide-playbook-complete-content.md` document across all system components. The goal is to ensure users receive a full 56-day course experience with interactive guides, personalized AI coaching, and proper milestones.
+After thorough codebase exploration, here's what already exists:
 
----
+### What's Already Built ✓
 
-## Current State
+| Feature | Status | Notes |
+|---------|--------|-------|
+| **Guides Hub** | ✓ Complete | `/guides` with 30 articles, search, category filters |
+| **SEO Components** | ✓ Complete | SEOHead, GuideLayout, QuickAnswerBox, FAQ schemas |
+| **robots.txt** | ✓ Complete | AI crawlers (GPTBot, PerplexityBot, ClaudeBot) explicitly allowed |
+| **Sitemap** | ✓ Partial | Static XML exists, needs expansion for new pages |
+| **Article Schema** | ✓ Complete | JSON-LD with Article, FAQ, Breadcrumb schemas |
+| **Semaglutide Guide** | ✓ Complete | Comprehensive guide at `/guides/semaglutide-complete-guide` |
+| **BPC-157 Guide** | ✓ Complete | At `/guides/bpc-157-complete-guide` |
+| **Tirzepatide vs Semaglutide** | ✓ Complete | Comparison at `/guides/tirzepatide-vs-semaglutide` |
+| **BPC-157 vs TB-500** | ✓ Complete | At `/guides/bpc-157-vs-tb-500` |
+| **Dosing Calculator** | ✓ Complete | Component exists in dashboard (`DosingCalculator.tsx`) |
+| **Injection Sites Guide** | ✓ Complete | At `/guides/peptide-injection-sites` |
+| **FAQ Components** | ✓ Complete | GuideFAQ.tsx with schema injection |
 
-| Component | Current State | Target State |
-|-----------|--------------|--------------|
-| Fat Loss Course | 57 lessons | 57 lessons (complete) |
-| Other Courses (5) | 8 lessons each | Full lessons per goal |
-| AI Coach Prompt | Basic version | Full enhanced version from doc |
-| Reconstitution Guide | Basic in courseContent.ts | Enhanced interactive version |
-| Injection Guide | Basic in courseContent.ts | Enhanced interactive version |
-| Dosing Calculator | Working | Already complete |
-| Milestones | Basic tracking | Full 12-milestone system |
-| Course Templates | Partial data | Complete with phases, supplies, schedules |
+### Critical Gaps ✗
+
+| Priority | Gap | Search Volume | Status |
+|----------|-----|---------------|--------|
+| **1** | Public Peptide Calculator Tool | ~3,000/mo | Dashboard-only, not public |
+| **2** | Reconstitution Guide | ~5,000/mo | No dedicated page |
+| **3** | Semaglutide Dosing Guide | ~10,000/mo | Exists in main guide, needs standalone |
+| **4** | Semaglutide Side Effects Guide | ~15,000/mo | Exists in main guide, needs standalone |
+| **5** | TB-500 Peptide Page | ~6,000/mo | Only side effects page exists |
+| **6** | Semax Peptide Page | ~4,000/mo | Not created |
+| **7** | Selank Peptide Page | ~2,500/mo | Not created |
+| **8** | Ozempic vs Wegovy Comparison | ~6,000/mo | Not created |
+| **9** | FAQ Hub with Individual Pages | High | Only embedded FAQs, no hub |
+| **10** | HowTo Schema | - | Not implemented for guides |
 
 ---
 
 ## Implementation Plan
 
-### Phase 1: Seed Remaining Course Content (Database)
+### Phase 1: High-Impact Quick Wins (Week 1)
 
-**Priority: Critical**
+#### 1.1 Create Public Peptide Calculator Tool Page
 
-The Fat Loss course has 57 lessons but the other 5 courses only have 8 each. We need to seed complete lesson content for:
+**New Route:** `/tools/peptide-calculator`
 
-1. **Muscle & Recovery Course** (56 days) - BPC-157 + TB-500
-2. **Injury Recovery Course** (42 days) - BPC-157
-3. **Anti-Aging Course** (84 days) - Epithalon + GHK-Cu  
-4. **Cognitive Course** (56 days) - Semax + Selank (nasal, no injections)
-5. **Beginner Course** (42 days) - BPC-157
+**Why:** Free tools get links, shares, and return visits. ~3,000 monthly searches with low competition.
 
-**Approach:**
-- Create database migration to update each course template with full lesson arrays
-- Lessons follow same structure: day, phase, title, content (200-400 words), action_item
-- Content adapted per peptide and administration method (injection vs nasal)
+**Implementation:**
+- Create `src/pages/tools/PeptideCalculator.tsx`
+- Reuse existing `DosingCalculator` component
+- Add standalone page wrapper with SEO optimization
+- Include HowTo schema for the calculation process
+- Add common vial size presets (5mg, 10mg)
+- Include educational content about the math
+- CTA to course at bottom
 
----
-
-### Phase 2: Enhanced AI Coach System Prompt
-
-**File:** `supabase/functions/coach/index.ts`
-
-Update the `buildSystemPrompt` function with the complete prompt from the document:
-
-**Key Additions:**
-- More detailed personality guidelines
-- Specific response formatting rules
-- Enhanced example responses
-- Additional context fields (injections completed, next injection date)
-- Stricter "NEVER DO" guidelines
-- Emoji usage guidance
-
-**Updated Context Fields:**
-```typescript
-- Name: {{user.name}}
-- Course: {{course.title}}
-- Current Day: {{progress.currentDay}} of {{course.duration}}
-- Current Phase: {{progress.currentPhase}}
-- Peptide: {{course.peptide}}
-- Current Dose: {{progress.currentDose}}
-- Next Injection: {{progress.nextInjectionDate}}
-- Experience Level: {{onboarding.experience}}
-- Main Concern: {{onboarding.mainConcern}}
-- Injections Completed: {{progress.injectionsCompleted}}
-```
-
----
-
-### Phase 3: Interactive Guides with Checkboxes
-
-**Files to Update:**
-- `src/lib/courseContent.ts` - Enhanced guide content
-- `src/pages/dashboard/MyPlan.tsx` - Interactive checkbox functionality
-
-**Reconstitution Guide Enhancements:**
-```typescript
-// Add step-by-step checkbox tracking
-const [reconSteps, setReconSteps] = useState<Record<string, boolean>>({
-  supplies: false,
-  mathUnderstood: false,
-  vialsClean: false,
-  waterDrawn: false,
-  waterAdded: false,
-  dissolved: false,
-  labeled: false,
-});
-```
-
-**Features:**
-- Checkbox for each step that must be confirmed
-- Progress indicator showing X/7 steps complete
-- "Can't proceed" logic until previous step confirmed
-- LocalStorage persistence for progress
-- Completion celebration when all steps done
-
-**Injection Guide Enhancements:**
-- Same checkbox pattern (6 steps)
-- Site selection with visual indicator
-- Tips section for reducing anxiety
-- "What to do if something goes wrong" section
-
----
-
-### Phase 4: Enhanced Milestone System
-
-**Files to Update:**
-- `src/lib/milestoneDefinitions.ts` (new file)
-- `src/hooks/useMilestones.ts` - Enhanced logic
-- `src/components/dashboard/home/MilestonesTimeline.tsx` - Updated UI
-
-**12 Milestones from Document:**
-```typescript
-const milestones = [
-  { id: "first-checkin", title: "First Check-In", targetDay: 0, celebration: "simple" },
-  { id: "supplies-ready", title: "Supplies Ready", targetDay: 2, celebration: "simple" },
-  { id: "reconstitution-complete", title: "Reconstitution Complete", targetDay: 4, celebration: "medium" },
-  { id: "first-injection", title: "First Injection 💉", targetDay: 5, celebration: "major" },
-  { id: "week-1-complete", title: "Week 1 Complete", targetDay: 7, celebration: "medium" },
-  { id: "week-2-complete", title: "Week 2 Complete", targetDay: 14, celebration: "simple" },
-  { id: "first-dose-increase", title: "First Dose Increase", targetDay: 15, celebration: "medium" },
-  { id: "one-month", title: "One Month Complete 🎉", targetDay: 28, celebration: "major" },
-  { id: "halfway", title: "Halfway There!", targetDay: 28, celebration: "medium" },
-  { id: "full-dose", title: "Full Dose Reached", targetDay: 29, celebration: "medium" },
-  { id: "week-6-complete", title: "Week 6 Complete", targetDay: 42, celebration: "medium" },
-  { id: "course-complete", title: "Course Complete! 🏆", targetDay: 56, celebration: "major" },
-];
-```
-
-**Celebration Types:**
-- `simple`: Subtle checkmark animation
-- `medium`: Toast notification with celebration message
-- `major`: Confetti animation + modal
-
----
-
-### Phase 5: Course Template Data Enhancement
-
-**Database Migration Updates:**
-
-Update `course_templates` table entries with complete data:
-
-```sql
-UPDATE course_templates 
-SET 
-  peptides = '[
-    {
-      "name": "Semaglutide",
-      "purpose": "GLP-1 receptor agonist for appetite control",
-      "dosing_research": "0.25mg → 0.5mg → 1.0mg weekly",
-      "frequency": "Once weekly",
-      "timing": "Same day each week",
-      "site": "Subcutaneous - abdomen, thigh, or arm"
-    }
-  ]'::jsonb
-WHERE goal = 'fat_loss';
-```
-
-**Data to Add Per Course:**
-- `schedule` array with weeks, dose, units, frequency
-- `supplies` array with required items and notes
-- `phases` array with name, days range, description
-- Complete `lessons` array (56+ items)
-
----
-
-### Phase 6: Update courseContent.ts
-
-**File:** `src/lib/courseContent.ts`
-
-**Enhancements:**
-1. Add complete semaglutide information from document Section 5
-2. Add interactive step definitions with checkbox requirements
-3. Add troubleshooting sections for guides
-4. Add common mistakes section
-5. Ensure all peptide details match document specifications
-
-**Key Data Structures:**
-```typescript
-export const semaglutideInfo = {
-  name: "Semaglutide",
-  category: "GLP-1 Receptor Agonist",
-  brandNames: ["Ozempic", "Wegovy", "Rybelsus"],
-  howItWorks: {
-    summary: "Mimics the GLP-1 hormone that signals fullness to your brain",
-    mechanisms: [
-      "Reduces appetite by acting on hunger centers in the brain",
-      "Slows gastric emptying (food stays in stomach longer)",
-      "Regulates blood sugar to prevent cravings",
-      "Reduces 'food noise' - constant thoughts about eating"
-    ]
-  },
-  research: {
-    trials: [
-      "STEP 1: 14.9% average body weight loss",
-      "STEP 2: 9.6% weight loss in diabetic patients",
-      "STEP 3: Maintained weight loss over 68 weeks"
-    ],
-    approval: "FDA approved for weight loss (Wegovy) and diabetes (Ozempic)"
-  },
-  // ... rest of detailed info
-};
-```
-
----
-
-## File Changes Summary
-
-| File | Action | Description |
-|------|--------|-------------|
-| Database Migration | Create | Seed all 5 remaining courses with full lessons |
-| `supabase/functions/coach/index.ts` | Update | Enhanced AI system prompt |
-| `src/lib/courseContent.ts` | Update | Complete peptide info + interactive guide data |
-| `src/lib/milestoneDefinitions.ts` | Create | 12-milestone definitions |
-| `src/hooks/useMilestones.ts` | Update | Enhanced milestone tracking logic |
-| `src/pages/dashboard/MyPlan.tsx` | Update | Interactive checkboxes for guides |
-| `src/components/dashboard/home/MilestonesTimeline.tsx` | Update | Celebration animations |
-
----
-
-## Expected Outcome
-
-After implementation:
-
-1. **Users get full 56-day course content** regardless of goal selected
-2. **AI Coach responses are personalized** with deep context awareness
-3. **Interactive guides** track completion step-by-step with checkboxes
-4. **12 milestones** trigger appropriate celebrations at key moments
-5. **Dosing calculator** already working (no changes needed)
-6. **Complete peptide information** displayed in My Plan
-
----
-
-## Technical Notes
-
-### Database Lesson Structure
-
-Each lesson in the JSONB array follows this format:
+**Schema markup:**
 ```json
 {
-  "day": 0,
-  "phase": "Preparation",
-  "title": "Welcome to Your Fat Loss Journey",
-  "content": "Congratulations. You just made a decision...",
-  "action_item": "Check out the My Plan tab. Familiarize yourself with your peptide, your schedule, and what supplies you'll need.",
-  "read_time": "4 min"
+  "@type": "HowTo",
+  "name": "How to Calculate Peptide Dosing",
+  "step": [
+    { "name": "Enter vial size", "text": "..." },
+    { "name": "Enter water amount", "text": "..." },
+    { "name": "Read your units", "text": "..." }
+  ]
 }
 ```
 
-### LocalStorage Keys for Guide Progress
+#### 1.2 Create Reconstitution Guide
 
-- `peptide_playbook_recon_progress` - Reconstitution steps completed
-- `peptide_playbook_injection_progress` - Injection steps completed
-- `peptide_playbook_supplies_checklist` - Supplies checked off
+**New Route:** `/guides/how-to-reconstitute-peptides`
 
-### Milestone Trigger Logic
+**Why:** ~5,000/mo searches, low competition, high intent.
 
-Milestones trigger based on:
-- Day-based: When `currentDay` reaches `targetDay`
-- Action-based: When specific actions complete (reconstitution, first injection)
-- Hybrid: Some milestones may need both conditions
+**Implementation:**
+- Create `src/pages/guides/ReconstitutionGuide.tsx`
+- Step-by-step guide with HowTo schema
+- Supplies list with explanations
+- Common mistakes section
+- Troubleshooting (cloudy solution, bubbles)
+- Embed dosing calculator component
+- FAQ section with schema
+- Link to injection guide as "next step"
+
+---
+
+### Phase 2: High-Volume Standalone Guides (Week 1-2)
+
+#### 2.1 Semaglutide Dosing Standalone Guide
+
+**New Route:** `/guides/semaglutide-dosing`
+
+**Why:** ~10,000/mo combined searches. Currently buried in main guide.
+
+**Content:**
+- Titration schedule table (0.25mg → 0.5mg → 1.0mg → 2.0mg → 2.4mg)
+- Weeks at each dose level
+- How to calculate units from mg
+- Embedded calculator with semaglutide defaults
+- What to do if you miss a dose
+- FAQ with schema
+
+#### 2.2 Semaglutide Side Effects Standalone Guide
+
+**New Route:** `/guides/semaglutide-side-effects`
+
+**Why:** ~15,000/mo searches. Highest volume opportunity.
+
+**Content:**
+- Common side effects with frequency percentages
+- Week-by-week timeline (when they improve)
+- Management strategies per side effect
+- When to seek medical attention
+- FAQ with schema
+
+---
+
+### Phase 3: Peptide Pages (Week 2)
+
+#### 3.1 TB-500 Complete Guide
+
+**New Route:** `/peptides/tb-500`
+
+**Why:** ~6,000/mo searches, only side effects page exists.
+
+**Content:**
+- What is TB-500 (Thymosin Beta-4)
+- Mechanism of action
+- Research summary
+- Dosing protocols
+- Stacking with BPC-157
+- Side effects
+- FAQ section
+
+#### 3.2 Semax Complete Guide
+
+**New Route:** `/peptides/semax`
+
+**Why:** ~4,000/mo searches. Covers cognitive peptide category.
+
+**Content:**
+- What is Semax
+- Nootropic mechanisms
+- Research summary
+- Nasal administration (no injection)
+- Side effects
+- Legal status
+- FAQ section
+
+#### 3.3 Selank Complete Guide
+
+**New Route:** `/peptides/selank`
+
+**Why:** ~2,500/mo searches. Complements Semax.
+
+**Content:**
+- What is Selank
+- Anxiolytic mechanisms
+- Comparison to Semax
+- Research summary
+- Administration
+- FAQ section
+
+---
+
+### Phase 4: Additional Comparisons (Week 2-3)
+
+#### 4.1 Ozempic vs Wegovy Comparison
+
+**New Route:** `/compare/ozempic-vs-wegovy`
+
+**Why:** ~6,000/mo searches, high intent comparison.
+
+**Content:**
+- Side-by-side comparison table
+- Same drug, different approvals
+- Dosing differences
+- Insurance coverage differences
+- FAQ section
+
+---
+
+### Phase 5: FAQ Hub System (Week 3+)
+
+#### 5.1 Master FAQ Hub
+
+**New Route:** `/faq`
+
+**Structure:**
+- Organized by category (Reconstitution, Injection, Dosing, Side Effects, Storage)
+- Links to individual FAQ pages
+- Search functionality
+
+#### 5.2 Individual FAQ Pages
+
+**New Routes:** `/faq/[question-slug]`
+
+**Examples:**
+- `/faq/how-much-bacteriostatic-water-to-add`
+- `/faq/how-long-do-reconstituted-peptides-last`
+- `/faq/how-many-units-is-025mg-semaglutide`
+
+**Each page:**
+- Direct answer in first paragraph
+- Comprehensive explanation
+- Related questions section
+- FAQ schema markup
+
+---
+
+### Phase 6: Technical SEO Enhancements
+
+#### 6.1 Add HowTo Schema
+
+Create reusable `HowToSchema` component for step-by-step guides:
+
+**File:** `src/components/seo/HowToSchema.tsx`
+
+```tsx
+interface HowToSchemaProps {
+  name: string;
+  description: string;
+  steps: { name: string; text: string }[];
+  totalTime?: string;
+}
+```
+
+#### 6.2 Update Sitemap
+
+Update `public/sitemap.xml` to include:
+- All new guide pages
+- Tools pages
+- FAQ pages
+- Peptide pages
+- Comparison pages
+
+#### 6.3 Internal Linking Component
+
+Create component to auto-suggest related content at bottom of each page based on category/tags.
+
+---
+
+## URL Structure (Final)
+
+```
+peptideplaybook.com/
+├── / (landing page - no changes)
+├── /guides/
+│   ├── how-to-reconstitute-peptides (NEW)
+│   ├── semaglutide-dosing (NEW)
+│   ├── semaglutide-side-effects (NEW)
+│   ├── peptide-injection-sites (EXISTS)
+│   └── [30 existing guides] (EXISTS)
+├── /peptides/
+│   ├── semaglutide → redirect to /guides/semaglutide-complete-guide
+│   ├── bpc-157 → redirect to /guides/bpc-157-complete-guide
+│   ├── tb-500 (NEW)
+│   ├── semax (NEW)
+│   └── selank (NEW)
+├── /compare/
+│   ├── semaglutide-vs-tirzepatide → /guides/tirzepatide-vs-semaglutide
+│   ├── bpc-157-vs-tb-500 → /guides/bpc-157-vs-tb-500
+│   └── ozempic-vs-wegovy (NEW)
+├── /tools/
+│   └── peptide-calculator (NEW)
+└── /faq/
+    ├── (hub page) (NEW)
+    └── [individual question pages] (NEW)
+```
+
+---
+
+## Priority Order
+
+| Week | Deliverable | Est. Monthly Traffic |
+|------|-------------|---------------------|
+| 1 | Peptide Calculator Tool | 3,000 |
+| 1 | Reconstitution Guide | 5,000 |
+| 1 | Semaglutide Dosing Guide | 10,000 |
+| 1 | Semaglutide Side Effects Guide | 15,000 |
+| 2 | TB-500 Complete Guide | 6,000 |
+| 2 | Semax Guide | 4,000 |
+| 2 | Selank Guide | 2,500 |
+| 2 | Ozempic vs Wegovy | 6,000 |
+| 3+ | FAQ Hub + 30 pages | 5,000+ |
+
+**Total addressable traffic: 50,000+ monthly searches**
+
+---
+
+## Technical Summary
+
+### New Files to Create
+
+| File | Purpose |
+|------|---------|
+| `src/pages/tools/PeptideCalculator.tsx` | Public calculator tool page |
+| `src/pages/guides/ReconstitutionGuide.tsx` | How to reconstitute peptides |
+| `src/pages/guides/SemaglutideDosing.tsx` | Standalone dosing guide |
+| `src/pages/guides/SemaglutideSideEffects.tsx` | Standalone side effects guide |
+| `src/pages/peptides/TB500.tsx` | TB-500 complete guide |
+| `src/pages/peptides/Semax.tsx` | Semax complete guide |
+| `src/pages/peptides/Selank.tsx` | Selank complete guide |
+| `src/pages/compare/OzempicVsWegovy.tsx` | Comparison page |
+| `src/pages/faq/FAQ.tsx` | FAQ hub page |
+| `src/pages/faq/FAQDetail.tsx` | Individual FAQ page template |
+| `src/components/seo/HowToSchema.tsx` | HowTo structured data |
+| `src/components/guides/ToolLayout.tsx` | Layout for tool pages |
+
+### Files to Update
+
+| File | Changes |
+|------|---------|
+| `src/App.tsx` | Add new routes |
+| `src/pages/Guides.tsx` | Add new guides to listing |
+| `public/sitemap.xml` | Add all new URLs |
+| `src/components/guides/GuideCTA.tsx` | Update to link to quiz |
+
+---
+
+## Expected Results
+
+| Timeframe | Projected Monthly Visits |
+|-----------|-------------------------|
+| Month 1-2 | Pages indexed, ~500 visits |
+| Month 3-4 | Long-tail rankings, ~2,000 visits |
+| Month 5-6 | Core rankings improve, ~5,000 visits |
+| Month 6+ | Compound growth, ~10,000+ visits |
+
+At 3% conversion to lead and 5% of leads purchasing:
+- 10,000 visits → 300 leads → 15 sales/month from SEO alone
 
