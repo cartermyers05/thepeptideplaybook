@@ -1,62 +1,81 @@
 
-# Fix: "Start Your Course" Should Redirect to Signup
 
-## Problem
+# Add Logo to Navbar
 
-When a user clicks "Start Your Course" (or similar CTAs like "Build My Course") on the landing page:
-1. They get sent to `/quiz` (a protected route)
-2. `ProtectedRoute` sees they're not logged in
-3. It redirects them to `/login` instead of `/signup`
+## Current State
 
-Users who want to start their course are new users - they should be creating an account, not signing in.
+The navbar currently displays the brand name as a stacked wordmark:
+```
+PEPTIDE
+PLAYBOOK
+```
 
----
-
-## Solution
-
-Update `ProtectedRoute` to redirect to `/signup` instead of `/login` for unauthenticated users.
-
-This makes sense because:
-- Users clicking "Start Your Course" are likely new and need to create an account
-- The signup page can have a "Already have an account? Sign in" link for existing users
-- This matches the user journey: discover → sign up → quiz → checkout → dashboard
+The `Logo` component exists at `src/components/brand/Logo.tsx` with a rainbow hexagon molecule icon that matches the brand identity.
 
 ---
 
-## File to Modify
+## Proposed Change
 
-| File | Change |
-|------|--------|
-| `src/components/auth/ProtectedRoute.tsx` | Change redirect from `/login` to `/signup` |
+Add the logo icon next to the wordmark in a horizontal layout:
+
+```
+[hexagon icon]  PEPTIDE
+                PLAYBOOK
+```
+
+The icon will be vertically centered with the stacked text.
 
 ---
 
-## Code Change
+## Implementation
 
-```typescript
-// Line 27 - Change:
-return <Navigate to="/login" state={{ from: location }} replace />;
+### File: `src/components/landing/Navbar.tsx`
 
-// To:
-return <Navigate to="/signup" state={{ from: location }} replace />;
+1. Import the `Logo` component
+2. Modify the logo section to include the icon alongside the wordmark
+3. Use `showText={false}` to only render the icon (we keep our custom stacked text)
+4. Use `size="md"` for appropriate sizing (32px icon)
+
+### Code Change
+
+```tsx
+// Add import at top
+import { Logo } from "@/components/brand/Logo";
+
+// Update the logo section (lines 31-47)
+<Link to="/" className="flex items-center gap-3">
+  <motion.div
+    className="flex items-center gap-3"
+    whileHover={{ 
+      y: -2,
+      transition: { duration: 0.2, ease: "easeOut" } 
+    }}
+  >
+    {/* Rainbow hexagon logo icon */}
+    <Logo showText={false} size="md" />
+    
+    {/* Stacked wordmark */}
+    <div className="flex flex-col">
+      <span className="text-lg md:text-xl font-bold tracking-tight uppercase">
+        Peptide
+      </span>
+      <span className="text-lg md:text-xl font-bold tracking-tight uppercase -mt-1">
+        Playbook
+      </span>
+    </div>
+  </motion.div>
+</Link>
 ```
 
 ---
 
-## Expected Result
+## Visual Result
 
-1. User clicks "Start Your Course" on landing page
-2. Tries to access `/quiz` (protected)
-3. Redirects to `/signup` (create account page)
-4. After signup, user is redirected back to `/quiz` to continue their journey
-5. Existing users can click "Already have an account? Sign in" on the signup page
+The navbar will now show:
+- Rainbow hexagon molecule icon (32x32px)
+- Gap between icon and text
+- Stacked "PEPTIDE" / "PLAYBOOK" wordmark
+- Smooth hover lift animation on the entire group
 
----
+This matches the brand identity with the rainbow gradient logo while maintaining the editorial typography style.
 
-## Alternative Consideration
-
-If you want `/login` to remain the default for some protected routes but `/signup` specifically for the quiz flow, we could instead:
-- Make `/quiz` unprotected initially
-- Show a "Create Account to Save Your Results" after quiz completion
-
-But the simpler fix (redirect to signup) is recommended since new users are the primary audience for the "Start Your Course" CTA.
