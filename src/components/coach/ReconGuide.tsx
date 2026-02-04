@@ -60,8 +60,8 @@ export function ReconGuide() {
 
   const handleComplete = async () => {
     setCompleted(true);
-    if (!hasMilestone("first_recon")) {
-      await awardMilestone.mutateAsync("first_recon");
+    if (!hasMilestone("reconstitution_complete")) {
+      await awardMilestone.mutateAsync("reconstitution_complete");
       toast.success("Achievement unlocked: First Reconstitution!");
     }
   };

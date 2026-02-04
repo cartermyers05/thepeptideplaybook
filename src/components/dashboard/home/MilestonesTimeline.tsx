@@ -1,48 +1,53 @@
 import { format, addDays, parseISO } from "date-fns";
-import { Check, Circle } from "lucide-react";
+import { Check, Circle, Target, Package, FlaskConical, Calendar, TrendingUp, Award, Flag, Zap, Star, Trophy, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MILESTONE_DEFINITIONS, MilestoneId } from "@/lib/milestoneDefinitions";
 
 interface MilestonesTimelineProps {
   currentDay: number;
   courseStartDate?: string | null;
   totalDays: number;
+  earnedMilestoneIds?: MilestoneId[];
 }
 
-interface Milestone {
-  id: string;
-  title: string;
-  day: number;
-  type: 'lesson' | 'streak' | 'dose' | 'progress';
-}
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Target,
+  Package,
+  FlaskConical,
+  Calendar,
+  CalendarCheck,
+  TrendingUp,
+  Award,
+  Flag,
+  Zap,
+  Star,
+  Trophy,
+};
 
-const courseMilestones: Milestone[] = [
-  { id: 'first-checkin', title: 'First Check-In', day: 1, type: 'lesson' },
-  { id: 'reconstitution', title: 'Reconstitution Complete', day: 4, type: 'lesson' },
-  { id: 'first-injection', title: 'First Injection', day: 5, type: 'lesson' },
-  { id: 'week-1', title: 'Week 1 Complete', day: 7, type: 'streak' },
-  { id: 'first-increase', title: 'First Dose Increase', day: 14, type: 'dose' },
-  { id: 'one-month', title: 'One Month Complete', day: 28, type: 'streak' },
-  { id: 'halfway', title: 'Halfway There!', day: 28, type: 'progress' },
-  { id: 'final-week', title: 'Final Week', day: 49, type: 'progress' },
-  { id: 'complete', title: 'Course Complete!', day: 56, type: 'progress' },
-];
-
-function getMilestones(currentDay: number, courseStartDate?: string | null, totalDays: number = 56) {
+function getMilestones(
+  currentDay: number,
+  courseStartDate?: string | null,
+  totalDays: number = 56,
+  earnedMilestoneIds: MilestoneId[] = []
+) {
   const courseStart = courseStartDate ? parseISO(courseStartDate) : null;
   
-  // Filter milestones to show only relevant ones (first 5 upcoming/recent)
-  const relevantMilestones = courseMilestones
-    .filter(m => m.day <= totalDays)
+  // Get relevant milestones (filter by total days and take first 6)
+  const relevantMilestones = MILESTONE_DEFINITIONS
+    .filter(m => m.targetDay <= totalDays)
     .slice(0, 6);
   
   return relevantMilestones.map(milestone => {
-    const completed = currentDay >= milestone.day;
-    const isCurrent = currentDay === milestone.day - 1 || currentDay === milestone.day;
+    // A milestone is completed if it's in earnedMilestoneIds OR if day-based and current day has passed
+    const isEarned = earnedMilestoneIds.includes(milestone.id);
+    const dayPassed = currentDay >= milestone.targetDay;
+    const completed = isEarned || (milestone.triggerType === "day" && dayPassed);
+    const isCurrent = currentDay === milestone.targetDay - 1 || currentDay === milestone.targetDay;
     
-    let dateLabel = `Day ${milestone.day}`;
+    let dateLabel = `Day ${milestone.targetDay}`;
     if (completed && courseStart) {
-      dateLabel = format(addDays(courseStart, milestone.day), 'MMM d');
-    } else if (milestone.day === currentDay) {
+      dateLabel = format(addDays(courseStart, milestone.targetDay), 'MMM d');
+    } else if (milestone.targetDay === currentDay) {
       dateLabel = 'Today';
     }
     
@@ -55,8 +60,13 @@ function getMilestones(currentDay: number, courseStartDate?: string | null, tota
   });
 }
 
-export function MilestonesTimeline({ currentDay, courseStartDate, totalDays }: MilestonesTimelineProps) {
-  const milestones = getMilestones(currentDay, courseStartDate, totalDays);
+export function MilestonesTimeline({ 
+  currentDay, 
+  courseStartDate, 
+  totalDays,
+  earnedMilestoneIds = [] 
+}: MilestonesTimelineProps) {
+  const milestones = getMilestones(currentDay, courseStartDate, totalDays, earnedMilestoneIds);
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
@@ -65,40 +75,51 @@ export function MilestonesTimeline({ currentDay, courseStartDate, totalDays }: M
       </h3>
       
       <div className="space-y-3">
-        {milestones.map((milestone) => (
-          <div key={milestone.id} className="flex items-center gap-4">
-            {/* Status indicator */}
-            <div className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-              milestone.completed 
-                ? "bg-green-100" 
-                : milestone.isCurrent 
-                  ? "bg-black" 
-                  : "bg-gray-100"
-            )}>
-              {milestone.completed ? (
-                <Check className="w-4 h-4 text-green-600" />
-              ) : milestone.isCurrent ? (
-                <div className="w-2 h-2 bg-white rounded-full" />
-              ) : (
-                <Circle className="w-4 h-4 text-gray-300" />
-              )}
+        {milestones.map((milestone) => {
+          const IconComponent = iconMap[milestone.icon] || Circle;
+          
+          return (
+            <div key={milestone.id} className="flex items-center gap-4">
+              {/* Status indicator */}
+              <div className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all",
+                milestone.completed 
+                  ? "bg-green-100" 
+                  : milestone.isCurrent 
+                    ? "bg-black" 
+                    : "bg-gray-100"
+              )}>
+                {milestone.completed ? (
+                  <Check className="w-4 h-4 text-green-600" />
+                ) : milestone.isCurrent ? (
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                ) : (
+                  <IconComponent className="w-4 h-4 text-gray-300" />
+                )}
+              </div>
+              
+              {/* Content */}
+              <p className={cn(
+                "flex-1 font-medium transition-colors",
+                milestone.completed 
+                  ? "text-gray-400 line-through" 
+                  : milestone.isCurrent
+                    ? "text-black font-semibold"
+                    : "text-gray-600"
+              )}>
+                {milestone.title}
+              </p>
+              
+              {/* Date/Day */}
+              <span className={cn(
+                "text-sm",
+                milestone.completed ? "text-green-600" : "text-gray-400"
+              )}>
+                {milestone.completed ? "✓" : milestone.dateLabel}
+              </span>
             </div>
-            
-            {/* Content */}
-            <p className={cn(
-              "flex-1 font-medium",
-              milestone.completed ? "text-gray-400" : "text-black"
-            )}>
-              {milestone.title}
-            </p>
-            
-            {/* Date/Day */}
-            <span className="text-sm text-gray-400">
-              {milestone.dateLabel}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
