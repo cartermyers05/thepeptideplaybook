@@ -3,13 +3,10 @@ import { motion } from "framer-motion";
 import { Send, Flame, Dumbbell, Heart, Clock, Brain, HelpCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuizChat } from "@/hooks/useQuizChat";
 import { QuizMessage } from "./QuizMessage";
-import { QuizProgressSidebar } from "./QuizProgressSidebar";
 import { BuildingAnimation } from "./BuildingAnimation";
 import { useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 const quickAnswers = [
@@ -23,7 +20,6 @@ const quickAnswers = [
 
 export function ConversationalQuiz() {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const [input, setInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -78,7 +74,6 @@ export function ConversationalQuiz() {
     setIsSubmitting(true);
     try {
       const goal = await saveQuizResponse(email, newsletter);
-      // Map goals to course paths
       const goalToCourse: Record<string, string> = {
         fat_loss: 'fat-loss',
         muscle: 'muscle',
@@ -114,106 +109,112 @@ export function ConversationalQuiz() {
   const showQuickAnswers = currentStep === 0 && messages.length <= 1;
 
   return (
-    <div className="flex h-full gap-6">
-      {/* Main chat area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Progress bar */}
-        <div className="px-4 py-3 border-b bg-background/95 backdrop-blur-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">
-              Step {Math.min(currentStep + 1, totalSteps)} of {totalSteps}
-            </span>
-          </div>
-          <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-foreground rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
+    <div className="flex-1 flex flex-col">
+      {/* Hero headline */}
+      <div className="text-center pt-8 md:pt-12 pb-6 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <p className="text-sm text-muted-foreground mb-3">
+            Step {Math.min(currentStep + 1, totalSteps)} of {totalSteps}
+          </p>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+            Build Your<br className="sm:hidden" /> Peptide Course
+          </h1>
+          <p className="mt-4 text-muted-foreground max-w-md mx-auto">
+            Answer a few questions to personalize your 8-week program
+          </p>
+        </motion.div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="max-w-xl mx-auto w-full px-4 mb-6">
+        <div className="h-1 bg-secondary rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-foreground rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />
         </div>
+      </div>
 
-        {/* Messages */}
-        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-          <div className="space-y-4 max-w-2xl mx-auto">
-            {messages.map((message, index) => (
-              <QuizMessage
-                key={message.id}
-                role={message.role}
-                content={message.content}
-                isStreaming={message.isStreaming}
-                isLatest={index === messages.length - 1}
-              />
-            ))}
-            
-            {error && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center text-sm text-destructive bg-destructive/10 rounded-lg p-3"
-              >
-                {error}
-              </motion.div>
-            )}
-          </div>
-        </ScrollArea>
+      {/* Messages - centered, generous spacing */}
+      <div 
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto px-4 pb-48"
+      >
+        <div className="max-w-xl mx-auto space-y-6">
+          {messages.map((message, index) => (
+            <QuizMessage
+              key={message.id}
+              role={message.role}
+              content={message.content}
+              isStreaming={message.isStreaming}
+              isLatest={index === messages.length - 1}
+            />
+          ))}
+          
+          {error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center text-sm text-destructive bg-destructive/10 rounded-xl p-4"
+            >
+              {error}
+            </motion.div>
+          )}
+        </div>
+      </div>
 
-        {/* Quick answers */}
-        {showQuickAnswers && (
-          <div className="px-4 py-3 border-t bg-secondary/30">
-            <p className="text-xs text-muted-foreground mb-2 text-center">Quick answers:</p>
-            <div className="flex flex-wrap gap-2 justify-center">
+      {/* Fixed input area at bottom */}
+      <div className="fixed bottom-0 inset-x-0 bg-background/80 backdrop-blur-xl border-t border-border/50">
+        <div className="max-w-xl mx-auto px-4 py-4 pb-safe">
+          {/* Quick answers */}
+          {showQuickAnswers && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-wrap gap-2 justify-center mb-4"
+            >
               {quickAnswers.map(({ value, label, icon: Icon }) => (
                 <Button
                   key={value}
                   variant="outline"
-                  size="sm"
                   onClick={() => handleQuickAnswer(value, label)}
                   disabled={isLoading}
-                  className="gap-1.5"
+                  className="rounded-full px-4 py-2 h-auto gap-2 hover:bg-foreground hover:text-background transition-all"
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-4 h-4" />
                   {label}
                 </Button>
               ))}
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
 
-        {/* Input */}
-        <form onSubmit={handleSubmit} className="p-4 border-t bg-background">
-          <div className="flex gap-2 max-w-2xl mx-auto">
+          {/* Input */}
+          <form onSubmit={handleSubmit} className="flex gap-3">
             <Input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your answer..."
               disabled={isLoading}
-              className="flex-1"
+              className="h-12 text-base bg-background border-border/50"
             />
-            <Button type="submit" size="icon" disabled={!input.trim() || isLoading}>
-              <Send className="w-4 h-4" />
+            <Button 
+              type="submit" 
+              size="lg"
+              disabled={!input.trim() || isLoading}
+              className="h-12 px-4"
+            >
+              <Send className="w-5 h-5" />
             </Button>
-          </div>
-        </form>
-      </div>
-
-      {/* Sidebar - hidden on mobile */}
-      {!isMobile && (
-        <div className="w-64 flex-shrink-0">
-          <div className="sticky top-4">
-            <QuizProgressSidebar
-              extractedValues={extractedValues}
-              currentStep={currentStep}
-              getGoalLabel={getGoalLabel}
-              getExperienceLabel={getExperienceLabel}
-              getConcernLabel={getConcernLabel}
-              getTimelineLabel={getTimelineLabel}
-            />
-          </div>
+          </form>
         </div>
-      )}
+      </div>
     </div>
   );
 }
