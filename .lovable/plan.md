@@ -1,338 +1,228 @@
 
+# Peptide Playbook - 6 Month Goal Progress Audit
 
-# SEO & AI Search Strategy Implementation Plan
+## Executive Summary
 
-## Current State Analysis
-
-After thorough codebase exploration, here's what already exists:
-
-### What's Already Built ✓
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| **Guides Hub** | ✓ Complete | `/guides` with 30 articles, search, category filters |
-| **SEO Components** | ✓ Complete | SEOHead, GuideLayout, QuickAnswerBox, FAQ schemas |
-| **robots.txt** | ✓ Complete | AI crawlers (GPTBot, PerplexityBot, ClaudeBot) explicitly allowed |
-| **Sitemap** | ✓ Partial | Static XML exists, needs expansion for new pages |
-| **Article Schema** | ✓ Complete | JSON-LD with Article, FAQ, Breadcrumb schemas |
-| **Semaglutide Guide** | ✓ Complete | Comprehensive guide at `/guides/semaglutide-complete-guide` |
-| **BPC-157 Guide** | ✓ Complete | At `/guides/bpc-157-complete-guide` |
-| **Tirzepatide vs Semaglutide** | ✓ Complete | Comparison at `/guides/tirzepatide-vs-semaglutide` |
-| **BPC-157 vs TB-500** | ✓ Complete | At `/guides/bpc-157-vs-tb-500` |
-| **Dosing Calculator** | ✓ Complete | Component exists in dashboard (`DosingCalculator.tsx`) |
-| **Injection Sites Guide** | ✓ Complete | At `/guides/peptide-injection-sites` |
-| **FAQ Components** | ✓ Complete | GuideFAQ.tsx with schema injection |
-
-### Critical Gaps ✗
-
-| Priority | Gap | Search Volume | Status |
-|----------|-----|---------------|--------|
-| **1** | Public Peptide Calculator Tool | ~3,000/mo | Dashboard-only, not public |
-| **2** | Reconstitution Guide | ~5,000/mo | No dedicated page |
-| **3** | Semaglutide Dosing Guide | ~10,000/mo | Exists in main guide, needs standalone |
-| **4** | Semaglutide Side Effects Guide | ~15,000/mo | Exists in main guide, needs standalone |
-| **5** | TB-500 Peptide Page | ~6,000/mo | Only side effects page exists |
-| **6** | Semax Peptide Page | ~4,000/mo | Not created |
-| **7** | Selank Peptide Page | ~2,500/mo | Not created |
-| **8** | Ozempic vs Wegovy Comparison | ~6,000/mo | Not created |
-| **9** | FAQ Hub with Individual Pages | High | Only embedded FAQs, no hub |
-| **10** | HowTo Schema | - | Not implemented for guides |
+Based on analyzing the master launch document against the current codebase, **you're approximately 85-90% complete** for launch. The core product flow works, but there are critical gaps in content seeding and some inconsistencies to address.
 
 ---
 
-## Implementation Plan
+## Complete User Journey - Status Check
 
-### Phase 1: High-Impact Quick Wins (Week 1)
-
-#### 1.1 Create Public Peptide Calculator Tool Page
-
-**New Route:** `/tools/peptide-calculator`
-
-**Why:** Free tools get links, shares, and return visits. ~3,000 monthly searches with low competition.
-
-**Implementation:**
-- Create `src/pages/tools/PeptideCalculator.tsx`
-- Reuse existing `DosingCalculator` component
-- Add standalone page wrapper with SEO optimization
-- Include HowTo schema for the calculation process
-- Add common vial size presets (5mg, 10mg)
-- Include educational content about the math
-- CTA to course at bottom
-
-**Schema markup:**
-```json
-{
-  "@type": "HowTo",
-  "name": "How to Calculate Peptide Dosing",
-  "step": [
-    { "name": "Enter vial size", "text": "..." },
-    { "name": "Enter water amount", "text": "..." },
-    { "name": "Read your units", "text": "..." }
-  ]
-}
+```text
+LANDING PAGE        ✅ Complete
+     ↓ [Start Your Course]
+ONBOARDING CHAT     ✅ Complete (quiz at /quiz)
+     ↓ 5 personalization questions
+BUILDING ANIMATION  ✅ Complete (in CoursePreview.tsx)
+     ↓ "Creating your course..."
+COURSE PREVIEW      ✅ Complete (/course/:goal)
+     ↓ [Get My Course]
+AUTH (if needed)    ✅ Complete (redirects to /login)
+     ↓ 
+STRIPE CHECKOUT     ✅ Complete (create-checkout function)
+     ↓ Payment
+WELCOME FLOW        ✅ Complete (WelcomeModal in dashboard)
+     ↓
+DASHBOARD           ✅ Complete (/dashboard)
 ```
 
-#### 1.2 Create Reconstitution Guide
-
-**New Route:** `/guides/how-to-reconstitute-peptides`
-
-**Why:** ~5,000/mo searches, low competition, high intent.
-
-**Implementation:**
-- Create `src/pages/guides/ReconstitutionGuide.tsx`
-- Step-by-step guide with HowTo schema
-- Supplies list with explanations
-- Common mistakes section
-- Troubleshooting (cloudy solution, bubbles)
-- Embed dosing calculator component
-- FAQ section with schema
-- Link to injection guide as "next step"
+**Flow Status: READY FOR LAUNCH**
 
 ---
 
-### Phase 2: High-Volume Standalone Guides (Week 1-2)
+## Pre-Launch Checklist (From Master Document Part 6)
 
-#### 2.1 Semaglutide Dosing Standalone Guide
+### Flow Requirements
 
-**New Route:** `/guides/semaglutide-dosing`
+| Requirement | Status | Notes |
+|------------|--------|-------|
+| Landing page converts to onboarding | ✅ | CTA goes to /quiz |
+| Onboarding captures 5 questions | ✅ | ConversationalQuiz captures goal, experience, concern, readiness, context |
+| Building animation shows | ✅ | CoursePreview.tsx has animated steps |
+| Course preview displays personalized content | ✅ | Shows peptides, schedule, what's included |
+| Auth works (signup/login) | ✅ | Supabase auth configured |
+| Stripe checkout works | ✅ | create-checkout function deployed |
+| Webhook creates course on payment | ✅ | verify-payment function handles this |
+| Welcome flow captures supplies status | ✅ | WelcomeModal has 3 steps |
+| Redirects to dashboard | ✅ | After welcome flow |
 
-**Why:** ~10,000/mo combined searches. Currently buried in main guide.
+### Product Requirements
 
-**Content:**
-- Titration schedule table (0.25mg → 0.5mg → 1.0mg → 2.0mg → 2.4mg)
-- Weeks at each dose level
-- How to calculate units from mg
-- Embedded calculator with semaglutide defaults
-- What to do if you miss a dose
-- FAQ with schema
+| Requirement | Status | Notes |
+|------------|--------|-------|
+| Dashboard shows today's lesson | ✅ | TodayLessonCard component |
+| Dashboard shows progress (ring, streak, stats) | ✅ | ProgressRing, streak in header |
+| Dashboard shows next injection | ✅ | NextInjectionCard component |
+| Dashboard shows week calendar | ✅ | WeekCalendarStrip component |
+| Dashboard shows milestones | ✅ | MilestonesTimeline component |
+| **All 56 lessons are seeded** | ⚠️ PARTIAL | Only fat_loss has 57 lessons. Other 5 courses only have 8 lessons each! |
+| Lesson view works, can mark complete | ✅ | Dialog in CourseLessons.tsx |
+| My Course page shows all lessons/phases | ✅ | /dashboard/course |
+| My Plan shows peptide info + schedule | ✅ | /dashboard/plan with full peptide details |
+| Reconstitution guide works (interactive) | ✅ | InteractiveGuide component with checkboxes |
+| Injection guide works (interactive) | ✅ | InteractiveGuide component with checkboxes |
+| Dosing calculator works | ✅ | DosingCalculator component |
+| AI Coach works with context | ✅ | /dashboard/coach with enhanced system prompt |
+| Settings page works | ✅ | /dashboard/settings |
 
-#### 2.2 Semaglutide Side Effects Standalone Guide
+### Tech Requirements
 
-**New Route:** `/guides/semaglutide-side-effects`
-
-**Why:** ~15,000/mo searches. Highest volume opportunity.
-
-**Content:**
-- Common side effects with frequency percentages
-- Week-by-week timeline (when they improve)
-- Management strategies per side effect
-- When to seek medical attention
-- FAQ with schema
-
----
-
-### Phase 3: Peptide Pages (Week 2)
-
-#### 3.1 TB-500 Complete Guide
-
-**New Route:** `/peptides/tb-500`
-
-**Why:** ~6,000/mo searches, only side effects page exists.
-
-**Content:**
-- What is TB-500 (Thymosin Beta-4)
-- Mechanism of action
-- Research summary
-- Dosing protocols
-- Stacking with BPC-157
-- Side effects
-- FAQ section
-
-#### 3.2 Semax Complete Guide
-
-**New Route:** `/peptides/semax`
-
-**Why:** ~4,000/mo searches. Covers cognitive peptide category.
-
-**Content:**
-- What is Semax
-- Nootropic mechanisms
-- Research summary
-- Nasal administration (no injection)
-- Side effects
-- Legal status
-- FAQ section
-
-#### 3.3 Selank Complete Guide
-
-**New Route:** `/peptides/selank`
-
-**Why:** ~2,500/mo searches. Complements Semax.
-
-**Content:**
-- What is Selank
-- Anxiolytic mechanisms
-- Comparison to Semax
-- Research summary
-- Administration
-- FAQ section
+| Requirement | Status | Notes |
+|------------|--------|-------|
+| Supabase auth configured | ✅ | Lovable Cloud |
+| Stripe keys configured | ⚠️ Verify | Need to confirm live keys |
+| Webhook endpoint deployed | ✅ | verify-payment function |
+| AI API for coach | ✅ | Using Lovable AI Gateway |
+| Domain configured | ⚠️ Check | Custom domain needed for production |
+| SSL certificate | ✅ | Automatic with Lovable |
+| Mobile responsive | ✅ | Tailwind responsive design |
 
 ---
 
-### Phase 4: Additional Comparisons (Week 2-3)
+## Critical Issues Found
 
-#### 4.1 Ozempic vs Wegovy Comparison
+### 🔴 CRITICAL: Course Content Only Seeded for 1 of 6 Goals
 
-**New Route:** `/compare/ozempic-vs-wegovy`
-
-**Why:** ~6,000/mo searches, high intent comparison.
-
-**Content:**
-- Side-by-side comparison table
-- Same drug, different approvals
-- Dosing differences
-- Insurance coverage differences
-- FAQ section
-
----
-
-### Phase 5: FAQ Hub System (Week 3+)
-
-#### 5.1 Master FAQ Hub
-
-**New Route:** `/faq`
-
-**Structure:**
-- Organized by category (Reconstitution, Injection, Dosing, Side Effects, Storage)
-- Links to individual FAQ pages
-- Search functionality
-
-#### 5.2 Individual FAQ Pages
-
-**New Routes:** `/faq/[question-slug]`
-
-**Examples:**
-- `/faq/how-much-bacteriostatic-water-to-add`
-- `/faq/how-long-do-reconstituted-peptides-last`
-- `/faq/how-many-units-is-025mg-semaglutide`
-
-**Each page:**
-- Direct answer in first paragraph
-- Comprehensive explanation
-- Related questions section
-- FAQ schema markup
-
----
-
-### Phase 6: Technical SEO Enhancements
-
-#### 6.1 Add HowTo Schema
-
-Create reusable `HowToSchema` component for step-by-step guides:
-
-**File:** `src/components/seo/HowToSchema.tsx`
-
-```tsx
-interface HowToSchemaProps {
-  name: string;
-  description: string;
-  steps: { name: string; text: string }[];
-  totalTime?: string;
-}
+**Current Database State:**
+```
+fat_loss      → 57 lessons ✅
+muscle        → 8 lessons  ❌
+recovery      → 8 lessons  ❌
+anti_aging    → 8 lessons  ❌
+cognitive     → 8 lessons  ❌
+beginner      → 8 lessons  ❌
 ```
 
-#### 6.2 Update Sitemap
+**Impact:** If someone selects "Build Muscle" or any non-fat-loss goal, they'll hit "no content" on Day 9.
 
-Update `public/sitemap.xml` to include:
-- All new guide pages
-- Tools pages
-- FAQ pages
-- Peptide pages
-- Comparison pages
-
-#### 6.3 Internal Linking Component
-
-Create component to auto-suggest related content at bottom of each page based on category/tags.
+**Fix Required:** Seed full lesson content for remaining 5 course templates.
 
 ---
 
-## URL Structure (Final)
+### ⚠️ Price Inconsistency
 
-```
-peptideplaybook.com/
-├── / (landing page - no changes)
-├── /guides/
-│   ├── how-to-reconstitute-peptides (NEW)
-│   ├── semaglutide-dosing (NEW)
-│   ├── semaglutide-side-effects (NEW)
-│   ├── peptide-injection-sites (EXISTS)
-│   └── [30 existing guides] (EXISTS)
-├── /peptides/
-│   ├── semaglutide → redirect to /guides/semaglutide-complete-guide
-│   ├── bpc-157 → redirect to /guides/bpc-157-complete-guide
-│   ├── tb-500 (NEW)
-│   ├── semax (NEW)
-│   └── selank (NEW)
-├── /compare/
-│   ├── semaglutide-vs-tirzepatide → /guides/tirzepatide-vs-semaglutide
-│   ├── bpc-157-vs-tb-500 → /guides/bpc-157-vs-tb-500
-│   └── ozempic-vs-wegovy (NEW)
-├── /tools/
-│   └── peptide-calculator (NEW)
-└── /faq/
-    ├── (hub page) (NEW)
-    └── [individual question pages] (NEW)
-```
+**Master Doc Says:** $99
+**Current Implementation:** $67 everywhere
+
+This appears intentional (price reduction), but SEO meta description still says "$99":
+- `src/pages/Index.tsx` line 18: "...cycle. $99 one-time."
+
+**Fix Required:** Update meta description to match $67 pricing.
 
 ---
 
-## Priority Order
+### ⚠️ Route Naming Difference
 
-| Week | Deliverable | Est. Monthly Traffic |
-|------|-------------|---------------------|
-| 1 | Peptide Calculator Tool | 3,000 |
-| 1 | Reconstitution Guide | 5,000 |
-| 1 | Semaglutide Dosing Guide | 10,000 |
-| 1 | Semaglutide Side Effects Guide | 15,000 |
-| 2 | TB-500 Complete Guide | 6,000 |
-| 2 | Semax Guide | 4,000 |
-| 2 | Selank Guide | 2,500 |
-| 2 | Ozempic vs Wegovy | 6,000 |
-| 3+ | FAQ Hub + 30 pages | 5,000+ |
+**Master Doc:** `/onboarding` for quiz
+**Current:** `/quiz` for onboarding
 
-**Total addressable traffic: 50,000+ monthly searches**
+This is fine, just noting the difference. The /quiz route works correctly.
 
 ---
 
-## Technical Summary
+## SEO Status (6-Month Traffic Goal)
 
-### New Files to Create
+### What's Built ✅
 
-| File | Purpose |
-|------|---------|
-| `src/pages/tools/PeptideCalculator.tsx` | Public calculator tool page |
-| `src/pages/guides/ReconstitutionGuide.tsx` | How to reconstitute peptides |
-| `src/pages/guides/SemaglutideDosing.tsx` | Standalone dosing guide |
-| `src/pages/guides/SemaglutideSideEffects.tsx` | Standalone side effects guide |
-| `src/pages/peptides/TB500.tsx` | TB-500 complete guide |
-| `src/pages/peptides/Semax.tsx` | Semax complete guide |
-| `src/pages/peptides/Selank.tsx` | Selank complete guide |
-| `src/pages/compare/OzempicVsWegovy.tsx` | Comparison page |
-| `src/pages/faq/FAQ.tsx` | FAQ hub page |
-| `src/pages/faq/FAQDetail.tsx` | Individual FAQ page template |
-| `src/components/seo/HowToSchema.tsx` | HowTo structured data |
-| `src/components/guides/ToolLayout.tsx` | Layout for tool pages |
+| Page | Status | Traffic Potential |
+|------|--------|------------------|
+| /guides hub | ✅ 33 guides | Hub complete |
+| Semaglutide Guide | ✅ Complete | 8,000+/mo |
+| BPC-157 Guide | ✅ Complete | 6,000+/mo |
+| Reconstitution Guide | ✅ Complete | 5,000/mo |
+| Semaglutide Dosing | ✅ Complete | 10,000/mo |
+| Semaglutide Side Effects | ✅ Complete | 15,000/mo |
+| Peptide Calculator Tool | ✅ Complete | 3,000/mo |
+| Injection Sites Guide | ✅ Complete | 1,300/mo |
+| Tirzepatide vs Semaglutide | ✅ Complete | 8,000/mo |
+| BPC-157 vs TB-500 | ✅ Complete | 2,000/mo |
+| robots.txt (AI crawlers) | ✅ Complete | - |
+| Sitemap | ✅ Updated | - |
+| HowTo Schema | ✅ Component built | - |
 
-### Files to Update
+### Missing SEO Pages (Phase 2-3)
 
-| File | Changes |
-|------|---------|
-| `src/App.tsx` | Add new routes |
-| `src/pages/Guides.tsx` | Add new guides to listing |
-| `public/sitemap.xml` | Add all new URLs |
-| `src/components/guides/GuideCTA.tsx` | Update to link to quiz |
+| Page | Status | Traffic Potential |
+|------|--------|------------------|
+| /peptides/tb-500 | ❌ Not created | 6,000/mo |
+| /peptides/semax | ❌ Not created | 4,000/mo |
+| /peptides/selank | ❌ Not created | 2,500/mo |
+| /compare/ozempic-vs-wegovy | ❌ Not created | 6,000/mo |
+| /faq hub | ❌ Not created | 5,000+/mo |
+
+**Current SEO Traffic Potential:** ~60,000/mo from built pages
+**Missing Traffic Potential:** ~23,500/mo from unbuilt pages
 
 ---
 
-## Expected Results
+## Product Features Summary
 
-| Timeframe | Projected Monthly Visits |
-|-----------|-------------------------|
-| Month 1-2 | Pages indexed, ~500 visits |
-| Month 3-4 | Long-tail rankings, ~2,000 visits |
-| Month 5-6 | Core rankings improve, ~5,000 visits |
-| Month 6+ | Compound growth, ~10,000+ visits |
+### What's Working Great ✅
 
-At 3% conversion to lead and 5% of leads purchasing:
-- 10,000 visits → 300 leads → 15 sales/month from SEO alone
+1. **User Flow** - Complete end-to-end from landing → payment → dashboard
+2. **Dashboard** - All core components (progress ring, calendar, milestones, lessons)
+3. **My Plan** - Full peptide details, interactive guides with checkboxes, dosing calculator
+4. **AI Coach** - Enhanced system prompt with deep personalization context
+5. **Interactive Guides** - Checkboxes that persist to localStorage, trigger milestones
+6. **Milestones System** - 12 milestones with celebration tiers (simple/medium/major)
+7. **SEO Foundation** - 30+ guides, proper schemas, AI crawler access
 
+### What Needs Work ⚠️
+
+1. **Lesson Content** - 5 of 6 course templates missing full lesson content
+2. **Price Meta** - SEO description says $99 but price is $67
+3. **Remaining SEO Pages** - TB-500, Semax, Selank, Ozempic vs Wegovy, FAQ hub
+
+---
+
+## Recommended Priority Actions
+
+### Before Launch (Must Fix)
+
+1. **Seed remaining 5 course templates** with full lesson content
+   - muscle: 56 days of lessons
+   - recovery: 42 days of lessons
+   - anti_aging: 84 days of lessons
+   - cognitive: 56 days of lessons
+   - beginner: 42 days of lessons
+
+2. **Fix price inconsistency** in SEO meta description ($99 → $67)
+
+### After Launch (Week 2+)
+
+3. Create remaining SEO pages:
+   - /peptides/tb-500
+   - /peptides/semax
+   - /peptides/selank
+   - /compare/ozempic-vs-wegovy
+   - /faq hub with individual pages
+
+4. Set up re-engagement emails (anti-churn)
+
+---
+
+## Launch Readiness Score
+
+| Category | Score | Notes |
+|----------|-------|-------|
+| Core Flow | 95% | Works end-to-end |
+| Dashboard | 100% | All components built |
+| Guides | 100% | Interactive with checkboxes |
+| AI Coach | 100% | Enhanced context-aware |
+| Course Content | 17% | Only 1/6 courses fully seeded |
+| SEO | 72% | Major pages built, some missing |
+| **Overall** | **85%** | Needs content seeding to launch |
+
+---
+
+## Bottom Line
+
+**You're very close to launch.** The architecture is solid, the flow works, and the core product is built. The ONE critical blocker is that only the fat_loss course has full lesson content - the other 5 courses will break on Day 9.
+
+**To launch safely:**
+1. Seed the remaining 5 course templates with full lessons
+2. Fix the $99 → $67 in SEO meta
+3. Ship it
+
+Everything else (additional SEO pages, re-engagement emails, etc.) can be done post-launch as optimization.
