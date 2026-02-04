@@ -11,7 +11,11 @@ export function useCheckout() {
   const { toast } = useToast();
 
   const startCheckout = useCallback(async (plan: Plan = "monthly") => {
-    if (isProcessingRef.current || redirectingRef.current) return;
+    // Only block if we're currently redirecting to Stripe
+    if (redirectingRef.current) return;
+    // Allow retry if not currently loading
+    if (isProcessingRef.current && isLoading) return;
+    
     isProcessingRef.current = true;
     setIsLoading(true);
     
