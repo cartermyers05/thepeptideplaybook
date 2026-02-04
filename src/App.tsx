@@ -118,7 +118,7 @@ const App = () => (
             <Route path="/partners" element={<Partners />} />
             
             {/* Quiz flow */}
-            <Route path="/quiz" element={<Quiz />} />
+            <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
             <Route path="/quiz/results" element={<QuizResults />} />
             
             {/* Course preview (pre-purchase) */}

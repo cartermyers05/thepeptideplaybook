@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Loader2, Dna, PartyPopper } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Dna, Check, PartyPopper } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { ExtractedValues } from "@/hooks/useQuizChat";
 
 interface BuildingAnimationProps {
@@ -12,15 +10,15 @@ interface BuildingAnimationProps {
   getExperienceLabel: (exp: string | null) => string | null;
   getConcernLabel: (concern: string | null) => string | null;
   getTimelineLabel: (timeline: string | null) => string | null;
-  onComplete: (email: string, newsletter: boolean) => void;
-  isSubmitting: boolean;
+  onComplete: () => void;
+  isSubmitting?: boolean;
 }
 
-const buildingSteps = [
-  "Analyzing your goals...",
-  "Selecting optimal peptides...",
-  "Creating your 8-week program...",
-  "Personalizing lessons..."
+const buildSteps = [
+  { id: 1, label: "Analyzing your goals...", duration: 1500 },
+  { id: 2, label: "Selecting optimal peptides...", duration: 1800 },
+  { id: 3, label: "Building your curriculum...", duration: 2000 },
+  { id: 4, label: "Personalizing your schedule...", duration: 1500 },
 ];
 
 export function BuildingAnimation({
@@ -30,219 +28,165 @@ export function BuildingAnimation({
   getConcernLabel,
   getTimelineLabel,
   onComplete,
-  isSubmitting
+  isSubmitting = false,
 }: BuildingAnimationProps) {
-  const [phase, setPhase] = useState<'building' | 'email'>('building');
-  const [currentBuildStep, setCurrentBuildStep] = useState(0);
-  const [email, setEmail] = useState('');
-  const [newsletter, setNewsletter] = useState(true);
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
 
+  // Run through building steps
   useEffect(() => {
-    if (phase === 'building') {
-      const interval = setInterval(() => {
-        setCurrentBuildStep(prev => {
-          if (prev >= buildingSteps.length - 1) {
-            clearInterval(interval);
-            setTimeout(() => setPhase('email'), 500);
-            return prev;
-          }
-          return prev + 1;
-        });
-      }, 800);
-      return () => clearInterval(interval);
+    if (currentStep < buildSteps.length) {
+      const timer = setTimeout(() => {
+        setCurrentStep(prev => prev + 1);
+      }, buildSteps[currentStep].duration);
+      return () => clearTimeout(timer);
+    } else if (currentStep === buildSteps.length && !isComplete) {
+      // All steps done - mark complete and trigger save
+      setIsComplete(true);
+      onComplete();
     }
-  }, [phase]);
+  }, [currentStep, isComplete, onComplete]);
 
-  const goalLabel = getGoalLabel(extractedValues.goal);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.includes('@')) {
-      onComplete(email, newsletter);
+  // After complete + save done, redirect to dashboard
+  useEffect(() => {
+    if (isComplete && !isSubmitting) {
+      const timer = setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 1500);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [isComplete, isSubmitting, navigate]);
+
+  const progress = Math.min((currentStep / buildSteps.length) * 100, 100);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-      <AnimatePresence mode="wait">
-        {phase === 'building' && (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-md w-full text-center"
+      >
+        {/* Icon */}
+        <div className="mb-8">
+          <AnimatePresence mode="wait">
+            {!isComplete ? (
+              <motion.div
+                key="building"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto"
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                >
+                  <Dna className="w-10 h-10 md:w-12 md:h-12 text-primary" />
+                </motion.div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="complete"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto"
+              >
+                <PartyPopper className="w-10 h-10 md:w-12 md:h-12 text-green-500" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Title */}
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">
+          {isComplete ? "Your Course is Ready!" : "Building Your Course..."}
+        </h1>
+        <p className="text-muted-foreground mb-8">
+          {isComplete 
+            ? "Taking you to your personalized dashboard..." 
+            : "Personalizing your 8-week peptide program"}
+        </p>
+
+        {/* Progress bar */}
+        <div className="h-2 bg-secondary rounded-full overflow-hidden mb-6">
           <motion.div
-            key="building"
+            className="h-full bg-primary rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
+
+        {/* Steps */}
+        <div className="space-y-3 text-left">
+          {buildSteps.map((step, index) => (
+            <motion.div
+              key={step.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ 
+                opacity: index <= currentStep ? 1 : 0.4,
+                x: 0 
+              }}
+              transition={{ delay: index * 0.2, duration: 0.3 }}
+              className="flex items-center gap-3"
+            >
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                index < currentStep 
+                  ? "bg-green-500/20 text-green-500" 
+                  : index === currentStep 
+                    ? "bg-primary/20 text-primary" 
+                    : "bg-muted text-muted-foreground"
+              }`}>
+                {index < currentStep ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <span className="text-xs font-medium">{index + 1}</span>
+                )}
+              </div>
+              <span className={`text-sm ${
+                index <= currentStep ? "text-foreground" : "text-muted-foreground"
+              }`}>
+                {step.label}
+              </span>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Extracted values summary */}
+        {extractedValues.goal && (
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="text-center space-y-10 w-full max-w-lg"
+            transition={{ delay: 0.5 }}
+            className="mt-8 p-4 bg-muted/50 rounded-xl text-left"
           >
-            <div>
-              <motion.div
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-                className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6"
-              >
-                <Dna className="w-10 h-10 md:w-12 md:h-12 text-primary" />
-              </motion.div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                Building Your Course...
-              </h2>
-            </div>
-
-            {/* Extracted values summary */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-secondary/50 backdrop-blur-sm rounded-2xl p-6 text-left space-y-3 border border-border/50"
-            >
+            <p className="text-sm text-muted-foreground mb-2">Your personalization:</p>
+            <div className="flex flex-wrap gap-2">
               {extractedValues.goal && (
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center gap-3"
-                >
-                  <div className="w-6 h-6 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
-                    <Check className="w-3.5 h-3.5 text-background" />
-                  </div>
-                  <span className="text-muted-foreground">Goal:</span>
-                  <span className="font-medium">{goalLabel}</span>
-                </motion.div>
+                <span className="px-3 py-1 bg-background rounded-full text-sm">
+                  {getGoalLabel(extractedValues.goal)}
+                </span>
               )}
               {extractedValues.experience && (
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="flex items-center gap-3"
-                >
-                  <div className="w-6 h-6 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
-                    <Check className="w-3.5 h-3.5 text-background" />
-                  </div>
-                  <span className="text-muted-foreground">Experience:</span>
-                  <span className="font-medium">{getExperienceLabel(extractedValues.experience)}</span>
-                </motion.div>
+                <span className="px-3 py-1 bg-background rounded-full text-sm">
+                  {getExperienceLabel(extractedValues.experience)}
+                </span>
               )}
-              {extractedValues.concern && (
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="flex items-center gap-3"
-                >
-                  <div className="w-6 h-6 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
-                    <Check className="w-3.5 h-3.5 text-background" />
-                  </div>
-                  <span className="text-muted-foreground">Addressing:</span>
-                  <span className="font-medium">{getConcernLabel(extractedValues.concern)}</span>
-                </motion.div>
+              {extractedValues.concern && extractedValues.concern !== 'nothing' && (
+                <span className="px-3 py-1 bg-background rounded-full text-sm">
+                  {getConcernLabel(extractedValues.concern)}
+                </span>
               )}
               {extractedValues.timeline && (
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="flex items-center gap-3"
-                >
-                  <div className="w-6 h-6 rounded-full bg-foreground flex items-center justify-center flex-shrink-0">
-                    <Check className="w-3.5 h-3.5 text-background" />
-                  </div>
-                  <span className="text-muted-foreground">Timeline:</span>
-                  <span className="font-medium">{getTimelineLabel(extractedValues.timeline)}</span>
-                </motion.div>
+                <span className="px-3 py-1 bg-background rounded-full text-sm">
+                  {getTimelineLabel(extractedValues.timeline)}
+                </span>
               )}
-            </motion.div>
-
-            {/* Building progress */}
-            <div className="space-y-3">
-              {buildingSteps.map((step, index) => (
-                <motion.div
-                  key={step}
-                  initial={{ opacity: 0 }}
-                  animate={{ 
-                    opacity: index <= currentBuildStep ? 1 : 0.3 
-                  }}
-                  className="flex items-center justify-center gap-3"
-                >
-                  {index < currentBuildStep ? (
-                    <Check className="w-5 h-5 text-foreground" />
-                  ) : index === currentBuildStep ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                  ) : (
-                    <div className="w-5 h-5" />
-                  )}
-                  <span className={index <= currentBuildStep ? "text-foreground" : "text-muted-foreground"}>
-                    {step}
-                  </span>
-                </motion.div>
-              ))}
             </div>
           </motion.div>
         )}
-
-        {phase === 'email' && (
-          <motion.div
-            key="email"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center space-y-8 w-full max-w-md"
-          >
-            <div>
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200 }}
-                className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6"
-              >
-                <PartyPopper className="w-10 h-10 md:w-12 md:h-12 text-primary" />
-              </motion.div>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
-                Your {goalLabel} Course is Ready!
-              </h2>
-              <p className="text-muted-foreground">
-                8 weeks · Personalized protocol · Step-by-step guides
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <Input
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-14 text-center text-lg bg-background border-border/50"
-                autoFocus
-              />
-              
-              <div className="flex items-center justify-center gap-2">
-                <Checkbox
-                  id="newsletter"
-                  checked={newsletter}
-                  onCheckedChange={(checked) => setNewsletter(checked as boolean)}
-                />
-                <label htmlFor="newsletter" className="text-sm text-muted-foreground cursor-pointer">
-                  Send me weekly peptide research
-                </label>
-              </div>
-
-              <Button
-                type="submit"
-                size="lg"
-                disabled={!email.includes('@') || isSubmitting}
-                className="w-full h-14 text-lg"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  "See My Course →"
-                )}
-              </Button>
-
-              <p className="text-xs text-muted-foreground">
-                We'll never spam you. Unsubscribe anytime.
-              </p>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </motion.div>
     </div>
   );
 }

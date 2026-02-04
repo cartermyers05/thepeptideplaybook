@@ -7,8 +7,6 @@ import { useQuizChat } from "@/hooks/useQuizChat";
 import { QuizMessage } from "./QuizMessage";
 import { BuildingAnimation } from "./BuildingAnimation";
 import { GoalButton } from "./GoalButton";
-import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
 
 const quickAnswers = [
   { 
@@ -50,7 +48,6 @@ const quickAnswers = [
 ];
 
 export function ConversationalQuiz() {
-  const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -100,20 +97,11 @@ export function ConversationalQuiz() {
     }
   };
 
-  const handleBuildingComplete = async (email: string, newsletter: boolean) => {
+  const handleBuildingComplete = async () => {
     setIsSubmitting(true);
     try {
-      const goal = await saveQuizResponse(email, newsletter);
-      const goalToCourse: Record<string, string> = {
-        fat_loss: 'fat-loss',
-        muscle: 'muscle',
-        recovery: 'recovery',
-        anti_aging: 'anti-aging',
-        cognitive: 'cognitive',
-        beginner: 'beginner'
-      };
-      const coursePath = goalToCourse[goal] || 'beginner';
-      navigate(`/course/${coursePath}`);
+      await saveQuizResponse();
+      // Navigation is handled by BuildingAnimation
     } catch (err) {
       console.error('Error saving quiz:', err);
     } finally {

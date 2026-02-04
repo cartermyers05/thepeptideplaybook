@@ -106,7 +106,7 @@ serve(async (req) => {
       throw new Error("You already own this course. Go to your dashboard to access it.");
     }
 
-    // Create one-time payment session
+    // Create one-time payment session - redirect to thank-you for verification
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
@@ -123,7 +123,7 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/dashboard?welcome=true&goal=${goal}`,
+      success_url: `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/course/${goal}`,
       metadata: {
         user_id: user.id,

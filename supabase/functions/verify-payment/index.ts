@@ -143,7 +143,8 @@ serve(async (req) => {
 
     logStep("Session retrieved", { 
       payment_status: session.payment_status,
-      metadata_user_id: session.metadata?.user_id 
+      metadata_user_id: session.metadata?.user_id,
+      metadata_goal: session.metadata?.goal
     });
 
     // Verify payment was successful
@@ -193,6 +194,41 @@ serve(async (req) => {
       });
     }
 
+    // Get goal from session metadata
+    const goal = session.metadata?.goal || 'beginner';
+    logStep("Creating user course", { goal });
+
+    // Get course template for this goal
+    const { data: template } = await supabase
+      .from("course_templates")
+      .select("*")
+      .eq("goal", goal)
+      .single();
+
+    // Create user_courses record
+    const courseData = {
+      user_id: user.id,
+      goal: goal,
+      title: template?.title || `${goal.replace('_', ' ')} Course`,
+      duration_days: template?.duration_days || 56,
+      lessons: template?.lessons || {},
+      peptides: template?.peptides || {},
+      template_id: template?.id || null,
+      status: 'pending_quiz', // Will be set to 'active' after quiz completion
+      purchased_at: new Date().toISOString(),
+    };
+
+    const { error: courseError } = await supabase
+      .from("user_courses")
+      .insert(courseData);
+
+    if (courseError) {
+      logStep("Error creating user course", { error: courseError.message });
+      // Don't throw - continue with other operations
+    } else {
+      logStep("User course created successfully");
+    }
+
     // Update profile tier to member
     const { error: updateError } = await supabase
       .from("profiles")
@@ -206,12 +242,13 @@ serve(async (req) => {
 
     logStep("Profile tier updated to member");
 
-    // Record purchase
+    // Record purchase with goal
     const { error: purchaseError } = await supabase.from("purchases").insert({
       user_id: user.id,
       tier: "member",
       amount: session.amount_total || 0,
       stripe_payment_id: paymentIntentId,
+      course_goal: goal,
     });
 
     if (purchaseError) {
@@ -250,7 +287,7 @@ serve(async (req) => {
       // Don't throw - this is a non-critical operation
     }
 
-    return new Response(JSON.stringify({ verified: true }), {
+    return new Response(JSON.stringify({ verified: true, goal }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
