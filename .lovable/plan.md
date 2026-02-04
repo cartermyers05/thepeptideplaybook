@@ -1,67 +1,54 @@
 
 
-# Add Red Theme to ChatPreviewCard
+# Hero Section Color Updates
 
 ## Overview
 
-Update the ChatPreviewCard (the large AI chatbot demo card at the top) to use a red/rose color theme, completing the color-coded trio:
+Two styling updates to the hero section:
 
-| Card | Theme |
-|------|-------|
-| **ChatPreviewCard** | Red/Rose (NEW) |
-| CoursePreviewCard | Purple |
-| DigestPreviewCard | Blue |
+1. **ChatPreviewCard**: Add red/rose color theme (matching the purple and blue themes on the other cards)
+2. **"Journey" Text**: Change from teal/primary to black for better visual balance
 
-## Visual Changes
+## Changes
 
-### ChatPreviewCard (Red Theme)
-- **Background**: Red gradient overlay (`from-red-500/10 via-rose-500/5 to-card/95`)
-- **Border**: Red tint (`border-red-200/50`)
-- **Header border**: Red accent (`border-red-200/30`)
-- **PP Avatar**: Red background (`bg-red-500`)
-- **User message bubble**: Red (`bg-red-500 text-white`)
-- **Status dot**: Red (`bg-red-500`)
-- **Category chips**: Red (`bg-red-500/10 text-red-500`)
+### 1. ChatPreviewCard Red Theme
 
-## File Changes
+Update the AI chatbot demo card with red accents:
+
+| Element | Current | New |
+|---------|---------|-----|
+| Background | `bg-card/95` | `bg-gradient-to-br from-red-500/10 via-rose-500/5 to-card/95` |
+| Border | `border-border` | `border-red-200/50` |
+| PP Avatar | `bg-primary` | `bg-red-500` |
+| User bubble | `bg-primary` | `bg-red-500` |
+| Status dot | `bg-primary` | `bg-red-500` |
+| Category chips | `bg-primary/10 text-primary` | `bg-red-500/10 text-red-500` |
+
+### 2. "Journey" Text Color
+
+Change the H1 accent word from teal to black:
+
+```tsx
+// Before
+<span className="text-primary">Journey</span>
+
+// After
+<span className="text-foreground">Journey</span>
+```
+
+## Files to Modify
 
 | File | Changes |
 |------|---------|
 | `src/components/landing/HeroProductCards.tsx` | Update `ChatPreviewCard` with red theme |
-
-## Technical Details
-
-```tsx
-// Card container - add red gradient
-className={cn(
-  "relative overflow-hidden rounded-3xl backdrop-blur border border-red-200/50 shadow-xl cursor-default",
-  "bg-gradient-to-br from-red-500/10 via-rose-500/5 to-card/95",
-  className
-)}
-
-// Header bar
-<div className="flex items-center justify-between px-4 py-3 border-b border-red-200/30 bg-white/50">
-
-// PP Avatar
-<div className="w-6 h-6 rounded-md bg-red-500 flex items-center justify-center">
-
-// Status dot
-<span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-
-// User message
-<div className="bg-red-500 text-white text-xs px-3 py-2 rounded-xl rounded-br-sm max-w-[80%]">
-
-// AI avatar
-<div className="w-5 h-5 rounded-md bg-red-500 flex-shrink-0 flex items-center justify-center">
-
-// Category chips
-<span className="text-[10px] px-2 py-1 rounded-full bg-red-500/10 text-red-500 font-medium">
-```
+| `src/components/landing/HeroSection.tsx` | Change "Journey" from `text-primary` to `text-foreground` |
 
 ## Result
 
-All three hero cards will now have distinct, vibrant color identities:
-- **AI Chat (Top)**: Red - bold, attention-grabbing, action-oriented
-- **Your Goal (Bottom Left)**: Purple - aspirational, premium feel
-- **Weekly Digest (Bottom Right)**: Blue - informational, trustworthy
+The hero section will have:
+- **"Journey"** in black, creating a cleaner typographic look
+- **Three color-coded product cards**:
+  - Red (AI Chat) - bold, action-oriented
+  - Purple (Your Goal) - aspirational, premium
+  - Blue (Weekly Digest) - informational, trustworthy
 
