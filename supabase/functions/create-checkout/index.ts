@@ -47,19 +47,23 @@ serve(async (req) => {
     const body = await req.json();
     const { goal } = body;
     
-    if (!goal) {
-      throw new Error("Goal is required");
+    // Goal is optional - if not provided, use generic course checkout
+    let courseTitle = "Peptide Playbook AI - Full Access";
+    let courseGoal = "general";
+    
+    if (goal) {
+      courseGoal = goal.replace('-', '_');
+      // Get course template to get title
+      const { data: template } = await supabase
+        .from("course_templates")
+        .select("title")
+        .eq("goal", courseGoal)
+        .single();
+
+      courseTitle = template?.title || `${goal} Course`;
     }
-
-    // Get course template to get title
-    const { data: template } = await supabase
-      .from("course_templates")
-      .select("title")
-      .eq("goal", goal.replace('-', '_'))
-      .single();
-
-    const courseTitle = template?.title || `${goal} Course`;
-    logStep("Course selected", { goal, courseTitle });
+    
+    logStep("Course selected", { goal: courseGoal, courseTitle });
 
     const stripe = new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
@@ -94,16 +98,18 @@ serve(async (req) => {
       logStep("Using existing Stripe customer", { customerId });
     }
 
-    // Check if user already purchased this course
-    const { data: existingCourse } = await supabase
-      .from("user_courses")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("goal", goal.replace('-', '_'))
-      .maybeSingle();
+    // Check if user already purchased this course (only if goal was specified)
+    if (goal) {
+      const { data: existingCourse } = await supabase
+        .from("user_courses")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("goal", courseGoal)
+        .maybeSingle();
 
-    if (existingCourse) {
-      throw new Error("You already own this course. Go to your dashboard to access it.");
+      if (existingCourse) {
+        throw new Error("You already own this course. Go to your dashboard to access it.");
+      }
     }
 
     // Create one-time payment session - redirect to thank-you for verification
@@ -124,10 +130,10 @@ serve(async (req) => {
       ],
       mode: "payment",
       success_url: `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/course/${goal}`,
+      cancel_url: `${req.headers.get("origin")}/checkout`,
       metadata: {
         user_id: user.id,
-        goal: goal.replace('-', '_'),
+        goal: courseGoal,
       },
     });
 
