@@ -48,12 +48,15 @@ export default function CoursePreview() {
 
   const handleCheckout = async () => {
     if (!user) {
-      // Redirect to login with return URL
       navigate(`/login?redirect=/course/${goal}`);
       return;
     }
 
     setIsCheckingOut(true);
+    
+    // Open blank tab IMMEDIATELY (before any async) to avoid popup blocker
+    const checkoutWindow = window.open('about:blank', '_blank');
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -66,12 +69,16 @@ export default function CoursePreview() {
 
       if (response.error) throw new Error(response.error.message);
       
-      if (response.data?.url) {
-        window.open(response.data.url, '_blank');
+      if (response.data?.url && checkoutWindow) {
+        checkoutWindow.location.href = response.data.url;
         toast.info("Checkout opened in new tab");
+        setIsCheckingOut(false);
+      } else if (!checkoutWindow) {
+        toast.error("Popup blocked - please allow popups for this site");
         setIsCheckingOut(false);
       }
     } catch (error: unknown) {
+      checkoutWindow?.close();
       const errorMessage = error instanceof Error ? error.message : "Failed to start checkout";
       toast.error(errorMessage);
       setIsCheckingOut(false);
