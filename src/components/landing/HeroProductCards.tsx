@@ -18,7 +18,7 @@ function TypingDots() {
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
-          className="w-1 h-1 rounded-full bg-primary/60"
+          className="w-1 h-1 rounded-full bg-orange-500/60"
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
         />
@@ -51,13 +51,13 @@ export function ChatPreviewCard({
       {/* Header bar */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/50">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-[10px] font-bold text-primary-foreground">PP</span>
+          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+            <span className="text-[10px] font-bold text-white">PP</span>
           </div>
           <span className="text-sm font-medium">Peptide Playbook AI</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
         </div>
       </div>
 
@@ -70,7 +70,7 @@ export function ChatPreviewCard({
           transition={{ delay: delay + 0.3, duration: 0.4 }}
           className="flex justify-end"
         >
-          <div className="bg-primary text-primary-foreground text-xs px-3 py-2 rounded-xl rounded-br-sm max-w-[80%]">
+          <div className="bg-gradient-to-r from-orange-400 to-amber-500 text-white text-xs px-3 py-2 rounded-xl rounded-br-sm max-w-[80%]">
             What's the best peptide for recovery?
           </div>
         </motion.div>
@@ -82,8 +82,8 @@ export function ChatPreviewCard({
           transition={{ delay: delay + 0.6, duration: 0.4 }}
           className="flex gap-2"
         >
-          <div className="w-5 h-5 rounded-md bg-primary flex-shrink-0 flex items-center justify-center">
-            <span className="text-[8px] font-bold text-primary-foreground">PP</span>
+          <div className="w-5 h-5 rounded-md bg-gradient-to-br from-orange-400 to-amber-500 flex-shrink-0 flex items-center justify-center">
+            <span className="text-[8px] font-bold text-white">PP</span>
           </div>
           <div className="bg-muted rounded-xl rounded-bl-sm px-3 py-2 text-xs leading-relaxed">
             Based on research, <span className="font-semibold">BPC-157</span> and{" "}
@@ -103,7 +103,7 @@ export function ChatPreviewCard({
         {["Recovery", "Compare", "FDA Status"].map((chip) => (
           <span
             key={chip}
-            className="text-[10px] px-2 py-1 rounded-full bg-primary/10 text-primary font-medium"
+            className="text-[10px] px-2 py-1 rounded-full bg-orange-500/10 text-orange-600 font-medium"
           >
             {chip}
           </span>
