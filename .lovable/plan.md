@@ -1,54 +1,50 @@
 
-
-# Hero Section Color Updates
+# Plan: Change Green Hover Colors to Grey
 
 ## Overview
+Replace all green/teal (`primary`) hover effects across the landing page with grey (`muted-foreground` or similar neutral grey) to create a more subtle, consistent hover experience.
 
-Two styling updates to the hero section:
+## Files to Update
 
-1. **ChatPreviewCard**: Add red/rose color theme (matching the purple and blue themes on the other cards)
-2. **"Journey" Text**: Change from teal/primary to black for better visual balance
+### 1. WhatsInsideSection.tsx (lines 90, 99)
+- `hover:border-primary/30` → `hover:border-muted-foreground/30`
+- `group-hover:text-primary` → `group-hover:text-foreground`
 
-## Changes
+### 2. FAQ.tsx (lines 45, 52)
+- `group-hover:text-primary` → `group-hover:text-foreground` (for question text)
+- `group-hover:text-primary` → `group-hover:text-foreground` (for plus icon)
 
-### 1. ChatPreviewCard Red Theme
+### 3. Footer.tsx (lines 40, 45, 50, 55, 68, 73, 78, 91, 96, 101, 129)
+- All `hover:text-primary` → `hover:text-foreground` (11 links)
 
-Update the AI chatbot demo card with red accents:
+### 4. Navbar.tsx (line 110)
+- `hover:text-primary` → `hover:text-foreground` (menu links)
 
-| Element | Current | New |
-|---------|---------|-----|
-| Background | `bg-card/95` | `bg-gradient-to-br from-red-500/10 via-rose-500/5 to-card/95` |
-| Border | `border-border` | `border-red-200/50` |
-| PP Avatar | `bg-primary` | `bg-red-500` |
-| User bubble | `bg-primary` | `bg-red-500` |
-| Status dot | `bg-primary` | `bg-red-500` |
-| Category chips | `bg-primary/10 text-primary` | `bg-red-500/10 text-red-500` |
+### 5. ProductPreview.tsx (lines 195, 201)
+- `group-hover:bg-primary/20` → `group-hover:bg-muted`
+- `group-hover:text-primary` → `group-hover:text-foreground`
 
-### 2. "Journey" Text Color
+### 6. FeaturedBy.tsx (line 36)
+- `hover:text-primary` → `hover:text-foreground`
 
-Change the H1 accent word from teal to black:
+### 7. ChatbotDemo.tsx (line 152)
+- `hover:border-primary/50 hover:bg-primary/5` → `hover:border-muted-foreground/50 hover:bg-muted/50`
 
-```tsx
-// Before
-<span className="text-primary">Journey</span>
+### 8. CourseFeatures.tsx (line 82)
+- `hover:border-primary/40` → `hover:border-muted-foreground/40`
 
-// After
-<span className="text-foreground">Journey</span>
-```
+## Summary of Changes
+- **Text hovers**: Change from `hover:text-primary` / `group-hover:text-primary` to `hover:text-foreground` / `group-hover:text-foreground`
+- **Border hovers**: Change from `hover:border-primary/*` to `hover:border-muted-foreground/*`
+- **Background hovers**: Change from `hover:bg-primary/*` to `hover:bg-muted/*`
 
-## Files to Modify
+---
 
-| File | Changes |
-|------|---------|
-| `src/components/landing/HeroProductCards.tsx` | Update `ChatPreviewCard` with red theme |
-| `src/components/landing/HeroSection.tsx` | Change "Journey" from `text-primary` to `text-foreground` |
+## Technical Details
 
-## Result
+All changes use existing Tailwind color tokens:
+- `text-foreground` - standard dark text color
+- `muted-foreground` - grey text color for subtle elements
+- `muted` - grey background color
 
-The hero section will have:
-- **"Journey"** in black, creating a cleaner typographic look
-- **Three color-coded product cards**:
-  - Red (AI Chat) - bold, action-oriented
-  - Purple (Your Goal) - aspirational, premium
-  - Blue (Weekly Digest) - informational, trustworthy
-
+No new CSS or configuration changes required.
