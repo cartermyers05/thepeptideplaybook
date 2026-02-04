@@ -1,115 +1,83 @@
 
 
-# Make Logo Static Until User Asks a Question
+# Fix Checkout Button Not Working
 
-## Overview
+## Problem
 
-Update the AnimatedLogo component to support an `animate` prop that controls whether animations are active. By default, the logo will be static, and it will only "come to life" when the AI is processing a question.
+The "Pay $67 — Get Full Access" button doesn't work because:
+
+1. **Ref blocks clicks**: When the page loads, the `useEffect` sets `hasStartedRef.current = true` before calling `startCheckout()`. The button's `onClick` handler then checks `if (!hasStartedRef.current)` which is now `true`, so clicking does nothing.
+
+2. **useCheckout also blocked**: The `isProcessingRef.current` in the hook is set to `true` and never reset if the checkout fails or the user navigates back.
+
+Additionally, there's a **price mismatch**: the UI shows "$67" but the edge function charges "$99" (unit_amount: 9900).
 
 ---
 
-## Changes
+## Solution
 
-### 1. Update AnimatedLogo Component
+### 1. Fix Checkout.tsx Button Logic
 
-**File:** `src/components/brand/AnimatedLogo.tsx`
+**File:** `src/pages/Checkout.tsx`
 
-Add an `animate` prop (default: `true` to maintain backward compatibility):
+Remove the ref check from the button's onClick handler. The button should always allow starting checkout:
 
 ```tsx
-interface AnimatedLogoProps {
-  size?: number;
-  className?: string;
-  animate?: boolean;  // NEW - controls whether animations run
-}
+// BEFORE (broken)
+onClick={() => {
+  if (!hasStartedRef.current) {
+    hasStartedRef.current = true;
+    startCheckout();
+  }
+}}
+
+// AFTER (fixed)
+onClick={() => {
+  startCheckout();
+}}
 ```
 
-When `animate={false}`:
-- No rotation on the SVG
-- No pulsing on the center node
-- No opacity animation on outer nodes
-- Just a static, beautiful hexagon
+### 2. Fix useCheckout Hook to Allow Retries
 
-When `animate={true}` (default):
-- Full animations as before
+**File:** `src/hooks/useCheckout.ts`
 
----
-
-### 2. Update AskCoach Component
-
-**File:** `src/components/coach/AskCoach.tsx`
-
-Pass `animate={isLoading}` to control when the logo animates:
-
-| Location | Current | Change |
-|----------|---------|--------|
-| Empty state (line 138) | Always animating | `animate={false}` - static until first question |
-| Message avatar (line 157) | Always animating | `animate={false}` - static for completed responses |
-| Loading state (line 186) | Always animating | `animate={true}` - animate while thinking |
-
----
-
-## Implementation Details
-
-### AnimatedLogo.tsx Changes
+Reset `isProcessingRef` when the hook is called again, or remove the blocking logic that prevents retries:
 
 ```tsx
-export function AnimatedLogo({ size = 40, className, animate = true }: AnimatedLogoProps) {
-  // ...existing gradient definitions...
-
-  return (
-    <motion.svg
-      // Only rotate if animate is true
-      animate={animate ? { rotate: 360 } : { rotate: 0 }}
-      transition={animate ? { 
-        duration: 20, 
-        repeat: Infinity, 
-        ease: "linear" 
-      } : undefined}
-    >
-      {/* Center node - only pulse if animate is true */}
-      <motion.circle
-        animate={animate 
-          ? { scale: [1, 1.2, 1], opacity: [0.8, 1, 0.8] } 
-          : { scale: 1, opacity: 1 }
-        }
-        transition={animate 
-          ? { duration: 2, repeat: Infinity, ease: "easeInOut" } 
-          : undefined
-        }
-      />
-
-      {/* Outer nodes - only glow if animate is true */}
-      <motion.circle
-        animate={animate ? { opacity: [0.7, 1, 0.7] } : { opacity: 1 }}
-        transition={animate ? { duration: 1.5, repeat: Infinity, delay: 0 } : undefined}
-      />
-      {/* ...similar for other outer nodes */}
-    </motion.svg>
-  );
-}
+const startCheckout = useCallback(async (plan: Plan = "monthly") => {
+  // Only block if we're currently redirecting to Stripe
+  if (redirectingRef.current) return;
+  
+  // Allow retry if not currently processing
+  if (isProcessingRef.current && isLoading) return;
+  
+  isProcessingRef.current = true;
+  setIsLoading(true);
+  
+  // ... rest of the function
 ```
 
-### AskCoach.tsx Changes
+### 3. Fix Price Mismatch
+
+**File:** `supabase/functions/create-checkout/index.ts`
+
+Update the price to match the UI ($67 = 6700 cents):
 
 ```tsx
-// Empty state - static logo
-<AnimatedLogo size={40} animate={false} />
+// BEFORE
+unit_amount: 9900, // $99.00
 
-// Message avatars - static for completed responses
-<AnimatedLogo size={20} animate={false} />
-
-// Loading state - animated while AI is thinking
-<AnimatedLogo size={20} animate={true} />
+// AFTER
+unit_amount: 6700, // $67.00
 ```
 
 ---
 
-## Result
+## Summary of Changes
 
-- **Before asking a question**: Logo is static and calm
-- **While AI is thinking**: Logo comes to life with rotation and pulsing nodes
-- **After response**: Logo returns to static state
-
-This creates a clear visual feedback loop where the animation signals "the AI is working on your question."
+| File | Change |
+|------|--------|
+| `src/pages/Checkout.tsx` | Remove ref check from button onClick |
+| `src/hooks/useCheckout.ts` | Allow retrying checkout after failed attempt |
+| `supabase/functions/create-checkout/index.ts` | Fix price from $99 to $67 |
 
