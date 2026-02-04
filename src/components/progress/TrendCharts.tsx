@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { format, parseISO } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { Zap, Smile, Moon } from "lucide-react";
 import type { CheckIn } from "@/hooks/useCheckIn";
 
 interface TrendChartsProps {
@@ -35,7 +36,7 @@ export function TrendCharts({ checkIns }: TrendChartsProps) {
     <div className="space-y-6">
       <div className="h-[200px]">
         <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-          <span>⚡</span> Energy Level
+          <Zap className="w-4 h-4 text-primary" /> Energy Level
         </h4>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
@@ -68,7 +69,7 @@ export function TrendCharts({ checkIns }: TrendChartsProps) {
 
       <div className="h-[200px]">
         <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-          <span>😊</span> Mood
+          <Smile className="w-4 h-4 text-green-600" /> Mood
         </h4>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
@@ -101,7 +102,7 @@ export function TrendCharts({ checkIns }: TrendChartsProps) {
 
       <div className="h-[200px]">
         <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-          <span>😴</span> Sleep Quality
+          <Moon className="w-4 h-4 text-blue-500" /> Sleep Quality
         </h4>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>

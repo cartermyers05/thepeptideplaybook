@@ -21,15 +21,15 @@ export interface Milestone {
 }
 
 export const MILESTONE_DETAILS: Record<MilestoneType, { label: string; icon: string; description: string }> = {
-  first_checkin: { label: "First Check-In", icon: "🎯", description: "Completed your first daily check-in" },
-  first_recon: { label: "First Reconstitution", icon: "🧪", description: "Completed the reconstitution guide" },
-  week_1: { label: "Week 1 Complete", icon: "📅", description: "One week into your protocol" },
-  streak_7: { label: "7-Day Streak", icon: "🔥", description: "7 consecutive days of check-ins" },
-  streak_14: { label: "14-Day Streak", icon: "⚡", description: "14 consecutive days of check-ins" },
-  streak_30: { label: "30-Day Streak", icon: "💪", description: "30 consecutive days of check-ins" },
-  streak_60: { label: "60-Day Streak", icon: "🏆", description: "60 consecutive days of check-ins" },
-  streak_90: { label: "90-Day Streak", icon: "👑", description: "90 consecutive days of check-ins" },
-  cycle_complete: { label: "Cycle Complete", icon: "🎉", description: "Finished your entire protocol cycle" },
+  first_checkin: { label: "First Check-In", icon: "Target", description: "Completed your first daily check-in" },
+  first_recon: { label: "First Reconstitution", icon: "FlaskConical", description: "Completed the reconstitution guide" },
+  week_1: { label: "Week 1 Complete", icon: "Calendar", description: "One week into your protocol" },
+  streak_7: { label: "7-Day Streak", icon: "Flame", description: "7 consecutive days of check-ins" },
+  streak_14: { label: "14-Day Streak", icon: "Zap", description: "14 consecutive days of check-ins" },
+  streak_30: { label: "30-Day Streak", icon: "Dumbbell", description: "30 consecutive days of check-ins" },
+  streak_60: { label: "60-Day Streak", icon: "Trophy", description: "60 consecutive days of check-ins" },
+  streak_90: { label: "90-Day Streak", icon: "Crown", description: "90 consecutive days of check-ins" },
+  cycle_complete: { label: "Cycle Complete", icon: "Award", description: "Finished your entire protocol cycle" },
 };
 
 export function useMilestones() {

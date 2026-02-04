@@ -7,7 +7,7 @@ import { useCheckIn, CheckInData } from "@/hooks/useCheckIn";
 import { useStreak } from "@/hooks/useStreak";
 import { useMilestones } from "@/hooks/useMilestones";
 import { useProtocol } from "@/hooks/useProtocol";
-import { Check, Loader2, PartyPopper } from "lucide-react";
+import { Check, Loader2, PartyPopper, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -80,7 +80,7 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
       }
 
       setStep("complete");
-      toast.success("Check-in complete! 🎉");
+      toast.success("Check-in complete!");
       onComplete?.();
     } catch (error) {
       toast.error("Failed to save check-in");
@@ -100,7 +100,7 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
               Great job! You've logged today's check-in. Come back tomorrow to continue your streak.
             </p>
             <div className="flex items-center gap-2 text-lg">
-              <span>🔥</span>
+              <Flame className="w-5 h-5 text-orange-500" />
               <span className="font-medium">{currentStreak}-day streak</span>
             </div>
           </div>
@@ -130,7 +130,7 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
               You're building great habits. Keep it up!
             </p>
             <div className="flex items-center gap-2 text-2xl font-bold text-primary">
-              <span>🔥</span>
+              <Flame className="w-6 h-6 text-orange-500" />
               <span>{currentStreak + 1}-day streak</span>
             </div>
           </motion.div>
