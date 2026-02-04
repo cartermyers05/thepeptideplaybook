@@ -290,9 +290,17 @@ export default function Signup() {
       {/* Right side - Visual */}
       <div className="hidden lg:flex flex-1 bg-gradient-primary items-center justify-center p-16">
         <div className="max-w-md text-center text-primary-foreground">
-          <h2 className="text-3xl font-bold mb-4">
-            Everything peptides, one place
-          </h2>
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold mb-3">
+              Everything peptides, one place
+            </h2>
+            <div 
+              className="h-1 w-24 mx-auto rounded-full"
+              style={{
+                background: "linear-gradient(90deg, hsl(45, 80%, 50%), hsl(25, 90%, 55%), hsl(350, 80%, 55%), hsl(270, 70%, 55%), hsl(210, 80%, 55%), hsl(160, 70%, 45%))"
+              }}
+            />
+          </div>
           <p className="text-primary-foreground/80 mb-8">
             Get instant access to research-backed peptide answers with citations.
           </p>
