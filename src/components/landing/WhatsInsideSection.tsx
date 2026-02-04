@@ -66,7 +66,7 @@ export function WhatsInsideSection() {
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
             What You
             <br />
-            <span className="text-primary">Get</span>
+            Get
           </h2>
           <p className="mt-6 text-lg text-muted-foreground max-w-xl">
             Everything you need to confidently complete your first peptide cycle.
