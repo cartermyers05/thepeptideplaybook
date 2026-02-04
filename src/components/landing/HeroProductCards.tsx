@@ -134,7 +134,8 @@ export function CoursePreviewCard({
       transition={{ delay }}
       whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
       className={cn(
-        "relative overflow-hidden rounded-3xl bg-card/95 backdrop-blur border border-border shadow-xl p-4 cursor-default",
+        "relative overflow-hidden rounded-3xl backdrop-blur border border-violet-200/50 shadow-xl p-4 cursor-default",
+        "bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-card/95",
         className
       )}
     >
@@ -150,8 +151,8 @@ export function CoursePreviewCard({
             className={cn(
               "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors",
               goal.selected
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
+                ? "bg-violet-500 text-white"
+                : "bg-white/50 text-muted-foreground"
             )}
           >
             {goal.selected && (
@@ -176,9 +177,9 @@ export function CoursePreviewCard({
         className="space-y-2"
       >
         <p className="text-[10px] text-muted-foreground">Building your course...</p>
-        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+        <div className="h-1.5 bg-white/30 rounded-full overflow-hidden">
           <motion.div
-            className="h-full bg-primary rounded-full"
+            className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full"
             initial={{ width: "0%" }}
             animate={{ width: "65%" }}
             transition={{ delay: delay + 0.8, duration: 1.5, ease: "easeOut" }}
@@ -212,14 +213,15 @@ export function DigestPreviewCard({
       transition={{ delay }}
       whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
       className={cn(
-        "relative overflow-hidden rounded-3xl bg-card/95 backdrop-blur border border-border shadow-xl p-4 cursor-default",
+        "relative overflow-hidden rounded-3xl backdrop-blur border border-blue-200/50 shadow-xl p-4 cursor-default",
+        "bg-gradient-to-br from-blue-500/10 via-sky-500/5 to-card/95",
         className
       )}
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
-          <Mail className="w-3 h-3 text-primary" />
+        <div className="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center">
+          <Mail className="w-3 h-3 text-blue-500" />
         </div>
         <span className="text-xs font-semibold">Weekly Digest</span>
       </div>
@@ -257,10 +259,10 @@ export function DigestPreviewCard({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: delay + 0.6 }}
-        className="flex items-center justify-between mt-3 pt-2 border-t border-border"
+        className="flex items-center justify-between mt-3 pt-2 border-t border-blue-200/30"
       >
         <span className="text-[10px] text-muted-foreground">12 Sources</span>
-        <span className="text-[10px] text-primary font-medium flex items-center gap-1">
+        <span className="text-[10px] text-blue-500 font-medium flex items-center gap-1">
           Read <ArrowRight className="w-2.5 h-2.5" />
         </span>
       </motion.div>
