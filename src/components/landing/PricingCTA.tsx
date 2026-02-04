@@ -13,6 +13,30 @@ const features = [
   "Lifetime access",
 ];
 
+// Glow pulse component for the pricing card
+function GlowPulse() {
+  return (
+    <motion.div
+      className="absolute inset-0 rounded-3xl"
+      initial={{ opacity: 0 }}
+      animate={{ 
+        opacity: [0.3, 0.5, 0.3],
+        scale: [1, 1.02, 1],
+      }}
+      transition={{
+        duration: 4,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+      style={{
+        background: "radial-gradient(ellipse at center, hsl(var(--primary) / 0.15) 0%, transparent 70%)",
+        filter: "blur(40px)",
+        zIndex: -1,
+      }}
+    />
+  );
+}
+
 export function PricingCTA() {
   return (
     <section id="pricing" className="py-32 md:py-40 bg-secondary/50">
@@ -44,7 +68,11 @@ export function PricingCTA() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative"
           >
+            {/* Glow effect behind the card */}
+            <GlowPulse />
+            
             <div className="bg-card border border-border rounded-3xl p-8 md:p-12 relative overflow-hidden">
               {/* Price */}
               <div className="mb-8">

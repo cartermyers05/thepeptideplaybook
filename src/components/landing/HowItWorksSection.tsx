@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-
+import { GridPattern } from "./GridPattern";
 interface Step {
   number: string;
   title: string;
@@ -81,8 +81,11 @@ const itemVariants = {
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="py-20 md:py-28">
-      <div className="container px-4 md:px-8">
+    <section id="how-it-works" className="relative py-20 md:py-28 overflow-hidden">
+      {/* Background grid pattern */}
+      <GridPattern variant="dots" className="opacity-50" />
+      
+      <div className="container px-4 md:px-8 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
