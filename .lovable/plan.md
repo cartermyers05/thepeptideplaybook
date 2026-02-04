@@ -1,86 +1,67 @@
 
 
-# Add Color-Coding to Hero Product Cards
+# Add Red Theme to ChatPreviewCard
 
 ## Overview
 
-Add distinctive color themes to the CoursePreviewCard (purple) and DigestPreviewCard (blue) while keeping the ChatPreviewCard in the current teal/primary theme. This will make each card visually distinct and add visual interest.
+Update the ChatPreviewCard (the large AI chatbot demo card at the top) to use a red/rose color theme, completing the color-coded trio:
 
-## Color Scheme
-
-| Card | Theme | Background | Accent Elements |
-|------|-------|------------|-----------------|
-| ChatPreviewCard | Teal (current) | `bg-card/95` | Primary teal accents |
-| CoursePreviewCard | Purple | Purple gradient overlay | Purple selected state, progress bar |
-| DigestPreviewCard | Blue | Blue gradient overlay | Blue icon, accents |
+| Card | Theme |
+|------|-------|
+| **ChatPreviewCard** | Red/Rose (NEW) |
+| CoursePreviewCard | Purple |
+| DigestPreviewCard | Blue |
 
 ## Visual Changes
 
-### CoursePreviewCard (Purple Theme)
-- Background: Subtle purple gradient (`from-violet-500/10 via-purple-500/5 to-card`)
-- Selected goal pill: Purple (`bg-violet-500 text-white`)
-- Progress bar: Purple gradient (`bg-violet-500`)
-- Border accent: Purple tint
-
-### DigestPreviewCard (Blue Theme)
-- Background: Subtle blue gradient (`from-blue-500/10 via-sky-500/5 to-card`)
-- Mail icon container: Blue (`bg-blue-500/10`)
-- Mail icon: Blue (`text-blue-500`)
-- "Read" link: Blue (`text-blue-500`)
-- Border accent: Blue tint
+### ChatPreviewCard (Red Theme)
+- **Background**: Red gradient overlay (`from-red-500/10 via-rose-500/5 to-card/95`)
+- **Border**: Red tint (`border-red-200/50`)
+- **Header border**: Red accent (`border-red-200/30`)
+- **PP Avatar**: Red background (`bg-red-500`)
+- **User message bubble**: Red (`bg-red-500 text-white`)
+- **Status dot**: Red (`bg-red-500`)
+- **Category chips**: Red (`bg-red-500/10 text-red-500`)
 
 ## File Changes
 
 | File | Changes |
 |------|---------|
-| `src/components/landing/HeroProductCards.tsx` | Update `CoursePreviewCard` with purple theme, update `DigestPreviewCard` with blue theme |
+| `src/components/landing/HeroProductCards.tsx` | Update `ChatPreviewCard` with red theme |
 
 ## Technical Details
 
-### CoursePreviewCard Updates
-
 ```tsx
-// Card container - add purple gradient
+// Card container - add red gradient
 className={cn(
-  "relative overflow-hidden rounded-3xl backdrop-blur border border-violet-200/50 shadow-xl p-4 cursor-default",
-  "bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-card/95",
+  "relative overflow-hidden rounded-3xl backdrop-blur border border-red-200/50 shadow-xl cursor-default",
+  "bg-gradient-to-br from-red-500/10 via-rose-500/5 to-card/95",
   className
 )}
 
-// Selected goal styling
-goal.selected
-  ? "bg-violet-500 text-white"
-  : "bg-white/50 text-muted-foreground"
+// Header bar
+<div className="flex items-center justify-between px-4 py-3 border-b border-red-200/30 bg-white/50">
 
-// Progress bar
-<motion.div className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full" />
-```
+// PP Avatar
+<div className="w-6 h-6 rounded-md bg-red-500 flex items-center justify-center">
 
-### DigestPreviewCard Updates
+// Status dot
+<span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
 
-```tsx
-// Card container - add blue gradient
-className={cn(
-  "relative overflow-hidden rounded-3xl backdrop-blur border border-blue-200/50 shadow-xl p-4 cursor-default",
-  "bg-gradient-to-br from-blue-500/10 via-sky-500/5 to-card/95",
-  className
-)}
+// User message
+<div className="bg-red-500 text-white text-xs px-3 py-2 rounded-xl rounded-br-sm max-w-[80%]">
 
-// Mail icon container
-<div className="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center">
-  <Mail className="w-3 h-3 text-blue-500" />
-</div>
+// AI avatar
+<div className="w-5 h-5 rounded-md bg-red-500 flex-shrink-0 flex items-center justify-center">
 
-// Read link
-<span className="text-[10px] text-blue-500 font-medium flex items-center gap-1">
+// Category chips
+<span className="text-[10px] px-2 py-1 rounded-full bg-red-500/10 text-red-500 font-medium">
 ```
 
 ## Result
 
-The three hero cards will each have their own color identity:
-- **AI Chat**: Teal (matches primary brand color)
-- **Your Goal**: Purple (aspirational, premium feel)
-- **Weekly Digest**: Blue (informational, trustworthy)
-
-This creates visual variety while maintaining the cohesive premium aesthetic.
+All three hero cards will now have distinct, vibrant color identities:
+- **AI Chat (Top)**: Red - bold, attention-grabbing, action-oriented
+- **Your Goal (Bottom Left)**: Purple - aspirational, premium feel
+- **Weekly Digest (Bottom Right)**: Blue - informational, trustworthy
 
