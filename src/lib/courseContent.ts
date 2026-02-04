@@ -470,3 +470,114 @@ export const injectionGuide = {
     },
   ],
 };
+
+// ═══════════════════════════════════════════════════════════
+// INTERACTIVE GUIDE STEPS FOR CHECKBOXES
+// ═══════════════════════════════════════════════════════════
+
+export interface InteractiveGuideStep {
+  id: string;
+  title: string;
+  content: string;
+  tips?: string[];
+  warnings?: string[];
+  confirmText: string;
+}
+
+export const reconstitutionSteps: InteractiveGuideStep[] = [
+  {
+    id: "gather_supplies",
+    title: "Step 1: Gather Your Supplies",
+    content: "Make sure you have: peptide vial, bacteriostatic water, alcohol swabs, syringes, and a clean workspace.",
+    tips: ["Work on a clean, flat surface", "Wash your hands thoroughly first"],
+    confirmText: "I have all supplies ready",
+  },
+  {
+    id: "understand_math",
+    title: "Step 2: Understand the Math",
+    content: "Formula: (Desired dose ÷ Vial size) × Water added × 100 = Units. Example: 0.25mg from 5mg vial with 2ml water = 10 units.",
+    tips: ["Use the Dosing Calculator in My Plan", "Write down your calculations"],
+    confirmText: "I understand the dosing math",
+  },
+  {
+    id: "clean_vials",
+    title: "Step 3: Clean Both Vials",
+    content: "Use an alcohol swab to clean the rubber stopper on both your peptide vial and bacteriostatic water vial. Let air dry.",
+    warnings: ["Never skip this step - contamination can ruin your peptide"],
+    confirmText: "Both vials are cleaned",
+  },
+  {
+    id: "draw_water",
+    title: "Step 4: Draw the Bacteriostatic Water",
+    content: "Draw air into syringe, push into BAC water vial, turn upside down, draw out the correct amount of water (usually 2ml).",
+    tips: ["Pull back slowly to avoid bubbles", "Keep needle tip below water level"],
+    confirmText: "I've drawn the correct amount of water",
+  },
+  {
+    id: "add_water",
+    title: "Step 5: Add Water to Peptide (SLOWLY!)",
+    content: "Insert needle at an angle, aim at the GLASS WALL, push plunger VERY SLOWLY. Water should trickle down the side.",
+    warnings: ["Never squirt directly onto powder!", "Never shake the vial!"],
+    confirmText: "Water added slowly down the side",
+  },
+  {
+    id: "dissolve",
+    title: "Step 6: Let It Dissolve",
+    content: "Set vial on flat surface, wait 5-10 minutes. Gently swirl if needed (never shake). Solution should be completely clear.",
+    warnings: ["Cloudy after 30 min = possible damage, don't use"],
+    confirmText: "Solution is completely clear",
+  },
+  {
+    id: "label_store",
+    title: "Step 7: Label and Store",
+    content: "Write date and concentration on vial. Store in refrigerator (36-46°F). Most peptides good for 28 days.",
+    tips: ["Set a phone reminder for expiration", "Keep out of direct light"],
+    confirmText: "Vial is labeled and stored properly",
+  },
+];
+
+export const injectionSteps: InteractiveGuideStep[] = [
+  {
+    id: "prep_supplies",
+    title: "Step 1: Prepare Your Supplies",
+    content: "Gather: reconstituted peptide vial, fresh insulin syringe, 2 alcohol swabs, sharps container. Wash hands.",
+    tips: ["Never reuse syringes", "Good lighting helps"],
+    confirmText: "All supplies are ready",
+  },
+  {
+    id: "draw_dose",
+    title: "Step 2: Draw Your Dose",
+    content: "Clean vial stopper, draw air, push into vial, turn upside down, pull your dose. Tap out air bubbles.",
+    tips: ["Double-check your units", "Small bubbles are OK"],
+    confirmText: "I've drawn the correct dose",
+  },
+  {
+    id: "select_site",
+    title: "Step 3: Select Injection Site",
+    content: "Best sites: Abdomen (2 inches from belly button), Thigh (front, middle third), Back of arm. ROTATE sites each time!",
+    tips: ["Abdomen is usually easiest", "Pinch at least 1 inch of skin"],
+    confirmText: "I've selected my injection site",
+  },
+  {
+    id: "clean_site",
+    title: "Step 4: Clean the Injection Site",
+    content: "Clean area with alcohol swab in circular motion. Let air dry completely (10 seconds). Don't blow on it.",
+    tips: ["If you touch the area, clean again"],
+    confirmText: "Site is cleaned and dry",
+  },
+  {
+    id: "inject",
+    title: "Step 5: Perform the Injection",
+    content: "Pinch skin, hold syringe at 45-90°, insert quickly, push plunger slowly (5-10 sec), wait 5 sec, remove straight out.",
+    tips: ["Quick insertion hurts less than slow", "Most say 'that was it?' after first one"],
+    warnings: ["If you see blood in syringe, remove and try different spot"],
+    confirmText: "Injection complete!",
+  },
+  {
+    id: "dispose",
+    title: "Step 6: Safe Disposal",
+    content: "Put syringe in sharps container immediately. Don't recap. Press gently if bleeding. Mark calendar as complete!",
+    tips: ["Never throw needles in regular trash"],
+    confirmText: "Disposed safely and logged dose",
+  },
+];

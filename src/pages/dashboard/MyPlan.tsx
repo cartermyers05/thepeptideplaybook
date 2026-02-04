@@ -2,8 +2,10 @@ import { motion } from "framer-motion";
 import { FlaskConical, Clock, MapPin, Calendar, AlertCircle, Check, Lightbulb, AlertTriangle, Info, Package, Syringe, ClipboardList } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useCourse } from "@/hooks/useCourse";
-import { peptideDetails, reconstitutionGuide, injectionGuide } from "@/lib/courseContent";
+import { useMilestones } from "@/hooks/useMilestones";
+import { peptideDetails, reconstitutionGuide, injectionGuide, reconstitutionSteps, injectionSteps } from "@/lib/courseContent";
 import { DosingCalculator } from "@/components/dashboard/DosingCalculator";
+import { InteractiveGuide } from "@/components/dashboard/InteractiveGuide";
 import {
   Accordion,
   AccordionContent,
@@ -26,6 +28,7 @@ const itemVariants = {
 
 export default function MyPlan() {
   const { userCourse } = useCourse();
+  const { awardMilestone } = useMilestones();
 
   if (!userCourse) {
     return (
@@ -276,13 +279,13 @@ export default function MyPlan() {
             <DosingCalculator />
           </motion.div>
 
-          {/* Guides */}
+          {/* Interactive Guides */}
           <motion.div variants={itemVariants}>
-            <h2 className="font-semibold text-black mb-4">Guides</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <h2 className="font-semibold text-black mb-4">Interactive Guides</h2>
+            <div className="grid grid-cols-1 gap-4">
+              {/* Reconstitution Guide */}
               <Accordion type="single" collapsible className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                {/* Blue gradient bar */}
-                <div className="h-1 bg-gradient-to-r from-[#93c5fd] to-[#60a5fa]" />
+                <div className="h-1 bg-gradient-to-r from-blue-300 to-blue-500" />
                 <AccordionItem value="recon" className="border-0">
                   <AccordionTrigger className="px-5 py-4 hover:no-underline">
                     <div className="flex items-center gap-3">
@@ -290,8 +293,8 @@ export default function MyPlan() {
                         <FlaskConical className="w-5 h-5 text-blue-600" />
                       </div>
                       <div className="text-left">
-                        <p className="font-semibold text-black">Reconstitution</p>
-                        <p className="text-xs text-gray-500">Step-by-step mixing</p>
+                        <p className="font-semibold text-black">Reconstitution Guide</p>
+                        <p className="text-xs text-gray-500">Step-by-step with checkboxes</p>
                       </div>
                     </div>
                   </AccordionTrigger>
@@ -299,7 +302,7 @@ export default function MyPlan() {
                     <div className="space-y-4">
                       <p className="text-sm text-gray-500">{reconstitutionGuide.overview}</p>
                       
-                      {/* Math */}
+                      {/* Math reference */}
                       <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
                         <p className="text-sm font-medium text-black mb-2">{reconstitutionGuide.mathExplanation.title}</p>
                         <p className="text-xs text-gray-500 mb-2">{reconstitutionGuide.mathExplanation.example}</p>
@@ -313,25 +316,24 @@ export default function MyPlan() {
                         </div>
                       </div>
 
-                      {reconstitutionGuide.steps.map((step, i) => (
-                        <div key={i} className="flex gap-3">
-                          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-xs font-bold text-blue-600">
-                            {step.step}
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm text-black">{step.title}</p>
-                            <p className="text-sm text-gray-500">{step.content}</p>
-                          </div>
-                        </div>
-                      ))}
+                      {/* Interactive steps */}
+                      <InteractiveGuide
+                        guideId="reconstitution"
+                        title="Reconstitution"
+                        steps={reconstitutionSteps}
+                        onComplete={() => {
+                          awardMilestone.mutate("reconstitution_complete");
+                        }}
+                        completedColor="bg-blue-50 border-blue-200"
+                      />
                     </div>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
 
+              {/* Injection Guide */}
               <Accordion type="single" collapsible className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                {/* Pink gradient bar */}
-                <div className="h-1 bg-gradient-to-r from-[#fda4af] to-[#fb7185]" />
+                <div className="h-1 bg-gradient-to-r from-pink-300 to-pink-500" />
                 <AccordionItem value="injection" className="border-0">
                   <AccordionTrigger className="px-5 py-4 hover:no-underline">
                     <div className="flex items-center gap-3">
@@ -361,17 +363,16 @@ export default function MyPlan() {
                         </ul>
                       </div>
 
-                      {injectionGuide.steps.map((step, i) => (
-                        <div key={i} className="flex gap-3">
-                          <div className="w-6 h-6 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0 text-xs font-bold text-pink-600">
-                            {step.step}
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm text-black">{step.title}</p>
-                            <p className="text-sm text-gray-500">{step.content}</p>
-                          </div>
-                        </div>
-                      ))}
+                      {/* Interactive steps */}
+                      <InteractiveGuide
+                        guideId="injection"
+                        title="Injection"
+                        steps={injectionSteps}
+                        onComplete={() => {
+                          awardMilestone.mutate("first_injection");
+                        }}
+                        completedColor="bg-pink-50 border-pink-200"
+                      />
                     </div>
                   </AccordionContent>
                 </AccordionItem>
