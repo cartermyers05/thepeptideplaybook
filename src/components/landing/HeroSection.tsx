@@ -40,7 +40,7 @@ export function HeroSection() {
             >
               Your
               <br />
-              Peptide
+              AI Peptide
               <br />
               Journey
             </motion.h1>
