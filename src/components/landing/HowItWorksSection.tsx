@@ -81,7 +81,7 @@ const itemVariants = {
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="py-32 md:py-40">
+    <section id="how-it-works" className="py-20 md:py-28">
       <div className="container px-4 md:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

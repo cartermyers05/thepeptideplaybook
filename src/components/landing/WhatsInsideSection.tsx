@@ -54,7 +54,7 @@ const itemVariants = {
 
 export function WhatsInsideSection() {
   return (
-    <section id="curriculum" className="py-32 md:py-40 bg-secondary/50">
+    <section id="curriculum" className="py-20 md:py-28 bg-secondary/50">
       <div className="container px-4 md:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
