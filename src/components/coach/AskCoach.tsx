@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Loader2, Bot, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCourse } from "@/hooks/useCourse";
@@ -31,12 +29,7 @@ interface UserContext {
 
 export function AskCoach() {
   const { userCourse } = useCourse();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: `Hi! I'm your AI Coach. I'm here to answer any questions about your peptide course, dosing, timing, reconstitution, or anything else you're curious about. What can I help you with today?`,
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -135,10 +128,20 @@ export function AskCoach() {
   };
 
   return (
-    <Card className="flex flex-col h-[500px]">
-      <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-        {/* Messages */}
-        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+    <div className="flex flex-col h-[500px]">
+      {/* Messages */}
+      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center px-4">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+              <Bot className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">Start a conversation</h3>
+            <p className="text-muted-foreground text-sm max-w-xs">
+              Ask me anything about your peptide course, dosing, side effects, or what to expect.
+            </p>
+          </div>
+        ) : (
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div
@@ -149,22 +152,20 @@ export function AskCoach() {
                 )}
               >
                 {message.role === "assistant" && (
-                  <Avatar className="w-8 h-8 flex-shrink-0">
-                    <AvatarFallback className="bg-primary/10">
-                      <Bot className="w-4 h-4 text-primary" />
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-4 h-4 text-primary" />
+                  </div>
                 )}
                 <div
                   className={cn(
-                    "max-w-[80%] rounded-lg px-4 py-2",
+                    "max-w-[80%]",
                     message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                      ? "chat-bubble-user"
+                      : "chat-bubble-assistant"
                   )}
                 >
                   {message.role === "assistant" ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <div className="prose prose-sm dark:prose-invert max-w-none text-sm">
                       <ReactMarkdown>{message.content}</ReactMarkdown>
                     </div>
                   ) : (
@@ -172,46 +173,50 @@ export function AskCoach() {
                   )}
                 </div>
                 {message.role === "user" && (
-                  <Avatar className="w-8 h-8 flex-shrink-0">
-                    <AvatarFallback className="bg-secondary">
-                      <User className="w-4 h-4" />
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-primary-foreground" />
+                  </div>
                 )}
               </div>
             ))}
             {isLoading && (
               <div className="flex gap-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-primary/10">
-                    <Bot className="w-4 h-4 text-primary" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="bg-muted rounded-lg px-4 py-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-primary" />
+                </div>
+                <div className="chat-bubble-assistant">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-pulse" style={{ animationDelay: '200ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-pulse" style={{ animationDelay: '400ms' }} />
+                  </div>
                 </div>
               </div>
             )}
           </div>
-        </ScrollArea>
+        )}
+      </ScrollArea>
 
-        {/* Input */}
-        <div className="border-t p-4">
-          <div className="flex gap-2">
-            <Textarea
-              placeholder="Ask me anything about peptides..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="min-h-[44px] max-h-[120px] resize-none"
-              rows={1}
-            />
-            <Button onClick={handleSend} disabled={isLoading || !input.trim()} size="icon" className="flex-shrink-0">
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
+      {/* Input */}
+      <div className="border-t border-border p-4">
+        <div className="flex gap-2">
+          <Textarea
+            placeholder="Type your question..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="min-h-[44px] max-h-[120px] resize-none rounded-xl"
+            rows={1}
+          />
+          <Button 
+            onClick={handleSend} 
+            disabled={isLoading || !input.trim()} 
+            className="btn-teal h-[44px] w-[44px] p-0 rounded-xl flex-shrink-0"
+          >
+            <Send className="w-4 h-4" />
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

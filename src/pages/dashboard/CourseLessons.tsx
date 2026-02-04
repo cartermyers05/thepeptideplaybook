@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Lock, Play, ChevronDown } from "lucide-react";
+import { Check, Lock, Play, ChevronDown, ArrowRight, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useCourse } from "@/hooks/useCourse";
 import { useLessons } from "@/hooks/useLessons";
@@ -75,146 +74,180 @@ export default function CourseLessons() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto animate-fade-up">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">{userCourse.title}</h1>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>{userCourse.current_day} of {userCourse.duration_days} days complete</span>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">{userCourse.title}</h1>
+          <p className="text-muted-foreground">
+            {userCourse.current_day} of {userCourse.duration_days} lessons complete
+          </p>
         </div>
 
         {/* Progress bar */}
-        <div className="mb-8">
+        <div className="card-premium p-4 mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Progress</span>
-            <span className="text-sm text-muted-foreground">{progressPercent}%</span>
+            <span className="text-sm font-bold text-primary">{progressPercent}%</span>
           </div>
-          <Progress value={progressPercent} className="h-2" />
+          <div className="progress-teal">
+            <div 
+              className="progress-teal-fill" 
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
         </div>
 
         {/* Lessons by phase */}
         <div className="space-y-4">
-          {Object.entries(phases).map(([phase, lessons]) => (
-            <div key={phase} className="rounded-xl border border-border overflow-hidden">
-              {/* Phase header */}
-              <button
-                onClick={() => togglePhase(phase)}
-                className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors"
-              >
-                <span className="font-semibold">{phase}</span>
-                <ChevronDown className={`w-5 h-5 transition-transform ${expandedPhases.has(phase) ? 'rotate-180' : ''}`} />
-              </button>
+          {Object.entries(phases).map(([phase, lessons]) => {
+            const phaseStartDay = Math.min(...lessons.map(l => l.day));
+            const phaseEndDay = Math.max(...lessons.map(l => l.day));
+            
+            return (
+              <div key={phase} className="card-premium overflow-hidden">
+                {/* Phase header */}
+                <button
+                  onClick={() => togglePhase(phase)}
+                  className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors"
+                >
+                  <div>
+                    <span className="font-semibold">{phase}</span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      Days {phaseStartDay}-{phaseEndDay}
+                    </span>
+                  </div>
+                  <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${expandedPhases.has(phase) ? 'rotate-180' : ''}`} />
+                </button>
 
-              {/* Lessons */}
-              {expandedPhases.has(phase) && (
-                <div className="divide-y divide-border">
-                  {lessons.map((lesson) => {
-                    const status = getLessonStatus(lesson.day);
-                    
-                    return (
-                      <motion.button
-                        key={lesson.day}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        onClick={() => status !== 'locked' && setSelectedLesson(lesson)}
-                        disabled={status === 'locked'}
-                        className={`w-full flex items-center gap-4 p-4 text-left transition-colors ${
-                          status === 'locked' 
-                            ? 'opacity-50 cursor-not-allowed' 
-                            : 'hover:bg-muted/30'
-                        }`}
-                      >
-                        {/* Status icon */}
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          status === 'completed' 
-                            ? 'bg-primary text-primary-foreground'
-                            : status === 'current'
-                              ? 'bg-primary/20 text-primary'
-                              : 'bg-muted text-muted-foreground'
-                        }`}>
-                          {status === 'completed' ? (
-                            <Check className="w-4 h-4" />
-                          ) : status === 'locked' ? (
-                            <Lock className="w-4 h-4" />
-                          ) : (
-                            <Play className="w-4 h-4" />
-                          )}
-                        </div>
-
-                        {/* Lesson info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate">
-                            Day {lesson.day}: {lesson.title}
+                {/* Lessons */}
+                {expandedPhases.has(phase) && (
+                  <div className="divide-y divide-border">
+                    {lessons.map((lesson) => {
+                      const status = getLessonStatus(lesson.day);
+                      
+                      return (
+                        <motion.button
+                          key={lesson.day}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          onClick={() => status !== 'locked' && setSelectedLesson(lesson)}
+                          disabled={status === 'locked'}
+                          className={`w-full flex items-center gap-4 p-4 text-left transition-all ${
+                            status === 'locked' 
+                              ? 'opacity-50 cursor-not-allowed' 
+                              : status === 'current'
+                                ? 'bg-accent border-l-3 border-primary'
+                                : status === 'completed'
+                                  ? 'border-l-3 border-success'
+                                  : 'hover:bg-muted/30'
+                          }`}
+                        >
+                          {/* Status icon */}
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            status === 'completed' 
+                              ? 'bg-success text-white'
+                              : status === 'current'
+                                ? 'bg-primary text-white'
+                                : 'bg-muted text-muted-foreground'
+                          }`}>
+                            {status === 'completed' ? (
+                              <Check className="w-4 h-4" />
+                            ) : status === 'locked' ? (
+                              <Lock className="w-4 h-4" />
+                            ) : (
+                              <Play className="w-4 h-4" />
+                            )}
                           </div>
-                          {status === 'current' && (
-                            <span className="text-xs text-primary">Current lesson</span>
-                          )}
-                        </div>
 
-                        {/* Status badge */}
-                        {status === 'current' && (
-                          <span className="px-2 py-1 rounded text-xs font-medium bg-primary text-primary-foreground">
-                            Start
-                          </span>
-                        )}
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ))}
+                          {/* Lesson info */}
+                          <div className="flex-1 min-w-0">
+                            <div className={`font-medium ${status === 'completed' ? 'text-muted-foreground' : 'text-foreground'}`}>
+                              Day {lesson.day}: {lesson.title}
+                            </div>
+                            {status === 'current' && (
+                              <span className="text-xs text-primary font-medium">Current lesson</span>
+                            )}
+                          </div>
+
+                          {/* Action */}
+                          {status === 'current' && (
+                            <span className="btn-teal text-sm px-4 py-2 flex items-center gap-1.5">
+                              Continue
+                              <ArrowRight className="w-3 h-3" />
+                            </span>
+                          )}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Lesson modal */}
       <Dialog open={!!selectedLesson} onOpenChange={() => setSelectedLesson(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           {selectedLesson && (
             <>
               <DialogHeader>
-                <DialogTitle>
-                  Day {selectedLesson.day}: {selectedLesson.title}
+                <div className="text-xs font-medium text-primary uppercase tracking-wide mb-1">
+                  Day {selectedLesson.day}
+                </div>
+                <DialogTitle className="text-2xl">
+                  {selectedLesson.title}
                 </DialogTitle>
               </DialogHeader>
               
-              <div className="prose prose-sm dark:prose-invert max-w-none">
+              <div className="prose prose-sm dark:prose-invert max-w-none mt-4">
                 {selectedLesson.content.split('\n').map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
+                  <p key={i} className="text-foreground/90 leading-relaxed">{paragraph}</p>
                 ))}
               </div>
 
-              <div className="mt-6 p-4 rounded-lg bg-muted/50 border border-border">
+              {/* Action Item */}
+              <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/10">
                 <div className="flex items-start gap-3">
-                  <Checkbox
-                    id="action-item"
-                    checked={isDayCompleted(selectedLesson.day)}
-                    disabled={isDayCompleted(selectedLesson.day)}
-                  />
+                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-primary" />
+                  </div>
                   <div>
-                    <label htmlFor="action-item" className="font-medium text-sm">
-                      Action Item
-                    </label>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-semibold text-sm text-foreground">Today's Action</p>
+                    <p className="text-sm text-muted-foreground mt-1">
                       {selectedLesson.action_item}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 mt-4">
-                <Button variant="outline" onClick={() => setSelectedLesson(null)}>
-                  Close
-                </Button>
+              {/* Actions */}
+              <div className="flex flex-col sm:flex-row gap-3 mt-6">
                 {!isDayCompleted(selectedLesson.day) && (
                   <Button 
                     onClick={handleCompleteLesson}
                     disabled={completeLesson.isPending}
+                    className="btn-teal flex-1"
                   >
-                    Mark Complete
+                    <Check className="w-4 h-4 mr-2" />
+                    Mark Complete & Continue
                   </Button>
                 )}
+                <Button variant="outline" onClick={() => setSelectedLesson(null)} className="flex-1 sm:flex-none">
+                  Close
+                </Button>
+              </div>
+
+              {/* Coach prompt */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <Link 
+                  to="/dashboard/coach"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Questions about this lesson? Ask AI Coach
+                </Link>
               </div>
             </>
           )}

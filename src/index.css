@@ -2,66 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Peptide Playbook Design System - Professional Health Media */
+/* Peptide Playbook Design System - Premium Health Product */
 
 @layer base {
   :root {
-    /* Lusion-style warm off-white background */
-    --background: 45 10% 96%;
-    --foreground: 0 0% 10%;
-
-    /* Card and surface - slightly warmer */
-    --card: 45 10% 98%;
-    --card-foreground: 0 0% 10%;
-    
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
-
-    /* Primary - Charcoal for CTAs */
-    --primary: 0 0% 15%;
+    /* Primary - Deep teal/emerald (health, trust, premium) */
+    --primary: 168 76% 42%;
     --primary-foreground: 0 0% 100%;
 
+    /* Warm grays (not cold/sterile) */
+    --background: 30 6% 98%;
+    --foreground: 20 14% 11%;
+
+    /* Card and surface */
+    --card: 0 0% 100%;
+    --card-foreground: 20 14% 11%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14% 11%;
+
     /* Secondary - Warm off-white */
-    --secondary: 45 10% 94%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 30 6% 94%;
+    --secondary-foreground: 20 14% 11%;
 
     /* Muted - For subtle text and backgrounds */
-    --muted: 45 10% 94%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 30 6% 94%;
+    --muted-foreground: 24 5% 45%;
 
-    /* Accent - Very subtle warm gray */
-    --accent: 45 5% 92%;
-    --accent-foreground: 0 0% 10%;
+    /* Accent - Subtle warm tint */
+    --accent: 168 30% 95%;
+    --accent-foreground: 20 14% 11%;
 
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs - softer */
-    --border: 45 5% 88%;
-    --input: 45 5% 88%;
-    --ring: 0 0% 20%;
+    --border: 30 6% 88%;
+    --input: 30 6% 88%;
+    --ring: 168 76% 42%;
 
     --radius: 1rem;
 
-    /* Custom tokens - Lusion style */
+    /* Custom tokens */
     --surface-elevated: 0 0% 100%;
-    --surface-sunken: 45 10% 94%;
-    --headline: 0 0% 8%;
+    --surface-sunken: 30 6% 94%;
+    --headline: 20 14% 11%;
 
-    /* Sidebar */
-    --sidebar-background: 45 10% 96%;
-    --sidebar-foreground: 0 0% 10%;
-    --sidebar-primary: 0 0% 20%;
+    /* Dark Sidebar */
+    --sidebar-background: 20 14% 11%;
+    --sidebar-foreground: 30 6% 96%;
+    --sidebar-primary: 168 76% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 45 5% 92%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 45 5% 88%;
-    --sidebar-ring: 0 0% 20%;
+    --sidebar-accent: 168 76% 42%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 20 14% 18%;
+    --sidebar-ring: 168 76% 42%;
+    --sidebar-muted: 24 5% 45%;
 
     /* Success state */
-    --success: 142 71% 45%;
+    --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
+
+    /* Amber accent for celebrations */
+    --amber: 43 96% 56%;
+    --amber-foreground: 20 14% 11%;
   }
 
   .dark {
@@ -75,8 +80,8 @@
     --popover: 222 47% 5%;
     --popover-foreground: 0 0% 98%;
 
-    /* Light primary in dark mode */
-    --primary: 0 0% 90%;
+    /* Teal primary in dark mode */
+    --primary: 168 76% 50%;
     --primary-foreground: 0 0% 5%;
 
     --secondary: 217 33% 10%;
@@ -85,8 +90,7 @@
     --muted: 217 33% 12%;
     --muted-foreground: 215 20% 55%;
 
-    /* Neutral accent in dark */
-    --accent: 0 0% 18%;
+    --accent: 168 40% 15%;
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 63% 31%;
@@ -94,7 +98,7 @@
 
     --border: 217 33% 14%;
     --input: 217 33% 14%;
-    --ring: 0 0% 85%;
+    --ring: 168 76% 50%;
 
     --surface-elevated: 222 47% 6%;
     --surface-sunken: 222 47% 2%;
@@ -102,15 +106,19 @@
 
     --sidebar-background: 222 47% 4%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 0% 85%;
+    --sidebar-primary: 168 76% 50%;
     --sidebar-primary-foreground: 0 0% 5%;
-    --sidebar-accent: 0 0% 18%;
+    --sidebar-accent: 168 40% 20%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 217 33% 15%;
-    --sidebar-ring: 0 0% 85%;
+    --sidebar-ring: 168 76% 50%;
+    --sidebar-muted: 215 20% 55%;
 
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
+
+    --amber: 43 96% 56%;
+    --amber-foreground: 20 14% 11%;
   }
 }
 
@@ -137,6 +145,89 @@
 }
 
 @layer utilities {
+  /* ========================================
+     PREMIUM CARD STYLES
+     ======================================== */
+
+  .card-premium {
+    @apply bg-card rounded-2xl border border-border;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease;
+  }
+
+  .card-premium:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+  }
+
+  /* Featured card (gradient teal) */
+  .card-featured {
+    @apply rounded-2xl text-white;
+    background: linear-gradient(135deg, hsl(168 76% 42%) 0%, hsl(168 76% 36%) 100%);
+  }
+
+  .card-featured-subtle {
+    @apply rounded-2xl;
+    background: linear-gradient(135deg, hsl(168 76% 42% / 0.1) 0%, hsl(168 76% 36% / 0.05) 100%);
+    border: 1px solid hsl(168 76% 42% / 0.2);
+  }
+
+  /* ========================================
+     PREMIUM BUTTONS
+     ======================================== */
+
+  .btn-teal {
+    @apply text-white font-semibold px-6 py-3 rounded-xl;
+    background: linear-gradient(135deg, hsl(168 76% 42%) 0%, hsl(168 76% 36%) 100%);
+    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+    transition: all 0.2s ease;
+  }
+
+  .btn-teal:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(20, 184, 166, 0.4);
+  }
+
+  .btn-teal:active {
+    transform: translateY(0);
+  }
+
+  .btn-primary-clean {
+    @apply text-white font-semibold px-6 py-3 rounded-xl;
+    background: linear-gradient(135deg, hsl(168 76% 42%) 0%, hsl(168 76% 36%) 100%);
+    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary-clean:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(20, 184, 166, 0.4);
+  }
+
+  /* Secondary button */
+  .btn-secondary-premium {
+    @apply bg-white text-foreground font-semibold px-6 py-3 rounded-xl border border-border;
+    transition: all 0.2s ease;
+  }
+
+  .btn-secondary-premium:hover {
+    @apply bg-muted border-primary/30;
+  }
+
+  /* ========================================
+     TEAL PROGRESS BAR
+     ======================================== */
+
+  .progress-teal {
+    @apply h-2 rounded-full overflow-hidden;
+    background: hsl(var(--muted));
+  }
+
+  .progress-teal-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+    background: linear-gradient(90deg, hsl(168 76% 52%) 0%, hsl(168 76% 42%) 100%);
+  }
+
   /* ========================================
      PREMIUM NAV
      ======================================== */
@@ -279,50 +370,13 @@
     opacity: 1;
   }
 
-  /* ========================================
-     CLEAN BUTTON - Premium Teal
-     ======================================== */
-
-  .btn-primary-clean {
-    background: linear-gradient(135deg, hsl(0 0% 15%) 0%, hsl(0 0% 10%) 100%);
-    color: white;
-    border-radius: 6px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    border: 1px solid hsl(0 0% 8%);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-primary-clean:hover {
-    background: linear-gradient(135deg, hsl(0 0% 10%) 0%, hsl(0 0% 5%) 100%);
-    box-shadow: 0 2px 8px rgba(38, 38, 38, 0.25);
-    transform: translateY(-1px);
-  }
-
-  .btn-primary-glow {
-    background: hsl(var(--primary));
-    color: white;
-    border-radius: 6px;
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(38, 38, 38, 0.2);
+  .glow-teal {
+    box-shadow: 0 2px 12px rgba(20, 184, 166, 0.15);
     transition: all 0.2s ease;
   }
 
-  .btn-primary-glow:hover {
-    box-shadow: 0 4px 16px rgba(38, 38, 38, 0.3);
-    transform: translateY(-1px);
-  }
-
-  .glow-primary {
-    box-shadow: 0 2px 8px rgba(38, 38, 38, 0.15);
-    transition: all 0.2s ease;
-  }
-
-  .glow-primary:hover {
-    box-shadow: 0 4px 12px rgba(38, 38, 38, 0.25);
+  .glow-teal:hover {
+    box-shadow: 0 4px 20px rgba(20, 184, 166, 0.25);
     transform: translateY(-1px);
   }
 
@@ -332,12 +386,12 @@
 
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(0 0% 15%) 0%, hsl(0 0% 35%) 100%);
+    background-image: linear-gradient(135deg, hsl(168 76% 35%) 0%, hsl(168 76% 50%) 100%);
   }
 
   .text-gradient-animated {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(90deg, hsl(0 0% 20%), hsl(0 0% 40%), hsl(0 0% 20%));
+    background-image: linear-gradient(90deg, hsl(168 76% 35%), hsl(168 76% 50%), hsl(168 76% 35%));
     background-size: 200% auto;
     animation: shimmer 3s linear infinite;
   }
@@ -358,14 +412,67 @@
 
   .shadow-glow {
     box-shadow: 
-      0 4px 16px -4px rgba(38, 38, 38, 0.2),
-      0 0 0 1px rgba(38, 38, 38, 0.08);
+      0 4px 16px -4px rgba(20, 184, 166, 0.2),
+      0 0 0 1px rgba(20, 184, 166, 0.08);
   }
 
   .shadow-glow-lg {
     box-shadow: 
-      0 8px 24px -6px rgba(38, 38, 38, 0.25),
-      0 0 0 1px rgba(38, 38, 38, 0.1);
+      0 8px 24px -6px rgba(20, 184, 166, 0.25),
+      0 0 0 1px rgba(20, 184, 166, 0.1);
+  }
+
+  /* ========================================
+     LESSON CARD STATES
+     ======================================== */
+
+  .lesson-card-completed {
+    @apply opacity-80;
+    border-left: 3px solid hsl(var(--success));
+  }
+
+  .lesson-card-current {
+    @apply bg-accent border-primary/30;
+    border-left: 3px solid hsl(var(--primary));
+  }
+
+  .lesson-card-locked {
+    @apply opacity-50;
+  }
+
+  /* ========================================
+     CHAT BUBBLES
+     ======================================== */
+
+  .chat-bubble-user {
+    @apply text-white rounded-2xl rounded-br-md px-4 py-3;
+    background: linear-gradient(135deg, hsl(168 76% 42%) 0%, hsl(168 76% 38%) 100%);
+  }
+
+  .chat-bubble-assistant {
+    @apply bg-muted text-foreground rounded-2xl rounded-bl-md px-4 py-3;
+  }
+
+  /* ========================================
+     MILESTONE BADGE
+     ======================================== */
+
+  .milestone-badge {
+    @apply rounded-full px-3 py-1 text-xs font-medium;
+    background: hsl(var(--amber) / 0.15);
+    color: hsl(43 96% 40%);
+  }
+
+  .milestone-complete {
+    @apply flex items-center justify-center w-8 h-8 rounded-full;
+    background: hsl(var(--success));
+    color: white;
+  }
+
+  .milestone-upcoming {
+    @apply flex items-center justify-center w-8 h-8 rounded-full border-2;
+    border-color: hsl(var(--border));
+    color: hsl(var(--muted-foreground));
   }
 
   /* ========================================
@@ -392,36 +499,12 @@
   @keyframes pulse-glow {
     0%, 100% { 
       opacity: 1;
-      box-shadow: 0 0 0 0 rgba(38, 38, 38, 0.4);
+      box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4);
     }
     50% { 
       opacity: 0.8;
-      box-shadow: 0 0 0 8px rgba(38, 38, 38, 0);
+      box-shadow: 0 0 0 8px rgba(20, 184, 166, 0);
     }
-  }
-
-  /* ========================================
-     STEP CONNECTOR LINE
-     ======================================== */
-
-  .step-line {
-    position: absolute;
-    top: 50%;
-    left: calc(50% + 28px);
-    width: calc(100% - 56px);
-    height: 2px;
-    background: linear-gradient(90deg, hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.1));
-  }
-
-  .step-line-animated {
-    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.5));
-    transform-origin: left;
-    animation: draw-line 1s ease-out forwards;
-  }
-
-  @keyframes draw-line {
-    from { transform: scaleX(0); }
-    to { transform: scaleX(1); }
   }
 
   /* ========================================
@@ -442,6 +525,10 @@
 
   .animate-slide-in-right {
     animation: slideInRight 0.5s ease-out forwards;
+  }
+
+  .animate-check-in {
+    animation: checkIn 0.3s ease-out forwards;
   }
 
   @keyframes fadeIn {
@@ -479,6 +566,15 @@
     to {
       opacity: 1;
       transform: translateX(0);
+    }
+  }
+
+  @keyframes checkIn {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: scale(1);
     }
   }
 
@@ -537,6 +633,30 @@
 
   .hover-scale:hover {
     transform: scale(1.02);
+  }
+
+  /* ========================================
+     STEP CONNECTOR LINE
+     ======================================== */
+
+  .step-line {
+    position: absolute;
+    top: 50%;
+    left: calc(50% + 28px);
+    width: calc(100% - 56px);
+    height: 2px;
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.1));
+  }
+
+  .step-line-animated {
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.5));
+    transform-origin: left;
+    animation: draw-line 1s ease-out forwards;
+  }
+
+  @keyframes draw-line {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
   }
 
   /* ========================================
