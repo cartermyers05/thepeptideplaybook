@@ -135,7 +135,7 @@ export function AskCoach() {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center mb-4">
-              <AnimatedLogo size={40} />
+              <AnimatedLogo size={40} animate={false} />
             </div>
             <h3 className="font-semibold text-lg text-black mb-2">Start a conversation</h3>
             <p className="text-gray-500 text-sm max-w-xs">
@@ -154,7 +154,7 @@ export function AskCoach() {
               >
                 {message.role === "assistant" && (
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center flex-shrink-0">
-                    <AnimatedLogo size={20} />
+                    <AnimatedLogo size={20} animate={false} />
                   </div>
                 )}
                 <div
@@ -183,7 +183,7 @@ export function AskCoach() {
             {isLoading && (
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-                  <AnimatedLogo size={20} />
+                  <AnimatedLogo size={20} animate={true} />
                 </div>
                 <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-3">
                   <div className="flex items-center gap-1.5">
