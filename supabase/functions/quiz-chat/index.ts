@@ -9,55 +9,55 @@ interface QuizStep {
   id: string;
   question: string;
   validValues: string[];
-  valueKey: 'goal' | 'experience' | 'concern' | 'timeline';
+  valueKey: 'goal' | 'experience' | 'concern' | 'readiness';
   systemPromptAddition: string;
 }
 
 const quizSteps: QuizStep[] = [
   {
     id: 'goal',
-    question: "What's your main goal with peptides?",
+    question: "What's your main goal?",
     validValues: ['fat_loss', 'muscle', 'recovery', 'anti_aging', 'cognitive', 'beginner'],
     valueKey: 'goal',
     systemPromptAddition: `Map their response to one of these goals:
-      - fat_loss: weight loss, burning fat, metabolism, body composition, losing weight, lean, shredding
-      - muscle: building muscle, recovery from workouts, strength, gains, bodybuilding, hypertrophy
-      - recovery: injury healing, surgery recovery, pain, tissue repair, tendon, joint, healing
-      - anti_aging: longevity, skin, vitality, aging, youthfulness, wrinkles, energy, aging slower
-      - cognitive: focus, memory, brain, clarity, mental performance, concentration, thinking
-      - beginner: unsure, exploring, don't know, general wellness, not sure, just curious`
+      - fat_loss: Fat loss & metabolism, weight loss, burning fat, body composition, losing weight, lean, shredding
+      - muscle: Muscle building & recovery, strength, gains, bodybuilding, hypertrophy, workout recovery
+      - recovery: Healing from injury, surgery recovery, pain, tissue repair, tendon, joint, healing
+      - anti_aging: Anti-aging & longevity, skin, vitality, aging, youthfulness, wrinkles, energy
+      - cognitive: Cognitive enhancement, focus, memory, brain, clarity, mental performance
+      - beginner: Not sure yet, exploring, don't know, general wellness, just curious`
   },
   {
     id: 'experience',
     question: "Have you used peptides before?",
-    validValues: ['beginner', 'some_experience', 'experienced'],
+    validValues: ['never', 'researched', 'experienced'],
     valueKey: 'experience',
     systemPromptAddition: `Determine their experience level:
-      - beginner: never used, first time, no experience, new to this, haven't tried
-      - some_experience: tried once or twice, not confident, some experience, dabbled
-      - experienced: multiple cycles, knows basics, regular user, been using, veteran`
+      - never: Never - this would be my first time, no experience, new to this
+      - researched: I've researched but never tried, read about them, studied
+      - experienced: I've used peptides before, tried them, have experience`
   },
   {
     id: 'concern',
-    question: "What worries you most about starting?",
-    validValues: ['injections', 'dosing', 'side_effects', 'reconstitution', 'nothing'],
+    question: "What's your biggest concern about getting started?",
+    validValues: ['injection_fear', 'dosing_confusion', 'peptide_choice', 'side_effects', 'all'],
     valueKey: 'concern',
     systemPromptAddition: `Identify their main concern:
-      - injections: needles, injecting, scared of shots, self-injection, pain
-      - dosing: getting dose wrong, too much, too little, calculating, measuring
-      - side_effects: worried about effects, reactions, what could happen, safety
-      - reconstitution: mixing, preparing, don't want to mess up, waste peptides
-      - nothing: confident, no worries, just need a plan, ready to go`
+      - injection_fear: I don't know how to inject myself, needles, scared of shots
+      - dosing_confusion: I'm confused about dosing/mixing, calculations, measuring
+      - peptide_choice: I don't know which peptides to use, overwhelmed by options
+      - side_effects: I'm worried about side effects, safety, reactions
+      - all: All of the above honestly, everything, multiple concerns`
   },
   {
-    id: 'timeline',
-    question: "When are you thinking of starting?",
-    validValues: ['this_week', 'this_month', 'researching'],
-    valueKey: 'timeline',
-    systemPromptAddition: `Determine their timeline:
-      - this_week: ready now, have supplies, starting immediately, this week
-      - this_month: soon, within a month, ordering supplies, preparing
-      - researching: just learning, not ready yet, still deciding, gathering info`
+    id: 'readiness',
+    question: "Where are you in your journey?",
+    validValues: ['ready_now', 'soon', 'exploring'],
+    valueKey: 'readiness',
+    systemPromptAddition: `Determine their readiness:
+      - ready_now: Ready to start ASAP, have supplies, starting immediately
+      - soon: Planning to start in a few weeks, ordering supplies, preparing
+      - exploring: Just exploring for now, researching, not ready yet`
   }
 ];
 
@@ -78,7 +78,7 @@ serve(async (req) => {
     if (!step) {
       // All steps complete
       return new Response(JSON.stringify({
-        response: "Perfect! I've got everything I need. Let me build your personalized course...",
+        response: "Perfect! I've got everything I need. Those are exactly the things we'll cover. Let me build your personalized course...",
         extracted: null,
         shouldAdvance: true,
         isComplete: true
@@ -86,6 +86,19 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
+
+    // Build friendly goal name for context
+    const goalFriendlyNames: Record<string, string> = {
+      fat_loss: "fat loss & metabolism",
+      muscle: "muscle building & recovery",
+      recovery: "healing from injury",
+      anti_aging: "anti-aging & longevity",
+      cognitive: "cognitive enhancement",
+      beginner: "exploring your options"
+    };
+    
+    const currentGoal = extractedValues.goal;
+    const goalFriendly = currentGoal ? goalFriendlyNames[currentGoal] || currentGoal : "";
 
     const systemPrompt = `You are a friendly, warm onboarding assistant for Peptide Playbook - an educational peptide course platform. Your job is to have a natural conversation while extracting specific information.
 
@@ -100,17 +113,25 @@ ${conversationHistory.map((m: { role: string; content: string }) => `${m.role}: 
 WHAT WE'VE COLLECTED:
 ${Object.entries(extractedValues).filter(([_, v]) => v).map(([k, v]) => `- ${k}: ${v}`).join('\n') || 'Nothing yet'}
 
+${currentGoal ? `USER'S GOAL: ${goalFriendly}` : ''}
+
 INSTRUCTIONS:
 1. Read their message and determine if it answers the current question
-2. If their answer is clear, extract the value and prepare to move to the next question
+2. If their answer is clear, extract the value and acknowledge warmly before transitioning to the next question
 3. If unclear, ask a friendly clarifying question without being pushy
 4. Keep responses conversational (2-3 sentences max), warm, and encouraging
 5. Reference their specific words when acknowledging their answer
 6. If they go off-topic (asking about vendors, prices, etc.), gently redirect back to the question
 
+TRANSITION PHRASES (use naturally based on step):
+- After goal: "Got it - {their goal}. Great choice."
+- After experience: "I hear you. {Brief acknowledgment}."
+- After concern: "Those are exactly the things we'll cover."
+- After readiness: "Perfect! Let me build your personalized course..."
+
 NEXT QUESTION (if advancing): ${quizSteps[currentStep + 1]?.question || "None - this is the last step"}
 
-TONE: Friendly, encouraging, knowledgeable but not preachy. Like a helpful friend who knows about peptides.`;
+TONE: Warm, supportive, encouraging. Like a helpful friend who knows about peptides. Never preachy or condescending.`;
 
     const tools = [{
       type: "function",

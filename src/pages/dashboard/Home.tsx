@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ClipboardCheck, MessageSquare, FileText, Trophy, Flame, Target, FlaskConical, Calendar, Zap, Dumbbell, Crown, Award } from "lucide-react";
@@ -10,21 +10,36 @@ import { useProtocol } from "@/hooks/useProtocol";
 import { useStreak } from "@/hooks/useStreak";
 import { useCheckIn } from "@/hooks/useCheckIn";
 import { useMilestones, MILESTONE_DETAILS } from "@/hooks/useMilestones";
+import { useCourse } from "@/hooks/useCourse";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckInFlow } from "@/components/coach/CheckInFlow";
+import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { protocol, isLoading: isLoadingProtocol } = useProtocol();
+  const { userCourse, courseLoading } = useCourse();
   const { currentStreak } = useStreak();
   const { hasCheckedInToday } = useCheckIn();
   const { recentMilestones } = useMilestones();
   const [showCheckIn, setShowCheckIn] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "there";
-  const isLoading = isLoadingProtocol;
+  const isLoading = isLoadingProtocol || courseLoading;
+
+  // Show welcome modal for new users who haven't set supplies status
+  useEffect(() => {
+    if (!isLoading && userCourse && !userCourse.supplies_status && userCourse.status === 'not_started') {
+      setShowWelcome(true);
+    }
+  }, [isLoading, userCourse]);
+
+  const handleWelcomeComplete = () => {
+    setShowWelcome(false);
+  };
 
   if (isLoading) {
     return (
@@ -45,6 +60,10 @@ export default function Dashboard() {
   };
 
   const status = getStatusMessage();
+
+  // Get course info for welcome modal
+  const courseTitle = userCourse?.title?.replace(' Course', '') || 'Peptide';
+  const durationWeeks = userCourse ? Math.ceil(userCourse.duration_days / 7) : 8;
 
   return (
     <DashboardLayout>
@@ -205,6 +224,16 @@ export default function Dashboard() {
           <CheckInFlow onComplete={() => setShowCheckIn(false)} />
         </DialogContent>
       </Dialog>
+
+      {/* Welcome Modal for new users */}
+      {userCourse && (
+        <WelcomeModal
+          open={showWelcome}
+          onComplete={handleWelcomeComplete}
+          courseTitle={courseTitle}
+          durationWeeks={durationWeeks}
+        />
+      )}
     </DashboardLayout>
   );
 }

@@ -9,7 +9,7 @@ interface BuildingAnimationProps {
   getGoalLabel: (goal: string | null) => string | null;
   getExperienceLabel: (exp: string | null) => string | null;
   getConcernLabel: (concern: string | null) => string | null;
-  getTimelineLabel: (timeline: string | null) => string | null;
+  getReadinessLabel: (readiness: string | null) => string | null;
   onComplete: () => void;
   isSubmitting?: boolean;
 }
@@ -26,7 +26,7 @@ export function BuildingAnimation({
   getGoalLabel,
   getExperienceLabel,
   getConcernLabel,
-  getTimelineLabel,
+  getReadinessLabel,
   onComplete,
   isSubmitting = false,
 }: BuildingAnimationProps) {
@@ -178,9 +178,9 @@ export function BuildingAnimation({
                   {getConcernLabel(extractedValues.concern)}
                 </span>
               )}
-              {extractedValues.timeline && (
+              {extractedValues.readiness && (
                 <span className="px-3 py-1 bg-background rounded-full text-sm">
-                  {getTimelineLabel(extractedValues.timeline)}
+                  {getReadinessLabel(extractedValues.readiness)}
                 </span>
               )}
             </div>
