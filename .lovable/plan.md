@@ -1,213 +1,263 @@
 
 
-# Peptide Database: Enhanced Card Layout with More Data
+# Peer-Reviewed Studies Database: 500+ Curated Citations
 
-## Current Problem
+## Current State Analysis
 
-The collapsed view shows:
-- Name
-- Primary use
-- Mechanism (1 line, truncated)
-- Category + badges
+The platform currently has:
+- **41 peptides** in the database with basic `studies` text fields
+- **Hardcoded knowledge base** in the chat edge function (~185 lines of static peptide info)
+- **11 published articles** with JSON-based citations
+- No structured, queryable studies database
 
-Users want to see **more data upfront** without expanding. The `studies` and `safety` fields have valuable content that's hidden.
+The AI chatbot uses a **static PEPTIDE_DATABASE** string embedded in the system prompt, not a dynamic database.
 
 ---
 
-## Solution: Rich Card Layout
+## Solution Architecture
 
-Transform each peptide row into a more substantial card that displays **4 key pieces of information** at a glance:
+### Phase 1: Database Schema
 
-```text
-┌────────────────────────────────────────────────────────────────────────────┐
-│ Semaglutide                                              GLP-1 │ strong │ │
-├────────────────────────────────────────────────────────────────────────────┤
-│                                                                            │
-│ Weight management, blood sugar control                                     │
-│                                                                            │
-│ How it works                                                               │
-│ GLP-1 receptor agonist that slows gastric emptying, increases satiety...  │
-│                                                                            │
-│ What research shows                                                        │
-│ Extensive clinical trials including STEP trials showing 15-20% body...    │
-│                                                                            │
-│ ⚠ Key safety note                                                         │
-│ Common side effects include nausea, vomiting, diarrhea...                 │
-│                                                                            │
-│ FDA Approved • Related: Tirzepatide, Liraglutide           [View full ▼]  │
-└────────────────────────────────────────────────────────────────────────────┘
+Create a new `studies` table to store 500+ peer-reviewed citations:
+
+```sql
+CREATE TABLE studies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  -- Core citation data
+  pubmed_id TEXT UNIQUE,
+  doi TEXT,
+  title TEXT NOT NULL,
+  authors TEXT[],
+  journal TEXT NOT NULL,
+  publication_year INTEGER NOT NULL,
+  publication_date DATE,
+  
+  -- Study characteristics
+  study_type TEXT NOT NULL, -- 'randomized_controlled_trial', 'meta_analysis', 'cohort', 'animal', 'in_vitro', 'case_study'
+  species TEXT[], -- ['human', 'mouse', 'rat', 'pig', 'dog']
+  sample_size INTEGER,
+  
+  -- Content
+  abstract TEXT,
+  key_findings TEXT NOT NULL, -- AI-friendly summary
+  dosing_info TEXT, -- Extracted dosing from study
+  safety_findings TEXT,
+  
+  -- Categorization
+  peptide_ids UUID[], -- Links to peptides table
+  peptide_names TEXT[] NOT NULL, -- ['BPC-157', 'TB-500'] for quick filtering
+  research_areas TEXT[], -- ['tissue_repair', 'gut_healing', 'tendon']
+  
+  -- Quality indicators
+  evidence_level TEXT, -- 'high', 'moderate', 'low', 'very_low' (GRADE scale)
+  is_landmark_study BOOLEAN DEFAULT FALSE,
+  
+  -- Source links
+  pubmed_url TEXT,
+  full_text_url TEXT,
+  
+  -- Metadata
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  verified_at TIMESTAMPTZ, -- When was this citation verified
+  verified_by TEXT -- 'automated' or 'manual_review'
+);
+
+-- Index for peptide-based lookups
+CREATE INDEX idx_studies_peptide_names ON studies USING GIN (peptide_names);
+
+-- Index for filtering by study quality
+CREATE INDEX idx_studies_evidence ON studies (evidence_level, study_type);
+```
+
+### Phase 2: Peptide-Studies Junction Table
+
+Link peptides to their supporting studies:
+
+```sql
+CREATE TABLE peptide_studies (
+  peptide_id UUID REFERENCES peptides(id) ON DELETE CASCADE,
+  study_id UUID REFERENCES studies(id) ON DELETE CASCADE,
+  relevance TEXT, -- 'primary', 'supportive', 'contradictory'
+  PRIMARY KEY (peptide_id, study_id)
+);
+```
+
+### Phase 3: Enhanced Peptides Table
+
+Add structured citation data to the existing peptides:
+
+```sql
+ALTER TABLE peptides 
+ADD COLUMN key_studies JSONB, -- Top 3-5 landmark studies per peptide
+ADD COLUMN total_study_count INTEGER DEFAULT 0,
+ADD COLUMN human_study_count INTEGER DEFAULT 0,
+ADD COLUMN last_study_update TIMESTAMPTZ;
 ```
 
 ---
 
-## Data Displayed in Collapsed View
+## AI Integration Strategy
 
-| Field | Display | Treatment |
-|-------|---------|-----------|
-| **Name** | Header row | Bold, larger text |
-| **Primary Use** | Subtitle | Featured prominently below name |
-| **Category + Research Status** | Header badges | Top right corner |
-| **Mechanism** | "How it works" section | 2 lines max (`line-clamp-2`) |
-| **Studies** | "What research shows" section | 2 lines max (`line-clamp-2`) |
-| **Safety** | "Key safety note" section | 2 lines max, with ⚠ icon for emphasis |
-| **FDA Status** | Footer badge | Bottom with related peptides |
-| **Related Peptides** | Footer inline | Comma-separated list |
+### Dynamic Knowledge Base for Chatbot
 
----
+Replace the static `PEPTIDE_DATABASE` string with a dynamic retrieval system:
 
-## Visual Design
+**File: `supabase/functions/chat/index.ts`**
 
-Use a card-based layout instead of table rows:
+1. **On conversation start**, fetch relevant peptide + study data based on user query
+2. **Build context dynamically** with actual PubMed citations
+3. **Include study counts** and evidence levels in responses
 
-```tsx
-<div className="space-y-4">
-  {peptides?.map((peptide) => (
-    <PeptideCard key={peptide.id} peptide={peptide} />
-  ))}
-</div>
-```
+```typescript
+// Fetch peptide data with studies
+async function getPeptideContext(peptideNames: string[], supabase) {
+  const { data: peptides } = await supabase
+    .from('peptides')
+    .select('*')
+    .in('name', peptideNames);
 
-Each card has:
-- **Header**: Name + category badge + research status badge
-- **Body**: 3 labeled sections (mechanism, studies, safety) each with `line-clamp-2`
-- **Footer**: FDA status + related peptides + expand chevron
-- **Expanded state**: Shows full text for all fields
+  const { data: studies } = await supabase
+    .from('studies')
+    .select('*')
+    .overlaps('peptide_names', peptideNames)
+    .order('evidence_level', { ascending: true })
+    .limit(20);
 
----
-
-## Implementation Details
-
-### File: `src/pages/dashboard/Database.tsx`
-
-Replace `PeptideRow` with `PeptideCard`:
-
-```tsx
-function PeptideCard({ peptide }: { peptide: Peptide }) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <motion.div 
-      className="dashboard-card"
-      onClick={() => setExpanded(!expanded)}
-    >
-      {/* Gradient top bar */}
-      <div className="h-1 dashboard-gradient-teal" />
-      
-      <div className="p-5">
-        {/* Header: Name + Badges */}
-        <div className="flex items-start justify-between gap-4 mb-3">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">
-              {peptide.name}
-            </h3>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {peptide.primary_use}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Badge>{peptide.category}</Badge>
-            <Badge>{peptide.research_status}</Badge>
-          </div>
-        </div>
-
-        {/* 3 Info Sections */}
-        <div className="space-y-3 text-sm">
-          {/* Mechanism */}
-          <div>
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              How it works
-            </span>
-            <p className={cn(
-              "text-foreground mt-1",
-              !expanded && "line-clamp-2"
-            )}>
-              {peptide.mechanism}
-            </p>
-          </div>
-
-          {/* Studies */}
-          <div>
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              What research shows
-            </span>
-            <p className={cn(
-              "text-foreground mt-1",
-              !expanded && "line-clamp-2"
-            )}>
-              {peptide.studies}
-            </p>
-          </div>
-
-          {/* Safety */}
-          <div>
-            <span className="text-xs font-medium text-amber-600 uppercase tracking-wider flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" />
-              Key safety note
-            </span>
-            <p className={cn(
-              "text-foreground mt-1",
-              !expanded && "line-clamp-2"
-            )}>
-              {peptide.safety}
-            </p>
-          </div>
-        </div>
-
-        {/* Footer: FDA + Related + Expand */}
-        <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
-          <div className="flex items-center gap-3">
-            <Badge>{peptide.fda_status}</Badge>
-            {peptide.related_peptides?.length > 0 && (
-              <span className="text-xs text-muted-foreground">
-                Related: {peptide.related_peptides.join(", ")}
-              </span>
-            )}
-          </div>
-          <button className="text-xs text-muted-foreground flex items-center gap-1">
-            {expanded ? "Show less" : "View full"}
-            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  );
+  return formatForSystemPrompt(peptides, studies);
 }
 ```
 
-### Layout Change
+### System Prompt Enhancement
 
-Switch from `<table>` to card list:
+Include citation instructions in the AI prompt:
 
-```tsx
-{/* Cards */}
-<div className="space-y-4">
-  {isLoading ? (
-    <div className="text-center py-8">Loading...</div>
-  ) : peptides?.length === 0 ? (
-    <div className="text-center py-8">No peptides found</div>
-  ) : (
-    peptides?.map((peptide) => (
-      <PeptideCard key={peptide.id} peptide={peptide} />
-    ))
-  )}
-</div>
+```text
+When citing research, use actual study data:
+- "A 2019 RCT (n=89) published in [Journal] found..."
+- "Animal studies show [specific finding]"
+- Always clarify: human vs animal data
+- Mention sample sizes for human trials
+- Reference PubMed IDs when available
 ```
 
 ---
 
-## Key Benefits
+## Data Population Strategy
 
-1. **6x more data visible**: Mechanism, studies, AND safety all shown upfront
-2. **Scannable sections**: Labeled headers make it easy to find specific info
-3. **Safety highlighted**: Amber-colored label draws attention to important warnings
-4. **Context preserved**: Related peptides visible without expanding
-5. **Still expandable**: Users can click to see full text when needed
+### Phase 1: Seed 500+ Studies
+
+Method: **Combination of automated + manual curation**
+
+| Source | Expected Count | Method |
+|--------|----------------|--------|
+| PubMed API | 300+ | Automated search by peptide name |
+| Existing article citations | 50+ | Extract from articles.citations JSON |
+| Manual curation | 150+ | Research team adds landmark studies |
+
+### Automated PubMed Scraper (Edge Function)
+
+Create `supabase/functions/scrape-pubmed/index.ts`:
+
+```typescript
+// Search PubMed for peptide studies
+const searchTerms = [
+  'BPC-157', 'TB-500', 'Semaglutide', 'Tirzepatide',
+  'CJC-1295', 'Ipamorelin', 'MK-677', 'GHK-Cu',
+  // ... all 41 peptides
+];
+
+for (const term of searchTerms) {
+  const results = await fetch(
+    `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${term}&retmax=50&retmode=json`
+  );
+  // Process and store in studies table
+}
+```
 
 ---
 
-## Files Modified
+## Frontend Integration
+
+### 1. Peptide Database Cards
+
+Update `PeptideCard` to show study counts:
+
+```tsx
+<div className="flex items-center gap-2 text-xs text-muted-foreground">
+  <span>{peptide.total_study_count} studies</span>
+  <span>•</span>
+  <span>{peptide.human_study_count} human trials</span>
+</div>
+```
+
+### 2. Study Browser Component
+
+New component: `src/components/database/StudyBrowser.tsx`
+
+- Filter by peptide, study type, evidence level
+- Link to PubMed abstracts
+- Show key findings in expandable cards
+
+### 3. Article/Guide Citations
+
+When displaying guides, pull from the `studies` table for live citations:
+
+```tsx
+// In guide pages
+const { data: studies } = usePeptideStudies('BPC-157');
+// Render as "Sources" section
+```
+
+---
+
+## Files to Create/Modify
 
 | File | Changes |
 |------|---------|
-| `src/pages/dashboard/Database.tsx` | Replace table-based `PeptideRow` with card-based `PeptideCard`. Add `AlertTriangle` icon import. Switch from `<table>` layout to `<div>` card list. Add Framer Motion for hover states. |
+| `supabase/migrations/*.sql` | Create `studies` table, junction table, alter peptides |
+| `supabase/functions/chat/index.ts` | Replace static DB with dynamic fetching |
+| `supabase/functions/coach/index.ts` | Add study data to coach context |
+| `supabase/functions/scrape-pubmed/index.ts` | New edge function for PubMed API |
+| `src/hooks/useStudies.ts` | New hook for fetching studies |
+| `src/components/database/StudyBrowser.tsx` | New UI for browsing studies |
+| `src/components/database/PeptideCard.tsx` | Add study counts display |
+| `src/pages/dashboard/Database.tsx` | Integrate study browser tab |
+
+---
+
+## Data Quality Standards
+
+Each study entry must include:
+
+| Field | Requirement |
+|-------|-------------|
+| PubMed ID or DOI | At least one identifier |
+| Study Type | Required classification |
+| Species | Required (human vs animal) |
+| Key Findings | 1-3 sentence summary |
+| Evidence Level | GRADE scale assessment |
+| Peptide Link | Which peptide(s) it supports |
+
+---
+
+## Implementation Timeline
+
+| Phase | Tasks | Scope |
+|-------|-------|-------|
+| **1** | Create database schema, seed 100 studies | Database setup |
+| **2** | Build PubMed scraper, populate 400+ more | Data population |
+| **3** | Update chat edge function with dynamic retrieval | AI integration |
+| **4** | Build Study Browser UI, update Peptide Cards | Frontend |
+| **5** | Quality review, add landmark study flags | Data curation |
+
+---
+
+## Benefits
+
+1. **Evidence-based responses**: AI cites real studies with PubMed links
+2. **Credibility**: Users see "Based on X peer-reviewed studies"
+3. **Up-to-date**: Studies table can be updated without code changes
+4. **SEO value**: Study database becomes citable content
+5. **Differentiator**: No other peptide platform has 500+ curated citations
 
