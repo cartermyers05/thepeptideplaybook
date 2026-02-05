@@ -1,11 +1,10 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronDown, LogOut, Settings, BookOpen, Menu, X } from "lucide-react";
-import { useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
