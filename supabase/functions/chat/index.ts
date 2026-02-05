@@ -199,6 +199,7 @@ WHAT YOU DO
 ✅ Explain FDA status and legal considerations
 ✅ Discuss stacking considerations based on published research
 ✅ Help build educational protocol outlines based on the user's stated goals
+✅ CREATE and SAVE protocols directly to the user's account when they ask
 
 ═══════════════════════════════════════════════════════════
 WHAT YOU DON'T DO
@@ -220,6 +221,36 @@ RESPONSE STYLE
 
 DELIVERY METHOD GUIDANCE:
 When a peptide has multiple delivery methods (topical, oral, subcutaneous, intranasal), ALWAYS present all available options and note which has the lowest barrier to entry. For example, GHK-Cu should always mention topical serums as an option alongside injectable. Default to recommending the least invasive option first.
+
+═══════════════════════════════════════════════════════════
+PROTOCOL CREATION TOOL (IMPORTANT!)
+═══════════════════════════════════════════════════════════
+
+You have access to a tool called "create_protocol" that saves protocols directly to the user's account.
+
+**WHEN TO USE THIS TOOL:**
+When a user explicitly asks you to "create", "build", "make", "set up", or "save" a protocol for them, use this tool.
+
+**BEFORE USING THE TOOL, GATHER:**
+1. Their primary goal (if not clearly stated)
+2. Their experience level with peptides (beginner, intermediate, advanced) - if not stated
+
+**HOW TO USE:**
+1. Determine the best peptides for their goal from your knowledge base
+2. Call the create_protocol tool with the structured data
+3. After the tool succeeds, confirm the protocol was created with a summary
+4. Suggest they view it in the Protocol Builder with a link: [View Your Protocol →](/dashboard/protocols)
+
+**EXAMPLE FLOW:**
+User: "Build me a recovery protocol"
+You: "I'd be happy to build a recovery protocol for you! Quick question - what's your experience level with peptides (beginner, intermediate, or advanced)?"
+User: "Beginner"
+You: *calls create_protocol tool* then responds with confirmation
+
+**DO NOT use this tool when the user is just:**
+- Asking general questions about protocols
+- Asking what peptides they should use (unless they explicitly say "build/create/make me a protocol")
+- Discussing protocols hypothetically
 
 ═══════════════════════════════════════════════════════════
 PROTOCOL BUILDING (WHEN USER ASKS)
@@ -292,6 +323,123 @@ The disclaimer "Educational purposes only. Consult a healthcare provider." at th
 
 Be helpful. Be informative. Be the best peptide research AI in the world.`;
 
+// Tool definition for protocol creation
+const tools = [
+  {
+    type: "function",
+    function: {
+      name: "create_protocol",
+      description: "Create and save a peptide protocol directly to the user's account. Use this when the user explicitly asks you to build, create, make, or set up a protocol for them. This saves the protocol so they can view it in their Protocol Builder.",
+      parameters: {
+        type: "object",
+        properties: {
+          goal: {
+            type: "string",
+            enum: ["fat_loss", "muscle_recovery", "injury_recovery", "anti_aging", "cognitive", "general_wellness"],
+            description: "The user's primary goal for the protocol"
+          },
+          protocol_name: {
+            type: "string",
+            description: "A descriptive name for the protocol (e.g., 'Muscle Recovery Protocol', 'Fat Loss Stack')"
+          },
+          cycle_length_weeks: {
+            type: "number",
+            description: "Duration of the protocol in weeks (typically 4-12)"
+          },
+          peptides: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                name: { 
+                  type: "string",
+                  description: "Name of the peptide (e.g., 'BPC-157', 'TB-500', 'Semaglutide')"
+                },
+                purpose: { 
+                  type: "string",
+                  description: "What this peptide is for in the protocol"
+                },
+                dosage: { 
+                  type: "string",
+                  description: "Research-backed dosing (e.g., '250mcg', '2.5mg')"
+                },
+                frequency: { 
+                  type: "string",
+                  description: "How often to use (e.g., 'Twice daily', 'Once weekly')"
+                },
+                timing: { 
+                  type: "string",
+                  description: "When to use (e.g., 'Morning and evening', 'Same day each week')"
+                },
+                site: { 
+                  type: "string",
+                  description: "Administration site/method (e.g., 'Subcutaneous, abdomen', 'Intranasal')"
+                }
+              },
+              required: ["name", "purpose", "dosage", "frequency", "timing"]
+            },
+            description: "Array of peptides with their dosing details"
+          }
+        },
+        required: ["goal", "protocol_name", "peptides", "cycle_length_weeks"]
+      }
+    }
+  }
+];
+
+// Handle tool calls for protocol creation
+async function handleToolCall(
+  toolCall: { function: { name: string; arguments: string } },
+  userId: string,
+  supabaseServiceRole: ReturnType<typeof createClient>
+): Promise<{ success: boolean; message: string; protocolId?: string }> {
+  if (toolCall.function.name === "create_protocol") {
+    try {
+      const args = JSON.parse(toolCall.function.arguments);
+      
+      console.log("Creating protocol for user:", userId, "with args:", args);
+
+      const { data, error } = await supabaseServiceRole
+        .from("protocols")
+        .insert({
+          user_id: userId,
+          goal: args.goal,
+          protocol_name: args.protocol_name,
+          peptides: args.peptides,
+          cycle_length_weeks: args.cycle_length_weeks,
+          status: "not_started",
+          current_day: 0,
+          current_week: 1,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Failed to create protocol:", error);
+        return { 
+          success: false, 
+          message: `Failed to save protocol: ${error.message}` 
+        };
+      }
+
+      console.log("Protocol created successfully:", data.id);
+      return { 
+        success: true, 
+        message: `Protocol "${args.protocol_name}" created successfully!`,
+        protocolId: data.id 
+      };
+    } catch (e) {
+      console.error("Error parsing tool arguments:", e);
+      return { 
+        success: false, 
+        message: "Failed to parse protocol data" 
+      };
+    }
+  }
+
+  return { success: false, message: "Unknown tool" };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -312,14 +460,19 @@ serve(async (req) => {
 
     const token = authHeader.replace("Bearer ", "");
     
-    // Create Supabase client with service role for checking profile
+    // Create Supabase client with user's token for auth check
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     });
 
-    // Verify user token - use getUser() without argument since client has auth header
+    // Service role client for writing protocols (bypasses RLS)
+    const supabaseServiceRole = createClient(supabaseUrl, supabaseServiceRoleKey);
+
+    // Verify user token
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError || !user) {
@@ -373,6 +526,7 @@ serve(async (req) => {
 
     console.log("Processing chat request with", messages?.length || 0, "messages");
 
+    // First API call - may include tool calls
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -385,7 +539,8 @@ serve(async (req) => {
           { role: "system", content: SYSTEM_PROMPT },
           ...messages,
         ],
-        stream: true,
+        tools: tools,
+        tool_choice: "auto",
         temperature: 0.7,
         max_tokens: 2000,
       }),
@@ -422,7 +577,114 @@ serve(async (req) => {
       );
     }
 
-    return new Response(response.body, {
+    // Parse the response to check for tool calls
+    const aiResponse = await response.json();
+    const assistantMessage = aiResponse.choices?.[0]?.message;
+    
+    // Check if the AI wants to call a tool
+    if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
+      console.log("AI requested tool calls:", assistantMessage.tool_calls);
+      
+      // Process each tool call
+      const toolResults = [];
+      for (const toolCall of assistantMessage.tool_calls) {
+        const result = await handleToolCall(toolCall, userId, supabaseServiceRole);
+        toolResults.push({
+          tool_call_id: toolCall.id,
+          role: "tool",
+          content: JSON.stringify(result),
+        });
+      }
+
+      // Make a follow-up request with the tool results
+      const followUpMessages = [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...messages,
+        assistantMessage,
+        ...toolResults,
+      ];
+
+      const followUpResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: followUpMessages,
+          stream: true,
+          temperature: 0.7,
+          max_tokens: 2000,
+        }),
+      });
+
+      if (!followUpResponse.ok) {
+        const errorText = await followUpResponse.text();
+        console.error("Follow-up AI gateway error:", followUpResponse.status, errorText);
+        return new Response(
+          JSON.stringify({ error: "AI service temporarily unavailable" }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      // Check if any tool created a protocol (for the frontend to know)
+      const protocolCreated = toolResults.some(r => {
+        try {
+          const content = JSON.parse(r.content);
+          return content.success && content.protocolId;
+        } catch { return false; }
+      });
+
+      // Add custom header to indicate protocol was created
+      const responseHeaders = { 
+        ...corsHeaders, 
+        "Content-Type": "text/event-stream",
+      };
+      
+      if (protocolCreated) {
+        responseHeaders["X-Protocol-Created"] = "true";
+      }
+
+      return new Response(followUpResponse.body, { headers: responseHeaders });
+    }
+
+    // No tool calls - stream the response directly
+    // We need to re-fetch with streaming since we consumed the response
+    const streamResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!streamResponse.ok) {
+      const errorText = await streamResponse.text();
+      console.error("AI gateway error:", streamResponse.status, errorText);
+      return new Response(
+        JSON.stringify({ error: "AI service temporarily unavailable" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    return new Response(streamResponse.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (error) {
