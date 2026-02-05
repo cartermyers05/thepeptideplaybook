@@ -644,12 +644,51 @@ export type Database = {
         }
         Relationships: []
       }
+      peptide_studies: {
+        Row: {
+          created_at: string | null
+          peptide_id: string
+          relevance: string | null
+          study_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          peptide_id: string
+          relevance?: string | null
+          study_id: string
+        }
+        Update: {
+          created_at?: string | null
+          peptide_id?: string
+          relevance?: string | null
+          study_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "peptide_studies_peptide_id_fkey"
+            columns: ["peptide_id"]
+            isOneToOne: false
+            referencedRelation: "peptides"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "peptide_studies_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       peptides: {
         Row: {
           category: string
           created_at: string | null
           fda_status: string
+          human_study_count: number | null
           id: string
+          key_studies: Json | null
+          last_study_update: string | null
           mechanism: string
           name: string
           primary_use: string
@@ -658,13 +697,17 @@ export type Database = {
           safety: string
           slug: string
           studies: string
+          total_study_count: number | null
           updated_at: string | null
         }
         Insert: {
           category: string
           created_at?: string | null
           fda_status: string
+          human_study_count?: number | null
           id?: string
+          key_studies?: Json | null
+          last_study_update?: string | null
           mechanism: string
           name: string
           primary_use: string
@@ -673,13 +716,17 @@ export type Database = {
           safety: string
           slug: string
           studies: string
+          total_study_count?: number | null
           updated_at?: string | null
         }
         Update: {
           category?: string
           created_at?: string | null
           fda_status?: string
+          human_study_count?: number | null
           id?: string
+          key_studies?: Json | null
+          last_study_update?: string | null
           mechanism?: string
           name?: string
           primary_use?: string
@@ -688,6 +735,7 @@ export type Database = {
           safety?: string
           slug?: string
           studies?: string
+          total_study_count?: number | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1022,6 +1070,90 @@ export type Database = {
           published_at?: string | null
           sources?: Json | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      studies: {
+        Row: {
+          abstract: string | null
+          authors: string[] | null
+          created_at: string | null
+          doi: string | null
+          dosing_info: string | null
+          evidence_level: string | null
+          full_text_url: string | null
+          id: string
+          is_landmark_study: boolean | null
+          journal: string
+          key_findings: string
+          peptide_names: string[]
+          publication_date: string | null
+          publication_year: number
+          pubmed_id: string | null
+          pubmed_url: string | null
+          research_areas: string[] | null
+          safety_findings: string | null
+          sample_size: number | null
+          species: string[] | null
+          study_type: string
+          title: string
+          updated_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          abstract?: string | null
+          authors?: string[] | null
+          created_at?: string | null
+          doi?: string | null
+          dosing_info?: string | null
+          evidence_level?: string | null
+          full_text_url?: string | null
+          id?: string
+          is_landmark_study?: boolean | null
+          journal: string
+          key_findings: string
+          peptide_names?: string[]
+          publication_date?: string | null
+          publication_year: number
+          pubmed_id?: string | null
+          pubmed_url?: string | null
+          research_areas?: string[] | null
+          safety_findings?: string | null
+          sample_size?: number | null
+          species?: string[] | null
+          study_type: string
+          title: string
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          abstract?: string | null
+          authors?: string[] | null
+          created_at?: string | null
+          doi?: string | null
+          dosing_info?: string | null
+          evidence_level?: string | null
+          full_text_url?: string | null
+          id?: string
+          is_landmark_study?: boolean | null
+          journal?: string
+          key_findings?: string
+          peptide_names?: string[]
+          publication_date?: string | null
+          publication_year?: number
+          pubmed_id?: string | null
+          pubmed_url?: string | null
+          research_areas?: string[] | null
+          safety_findings?: string | null
+          sample_size?: number | null
+          species?: string[] | null
+          study_type?: string
+          title?: string
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: []
       }
