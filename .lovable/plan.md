@@ -1,129 +1,165 @@
 
 
-# AI Chat Updates: System Prompt Rules + Legal Disclaimer Modal
+# Fix: AI Disclaimer Modal Keeps Reappearing
 
-## Summary
+## The Problem
 
-Three updates to the AI Chat system:
-1. Add delivery method rule to system prompt
-2. Add research-framing language rule to system prompt  
-3. Create a first-time legal disclaimer modal for AI Chat & Protocol Builder (persisted to user profile)
+The AI disclaimer modal is appearing repeatedly (every minute or on window focus) instead of only showing once. After clicking "I understand" and "Continue," the modal should never appear again.
 
----
+## Root Cause
 
-## Change 1: Delivery Method Rule
+1. **React Query refetches profile data** on window focus (default behavior), component remount, and stale data
+2. **Local state (`disclaimerAccepted`) is not persistent** - it resets on remount
+3. **Database update may be failing silently** - the catch block still calls `onAccepted()` even on failure
+4. **No optimistic cache update** - the query cache isn't updated immediately after the mutation
 
-**File:** `supabase/functions/chat/index.ts`
+Looking at the database, `ai_disclaimer_accepted_at` is still `null`, confirming the update isn't persisting.
 
-Add this rule to the RESPONSE STYLE section of the system prompt:
+## The Fix
 
-```text
-DELIVERY METHOD GUIDANCE:
-When a peptide has multiple delivery methods (topical, oral, subcutaneous, intranasal), ALWAYS present all available options and note which has the lowest barrier to entry. For example, GHK-Cu should always mention topical serums as an option alongside injectable. Default to recommending the least invasive option first.
+### 1. Use Optimistic Updates
+
+Update the React Query cache immediately when the mutation runs, so the modal doesn't reappear during refetches.
+
+### 2. Remove Silent Failure Behavior
+
+If the database update fails, show an error and keep the modal open instead of dismissing it.
+
+### 3. Simplify the Conditional Logic
+
+The modal is currently checking the same condition in both the parent and inside itself. Clean this up.
+
+### 4. Add `staleTime` to Profile Query
+
+Prevent constant refetching by adding a reasonable `staleTime` (e.g., 30 seconds).
+
+## Code Changes
+
+### File 1: `src/components/chat/AIDisclaimerModal.tsx`
+
+```tsx
+// Changes:
+// 1. Add optimistic update to mutation
+// 2. Remove silent failure - show error toast if update fails
+// 3. Only dismiss modal on actual success
 ```
 
----
+**Before:**
+```tsx
+const handleContinue = async () => {
+  if (!isChecked) return;
 
-## Change 2: Research-Framing Language Rule
-
-**File:** `supabase/functions/chat/index.ts`
-
-Update the APPROVED LANGUAGE section to enforce research-based framing:
-
-```text
-LANGUAGE FRAMING:
-Never use direct instructional language like "Add 2mL" or "inject X." Always frame as:
-- "Research protocols typically use..."
-- "Published studies have examined doses of..."
-- "A common reconstitution method described in literature involves..."
-- "In clinical settings, researchers have administered..."
+  try {
+    await updateProfile.mutateAsync({
+      ai_disclaimer_accepted_at: new Date().toISOString(),
+    } as any);
+    onAccepted();
+  } catch (error) {
+    console.error("Failed to save disclaimer acceptance:", error);
+    // Still allow proceeding even if save fails  <-- THIS IS THE BUG
+    onAccepted();
+  }
+};
 ```
 
----
+**After:**
+```tsx
+const handleContinue = async () => {
+  if (!isChecked) return;
 
-## Change 3: First-Time Legal Disclaimer Modal
-
-### Database Migration
-
-Add a new column to track AI-specific legal acknowledgment:
-
-```sql
-ALTER TABLE public.profiles 
-ADD COLUMN IF NOT EXISTS ai_disclaimer_accepted_at timestamptz;
+  try {
+    await updateProfile.mutateAsync({
+      ai_disclaimer_accepted_at: new Date().toISOString(),
+    });
+    onAccepted();
+  } catch (error) {
+    console.error("Failed to save disclaimer acceptance:", error);
+    toast({
+      title: "Error",
+      description: "Failed to save. Please try again.",
+      variant: "destructive",
+    });
+    // DON'T call onAccepted() - keep modal open
+  }
+};
 ```
 
-This is separate from `terms_accepted_at` (general terms) to specifically track AI tool acknowledgment.
+### File 2: `src/hooks/useProfile.ts`
 
-### New Component: `AIDisclaimerModal`
+Add optimistic update to `useUpdateProfile` and add staleTime to `useProfile`:
 
-**File:** `src/components/chat/AIDisclaimerModal.tsx`
+```tsx
+export function useProfile() {
+  const { user } = useAuth();
 
-A reusable modal that:
-- Shows on first visit to AI Chat OR Protocol Builder
-- Contains the specified legal text with checkbox
-- Saves `ai_disclaimer_accepted_at` to profile on acceptance
-- Only shows once per user (persisted)
+  return useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => { /* ... */ },
+    enabled: !!user?.id,
+    staleTime: 30 * 1000, // 30 seconds - prevents excessive refetching
+  });
+}
 
-**Content:**
-```text
-Before you continue:
+export function useUpdateProfile() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-• This tool provides educational information based on published peptide research
-• Nothing here constitutes medical advice, diagnosis, or treatment recommendations
-• Always consult a licensed healthcare provider before making health decisions
-• By continuing, you acknowledge you understand these terms
-
-[ ] I understand
-[Continue]
+  return useMutation({
+    mutationFn: async (updates: Partial<Profile>) => { /* ... */ },
+    // Add optimistic update
+    onMutate: async (updates) => {
+      await queryClient.cancelQueries({ queryKey: ["profile", user?.id] });
+      const previousProfile = queryClient.getQueryData(["profile", user?.id]);
+      queryClient.setQueryData(["profile", user?.id], (old: Profile | null) => ({
+        ...old,
+        ...updates,
+      }));
+      return { previousProfile };
+    },
+    onError: (err, updates, context) => {
+      // Rollback on error
+      queryClient.setQueryData(["profile", user?.id], context?.previousProfile);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
+    },
+  });
+}
 ```
 
-### Integration Points
+### File 3: `src/pages/dashboard/Protocols.tsx` and `src/components/dashboard/ChatInterface.tsx`
+
+Remove redundant local state tracking. Let the modal handle everything internally:
+
+```tsx
+// Remove: const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+// Remove: const hasAcceptedDisclaimer = !!profile?.ai_disclaimer_accepted_at || disclaimerAccepted;
+
+// Change rendering to:
+{!profileLoading && !profile?.ai_disclaimer_accepted_at && (
+  <AIDisclaimerModal onAccepted={() => {
+    // The modal will only call this on successful DB update
+    // React Query will have already updated the cache optimistically
+  }} />
+)}
+```
+
+## Summary of Changes
 
 | File | Change |
 |------|--------|
-| `src/components/dashboard/ChatInterface.tsx` | Import and render `AIDisclaimerModal`, check profile for `ai_disclaimer_accepted_at` |
-| `src/pages/dashboard/Protocols.tsx` | Replace current inline disclaimer with `AIDisclaimerModal`, check profile before showing |
-| `src/hooks/useProfile.ts` | Already handles profile data - no changes needed |
+| `src/components/chat/AIDisclaimerModal.tsx` | Remove silent failure, add toast import, only call onAccepted on success |
+| `src/hooks/useProfile.ts` | Add staleTime, add optimistic update to mutation |
+| `src/pages/dashboard/Protocols.tsx` | Remove redundant local state, simplify conditional |
+| `src/components/dashboard/ChatInterface.tsx` | Remove redundant local state, simplify conditional |
 
-### Flow
+## Expected Behavior After Fix
 
-```text
-User opens AI Chat or Protocol Builder
-         ↓
-  Check profile.ai_disclaimer_accepted_at
-         ↓
-    ┌────┴────┐
-    ↓         ↓
-  Exists    Null
-    ↓         ↓
-  Show UI   Show Modal
-              ↓
-        User checks "I understand"
-              ↓
-        User clicks "Continue"
-              ↓
-        Save timestamp to profile
-              ↓
-        Show UI
-```
-
----
-
-## Files Modified Summary
-
-| File | Changes |
-|------|---------|
-| `supabase/functions/chat/index.ts` | Add 2 new rules to system prompt |
-| `src/components/chat/AIDisclaimerModal.tsx` | Create new modal component |
-| `src/components/dashboard/ChatInterface.tsx` | Add disclaimer modal check |
-| `src/pages/dashboard/Protocols.tsx` | Use shared disclaimer modal instead of inline |
-| Database migration | Add `ai_disclaimer_accepted_at` column |
-
----
-
-## Technical Notes
-
-- The existing `ChatConsentModal` component has different content (more restrictive messaging). The new modal uses the exact text you specified.
-- The existing Protocol Builder has an inline disclaimer that resets on each visit. This will be replaced with the persisted version.
-- Both AI Chat and Protocol Builder will share the same disclaimer state - accept once, applies everywhere.
+1. User opens AI Chat or Protocol Builder for the first time
+2. Disclaimer modal appears (blocking)
+3. User checks "I understand" and clicks "Continue"
+4. Database is updated with timestamp
+5. Cache is optimistically updated immediately
+6. Modal dismisses and never appears again
+7. Even on window focus or page refresh, modal stays dismissed because the database value is persisted
 
