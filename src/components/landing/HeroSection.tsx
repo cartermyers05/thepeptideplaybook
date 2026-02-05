@@ -96,7 +96,7 @@ export function HeroSection() {
               animate="float"
             >
               <motion.h1
-                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9]"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.1]"
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
@@ -115,7 +115,7 @@ export function HeroSection() {
                   variants={letterContainerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="block relative"
+                  className="block relative whitespace-nowrap"
                 >
                   <motion.span
                     className="inline-block bg-clip-text text-transparent"
