@@ -1,41 +1,15 @@
 
-
-# Simplify Hero Headline: Big Bold Letters + Rainbow Underline
+# Remove Rainbow Underline - Back to Clean Text
 
 ## The Goal
-Replace the typewriter animation with a simple, bold headline where all text appears immediately. The only animation is the rainbow underline drawing itself under "AI Peptide."
+Remove the rainbow gradient underline from the hero headline and return to a clean, simple text-only design.
 
-## Current State
-- Complex typewriter effect with cursor blinking
-- Words appear letter-by-letter with delays
-- Rainbow underline on "AI Peptide"
+## What to Remove
+- The `rainbowGradient` constant (no longer needed)
+- The `motion.div` that creates the animated underline under "AI Peptide"
+- The `relative` class from the "AI Peptide" span (no longer positioning anything)
 
-## New State
-- Big, bold, static text that loads instantly
-- Simple fade-in entrance for the headline
-- Rainbow underline animates (draws itself) under "AI Peptide" only
-- Clean, readable, no complexity
-
-## Visual Preview
-
-```text
-Your
-AI Peptide  ← rainbow underline draws itself
-Journey
-```
-
-## Implementation
-
-### Remove
-| What | Why |
-|------|-----|
-| `TypewriterCursor` component | No longer needed |
-| `TypewriterWord` component | No longer needed |
-| `words` configuration array | No longer needed |
-| `currentWordIndex` / `allWordsComplete` state | No longer needed |
-
-### Replace With
-Simple motion-wrapped spans with a fade-in animation:
+## Final Hero Headline Structure
 
 ```tsx
 <motion.h1 
@@ -44,43 +18,19 @@ Simple motion-wrapped spans with a fade-in animation:
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.6 }}
 >
-  <span className="block">Your</span>
-  <span className="block relative">
-    AI Peptide
-    {/* Rainbow underline */}
-    <motion.div
-      className="absolute -bottom-1 left-0 h-1.5 w-full rounded-full"
-      style={{ background: rainbowGradient, backgroundSize: "200% 100%", transformOrigin: "left" }}
-      initial={{ scaleX: 0 }}
-      animate={{ scaleX: 1, backgroundPosition: ["0% 0%", "100% 0%", "0% 0%"] }}
-      transition={{ 
-        scaleX: { delay: 0.4, duration: 0.6 }, 
-        backgroundPosition: { duration: 4, repeat: Infinity } 
-      }}
-    />
-  </span>
-  <span className="block">Journey</span>
+  <span className="block text-foreground">Your</span>
+  <span className="block text-foreground">AI Peptide</span>
+  <span className="block text-foreground">Journey</span>
 </motion.h1>
 ```
 
-### Timing Adjustments
-| Element | Current Delay | New Delay |
-|---------|---------------|-----------|
-| Headline | Typewriter (2+ sec) | 0s (instant) |
-| Rainbow underline | After typing | 0.4s |
-| Subheadline | 2.4s | 0.6s |
-| CTA buttons | 2.6s | 0.8s |
-| Price line | 2.8s | 1.0s |
+## Result
+- Big, bold, clean headline with simple fade-in animation
+- No rainbow underline or gradient effects
+- Just clean black text on the page
 
 ## File Changes
 
 | File | Changes |
 |------|---------|
-| `src/components/landing/HeroSection.tsx` | Remove typewriter components, simplify to static headline with animated rainbow underline |
-
-## Result
-- Clean, big, bold text that's immediately readable
-- Single "wow" moment: the rainbow underline drawing itself
-- Faster page feel—no waiting for typing animation
-- Zero chance of blur/visibility bugs
-
+| `src/components/landing/HeroSection.tsx` | Remove `rainbowGradient` constant and the rainbow underline `motion.div` |
