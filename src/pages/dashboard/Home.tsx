@@ -1,26 +1,12 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, MessageCircle, Database, FlaskConical, Newspaper } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useProtocol } from "@/hooks/useProtocol";
-import { useCheckIn } from "@/hooks/useCheckIn";
-import { useCourse } from "@/hooks/useCourse";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckInFlow } from "@/components/coach/CheckInFlow";
-import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
-import { getGoalTheme } from "@/lib/goalThemes";
-
-// Dashboard components
-import { ProgressRing } from "@/components/dashboard/home/ProgressRing";
-import { NextInjectionCard } from "@/components/dashboard/home/NextInjectionCard";
-import { WeekCalendarStrip } from "@/components/dashboard/home/WeekCalendarStrip";
-import { MilestonesTimeline } from "@/components/dashboard/home/MilestonesTimeline";
-import { TodayLessonCard } from "@/components/dashboard/home/TodayLessonCard";
-import { QuickActionCards } from "@/components/dashboard/home/QuickActionCards";
+import { useConversations } from "@/hooks/useConversations";
+import { formatDistanceToNow } from "date-fns";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -32,85 +18,47 @@ function getGreeting() {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: profile } = useProfile();
-  const { protocol, isLoading: isLoadingProtocol } = useProtocol();
-  const { userCourse, courseLoading, progressPercent } = useCourse();
-  const { hasCheckedInToday } = useCheckIn();
-  const [showCheckIn, setShowCheckIn] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(false);
+  const { data: profile, isLoading: isLoadingProfile } = useProfile();
+  const { data: conversations, isLoading: isLoadingConversations } = useConversations();
 
   const displayName = profile?.full_name?.split(' ')[0] || user?.user_metadata?.full_name?.split(" ")[0] || "there";
-  const isLoading = isLoadingProtocol || courseLoading;
+  const isLoading = isLoadingProfile;
 
-  const currentDay = userCourse?.current_day ?? 0;
-  const totalDays = userCourse?.duration_days ?? 56;
-  const courseTitle = userCourse?.title ?? 'Your Course';
-  const currentWeek = Math.ceil((currentDay + 1) / 7);
-  
-  // Get goal-based theme
-  const goalTheme = getGoalTheme(userCourse?.goal);
-  const GoalIcon = goalTheme.Icon;
+  // Get recent conversations (last 3)
+  const recentChats = conversations?.slice(0, 3) || [];
 
-  // Get today's lesson
-  const todayLesson = userCourse?.lessons?.find(
-    (l: { day: number }) => l.day === currentDay
-  );
-  const currentPhase = todayLesson?.phase || 'Getting Started';
-
-  // Show welcome modal for new users who haven't set supplies status
-  useEffect(() => {
-    if (!isLoading && userCourse && !userCourse.supplies_status && userCourse.status === 'not_started') {
-      setShowWelcome(true);
-    }
-  }, [isLoading, userCourse]);
-
-  const handleWelcomeComplete = () => {
-    setShowWelcome(false);
-  };
+  const quickActions = [
+    {
+      icon: MessageCircle,
+      label: "AI Chat",
+      description: "Ask anything about peptides",
+      path: "/dashboard/chat",
+    },
+    {
+      icon: Database,
+      label: "Peptide Database",
+      description: "Browse research & protocols",
+      path: "/dashboard/database",
+    },
+    {
+      icon: FlaskConical,
+      label: "Protocol Builder",
+      description: "Build your personalized stack",
+      path: "/dashboard/protocols",
+    },
+  ];
 
   if (isLoading) {
     return (
       <DashboardLayout>
         <div className="space-y-6">
           <Skeleton className="h-20 w-full rounded-2xl" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Skeleton className="h-32 w-full rounded-2xl" />
+            <Skeleton className="h-32 w-full rounded-2xl" />
+            <Skeleton className="h-32 w-full rounded-2xl" />
+          </div>
           <Skeleton className="h-48 w-full rounded-2xl" />
-          <div className="grid grid-cols-2 gap-6">
-            <Skeleton className="h-48 w-full rounded-2xl" />
-            <Skeleton className="h-48 w-full rounded-2xl" />
-          </div>
-          <Skeleton className="h-32 w-full rounded-2xl" />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // No course CTA
-  if (!protocol && !userCourse) {
-    return (
-      <DashboardLayout>
-        <div className="space-y-8 animate-fade-up">
-          {/* Header */}
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black mb-1">
-              {getGreeting()}, {displayName}
-            </h1>
-            <p className="text-gray-500">Ready to start your journey?</p>
-          </div>
-
-          {/* Build Course CTA */}
-          <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-10 text-center">
-            <h3 className="font-semibold text-xl text-black mb-2">No Course Yet</h3>
-            <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Take our quick quiz to get a personalized peptide course designed for your specific goals.
-            </p>
-            <Button 
-              onClick={() => navigate("/quiz")} 
-              className="bg-black text-white hover:bg-black/90 font-semibold rounded-xl px-8 py-6 text-lg"
-            >
-              Build My Course
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-          </div>
         </div>
       </DashboardLayout>
     );
@@ -118,120 +66,136 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-up">
+      <div className="space-y-8 animate-fade-up">
         {/* Header */}
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-black mb-1">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground mb-1">
             {getGreeting()}, {displayName}
           </h1>
-          <p className="text-gray-500 flex items-center gap-2">
-            Day {currentDay} of {totalDays} · 
-            <span className="inline-flex items-center gap-1.5">
-              <GoalIcon className={`w-4 h-4 ${goalTheme.iconColor}`} />
-              {goalTheme.tagline}
-            </span>
+          <p className="text-muted-foreground">
+            Your peptide research assistant is ready to help.
           </p>
         </div>
 
-        {/* Checked in success state */}
-        {hasCheckedInToday && (
-          <div className="bg-green-50 rounded-2xl border border-green-200 p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                <Check className="w-4 h-4 text-green-600" />
-              </div>
-              <div>
-                <p className="font-medium text-green-700">Today's Check-In Complete</p>
-                <p className="text-sm text-green-600">Great job! See you tomorrow.</p>
-              </div>
-            </div>
+        {/* Quick Actions */}
+        <div>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {quickActions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <button
+                  key={action.path}
+                  onClick={() => navigate(action.path)}
+                  className="card-premium p-6 text-left group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-foreground" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-1 group-hover:text-foreground/80 transition-colors">
+                    {action.label}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {action.description}
+                  </p>
+                </button>
+              );
+            })}
           </div>
-        )}
-
-        {/* Today's Lesson Card - Hero */}
-        <TodayLessonCard 
-          lesson={todayLesson} 
-          currentDay={currentDay}
-          hasCompletedToday={hasCheckedInToday}
-          goalTheme={goalTheme}
-        />
-
-        {/* Progress + Next Injection Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Progress Card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
-              Your Progress
-            </h3>
-            
-            <div className="flex items-center gap-6">
-              <ProgressRing 
-                percent={progressPercent} 
-                size={80} 
-                strokeWidth={6} 
-                progressColor={goalTheme.progressColor}
-              />
-              
-              <div>
-                <p className="text-2xl font-bold text-black">{currentDay}</p>
-                <p className="text-gray-500">of {totalDays} days</p>
-              </div>
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <p className="text-sm text-gray-500">
-                Phase: <span className={`font-medium ${goalTheme.accentText}`}>{currentPhase}</span>
-              </p>
-            </div>
-          </div>
-
-          {/* Next Injection Card */}
-          <NextInjectionCard 
-            currentDay={currentDay}
-            courseStartDate={userCourse?.started_at}
-            currentWeek={currentWeek}
-            courseStatus={userCourse?.status}
-            goalTheme={goalTheme}
-          />
         </div>
 
-        {/* Week Calendar Strip */}
-        <WeekCalendarStrip 
-          currentDay={currentDay}
-          courseStartDate={userCourse?.started_at}
-          injectionDayOfWeek={0} // Sunday
-        />
+        {/* Recent Conversations */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Recent Conversations
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/dashboard/chat")}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              View All
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
 
-        {/* Quick Actions */}
-        <QuickActionCards />
+          {isLoadingConversations ? (
+            <div className="space-y-3">
+              <Skeleton className="h-16 w-full rounded-xl" />
+              <Skeleton className="h-16 w-full rounded-xl" />
+            </div>
+          ) : recentChats.length > 0 ? (
+            <div className="space-y-3">
+              {recentChats.map((chat) => (
+                <button
+                  key={chat.id}
+                  onClick={() => navigate(`/dashboard/chat?id=${chat.id}`)}
+                  className="w-full bg-card border border-border rounded-xl p-4 text-left hover:border-foreground/20 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                        <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground truncate max-w-[300px]">
+                          {chat.title || "New Conversation"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(chat.updated_at), { addSuffix: true })}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-card border border-border rounded-xl p-8 text-center">
+              <MessageCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground mb-4">No conversations yet</p>
+              <Button onClick={() => navigate("/dashboard/chat")}>
+                Start Your First Chat
+              </Button>
+            </div>
+          )}
+        </div>
 
-        {/* Milestones Timeline */}
-        <MilestonesTimeline 
-          currentDay={currentDay}
-          courseStartDate={userCourse?.started_at}
-          totalDays={totalDays}
-        />
+        {/* Latest Research */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Latest Research
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/dashboard/research")}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              View All
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-8 text-center">
+            <Newspaper className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">Research feed coming soon</p>
+          </div>
+        </div>
+
+        {/* Legal Footer */}
+        <div className="text-xs text-muted-foreground text-center py-4 border-t border-border">
+          <p>
+            For educational purposes only. Not medical advice. Always consult a healthcare provider.
+          </p>
+        </div>
       </div>
-
-      {/* Check-In Modal */}
-      <Dialog open={showCheckIn} onOpenChange={setShowCheckIn}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Daily Check-In</DialogTitle>
-          </DialogHeader>
-          <CheckInFlow onComplete={() => setShowCheckIn(false)} />
-        </DialogContent>
-      </Dialog>
-
-      {/* Welcome Modal for new users */}
-      {userCourse && (
-        <WelcomeModal
-          open={showWelcome}
-          onComplete={handleWelcomeComplete}
-          courseTitle={courseTitle.replace(' Course', '')}
-          durationWeeks={Math.ceil(totalDays / 7)}
-        />
-      )}
     </DashboardLayout>
   );
 }
