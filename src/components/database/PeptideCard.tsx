@@ -1,21 +1,38 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, BookOpen, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { Peptide } from "@/hooks/usePeptides";
+
+export interface Peptide {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  primary_use: string;
+  research_status: "strong" | "moderate" | "limited" | "emerging";
+  fda_status: "FDA Approved" | "Category 2" | "Under Review" | "Not Regulated";
+  mechanism: string;
+  studies: string;
+  safety: string;
+  related_peptides: string[];
+  total_study_count?: number;
+  human_study_count?: number;
+  created_at: string;
+  updated_at: string;
+}
 
 const researchBadgeColors: Record<string, string> = {
-  strong: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  moderate: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  limited: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  strong: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200",
+  moderate: "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200",
+  limited: "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200",
   emerging: "bg-muted text-muted-foreground",
 };
 
 const fdaBadgeColors: Record<string, string> = {
-  "FDA Approved": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  "Category 2": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  "Under Review": "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  "FDA Approved": "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200",
+  "Category 2": "bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-200",
+  "Under Review": "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200",
   "Not Regulated": "bg-muted text-muted-foreground",
 };
 
@@ -106,7 +123,7 @@ export function PeptideCard({ peptide }: PeptideCardProps) {
           </div>
         </div>
 
-        {/* Footer: FDA + Related + Expand */}
+        {/* Footer: FDA + Study Counts + Related + Expand */}
         <div className="flex items-center justify-between mt-5 pt-4 border-t border-border">
           <div className="flex flex-wrap items-center gap-3">
             <Badge
@@ -115,6 +132,23 @@ export function PeptideCard({ peptide }: PeptideCardProps) {
             >
               {peptide.fda_status}
             </Badge>
+            
+            {/* Study counts */}
+            {(peptide.total_study_count ?? 0) > 0 && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <BookOpen className="w-3 h-3" />
+                  <span>{peptide.total_study_count} studies</span>
+                </div>
+                {(peptide.human_study_count ?? 0) > 0 && (
+                  <div className="flex items-center gap-1">
+                    <Users className="w-3 h-3" />
+                    <span>{peptide.human_study_count} human</span>
+                  </div>
+                )}
+              </div>
+            )}
+            
             {peptide.related_peptides?.length > 0 && (
               <span className="text-xs text-muted-foreground">
                 Related: {peptide.related_peptides.join(", ")}

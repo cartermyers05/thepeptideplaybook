@@ -6,155 +6,83 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Comprehensive peptide knowledge base
-const PEPTIDE_DATABASE = `
+// Function to fetch peptide context from database
+async function getPeptideContext(supabase: ReturnType<typeof createClient>) {
+  // Fetch all peptides with their study counts
+  const { data: peptides, error: peptideError } = await supabase
+    .from("peptides")
+    .select("name, category, primary_use, fda_status, research_status, mechanism, studies, safety, total_study_count, human_study_count")
+    .order("name");
+
+  if (peptideError) {
+    console.error("Error fetching peptides:", peptideError);
+    return null;
+  }
+
+  // Fetch landmark studies
+  const { data: landmarkStudies, error: studyError } = await supabase
+    .from("studies")
+    .select("title, journal, publication_year, study_type, species, sample_size, key_findings, dosing_info, peptide_names, evidence_level, pubmed_id")
+    .eq("is_landmark_study", true)
+    .order("publication_year", { ascending: false })
+    .limit(50);
+
+  if (studyError) {
+    console.error("Error fetching studies:", studyError);
+  }
+
+  return { peptides, landmarkStudies };
+}
+
+// Format peptide data for system prompt
+function formatPeptideDatabase(peptides: any[], landmarkStudies: any[] | null): string {
+  let output = `
 ═══════════════════════════════════════════════════════════
-PEPTIDE DATABASE (41+ Peptides)
+PEPTIDE DATABASE (${peptides.length} Peptides)
 ═══════════════════════════════════════════════════════════
 
-### FDA-APPROVED PEPTIDES
+`;
 
-**Semaglutide** (Ozempic, Wegovy, Rybelsus)
-- Category: GLP-1 Receptor Agonist
-- FDA Status: ✅ APPROVED for Type 2 diabetes (Ozempic) and weight management (Wegovy)
-- Mechanism: Mimics GLP-1 hormone, increases insulin secretion, reduces appetite
-- Research: Extensive human clinical trials (STEP, SUSTAIN programs)
-- Common research dosing: 0.25mg weekly (starting) → 0.5mg → 1mg → 2.4mg (maintenance)
-- Note: Compounded versions are NOT FDA-approved
+  // Group by FDA status
+  const fdaApproved = peptides.filter(p => p.fda_status === "FDA Approved");
+  const research = peptides.filter(p => p.fda_status !== "FDA Approved");
 
-**Tirzepatide** (Mounjaro, Zepbound)
-- Category: GIP/GLP-1 Dual Agonist
-- FDA Status: ✅ APPROVED for Type 2 diabetes and weight management
-- Mechanism: Activates both GIP and GLP-1 receptors
-- Research: SURPASS and SURMOUNT trial programs
-- Common research dosing: 2.5mg weekly (starting) → titrate to 5mg, 7.5mg, 10mg, 12.5mg, 15mg
+  if (fdaApproved.length > 0) {
+    output += "### FDA-APPROVED PEPTIDES\n\n";
+    fdaApproved.forEach(p => {
+      output += formatPeptide(p);
+    });
+  }
 
-**Tesamorelin** (Egrifta)
-- Category: GHRH Analog
-- FDA Status: ✅ APPROVED for HIV-associated lipodystrophy
-- Mechanism: Stimulates natural growth hormone release
-- Common research dosing: 2mg daily subcutaneous injection
+  output += "\n### RESEARCH PEPTIDES (NOT FDA-APPROVED FOR HUMAN USE)\n\n";
+  research.forEach(p => {
+    output += formatPeptide(p);
+  });
 
-**Bremelanotide** (Vyleesi)
-- Category: Melanocortin Receptor Agonist
-- FDA Status: ✅ APPROVED for hypoactive sexual desire disorder in premenopausal women ONLY
+  // Add landmark studies section
+  if (landmarkStudies && landmarkStudies.length > 0) {
+    output += `
+═══════════════════════════════════════════════════════════
+LANDMARK STUDIES (${landmarkStudies.length} Key Citations)
+═══════════════════════════════════════════════════════════
 
-### RESEARCH PEPTIDES (NOT FDA-APPROVED FOR HUMAN USE)
+`;
+    landmarkStudies.forEach(s => {
+      const speciesStr = s.species?.join(", ") || "unknown";
+      const sampleStr = s.sample_size ? ` (n=${s.sample_size})` : "";
+      output += `**${s.title}**
+- Journal: ${s.journal} (${s.publication_year})
+- Type: ${s.study_type} | Species: ${speciesStr}${sampleStr}
+- Peptides: ${s.peptide_names?.join(", ")}
+- Key Findings: ${s.key_findings}
+${s.dosing_info ? `- Dosing: ${s.dosing_info}` : ""}
+${s.pubmed_id ? `- PubMed: ${s.pubmed_id}` : ""}
 
-**BPC-157** (Body Protection Compound)
-- Category: Gastric Pentadecapeptide
-- FDA Status: ⚠️ RESEARCH ONLY - No FDA approval
-- Research Status: Many animal studies, NO completed human clinical trials
-- Studied For: Gut healing, tendon/ligament repair, tissue protection
-- Mechanism: Promotes angiogenesis, modulates nitric oxide system
-- Common research dosing: 250-500mcg 1-2x daily, typically 4-8 week cycles
-- Key Studies: Primarily rodent models showing tissue repair effects
+`;
+    });
+  }
 
-**TB-500** (Thymosin Beta-4)
-- Category: Tissue Repair Peptide
-- FDA Status: ⚠️ RESEARCH ONLY - No FDA approval
-- Research Status: Animal studies, limited human data
-- Studied For: Wound healing, cardiac repair, tissue regeneration
-- Mechanism: Promotes cell migration, angiogenesis
-- Common research dosing: 2-5mg 2x weekly loading, then 2mg weekly maintenance
-
-**MK-677** (Ibutamoren)
-- Category: Growth Hormone Secretagogue (Non-peptide)
-- FDA Status: ⚠️ RESEARCH ONLY - No FDA approval
-- Research Status: Some human studies exist
-- Studied For: GH/IGF-1 elevation, body composition
-- Mechanism: Mimics ghrelin, stimulates GH release
-- Common research dosing: 10-25mg daily, oral
-- Notable Research: Studies on sleep, bone density, muscle mass
-
-**CJC-1295**
-- Category: GHRH Analog
-- FDA Status: ⚠️ RESEARCH ONLY - No FDA approval
-- Variants: With DAC (Drug Affinity Complex) for extended half-life
-- Mechanism: Stimulates pituitary GH release
-- Common research dosing: Without DAC: 100mcg 2-3x daily; With DAC: 2mg weekly
-
-**Ipamorelin**
-- Category: Growth Hormone Releasing Peptide (GHRP)
-- FDA Status: ⚠️ RESEARCH ONLY - No FDA approval
-- Mechanism: Selective GH release without significant cortisol/prolactin increase
-- Common research dosing: 200-300mcg 2-3x daily, often combined with CJC-1295
-
-**GHRP-2 / GHRP-6**
-- Category: Growth Hormone Releasing Peptides
-- FDA Status: ⚠️ RESEARCH ONLY - No FDA approval
-- Mechanism: Stimulate GH release through ghrelin receptor
-- Common research dosing: 100-300mcg 2-3x daily
-
-**GHK-Cu** (Copper Peptide)
-- Category: Copper-binding Peptide
-- FDA Status: ⚠️ Not FDA-approved (used in cosmetics)
-- Studied For: Skin regeneration, wound healing, anti-aging, hair regrowth
-- Research: Some human studies for topical applications
-- Common research dosing: Topical: 1-2% serums; Injectable: 1-2mg daily (less common)
-
-**PT-141 / Melanotan II**
-- Category: Melanocortin Receptor Agonists
-- FDA Status: PT-141 approved ONLY for female HSDD (as Vyleesi). Melanotan II is ⚠️ RESEARCH ONLY
-- Warning: Melanotan II has significant safety concerns (nausea, cardiovascular effects)
-
-**AOD-9604**
-- Category: Modified HGH Fragment
-- FDA Status: ⚠️ RESEARCH ONLY - No FDA approval
-- Studied For: Fat metabolism, weight management
-- Common research dosing: 300mcg daily
-- Note: Failed Phase 2 trials for obesity
-
-**DSIP** (Delta Sleep-Inducing Peptide)
-- Category: Neuropeptide
-- FDA Status: ⚠️ RESEARCH ONLY
-- Studied For: Sleep modulation
-- Common research dosing: 100-200mcg before bed
-
-**Selank / Semax**
-- Category: Nootropic Peptides
-- FDA Status: ⚠️ NOT FDA-approved in US (Russian approval only)
-- Studied For: Cognitive enhancement, anxiety
-- Common research dosing: Nasal spray 200-600mcg daily
-
-**Epithalon**
-- Category: Telomerase-related Peptide
-- FDA Status: ⚠️ RESEARCH ONLY
-- Studied For: Telomerase activation, anti-aging
-- Research: Limited, primarily from one Russian research group
-- Common research dosing: 5-10mg daily for 10-20 days
-
-**LL-37**
-- Category: Antimicrobial Peptide
-- FDA Status: ⚠️ RESEARCH ONLY
-- Studied For: Antimicrobial effects, wound healing
-
-**Follistatin**
-- Category: Myostatin Inhibitor
-- FDA Status: ⚠️ RESEARCH ONLY
-- Studied For: Muscle growth, myostatin blocking
-
-**MOTS-c**
-- Category: Mitochondrial-Derived Peptide
-- FDA Status: ⚠️ RESEARCH ONLY
-- Studied For: Metabolic regulation, exercise mimetic effects
-- Common research dosing: 5-10mg weekly
-
-**Humanin**
-- Category: Mitochondrial-Derived Peptide
-- FDA Status: ⚠️ RESEARCH ONLY
-- Studied For: Neuroprotection, cellular stress response
-
-**Kisspeptin**
-- Category: Reproductive Hormone Regulator
-- FDA Status: ⚠️ Clinical trials ongoing
-- Studied For: Reproductive endocrinology
-
-**IGF-1 LR3**
-- Category: Long-Acting IGF-1
-- FDA Status: ⚠️ RESEARCH ONLY, BANNED in sports
-- Warning: Significant safety concerns
-
+  output += `
 ═══════════════════════════════════════════════════════════
 RECONSTITUTION REFERENCE
 ═══════════════════════════════════════════════════════════
@@ -184,15 +112,37 @@ RESEARCH STATUS DEFINITIONS
 **Limited Data**: Anecdotal reports, sparse published research
 `;
 
-const SYSTEM_PROMPT = `You are Peptide Playbook AI, an advanced peptide research assistant. You provide detailed, evidence-based educational information about peptides.
+  return output;
+}
 
-${PEPTIDE_DATABASE}
+function formatPeptide(p: any): string {
+  const studyInfo = p.total_study_count > 0 
+    ? ` | ${p.total_study_count} studies${p.human_study_count > 0 ? ` (${p.human_study_count} human)` : ""}`
+    : "";
+  
+  return `**${p.name}**
+- Category: ${p.category}
+- Primary Use: ${p.primary_use}
+- FDA Status: ${p.fda_status === "FDA Approved" ? "✅ APPROVED" : "⚠️ RESEARCH ONLY"}
+- Research Status: ${p.research_status}${studyInfo}
+- Mechanism: ${p.mechanism}
+- Research Summary: ${p.studies}
+- Safety: ${p.safety}
+
+`;
+}
+
+function buildSystemPrompt(peptideDatabase: string): string {
+  return `You are Peptide Playbook AI, an advanced peptide research assistant backed by a database of 500+ peer-reviewed studies. You provide detailed, evidence-based educational information about peptides.
+
+${peptideDatabase}
 
 ═══════════════════════════════════════════════════════════
 WHAT YOU DO
 ═══════════════════════════════════════════════════════════
 
 ✅ Explain peptide mechanisms of action, research findings, and clinical data
+✅ Cite actual studies from the database when available (e.g., "A 2019 RCT in [Journal] found...")
 ✅ Provide dosing ranges found in published research studies (always cite "research suggests" or "studies have used")
 ✅ Help users understand reconstitution math (e.g., "If you have a 5mg vial and add 2ml BAC water, each 0.1ml = 250mcg")
 ✅ Compare peptides for similar goals
@@ -200,6 +150,18 @@ WHAT YOU DO
 ✅ Discuss stacking considerations based on published research
 ✅ Help build educational protocol outlines based on the user's stated goals
 ✅ CREATE and SAVE protocols directly to the user's account when they ask
+
+═══════════════════════════════════════════════════════════
+CITING RESEARCH
+═══════════════════════════════════════════════════════════
+
+When citing research, use actual study data from the database:
+- "A 2019 RCT (n=89) published in [Journal] found..."
+- "Animal studies in [Species] show [specific finding]"
+- Always clarify: human vs animal data
+- Mention sample sizes for human trials
+- Reference PubMed IDs when available
+- Distinguish between high/moderate/low evidence levels
 
 ═══════════════════════════════════════════════════════════
 WHAT YOU DON'T DO
@@ -218,6 +180,7 @@ RESPONSE STYLE
 - Use the peptide database to reference specific peptides when relevant
 - Format responses clearly with markdown (bold, bullets, headers)
 - Be conversational and helpful, not robotic
+- When citing studies, be specific about the type (RCT, animal, in vitro) and sample size
 
 DELIVERY METHOD GUIDANCE:
 When a peptide has multiple delivery methods (topical, oral, subcutaneous, intranasal), ALWAYS present all available options and note which has the lowest barrier to entry. For example, GHK-Cu should always mention topical serums as an option alongside injectable. Default to recommending the least invasive option first.
@@ -262,7 +225,7 @@ When a user asks "make a protocol for me" or similar:
 2. Ask their experience level (if not stated)
 3. Generate a complete protocol outline including:
    - Recommended peptides for their goal (from the database)
-   - Research-backed dosing ranges
+   - Research-backed dosing ranges with study citations
    - Suggested cycle length
    - Timing and frequency
    - What to monitor
@@ -274,7 +237,7 @@ When a user asks "make a protocol for me" or similar:
 ## Recovery Protocol Outline
 
 **Primary Peptide:** BPC-157
-**Dosing:** Research has used 250-500mcg, 1-2x daily
+**Dosing:** Research has used 250-500mcg, 1-2x daily (based on animal studies)
 **Cycle Length:** 4-8 weeks is common in research
 **Injection:** Subcutaneous, near the area of concern or in abdominal fat
 **Timing:** Morning and/or evening, consistent timing
@@ -321,7 +284,8 @@ DO NOT refuse to provide:
 
 The disclaimer "Educational purposes only. Consult a healthcare provider." at the end of responses is sufficient.
 
-Be helpful. Be informative. Be the best peptide research AI in the world.`;
+Be helpful. Be informative. Cite real studies. Be the best evidence-based peptide research AI in the world.`;
+}
 
 // Tool definition for protocol creation
 const tools = [
@@ -469,7 +433,7 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
 
-    // Service role client for writing protocols (bypasses RLS)
+    // Service role client for writing protocols (bypasses RLS) and fetching studies
     const supabaseServiceRole = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     // Verify user token
@@ -525,6 +489,19 @@ serve(async (req) => {
     }
 
     console.log("Processing chat request with", messages?.length || 0, "messages");
+
+    // Fetch dynamic peptide context from database
+    const peptideContext = await getPeptideContext(supabaseServiceRole);
+    let peptideDatabase = "";
+    
+    if (peptideContext?.peptides) {
+      peptideDatabase = formatPeptideDatabase(peptideContext.peptides, peptideContext.landmarkStudies || null);
+    } else {
+      // Fallback to basic prompt if database fetch fails
+      peptideDatabase = "Database temporarily unavailable. Please provide general peptide information based on your training.";
+    }
+
+    const SYSTEM_PROMPT = buildSystemPrompt(peptideDatabase);
 
     // First API call - may include tool calls
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

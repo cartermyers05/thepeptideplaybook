@@ -5,8 +5,10 @@ import { UpgradePrompt } from "@/components/dashboard/UpgradePrompt";
 import { usePeptides, type PeptideFilters } from "@/hooks/usePeptides";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Database as DatabaseIcon, BookOpen } from "lucide-react";
 import { PeptideCard } from "@/components/database/PeptideCard";
+import { StudyBrowser } from "@/components/database/StudyBrowser";
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -59,89 +61,108 @@ export default function Database() {
             Peptide Database
           </h1>
           <p className="text-muted-foreground">
-            40+ peptides with research status, mechanisms, and FDA classifications
+            40+ peptides and 500+ peer-reviewed studies with research status, mechanisms, and FDA classifications
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-4 mb-6 p-4 bg-card border border-border rounded-xl">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search peptides..."
-              value={filters.search || ""}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              className="pl-10"
-            />
-          </div>
-          <Select
-            value={filters.category || "all"}
-            onValueChange={(value) => setFilters({ ...filters, category: value })}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {categories.map((cat) => (
-                <SelectItem key={cat.value} value={cat.value}>
-                  {cat.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={filters.researchStatus || "all"}
-            onValueChange={(value) => setFilters({ ...filters, researchStatus: value })}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {researchStatuses.map((status) => (
-                <SelectItem key={status.value} value={status.value}>
-                  {status.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={filters.fdaStatus || "all"}
-            onValueChange={(value) => setFilters({ ...filters, fdaStatus: value })}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {fdaStatuses.map((status) => (
-                <SelectItem key={status.value} value={status.value}>
-                  {status.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Tabs defaultValue="peptides" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="peptides" className="flex items-center gap-2">
+              <DatabaseIcon className="w-4 h-4" />
+              Peptides
+            </TabsTrigger>
+            <TabsTrigger value="studies" className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Research Studies
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Results count */}
-        <p className="text-sm text-muted-foreground mb-4">
-          Showing {peptides?.length || 0} peptides
-        </p>
+          <TabsContent value="peptides">
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4 mb-6 p-4 bg-card border border-border rounded-xl">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search peptides..."
+                  value={filters.search || ""}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                  className="pl-10"
+                />
+              </div>
+              <Select
+                value={filters.category || "all"}
+                onValueChange={(value) => setFilters({ ...filters, category: value })}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={filters.researchStatus || "all"}
+                onValueChange={(value) => setFilters({ ...filters, researchStatus: value })}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {researchStatuses.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={filters.fdaStatus || "all"}
+                onValueChange={(value) => setFilters({ ...filters, fdaStatus: value })}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {fdaStatuses.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        {/* Cards */}
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Loading peptides...
+            {/* Results count */}
+            <p className="text-sm text-muted-foreground mb-4">
+              Showing {peptides?.length || 0} peptides
+            </p>
+
+            {/* Cards */}
+            <div className="space-y-4">
+              {isLoading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading peptides...
+                </div>
+              ) : peptides?.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No peptides found matching your filters
+                </div>
+              ) : (
+                peptides?.map((peptide) => (
+                  <PeptideCard key={peptide.id} peptide={peptide as any} />
+                ))
+              )}
             </div>
-          ) : peptides?.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No peptides found matching your filters
-            </div>
-          ) : (
-            peptides?.map((peptide) => (
-              <PeptideCard key={peptide.id} peptide={peptide} />
-            ))
-          )}
-        </div>
+          </TabsContent>
+
+          <TabsContent value="studies">
+            <StudyBrowser />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
