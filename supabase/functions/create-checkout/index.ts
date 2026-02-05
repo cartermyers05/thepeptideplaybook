@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const logStep = (step: string, details?: unknown) => {
@@ -44,27 +44,6 @@ serve(async (req) => {
     }
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const body = await req.json();
-    const { goal } = body;
-    
-    // Goal is optional - if not provided, use generic course checkout
-    let courseTitle = "Peptide Playbook AI - Full Access";
-    let courseGoal = "general";
-    
-    if (goal) {
-      courseGoal = goal.replace('-', '_');
-      // Get course template to get title
-      const { data: template } = await supabase
-        .from("course_templates")
-        .select("title")
-        .eq("goal", courseGoal)
-        .single();
-
-      courseTitle = template?.title || `${goal} Course`;
-    }
-    
-    logStep("Course selected", { goal: courseGoal, courseTitle });
-
     const stripe = new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
     });
@@ -72,9 +51,14 @@ serve(async (req) => {
     // Check if user already has a Stripe customer
     const { data: profile } = await supabase
       .from("profiles")
-      .select("stripe_customer_id")
+      .select("stripe_customer_id, subscription_status")
       .eq("user_id", user.id)
       .single();
+
+    // Check if user already has an active subscription
+    if (profile?.subscription_status === "active") {
+      throw new Error("You already have an active subscription. Go to your dashboard to manage it.");
+    }
 
     let customerId = profile?.stripe_customer_id;
 
@@ -98,21 +82,7 @@ serve(async (req) => {
       logStep("Using existing Stripe customer", { customerId });
     }
 
-    // Check if user already purchased this course (only if goal was specified)
-    if (goal) {
-      const { data: existingCourse } = await supabase
-        .from("user_courses")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("goal", courseGoal)
-        .maybeSingle();
-
-      if (existingCourse) {
-        throw new Error("You already own this course. Go to your dashboard to access it.");
-      }
-    }
-
-    // Create one-time payment session - redirect to thank-you for verification
+    // Create subscription checkout session - $29/month
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
@@ -120,20 +90,27 @@ serve(async (req) => {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: courseTitle,
-              description: 'Lifetime access to your personalized peptide course',
+              name: 'Peptide Playbook - AI Research Platform',
+              description: 'Full access to AI research assistant, peptide database, protocol builder, and more',
             },
-            unit_amount: 6700, // $67.00
+            unit_amount: 2900, // $29.00
+            recurring: {
+              interval: 'month',
+            },
           },
           quantity: 1,
         },
       ],
-      mode: "payment",
-      success_url: `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
+      mode: "subscription",
+      success_url: `${req.headers.get("origin")}/dashboard?subscription=success`,
       cancel_url: `${req.headers.get("origin")}/checkout`,
       metadata: {
         user_id: user.id,
-        goal: courseGoal,
+      },
+      subscription_data: {
+        metadata: {
+          user_id: user.id,
+        },
       },
     });
 

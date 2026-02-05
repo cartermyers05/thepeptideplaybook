@@ -4,12 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-const PRODUCTS = {
-  monthly: "prod_TueSqjXVh5aZq6",
-  annual: "prod_TueSlWOMfS2CwG",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const logStep = (step: string, details?: unknown) => {
@@ -68,7 +63,6 @@ serve(async (req) => {
     });
 
     const hasActiveSub = subscriptions.data.length > 0;
-    let plan: string | null = null;
     let subscriptionEnd: string | null = null;
     let subscriptionId: string | null = null;
 
@@ -77,24 +71,16 @@ serve(async (req) => {
       subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       subscriptionId = subscription.id;
       
-      // Determine plan from product ID
-      const productId = subscription.items.data[0].price.product as string;
-      if (productId === PRODUCTS.monthly) {
-        plan = "monthly";
-      } else if (productId === PRODUCTS.annual) {
-        plan = "annual";
-      } else {
-        plan = "unknown";
-      }
-      
-      logStep("Active subscription found", { subscriptionId, plan, endDate: subscriptionEnd });
+      logStep("Active subscription found", { subscriptionId, endDate: subscriptionEnd });
 
       // Update profile with subscription info
       await supabaseClient
         .from("profiles")
         .update({ 
-          tier: plan === "annual" ? "annual" : "monthly",
+          tier: "member",
           subscription_status: "active",
+          stripe_customer_id: customerId,
+          stripe_subscription_id: subscriptionId
         })
         .eq("user_id", user.id);
     } else {
@@ -105,13 +91,14 @@ serve(async (req) => {
         .from("profiles")
         .update({ 
           subscription_status: "inactive",
+          tier: "free"
         })
         .eq("user_id", user.id);
     }
 
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
-      plan,
+      tier: hasActiveSub ? "member" : "free",
       subscription_end: subscriptionEnd,
       subscription_id: subscriptionId,
     }), {
