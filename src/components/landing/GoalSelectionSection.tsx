@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Flame, Dumbbell, Heart, Clock, Brain, Compass } from "lucide-react";
+import { Flame, Dumbbell, Heart, Clock, Brain, Compass, Sparkles } from "lucide-react";
 import { FloatingOrbs } from "./FloatingOrbs";
 
 const goals = [
@@ -38,6 +38,13 @@ const goals = [
     title: "Sharpen Mind",
     description: "Focus, memory, clarity",
     gradient: "linear-gradient(135deg, hsl(160 70% 45%) 0%, hsl(170 65% 35%) 100%)",
+  },
+  {
+    id: "aesthetics",
+    icon: Sparkles,
+    title: "Look Better",
+    description: "Skin, hair, and aesthetics",
+    gradient: "linear-gradient(135deg, hsl(330 70% 55%) 0%, hsl(350 65% 45%) 100%)",
   },
   {
     id: "beginner",
