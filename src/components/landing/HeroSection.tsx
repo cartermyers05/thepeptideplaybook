@@ -3,9 +3,6 @@ import { Link } from "react-router-dom";
 import { PillButton } from "./PillButton";
 import { ChatPreviewCard, CoursePreviewCard, DigestPreviewCard } from "./HeroProductCards";
 
-// Rainbow gradient colors from brand logo
-const rainbowGradient = "linear-gradient(90deg, hsl(45, 80%, 50%), hsl(25, 90%, 55%), hsl(350, 80%, 55%), hsl(270, 70%, 55%), hsl(210, 80%, 55%), hsl(160, 70%, 45%), hsl(45, 80%, 50%))";
-
 export function HeroSection() {
   return (
     <section className="relative min-h-screen pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
@@ -21,27 +18,7 @@ export function HeroSection() {
               transition={{ duration: 0.6 }}
             >
               <span className="block text-foreground">Your</span>
-              <span className="block relative text-foreground">
-                AI Peptide
-                {/* Rainbow underline that draws itself */}
-                <motion.div
-                  className="absolute -bottom-1 left-0 h-1.5 w-full rounded-full"
-                  style={{
-                    background: rainbowGradient,
-                    backgroundSize: "200% 100%",
-                    transformOrigin: "left",
-                  }}
-                  initial={{ scaleX: 0 }}
-                  animate={{ 
-                    scaleX: 1,
-                    backgroundPosition: ["0% 0%", "100% 0%", "0% 0%"],
-                  }}
-                  transition={{
-                    scaleX: { delay: 0.4, duration: 0.6, ease: "easeOut" },
-                    backgroundPosition: { duration: 4, ease: "linear", repeat: Infinity, delay: 1 },
-                  }}
-                />
-              </span>
+               <span className="block text-foreground">AI Peptide</span>
               <span className="block text-foreground">Journey</span>
             </motion.h1>
 
