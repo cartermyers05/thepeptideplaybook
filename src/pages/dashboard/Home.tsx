@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, MessageCircle, FlaskConical, BookOpen } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -119,18 +119,15 @@ export default function Dashboard() {
           >
             <div className="h-1 dashboard-gradient-purple" />
             <div className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-                  <FlaskConical className="w-5 h-5 text-purple-600" />
-                </div>
-                <span className="text-sm font-medium text-muted-foreground">Active Protocol</span>
-              </div>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Active Protocol
+              </span>
               {isLoadingProtocol ? (
-                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-7 w-32 mt-2" />
               ) : protocol ? (
-                <p className="font-semibold text-foreground truncate">{protocol.protocol_name}</p>
+                <p className="text-xl font-bold text-foreground mt-2 truncate">{protocol.protocol_name}</p>
               ) : (
-                <p className="text-sm text-muted-foreground">No active protocol</p>
+                <p className="text-lg text-muted-foreground mt-2">None yet</p>
               )}
             </div>
           </motion.button>
@@ -144,16 +141,15 @@ export default function Dashboard() {
           >
             <div className="h-1 dashboard-gradient-blue" />
             <div className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5 text-blue-600" />
-                </div>
-                <span className="text-sm font-medium text-muted-foreground">AI Research</span>
-              </div>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                AI Research
+              </span>
               {isLoadingConversations ? (
-                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-7 w-24 mt-2" />
+              ) : conversationCount > 0 ? (
+                <p className="text-xl font-bold text-foreground mt-2">{conversationCount} conversations</p>
               ) : (
-                <p className="font-semibold text-foreground">{conversationCount} conversations</p>
+                <p className="text-lg text-muted-foreground mt-2">Start exploring</p>
               )}
             </div>
           </motion.button>
@@ -167,13 +163,10 @@ export default function Dashboard() {
           >
             <div className="h-1 dashboard-gradient-teal" />
             <div className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-teal-600" />
-                </div>
-                <span className="text-sm font-medium text-muted-foreground">Peptide Database</span>
-              </div>
-              <p className="font-semibold text-foreground">40+ peptides</p>
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Peptide Database
+              </span>
+              <p className="text-xl font-bold text-foreground mt-2">40+ peptides</p>
             </div>
           </motion.button>
         </div>
@@ -217,11 +210,11 @@ export default function Dashboard() {
             <div className="dashboard-card overflow-visible">
               <div className="h-1 dashboard-gradient-orange" />
               <div className="p-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <p className="font-semibold text-foreground">Ask your first question</p>
+                <div className="mb-5">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Get Started
+                  </span>
+                  <p className="text-xl font-bold text-foreground mt-2">Ask your first question</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {starterPrompts.map((prompt, index) => (
