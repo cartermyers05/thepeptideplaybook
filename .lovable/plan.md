@@ -1,125 +1,207 @@
 
 
-# Peptide Database Enhancement: Add Quick Context
+# Peptide Database: Enhanced Card Layout with More Data
 
-## Current State
+## Current Problem
 
-The peptide table shows these columns in the collapsed view:
-| Peptide Name | Category | Primary Use | Research | FDA Status |
-|--------------|----------|-------------|----------|------------|
+The collapsed view shows:
+- Name
+- Primary use
+- Mechanism (1 line, truncated)
+- Category + badges
 
-When you click to expand, you see:
-- Mechanism of Action
-- What Research Shows
-- Safety Considerations
-- Related Peptides
-
-## Problem
-
-Users have to click to expand every row to understand what a peptide actually *does*. The "Primary Use" column helps but it's brief (e.g., "Tissue repair, gut healing").
+Users want to see **more data upfront** without expanding. The `studies` and `safety` fields have valuable content that's hidden.
 
 ---
 
-## Proposed Enhancement
+## Solution: Rich Card Layout
 
-Add a **one-line summary** visible in the collapsed row — a short "elevator pitch" that helps users quickly understand what the peptide is for without needing to expand.
-
-### Option A: Add a "Quick Summary" Line Below the Row (Recommended)
-
-Show a subtle one-liner beneath the main row content that summarizes the mechanism:
+Transform each peptide row into a more substantial card that displays **4 key pieces of information** at a glance:
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────┐
-│ BPC-157      │ Recovery │ Tissue repair, gut healing │ moderate │ Cat 2│
-│ ─────────────────────────────────────────────────────────────────────── │
-│ Promotes angiogenesis and supports tissue repair pathways              │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
-**Implementation:**
-- Truncate the `mechanism` field to ~80 characters
-- Display it in a smaller, muted text style below the main row content
-- Still keep the full expanded view for detailed information
-
-### Option B: Replace Table with Cards
-
-Switch from a table to a card-based layout that naturally accommodates more content:
-
-```text
-┌────────────────────────────────────────┐
-│ BPC-157                     [moderate] │
-│ Recovery • Category 2                  │
-│                                        │
-│ Tissue repair, gut healing             │
-│ Promotes angiogenesis and supports     │
-│ tissue repair pathways.                │
-│                                        │
-│ [View Details]                         │
-└────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────┐
+│ Semaglutide                                              GLP-1 │ strong │ │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│ Weight management, blood sugar control                                     │
+│                                                                            │
+│ How it works                                                               │
+│ GLP-1 receptor agonist that slows gastric emptying, increases satiety...  │
+│                                                                            │
+│ What research shows                                                        │
+│ Extensive clinical trials including STEP trials showing 15-20% body...    │
+│                                                                            │
+│ ⚠ Key safety note                                                         │
+│ Common side effects include nausea, vomiting, diarrhea...                 │
+│                                                                            │
+│ FDA Approved • Related: Tirzepatide, Liraglutide           [View full ▼]  │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Recommended: Option A (Inline Summary)
+## Data Displayed in Collapsed View
 
-Keep the efficient table format but add a preview of the mechanism.
+| Field | Display | Treatment |
+|-------|---------|-----------|
+| **Name** | Header row | Bold, larger text |
+| **Primary Use** | Subtitle | Featured prominently below name |
+| **Category + Research Status** | Header badges | Top right corner |
+| **Mechanism** | "How it works" section | 2 lines max (`line-clamp-2`) |
+| **Studies** | "What research shows" section | 2 lines max (`line-clamp-2`) |
+| **Safety** | "Key safety note" section | 2 lines max, with ⚠ icon for emphasis |
+| **FDA Status** | Footer badge | Bottom with related peptides |
+| **Related Peptides** | Footer inline | Comma-separated list |
+
+---
+
+## Visual Design
+
+Use a card-based layout instead of table rows:
+
+```tsx
+<div className="space-y-4">
+  {peptides?.map((peptide) => (
+    <PeptideCard key={peptide.id} peptide={peptide} />
+  ))}
+</div>
+```
+
+Each card has:
+- **Header**: Name + category badge + research status badge
+- **Body**: 3 labeled sections (mechanism, studies, safety) each with `line-clamp-2`
+- **Footer**: FDA status + related peptides + expand chevron
+- **Expanded state**: Shows full text for all fields
+
+---
+
+## Implementation Details
 
 ### File: `src/pages/dashboard/Database.tsx`
 
-**Changes to PeptideRow component:**
-
-1. **Add mechanism preview** — Show first ~100 characters of the mechanism in a subtle line
-2. **Improve row structure** — Make the name/primary use more prominent
-3. **Show "at a glance" info** — Primary use as a tagline under the name
-
-**Before (collapsed row):**
-```
-│ BPC-157 │ Recovery │ Tissue repair, gut healing │ [moderate] │ [Cat 2] │ ▼ │
-```
-
-**After (collapsed row with preview):**
-```
-│ BPC-157                                                        │
-│ Tissue repair, gut healing                                     │
-│ Promotes angiogenesis, modulates nitric oxide system...       │
-│ Recovery • [moderate] • [Cat 2]                                │ ▼ │
-```
-
-### Specific Changes
-
-**Row structure update:**
-- Stack content vertically in the first cell
-- Move category/badges into a single inline row
-- Add truncated mechanism preview
+Replace `PeptideRow` with `PeptideCard`:
 
 ```tsx
-<tr className="border-b border-border hover:bg-muted/50 cursor-pointer">
-  <td className="p-4" colSpan={5}>
-    <div className="space-y-1">
-      <h3 className="font-semibold text-foreground">{peptide.name}</h3>
-      <p className="text-sm text-muted-foreground">{peptide.primary_use}</p>
-      <p className="text-xs text-muted-foreground/70 line-clamp-1">
-        {peptide.mechanism}
-      </p>
-      <div className="flex items-center gap-2 pt-1">
-        <span className="text-xs text-muted-foreground">{peptide.category}</span>
-        <span className="text-muted-foreground/40">•</span>
-        <Badge ...>{peptide.research_status}</Badge>
-        <Badge ...>{peptide.fda_status}</Badge>
+function PeptideCard({ peptide }: { peptide: Peptide }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <motion.div 
+      className="dashboard-card"
+      onClick={() => setExpanded(!expanded)}
+    >
+      {/* Gradient top bar */}
+      <div className="h-1 dashboard-gradient-teal" />
+      
+      <div className="p-5">
+        {/* Header: Name + Badges */}
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">
+              {peptide.name}
+            </h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {peptide.primary_use}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Badge>{peptide.category}</Badge>
+            <Badge>{peptide.research_status}</Badge>
+          </div>
+        </div>
+
+        {/* 3 Info Sections */}
+        <div className="space-y-3 text-sm">
+          {/* Mechanism */}
+          <div>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              How it works
+            </span>
+            <p className={cn(
+              "text-foreground mt-1",
+              !expanded && "line-clamp-2"
+            )}>
+              {peptide.mechanism}
+            </p>
+          </div>
+
+          {/* Studies */}
+          <div>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              What research shows
+            </span>
+            <p className={cn(
+              "text-foreground mt-1",
+              !expanded && "line-clamp-2"
+            )}>
+              {peptide.studies}
+            </p>
+          </div>
+
+          {/* Safety */}
+          <div>
+            <span className="text-xs font-medium text-amber-600 uppercase tracking-wider flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              Key safety note
+            </span>
+            <p className={cn(
+              "text-foreground mt-1",
+              !expanded && "line-clamp-2"
+            )}>
+              {peptide.safety}
+            </p>
+          </div>
+        </div>
+
+        {/* Footer: FDA + Related + Expand */}
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+          <div className="flex items-center gap-3">
+            <Badge>{peptide.fda_status}</Badge>
+            {peptide.related_peptides?.length > 0 && (
+              <span className="text-xs text-muted-foreground">
+                Related: {peptide.related_peptides.join(", ")}
+              </span>
+            )}
+          </div>
+          <button className="text-xs text-muted-foreground flex items-center gap-1">
+            {expanded ? "Show less" : "View full"}
+            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
+        </div>
       </div>
-    </div>
-  </td>
-  <td className="p-4">
-    <ChevronDown/Up />
-  </td>
-</tr>
+    </motion.div>
+  );
+}
 ```
 
-### Mobile Considerations
+### Layout Change
 
-The stacked layout works better on mobile than the wide table. Add responsive behavior:
-- On desktop: Keep table header visible
-- On mobile: Hide table header, each row becomes a self-contained card
+Switch from `<table>` to card list:
+
+```tsx
+{/* Cards */}
+<div className="space-y-4">
+  {isLoading ? (
+    <div className="text-center py-8">Loading...</div>
+  ) : peptides?.length === 0 ? (
+    <div className="text-center py-8">No peptides found</div>
+  ) : (
+    peptides?.map((peptide) => (
+      <PeptideCard key={peptide.id} peptide={peptide} />
+    ))
+  )}
+</div>
+```
+
+---
+
+## Key Benefits
+
+1. **6x more data visible**: Mechanism, studies, AND safety all shown upfront
+2. **Scannable sections**: Labeled headers make it easy to find specific info
+3. **Safety highlighted**: Amber-colored label draws attention to important warnings
+4. **Context preserved**: Related peptides visible without expanding
+5. **Still expandable**: Users can click to see full text when needed
 
 ---
 
@@ -127,35 +209,5 @@ The stacked layout works better on mobile than the wide table. Add responsive be
 
 | File | Changes |
 |------|---------|
-| `src/pages/dashboard/Database.tsx` | Restructure `PeptideRow` to show stacked content with mechanism preview. Update table header for new layout. Add responsive styles for mobile. |
-
----
-
-## Visual Result
-
-**Desktop:**
-```text
-┌─────────────────────────────────────────────────────────────────────────┐
-│ Search...              │ Category ▼ │ Research ▼ │ FDA Status ▼        │
-├─────────────────────────────────────────────────────────────────────────┤
-│ Semaglutide                                                           ▼ │
-│ Weight management, blood sugar control                                  │
-│ GLP-1 receptor agonist that slows gastric emptying, increases satiety..│
-│ GLP-1 • strong • FDA Approved                                           │
-├─────────────────────────────────────────────────────────────────────────┤
-│ BPC-157                                                               ▼ │
-│ Tissue repair, gut healing                                              │
-│ Promotes angiogenesis, modulates nitric oxide system, supports tissue.. │
-│ Recovery • moderate • Category 2                                        │
-└─────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Benefits
-
-- **Scannable**: Users can understand each peptide without clicking
-- **Efficient**: Still uses a compact table format
-- **Informative**: Mechanism preview gives the "how it works" context
-- **Consistent**: Keeps the expand/collapse for full details
+| `src/pages/dashboard/Database.tsx` | Replace table-based `PeptideRow` with card-based `PeptideCard`. Add `AlertTriangle` icon import. Switch from `<table>` layout to `<div>` card list. Add Framer Motion for hover states. |
 
