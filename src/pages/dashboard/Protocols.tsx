@@ -1,22 +1,23 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Sparkles, Download, Printer, AlertTriangle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Download, Printer, AlertTriangle, Flame, Dumbbell, Heart, Brain, FlaskConical } from "lucide-react";
 import { useProtocol } from "@/hooks/useProtocol";
 import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 import { AIDisclaimerModal } from "@/components/chat/AIDisclaimerModal";
 
 const GOALS = [
-  { id: "fat_loss", label: "Fat Loss", description: "Metabolic optimization & appetite control" },
-  { id: "muscle_recovery", label: "Muscle & Recovery", description: "Enhanced repair & performance" },
-  { id: "injury_recovery", label: "Injury Recovery", description: "Accelerated tissue healing" },
-  { id: "anti_aging", label: "Anti-Aging", description: "Longevity & cellular health" },
-  { id: "cognitive", label: "Cognitive Enhancement", description: "Focus, memory & neuroprotection" },
-  { id: "general_wellness", label: "General Wellness", description: "Overall health optimization" },
+  { id: "fat_loss", label: "Fat Loss", description: "Metabolic optimization & appetite control", icon: Flame, gradient: "from-rose-400 to-orange-400", iconBg: "bg-rose-100", iconColor: "text-rose-600" },
+  { id: "muscle_recovery", label: "Muscle & Recovery", description: "Enhanced repair & performance", icon: Dumbbell, gradient: "from-blue-400 to-indigo-500", iconBg: "bg-blue-100", iconColor: "text-blue-600" },
+  { id: "injury_recovery", label: "Injury Recovery", description: "Accelerated tissue healing", icon: Heart, gradient: "from-green-400 to-emerald-500", iconBg: "bg-green-100", iconColor: "text-green-600" },
+  { id: "anti_aging", label: "Anti-Aging", description: "Longevity & cellular health", icon: Sparkles, gradient: "from-purple-400 to-violet-500", iconBg: "bg-purple-100", iconColor: "text-purple-600" },
+  { id: "cognitive", label: "Cognitive Enhancement", description: "Focus, memory & neuroprotection", icon: Brain, gradient: "from-amber-400 to-yellow-500", iconBg: "bg-amber-100", iconColor: "text-amber-600" },
+  { id: "general_wellness", label: "General Wellness", description: "Overall health optimization", icon: FlaskConical, gradient: "from-teal-400 to-cyan-500", iconBg: "bg-teal-100", iconColor: "text-teal-600" },
 ];
 
 const EXPERIENCE_LEVELS = [
@@ -99,51 +100,63 @@ export default function Protocols() {
   if (protocol && protocol.status !== "not_started" && step === 1) {
     return (
       <DashboardLayout>
-        <div className="space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Your Protocol</h1>
+            <h1 className="text-3xl font-bold text-foreground">Your Protocol</h1>
             <p className="text-muted-foreground">Currently active protocol</p>
           </div>
 
-          <Card className="border-border bg-card">
-            <CardHeader>
-              <div className="flex items-center justify-between">
+          <div className="dashboard-card">
+            <div className="h-1.5 dashboard-gradient-purple" />
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <CardTitle className="text-foreground">{protocol.protocol_name}</CardTitle>
-                  <CardDescription>
+                  <h2 className="text-xl font-semibold text-foreground">{protocol.protocol_name}</h2>
+                  <p className="text-muted-foreground">
                     Week {protocol.current_week} of {protocol.cycle_length_weeks} • Day {protocol.current_day}
-                  </CardDescription>
+                  </p>
                 </div>
-                <Badge variant={protocol.status === "active" ? "default" : "secondary"}>
+                <Badge variant={protocol.status === "active" ? "default" : "secondary"} className="rounded-full">
                   {protocol.status}
                 </Badge>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {protocol.peptides.map((peptide, index) => (
-                <div key={index} className="p-4 rounded-lg bg-muted/50 border border-border">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-foreground">{peptide.name}</h3>
-                    <Badge variant="outline">{peptide.frequency}</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-2">{peptide.purpose}</p>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div><span className="text-muted-foreground">Dosage:</span> {peptide.dosage}</div>
-                    <div><span className="text-muted-foreground">Timing:</span> {peptide.timing}</div>
-                    {peptide.site && <div className="col-span-2"><span className="text-muted-foreground">Site:</span> {peptide.site}</div>}
-                  </div>
-                </div>
-              ))}
+              
+              <div className="space-y-4">
+                {protocol.peptides.map((peptide, index) => (
+                  <motion.div 
+                    key={index} 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="p-4 rounded-xl bg-muted/50 border border-border"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-foreground">{peptide.name}</h3>
+                      <Badge variant="outline" className="rounded-full">{peptide.frequency}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">{peptide.purpose}</p>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div><span className="text-muted-foreground">Dosage:</span> {peptide.dosage}</div>
+                      <div><span className="text-muted-foreground">Timing:</span> {peptide.timing}</div>
+                      {peptide.site && <div className="col-span-2"><span className="text-muted-foreground">Site:</span> {peptide.site}</div>}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
 
-              <div className="flex gap-3 pt-4">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
+              <div className="flex gap-3 pt-6">
+                <Button variant="outline" className="flex-1 rounded-full" onClick={() => setStep(1)}>
                   <Sparkles className="w-4 h-4 mr-2" />
                   Create New Protocol
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
+        </motion.div>
       </DashboardLayout>
     );
   }
@@ -155,10 +168,14 @@ export default function Protocols() {
         <AIDisclaimerModal onAccepted={() => {}} />
       )}
 
-      <div className="space-y-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-8"
+      >
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Protocol Builder</h1>
+          <h1 className="text-3xl font-bold text-foreground">Protocol Builder</h1>
           <p className="text-muted-foreground">Create your personalized peptide protocol</p>
         </div>
 
@@ -172,31 +189,62 @@ export default function Protocols() {
         </div>
 
         {/* Step Content */}
-        <Card className="border-border bg-card">
-          <CardContent className="pt-6">
+        <div className="dashboard-card">
+          <div className="h-1.5 dashboard-gradient-purple" />
+          <div className="p-6">
             {/* Step 1: Primary Goal */}
             {step === 1 && (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">What's your primary goal?</h2>
-                  <p className="text-sm text-muted-foreground">Select the main outcome you want to achieve</p>
+                  <h2 className="text-xl font-semibold text-foreground">What's your primary goal?</h2>
+                  <p className="text-muted-foreground">Select the main outcome you want to achieve</p>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {GOALS.map((goal) => (
-                    <button
-                      key={goal.id}
-                      onClick={() => setPrimaryGoal(goal.id)}
-                      className={cn(
-                        "p-4 rounded-lg border text-left transition-all",
-                        primaryGoal === goal.id
-                          ? "border-primary bg-primary/10"
-                          : "border-border hover:border-primary/50 hover:bg-muted/50"
-                      )}
-                    >
-                      <h3 className="font-medium text-foreground">{goal.label}</h3>
-                      <p className="text-sm text-muted-foreground">{goal.description}</p>
-                    </button>
-                  ))}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {GOALS.map((goal, index) => {
+                    const Icon = goal.icon;
+                    return (
+                      <motion.button
+                        key={goal.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(0,0,0,0.1)" }}
+                        onClick={() => setPrimaryGoal(goal.id)}
+                        className={cn(
+                          "relative overflow-hidden p-5 rounded-2xl border text-left transition-all group",
+                          primaryGoal === goal.id
+                            ? "border-foreground bg-foreground text-background"
+                            : "border-border hover:border-foreground/30"
+                        )}
+                      >
+                        {/* Gradient overlay on hover */}
+                        <div className={cn(
+                          "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity",
+                          goal.gradient
+                        )} />
+                        
+                        <div className="relative">
+                          <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center mb-3",
+                            primaryGoal === goal.id ? "bg-background/20" : goal.iconBg
+                          )}>
+                            <Icon className={cn(
+                              "w-5 h-5",
+                              primaryGoal === goal.id ? "text-background" : goal.iconColor
+                            )} />
+                          </div>
+                          <h3 className={cn(
+                            "font-semibold mb-1",
+                            primaryGoal === goal.id ? "text-background" : "text-foreground"
+                          )}>{goal.label}</h3>
+                          <p className={cn(
+                            "text-sm",
+                            primaryGoal === goal.id ? "text-background/70" : "text-muted-foreground"
+                          )}>{goal.description}</p>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -335,8 +383,8 @@ export default function Protocols() {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Navigation */}
         {step < 5 && (
@@ -345,18 +393,19 @@ export default function Protocols() {
               variant="outline"
               onClick={handleBack}
               disabled={step === 1}
+              className="rounded-full"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
 
             {step < 4 ? (
-              <Button onClick={handleNext} disabled={!canProceed()}>
+              <Button onClick={handleNext} disabled={!canProceed()} className="rounded-full">
                 Next
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
-              <Button onClick={handleGenerate} disabled={isGenerating || !canProceed()}>
+              <Button onClick={handleGenerate} disabled={isGenerating || !canProceed()} className="rounded-full">
                 {isGenerating ? (
                   <>Generating...</>
                 ) : (
@@ -369,7 +418,7 @@ export default function Protocols() {
             )}
           </div>
         )}
-      </div>
+      </motion.div>
     </DashboardLayout>
   );
 }
