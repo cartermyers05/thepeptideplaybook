@@ -1,263 +1,143 @@
 
+# Add 15 New Public Guide Pages
 
-# Peer-Reviewed Studies Database: 500+ Curated Citations
+## Overview
 
-## Current State Analysis
+Add 15 comprehensive, SEO-optimized guide pages using the exact same template, components, and styling as existing guides (BPC157Guide, SemaglutideGuide, TB500SideEffects, etc.). No changes to any existing design or code.
 
-The platform currently has:
-- **41 peptides** in the database with basic `studies` text fields
-- **Hardcoded knowledge base** in the chat edge function (~185 lines of static peptide info)
-- **11 published articles** with JSON-based citations
-- No structured, queryable studies database
+## Existing Template Pattern
 
-The AI chatbot uses a **static PEPTIDE_DATABASE** string embedded in the system prompt, not a dynamic database.
+Each guide follows this established structure:
+1. **Imports**: GuideLayout, QuickAnswerBox, BottomLineBox, GuideFAQ, GuideCTA, GuideDisclaimer, RelatedGuides, GuideTableOfContents, PrimarySources, WhatWeDontKnow, EvidenceTable, GuideChangelog
+2. **Data constants**: tocItems, faqItems, relatedGuides, evidenceStudies, changelogEntries
+3. **Schema objects**: articleSchema (JSON-LD), faqSchema (JSON-LD)
+4. **Component structure**: GuideLayout wrapper -> flex layout with TOC sidebar + article content
 
----
+## Files to Create (15 new guide pages)
 
-## Solution Architecture
+| File | URL | Category |
+|------|-----|----------|
+| `src/pages/guides/GHKCuCompleteGuide.tsx` | /guides/ghk-cu-complete-guide | Recovery & Healing |
+| `src/pages/guides/GHKCuTopicalVsInjectable.tsx` | /guides/ghk-cu-topical-vs-injectable | Recovery & Healing |
+| `src/pages/guides/SS31Peptide.tsx` | /guides/ss-31-peptide | Recovery & Healing |
+| `src/pages/guides/Melanotan2Guide.tsx` | /guides/melanotan-2 | Other |
+| `src/pages/guides/HGHPeptidesGuide.tsx` | /guides/hgh-peptides | Recovery & Healing |
+| `src/pages/guides/EpitalonPeptide.tsx` | /guides/epitalon-peptide | Other |
+| `src/pages/guides/BestPeptidesWeightLoss.tsx` | /guides/best-peptides-weight-loss | Weight Loss |
+| `src/pages/guides/BestPeptidesMuscleGrowth.tsx` | /guides/best-peptides-muscle-growth | Recovery & Healing |
+| `src/pages/guides/TB500ResearchGuide.tsx` | /guides/tb-500-research-guide | Recovery & Healing |
+| `src/pages/guides/NADPeptides.tsx` | /guides/nad-peptides | Other |
+| `src/pages/guides/VIPPeptide.tsx` | /guides/vip-peptide | Other |
+| `src/pages/guides/PeptideReconstitutionGuide.tsx` | /guides/peptide-reconstitution | How-To |
+| `src/pages/guides/PeptidesForBeginners.tsx` | /guides/peptides-for-beginners | How-To |
+| `src/pages/guides/IGF1PeptideGuide.tsx` | /guides/igf-1-peptide | Recovery & Healing |
+| `src/pages/guides/HGHFragmentGuide.tsx` | /guides/hgh-fragment | Weight Loss |
 
-### Phase 1: Database Schema
+## Files to Modify
 
-Create a new `studies` table to store 500+ peer-reviewed citations:
+### 1. `src/App.tsx`
+Add 15 new route imports and Route definitions following existing pattern.
 
-```sql
-CREATE TABLE studies (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  -- Core citation data
-  pubmed_id TEXT UNIQUE,
-  doi TEXT,
-  title TEXT NOT NULL,
-  authors TEXT[],
-  journal TEXT NOT NULL,
-  publication_year INTEGER NOT NULL,
-  publication_date DATE,
-  
-  -- Study characteristics
-  study_type TEXT NOT NULL, -- 'randomized_controlled_trial', 'meta_analysis', 'cohort', 'animal', 'in_vitro', 'case_study'
-  species TEXT[], -- ['human', 'mouse', 'rat', 'pig', 'dog']
-  sample_size INTEGER,
-  
-  -- Content
-  abstract TEXT,
-  key_findings TEXT NOT NULL, -- AI-friendly summary
-  dosing_info TEXT, -- Extracted dosing from study
-  safety_findings TEXT,
-  
-  -- Categorization
-  peptide_ids UUID[], -- Links to peptides table
-  peptide_names TEXT[] NOT NULL, -- ['BPC-157', 'TB-500'] for quick filtering
-  research_areas TEXT[], -- ['tissue_repair', 'gut_healing', 'tendon']
-  
-  -- Quality indicators
-  evidence_level TEXT, -- 'high', 'moderate', 'low', 'very_low' (GRADE scale)
-  is_landmark_study BOOLEAN DEFAULT FALSE,
-  
-  -- Source links
-  pubmed_url TEXT,
-  full_text_url TEXT,
-  
-  -- Metadata
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  verified_at TIMESTAMPTZ, -- When was this citation verified
-  verified_by TEXT -- 'automated' or 'manual_review'
-);
+### 2. `src/pages/Guides.tsx`
+Add 15 new entries to the `guides` array and add "other" category to the categories filter.
 
--- Index for peptide-based lookups
-CREATE INDEX idx_studies_peptide_names ON studies USING GIN (peptide_names);
+### 3. `public/sitemap.xml`
+Add 15 new URL entries for the guide pages.
 
--- Index for filtering by study quality
-CREATE INDEX idx_studies_evidence ON studies (evidence_level, study_type);
-```
+## Technical Requirements per Guide
 
-### Phase 2: Peptide-Studies Junction Table
+Each guide will include:
 
-Link peptides to their supporting studies:
+### SEO Meta Tags (via GuideLayout + SEOHead)
+- Title: "[Guide Title] | Peptide Playbook"
+- Description: TL;DR text from prompt
+- Canonical URL
+- Open Graph tags (og:title, og:description, og:type=article)
 
-```sql
-CREATE TABLE peptide_studies (
-  peptide_id UUID REFERENCES peptides(id) ON DELETE CASCADE,
-  study_id UUID REFERENCES studies(id) ON DELETE CASCADE,
-  relevance TEXT, -- 'primary', 'supportive', 'contradictory'
-  PRIMARY KEY (peptide_id, study_id)
-);
-```
+### JSON-LD Schemas (via Helmet)
+```javascript
+// Article Schema
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Guide title",
+  "datePublished": "2026-02-05",
+  "dateModified": "2026-02-05",
+  "author": { "@type": "Organization", "name": "Peptide Playbook" },
+  "publisher": { "@type": "Organization", "name": "Peptide Playbook" }
+}
 
-### Phase 3: Enhanced Peptides Table
-
-Add structured citation data to the existing peptides:
-
-```sql
-ALTER TABLE peptides 
-ADD COLUMN key_studies JSONB, -- Top 3-5 landmark studies per peptide
-ADD COLUMN total_study_count INTEGER DEFAULT 0,
-ADD COLUMN human_study_count INTEGER DEFAULT 0,
-ADD COLUMN last_study_update TIMESTAMPTZ;
-```
-
----
-
-## AI Integration Strategy
-
-### Dynamic Knowledge Base for Chatbot
-
-Replace the static `PEPTIDE_DATABASE` string with a dynamic retrieval system:
-
-**File: `supabase/functions/chat/index.ts`**
-
-1. **On conversation start**, fetch relevant peptide + study data based on user query
-2. **Build context dynamically** with actual PubMed citations
-3. **Include study counts** and evidence levels in responses
-
-```typescript
-// Fetch peptide data with studies
-async function getPeptideContext(peptideNames: string[], supabase) {
-  const { data: peptides } = await supabase
-    .from('peptides')
-    .select('*')
-    .in('name', peptideNames);
-
-  const { data: studies } = await supabase
-    .from('studies')
-    .select('*')
-    .overlaps('peptide_names', peptideNames)
-    .order('evidence_level', { ascending: true })
-    .limit(20);
-
-  return formatForSystemPrompt(peptides, studies);
+// FAQ Schema (generated from faqItems array)
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [...faqItems mapped to Question/Answer format]
 }
 ```
 
-### System Prompt Enhancement
+### Content Structure per Guide
+1. **QuickAnswerBox**: TL;DR, "Last Updated: February 2026", read time
+2. **H1 Title**
+3. **Sections with h2 headings** (each with unique IDs for TOC)
+4. **EvidenceTable** (where applicable)
+5. **WhatWeDontKnow** section
+6. **PrimarySources** component
+7. **GuideChangelog**: "Feb 5, 2026 - Initial publication"
+8. **GuideFAQ**: FAQ accordion with 5-8 questions
+9. **BottomLineBox**: Summary
+10. **RelatedGuides**: 2-3 links to related guides
+11. **GuideCTA**: Links to /dashboard/chat and /signup
+12. **GuideDisclaimer**: Medical disclaimer
 
-Include citation instructions in the AI prompt:
+### Internal Linking Strategy
+Each guide will link to 2-3 related guides in the content body and RelatedGuides section:
+- GHK-Cu Complete Guide → GHK-Cu Topical vs Injectable, Reconstitution Guide
+- HGH Peptides → CJC-1295 Safety, Epitalon
+- Best Peptides for Weight Loss → Semaglutide Guide, Tirzepatide vs Semaglutide
+- etc.
 
-```text
-When citing research, use actual study data:
-- "A 2019 RCT (n=89) published in [Journal] found..."
-- "Animal studies show [specific finding]"
-- Always clarify: human vs animal data
-- Mention sample sizes for human trials
-- Reference PubMed IDs when available
-```
+## Categories Update
 
----
-
-## Data Population Strategy
-
-### Phase 1: Seed 500+ Studies
-
-Method: **Combination of automated + manual curation**
-
-| Source | Expected Count | Method |
-|--------|----------------|--------|
-| PubMed API | 300+ | Automated search by peptide name |
-| Existing article citations | 50+ | Extract from articles.citations JSON |
-| Manual curation | 150+ | Research team adds landmark studies |
-
-### Automated PubMed Scraper (Edge Function)
-
-Create `supabase/functions/scrape-pubmed/index.ts`:
-
-```typescript
-// Search PubMed for peptide studies
-const searchTerms = [
-  'BPC-157', 'TB-500', 'Semaglutide', 'Tirzepatide',
-  'CJC-1295', 'Ipamorelin', 'MK-677', 'GHK-Cu',
-  // ... all 41 peptides
+Add "other" category to the Guides.tsx categories array:
+```javascript
+const categories = [
+  { id: "all", label: "All Guides" },
+  { id: "recovery", label: "Recovery & Healing" },
+  { id: "weight-loss", label: "Weight Loss" },
+  { id: "safety", label: "Safety & Legal" },
+  { id: "how-to", label: "How-To" },
+  { id: "other", label: "Other" }, // NEW
 ];
-
-for (const term of searchTerms) {
-  const results = await fetch(
-    `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${term}&retmax=50&retmode=json`
-  );
-  // Process and store in studies table
-}
 ```
 
----
+## Implementation Order
 
-## Frontend Integration
+1. Create all 15 guide page files with full content
+2. Update `src/App.tsx` with new imports and routes
+3. Update `src/pages/Guides.tsx` with new guide entries and "other" category
+4. Update `public/sitemap.xml` with new URLs
 
-### 1. Peptide Database Cards
+## No Changes Made To
 
-Update `PeptideCard` to show study counts:
+- Any existing guide pages
+- Landing page design
+- Dashboard or authenticated pages
+- Navigation structure
+- Colors, fonts, spacing, or visual elements
+- Existing components (GuideLayout, GuideCTA, etc.)
 
-```tsx
-<div className="flex items-center gap-2 text-xs text-muted-foreground">
-  <span>{peptide.total_study_count} studies</span>
-  <span>•</span>
-  <span>{peptide.human_study_count} human trials</span>
-</div>
-```
+## Content Attribution
 
-### 2. Study Browser Component
+All guides will include:
+- "Last Updated: February 2026" in QuickAnswerBox
+- "Based on published research" implicit via GuideDisclaimer (no "Medical Review Team" mention)
+- GuideChangelog with "Feb 5, 2026 - Initial publication"
 
-New component: `src/components/database/StudyBrowser.tsx`
+## CTA at Bottom (via existing GuideCTA component)
 
-- Filter by peptide, study type, evidence level
-- Link to PubMed abstracts
-- Show key findings in expandable cards
+The existing GuideCTA component already provides:
+- "Still Have Questions?" heading
+- "Ask the Peptide Assistant" button → links to /
+- "Get Free Access to Peptide Playbook" button → links to /signup
 
-### 3. Article/Guide Citations
-
-When displaying guides, pull from the `studies` table for live citations:
-
-```tsx
-// In guide pages
-const { data: studies } = usePeptideStudies('BPC-157');
-// Render as "Sources" section
-```
-
----
-
-## Files to Create/Modify
-
-| File | Changes |
-|------|---------|
-| `supabase/migrations/*.sql` | Create `studies` table, junction table, alter peptides |
-| `supabase/functions/chat/index.ts` | Replace static DB with dynamic fetching |
-| `supabase/functions/coach/index.ts` | Add study data to coach context |
-| `supabase/functions/scrape-pubmed/index.ts` | New edge function for PubMed API |
-| `src/hooks/useStudies.ts` | New hook for fetching studies |
-| `src/components/database/StudyBrowser.tsx` | New UI for browsing studies |
-| `src/components/database/PeptideCard.tsx` | Add study counts display |
-| `src/pages/dashboard/Database.tsx` | Integrate study browser tab |
-
----
-
-## Data Quality Standards
-
-Each study entry must include:
-
-| Field | Requirement |
-|-------|-------------|
-| PubMed ID or DOI | At least one identifier |
-| Study Type | Required classification |
-| Species | Required (human vs animal) |
-| Key Findings | 1-3 sentence summary |
-| Evidence Level | GRADE scale assessment |
-| Peptide Link | Which peptide(s) it supports |
-
----
-
-## Implementation Timeline
-
-| Phase | Tasks | Scope |
-|-------|-------|-------|
-| **1** | Create database schema, seed 100 studies | Database setup |
-| **2** | Build PubMed scraper, populate 400+ more | Data population |
-| **3** | Update chat edge function with dynamic retrieval | AI integration |
-| **4** | Build Study Browser UI, update Peptide Cards | Frontend |
-| **5** | Quality review, add landmark study flags | Data curation |
-
----
-
-## Benefits
-
-1. **Evidence-based responses**: AI cites real studies with PubMed links
-2. **Credibility**: Users see "Based on X peer-reviewed studies"
-3. **Up-to-date**: Studies table can be updated without code changes
-4. **SEO value**: Study database becomes citable content
-5. **Differentiator**: No other peptide platform has 500+ curated citations
-
+To match the requested CTA text, the GuideCTA component will be kept as-is (per "no design changes" constraint), as it already serves the same purpose of driving users to the AI chat and signup.
