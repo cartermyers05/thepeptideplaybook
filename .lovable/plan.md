@@ -1,42 +1,69 @@
 
 
-# Fix Blurry Hero Headline
+# Fix White/Invisible Hero Headline Text
 
 ## The Problem
-The headline text appears blurry because of two issues:
+The "AI Peptide" text is invisible because of a conflict between:
+1. **Parent span**: Has `bg-clip-text text-transparent` with the rainbow gradient
+2. **Child letter spans**: Have `letterVariants` animating opacity from 0 to 1
 
-1. **Blur filter in animations** - The `enhancedLineVariants` and `letterVariants` use `filter: "blur(8px)"` and `filter: "blur(4px)"` that may not be transitioning cleanly to `blur(0px)`
-
-2. **Glow overlay element** - There's an absolutely positioned glow effect (lines 150-178) with `filter: "blur(20px)"` sitting on top of the actual text
+When `text-transparent` is applied to the parent, the gradient clips to the text shape. But the child spans inherit the transparent text color, and their individual opacity animations don't interact correctly with the gradient clipping - resulting in completely invisible text.
 
 ## The Fix
 
-### 1. Remove Blur from Animation Variants
-Replace blur-based reveals with simpler opacity + transform animations that are more performant:
+### Option A: Remove Letter-by-Letter Animation (Simpler)
+Keep the rainbow gradient and remove the per-character animation. The text will still shimmer beautifully.
 
 | Current | New |
 |---------|-----|
-| `filter: "blur(8px)"` → `blur(0px)` | Remove filter, use only opacity + translateX |
-| `filter: "blur(4px)"` → `blur(0px)` | Remove filter, use only opacity + translateY |
+| Each letter has its own `motion.span` with opacity animation | Single text node with rainbow gradient |
+| Staggered letter reveal | Smooth fade-in of entire "AI Peptide" text |
 
-### 2. Remove or Fix the Glow Overlay
-The glow effect element with `filter: "blur(20px)"` and `absolute inset-0` is layered over the text. Options:
-- **Remove it entirely** (cleanest fix)
-- **Or** move it behind with `z-index: -1` and reduce blur
+### Option B: Apply Gradient to Each Letter (More Complex)
+Apply the gradient styling to each individual letter span instead of the parent.
 
-### 3. Add Hardware Acceleration
-Add `will-change: transform, opacity` and `transform: translateZ(0)` to enable GPU acceleration for smoother rendering.
+## Recommended Fix (Option A)
 
-## Changes to `src/components/landing/HeroSection.tsx`
+Simplify the "AI Peptide" section:
 
-| Line | Current | New |
-|------|---------|-----|
-| 28 | `filter: "blur(8px)"` | Remove the filter property |
-| 32 | `filter: "blur(0px)"` | Remove the filter property |
-| 54 | `filter: "blur(4px)"` | Remove the filter property |
-| 58 | `filter: "blur(0px)"` | Remove the filter property |
-| 150-178 | Glow overlay with blur | Remove entirely or add `className="-z-10"` |
+```tsx
+{/* "AI Peptide" - rainbow gradient with smooth entrance */}
+<motion.span 
+  variants={enhancedLineVariants}
+  custom={1}
+  className="block"
+>
+  <motion.span
+    className="inline-block bg-clip-text text-transparent"
+    style={{
+      backgroundImage: rainbowGradient,
+      backgroundSize: "200% 100%",
+    }}
+    animate={{
+      backgroundPosition: ["0% 0%", "100% 0%", "0% 0%"],
+    }}
+    transition={{
+      duration: 4,
+      ease: "linear",
+      repeat: Infinity,
+    }}
+  >
+    AI Peptide
+  </motion.span>
+</motion.span>
+```
+
+This keeps:
+- The rainbow gradient shimmer effect
+- Smooth slide-in entrance (matches "Your" and "Journey")
+- Clean, readable text
+
+## File to Modify
+
+| File | Changes |
+|------|---------|
+| `src/components/landing/HeroSection.tsx` | Replace letter-by-letter animation with single gradient text span, remove `letterContainerVariants` and `letterVariants` |
 
 ## Result
-Clean, crisp text with smooth fade-in animations. The rainbow shimmer effect continues to work, but without any blur artifacts causing readability issues.
+Visible, crisp "AI Peptide" text with flowing rainbow gradient animation. The entrance animation will match "Your" and "Journey" (slide from left), creating a cohesive sequence while keeping the signature rainbow shimmer.
 
