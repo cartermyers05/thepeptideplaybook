@@ -1,40 +1,42 @@
 
 
-# Fix Hero Headline Visibility
+# Fix Blurry Hero Headline
 
 ## The Problem
-The headline "Your AI Peptide Journey" is getting cut off or not fully visible. This is happening because:
-1. The text is very large (up to `text-8xl` on desktop)
-2. The line-height is very tight (`leading-[0.9]`)
-3. "AI Peptide" may be wrapping awkwardly on smaller screens
+The headline text appears blurry because of two issues:
+
+1. **Blur filter in animations** - The `enhancedLineVariants` and `letterVariants` use `filter: "blur(8px)"` and `filter: "blur(4px)"` that may not be transitioning cleanly to `blur(0px)`
+
+2. **Glow overlay element** - There's an absolutely positioned glow effect (lines 150-178) with `filter: "blur(20px)"` sitting on top of the actual text
 
 ## The Fix
 
-### 1. Adjust Text Sizing for Better Fit
-Reduce font sizes slightly and ensure proper scaling:
+### 1. Remove Blur from Animation Variants
+Replace blur-based reveals with simpler opacity + transform animations that are more performant:
 
-| Current | New | Reason |
-|---------|-----|--------|
-| `text-5xl` (mobile) | `text-4xl` | Better fit on small screens |
-| `sm:text-6xl` | `sm:text-5xl` | Smoother scaling |
-| `md:text-7xl` | `md:text-6xl` | Prevents overflow |
-| `lg:text-8xl` | `lg:text-7xl xl:text-8xl` | Full size only on large screens |
+| Current | New |
+|---------|-----|
+| `filter: "blur(8px)"` → `blur(0px)` | Remove filter, use only opacity + translateX |
+| `filter: "blur(4px)"` → `blur(0px)` | Remove filter, use only opacity + translateY |
 
-### 2. Improve Line Height
-Change `leading-[0.9]` to `leading-tight` (1.25) or `leading-[1.1]` to give each line more breathing room.
+### 2. Remove or Fix the Glow Overlay
+The glow effect element with `filter: "blur(20px)"` and `absolute inset-0` is layered over the text. Options:
+- **Remove it entirely** (cleanest fix)
+- **Or** move it behind with `z-index: -1` and reduce blur
 
-### 3. Prevent Word Breaking
-Add `whitespace-nowrap` to "AI Peptide" to keep it on one line, or if needed, allow it to wrap gracefully.
+### 3. Add Hardware Acceleration
+Add `will-change: transform, opacity` and `transform: translateZ(0)` to enable GPU acceleration for smoother rendering.
 
-### 4. Container Overflow Fix
-Ensure the section doesn't clip content with `overflow-visible` where needed.
+## Changes to `src/components/landing/HeroSection.tsx`
 
-## File to Modify
-
-| File | Changes |
-|------|---------|
-| `src/components/landing/HeroSection.tsx` | Adjust text sizing, line-height, and overflow handling |
+| Line | Current | New |
+|------|---------|-----|
+| 28 | `filter: "blur(8px)"` | Remove the filter property |
+| 32 | `filter: "blur(0px)"` | Remove the filter property |
+| 54 | `filter: "blur(4px)"` | Remove the filter property |
+| 58 | `filter: "blur(0px)"` | Remove the filter property |
+| 150-178 | Glow overlay with blur | Remove entirely or add `className="-z-10"` |
 
 ## Result
-The full headline "Your AI Peptide Journey" will be visible on all screen sizes while maintaining the dramatic animated entrance.
+Clean, crisp text with smooth fade-in animations. The rainbow shimmer effect continues to work, but without any blur artifacts causing readability issues.
 
