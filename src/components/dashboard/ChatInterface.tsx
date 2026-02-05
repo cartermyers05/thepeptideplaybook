@@ -161,7 +161,6 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
@@ -175,8 +174,6 @@ export default function ChatInterface() {
   const incrementQuestions = useIncrementQuestionsAsked();
   const { toast } = useToast();
 
-  // Check if user has already accepted the AI disclaimer
-  const hasAcceptedDisclaimer = !!profile?.ai_disclaimer_accepted_at || disclaimerAccepted;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -402,8 +399,8 @@ export default function ChatInterface() {
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* AI Disclaimer Modal - shows once per user */}
-      {!profileLoading && !hasAcceptedDisclaimer && (
-        <AIDisclaimerModal onAccepted={() => setDisclaimerAccepted(true)} />
+      {!profileLoading && !profile?.ai_disclaimer_accepted_at && (
+        <AIDisclaimerModal onAccepted={() => {}} />
       )}
 
       {/* Chat area */}

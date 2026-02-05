@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
+import { useUpdateProfile } from "@/hooks/useProfile";
+import { useToast } from "@/hooks/use-toast";
 
 interface AIDisclaimerModalProps {
   onAccepted: () => void;
@@ -17,11 +18,8 @@ interface AIDisclaimerModalProps {
 
 export function AIDisclaimerModal({ onAccepted }: AIDisclaimerModalProps) {
   const [isChecked, setIsChecked] = useState(false);
-  const { data: profile, isLoading: profileLoading } = useProfile();
   const updateProfile = useUpdateProfile();
-
-  // Don't show if already accepted
-  const hasAccepted = !!profile?.ai_disclaimer_accepted_at;
+  const { toast } = useToast();
 
   const handleContinue = async () => {
     if (!isChecked) return;
@@ -29,19 +27,18 @@ export function AIDisclaimerModal({ onAccepted }: AIDisclaimerModalProps) {
     try {
       await updateProfile.mutateAsync({
         ai_disclaimer_accepted_at: new Date().toISOString(),
-      } as any);
+      });
       onAccepted();
     } catch (error) {
       console.error("Failed to save disclaimer acceptance:", error);
-      // Still allow proceeding even if save fails
-      onAccepted();
+      toast({
+        title: "Error",
+        description: "Failed to save. Please try again.",
+        variant: "destructive",
+      });
+      // Keep modal open on failure - don't call onAccepted()
     }
   };
-
-  // Loading or already accepted - don't show modal
-  if (profileLoading || hasAccepted) {
-    return null;
-  }
 
   return (
     <Dialog open={true} onOpenChange={() => {}}>
