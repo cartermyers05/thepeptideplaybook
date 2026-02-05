@@ -1,151 +1,125 @@
 
 
-# Dashboard Stat Cards Redesign: Remove Icon Clutter
+# Peptide Database Enhancement: Add Quick Context
 
-## Current Problem
+## Current State
 
-The three stat cards (Active Protocol, AI Research, Peptide Database) each have:
-- A 40x40px colored icon box (bg-purple-100, bg-blue-100, bg-teal-100)
-- An icon inside (FlaskConical, MessageCircle, BookOpen)
-- A text label next to it
+The peptide table shows these columns in the collapsed view:
+| Peptide Name | Category | Primary Use | Research | FDA Status |
+|--------------|----------|-------------|----------|------------|
 
-This creates visual noise and feels like a "vibe-coded" template.
+When you click to expand, you see:
+- Mechanism of Action
+- What Research Shows
+- Safety Considerations
+- Related Peptides
+
+## Problem
+
+Users have to click to expand every row to understand what a peptide actually *does*. The "Primary Use" column helps but it's brief (e.g., "Tissue repair, gut healing").
 
 ---
 
-## Design Alternatives
+## Proposed Enhancement
 
-### Option A: Typography-Only (Recommended)
+Add a **one-line summary** visible in the collapsed row — a short "elevator pitch" that helps users quickly understand what the peptide is for without needing to expand.
 
-Remove icons entirely. Let the **gradient top bar** provide the color accent, and use **bold typography hierarchy** to convey meaning — matching the landing page's editorial style.
+### Option A: Add a "Quick Summary" Line Below the Row (Recommended)
+
+Show a subtle one-liner beneath the main row content that summarizes the mechanism:
 
 ```text
-┌─────────────────────────────┐
-│ ████████ (gradient bar)    │
-│                             │
-│ ACTIVE PROTOCOL             │  ← Small caps label
-│ Shoulder Recovery           │  ← Bold value
-│                             │
-└─────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│ BPC-157      │ Recovery │ Tissue repair, gut healing │ moderate │ Cat 2│
+│ ─────────────────────────────────────────────────────────────────────── │
+│ Promotes angiogenesis and supports tissue repair pathways              │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Benefits:**
-- Clean, minimal, typography-first
-- Matches WhatsInsideSection cards (title + description, no icons)
-- Gradient bar already provides color identity
+**Implementation:**
+- Truncate the `mechanism` field to ~80 characters
+- Display it in a smaller, muted text style below the main row content
+- Still keep the full expanded view for detailed information
 
----
+### Option B: Replace Table with Cards
 
-### Option B: Large Stat Numbers
-
-Use the stat as the visual hero element with large typography:
+Switch from a table to a card-based layout that naturally accommodates more content:
 
 ```text
-┌─────────────────────────────┐
-│ ████████ (gradient bar)    │
-│                             │
-│ 12                          │  ← Large 3xl/4xl number
-│ conversations               │  ← Muted label below
-│                             │
-└─────────────────────────────┘
-```
-
-Works well for "AI Research" (12 conversations) and "Peptide Database" (40+ peptides).
-
----
-
-### Option C: Hybrid — Icon Only on Empty States
-
-Keep icons only when there's nothing to show (e.g., "No active protocol"), remove them when displaying actual data.
-
----
-
-## Recommended Implementation
-
-Use **Option A (Typography-Only)** for consistency, with a slight enhancement: make the primary value larger and bolder.
-
-### File: `src/pages/dashboard/Home.tsx`
-
-**Before:**
-```tsx
-<div className="flex items-center gap-3 mb-3">
-  <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-    <FlaskConical className="w-5 h-5 text-purple-600" />
-  </div>
-  <span className="text-sm font-medium text-muted-foreground">Active Protocol</span>
-</div>
-{protocol ? (
-  <p className="font-semibold text-foreground truncate">{protocol.protocol_name}</p>
-) : (
-  <p className="text-sm text-muted-foreground">No active protocol</p>
-)}
-```
-
-**After:**
-```tsx
-<div className="p-6">
-  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-    Active Protocol
-  </span>
-  {protocol ? (
-    <p className="text-xl font-bold text-foreground mt-2 truncate">
-      {protocol.protocol_name}
-    </p>
-  ) : (
-    <p className="text-lg text-muted-foreground mt-2">None yet</p>
-  )}
-</div>
-```
-
-Apply the same pattern to all three cards:
-
-| Card | Label | Value |
-|------|-------|-------|
-| Active Protocol | `ACTIVE PROTOCOL` | Protocol name or "None yet" |
-| AI Research | `AI RESEARCH` | `{count} conversations` or "Start exploring" |
-| Peptide Database | `PEPTIDE DATABASE` | `40+ peptides` |
-
----
-
-## Visual Result
-
-```text
-┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
-│ ═══ (purple)     │  │ ═══ (blue)       │  │ ═══ (teal)       │
-│                  │  │                  │  │                  │
-│ ACTIVE PROTOCOL  │  │ AI RESEARCH      │  │ PEPTIDE DATABASE │
-│ Shoulder Recovery│  │ 12 conversations │  │ 40+ peptides     │
-│                  │  │                  │  │                  │
-└──────────────────┘  └──────────────────┘  └──────────────────┘
+┌────────────────────────────────────────┐
+│ BPC-157                     [moderate] │
+│ Recovery • Category 2                  │
+│                                        │
+│ Tissue repair, gut healing             │
+│ Promotes angiogenesis and supports     │
+│ tissue repair pathways.                │
+│                                        │
+│ [View Details]                         │
+└────────────────────────────────────────┘
 ```
 
 ---
 
-## Additional Cleanup
+## Recommended: Option A (Inline Summary)
 
-Also remove the icon from the "Get Started" / starter prompts section:
+Keep the efficient table format but add a preview of the mechanism.
 
-**Before:**
-```tsx
-<div className="flex items-center gap-3 mb-5">
-  <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-    <Sparkles className="w-5 h-5 text-orange-600" />
-  </div>
-  <p className="font-semibold text-foreground">Ask your first question</p>
-</div>
+### File: `src/pages/dashboard/Database.tsx`
+
+**Changes to PeptideRow component:**
+
+1. **Add mechanism preview** — Show first ~100 characters of the mechanism in a subtle line
+2. **Improve row structure** — Make the name/primary use more prominent
+3. **Show "at a glance" info** — Primary use as a tagline under the name
+
+**Before (collapsed row):**
+```
+│ BPC-157 │ Recovery │ Tissue repair, gut healing │ [moderate] │ [Cat 2] │ ▼ │
 ```
 
-**After:**
-```tsx
-<div className="mb-5">
-  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-    Get Started
-  </span>
-  <p className="text-xl font-bold text-foreground mt-2">
-    Ask your first question
-  </p>
-</div>
+**After (collapsed row with preview):**
 ```
+│ BPC-157                                                        │
+│ Tissue repair, gut healing                                     │
+│ Promotes angiogenesis, modulates nitric oxide system...       │
+│ Recovery • [moderate] • [Cat 2]                                │ ▼ │
+```
+
+### Specific Changes
+
+**Row structure update:**
+- Stack content vertically in the first cell
+- Move category/badges into a single inline row
+- Add truncated mechanism preview
+
+```tsx
+<tr className="border-b border-border hover:bg-muted/50 cursor-pointer">
+  <td className="p-4" colSpan={5}>
+    <div className="space-y-1">
+      <h3 className="font-semibold text-foreground">{peptide.name}</h3>
+      <p className="text-sm text-muted-foreground">{peptide.primary_use}</p>
+      <p className="text-xs text-muted-foreground/70 line-clamp-1">
+        {peptide.mechanism}
+      </p>
+      <div className="flex items-center gap-2 pt-1">
+        <span className="text-xs text-muted-foreground">{peptide.category}</span>
+        <span className="text-muted-foreground/40">•</span>
+        <Badge ...>{peptide.research_status}</Badge>
+        <Badge ...>{peptide.fda_status}</Badge>
+      </div>
+    </div>
+  </td>
+  <td className="p-4">
+    <ChevronDown/Up />
+  </td>
+</tr>
+```
+
+### Mobile Considerations
+
+The stacked layout works better on mobile than the wide table. Add responsive behavior:
+- On desktop: Keep table header visible
+- On mobile: Hide table header, each row becomes a self-contained card
 
 ---
 
@@ -153,14 +127,35 @@ Also remove the icon from the "Get Started" / starter prompts section:
 
 | File | Changes |
 |------|---------|
-| `src/pages/dashboard/Home.tsx` | Remove icon boxes from stat cards, switch to typography-only with uppercase labels and bold values. Remove Sparkles icon from starter section. |
+| `src/pages/dashboard/Database.tsx` | Restructure `PeptideRow` to show stacked content with mechanism preview. Update table header for new layout. Add responsive styles for mobile. |
+
+---
+
+## Visual Result
+
+**Desktop:**
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Search...              │ Category ▼ │ Research ▼ │ FDA Status ▼        │
+├─────────────────────────────────────────────────────────────────────────┤
+│ Semaglutide                                                           ▼ │
+│ Weight management, blood sugar control                                  │
+│ GLP-1 receptor agonist that slows gastric emptying, increases satiety..│
+│ GLP-1 • strong • FDA Approved                                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│ BPC-157                                                               ▼ │
+│ Tissue repair, gut healing                                              │
+│ Promotes angiogenesis, modulates nitric oxide system, supports tissue.. │
+│ Recovery • moderate • Category 2                                        │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Benefits
 
-- **Cleaner visual**: No competing icon boxes
-- **Consistent with landing page**: Matches WhatsInsideSection's typography-first cards
-- **Gradient bar does the work**: Color identity comes from the top bar, not icons
-- **More premium feel**: Editorial typography over generic icon grids
+- **Scannable**: Users can understand each peptide without clicking
+- **Efficient**: Still uses a compact table format
+- **Informative**: Mechanism preview gives the "how it works" context
+- **Consistent**: Keeps the expand/collapse for full details
 
