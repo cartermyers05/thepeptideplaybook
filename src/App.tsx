@@ -63,6 +63,21 @@ import PeptideTikTokMyths from "./pages/guides/PeptideTikTokMyths";
 import ReconstitutionGuide from "./pages/guides/ReconstitutionGuide";
 import SemaglutideDosing from "./pages/guides/SemaglutideDosing";
 import SemaglutideSideEffects from "./pages/guides/SemaglutideSideEffects";
+import GHKCuCompleteGuide from "./pages/guides/GHKCuCompleteGuide";
+import GHKCuTopicalVsInjectable from "./pages/guides/GHKCuTopicalVsInjectable";
+import SS31Peptide from "./pages/guides/SS31Peptide";
+import Melanotan2Guide from "./pages/guides/Melanotan2Guide";
+import HGHPeptidesGuide from "./pages/guides/HGHPeptidesGuide";
+import EpitalonPeptide from "./pages/guides/EpitalonPeptide";
+import BestPeptidesWeightLoss from "./pages/guides/BestPeptidesWeightLoss";
+import BestPeptidesMuscleGrowth from "./pages/guides/BestPeptidesMuscleGrowth";
+import TB500ResearchGuide from "./pages/guides/TB500ResearchGuide";
+import NADPeptides from "./pages/guides/NADPeptides";
+import VIPPeptide from "./pages/guides/VIPPeptide";
+import PeptideReconstitutionGuide from "./pages/guides/PeptideReconstitutionGuide";
+import PeptidesForBeginners from "./pages/guides/PeptidesForBeginners";
+import IGF1PeptideGuide from "./pages/guides/IGF1PeptideGuide";
+import HGHFragmentGuide from "./pages/guides/HGHFragmentGuide";
 
 // Tool pages
 import PeptideCalculator from "./pages/tools/PeptideCalculator";
@@ -123,6 +138,21 @@ const App = () => (
             <Route path="/guides/how-to-reconstitute-peptides" element={<ReconstitutionGuide />} />
             <Route path="/guides/semaglutide-dosing" element={<SemaglutideDosing />} />
             <Route path="/guides/semaglutide-side-effects" element={<SemaglutideSideEffects />} />
+            <Route path="/guides/ghk-cu-complete-guide" element={<GHKCuCompleteGuide />} />
+            <Route path="/guides/ghk-cu-topical-vs-injectable" element={<GHKCuTopicalVsInjectable />} />
+            <Route path="/guides/ss-31-peptide" element={<SS31Peptide />} />
+            <Route path="/guides/melanotan-2" element={<Melanotan2Guide />} />
+            <Route path="/guides/hgh-peptides" element={<HGHPeptidesGuide />} />
+            <Route path="/guides/epitalon-peptide" element={<EpitalonPeptide />} />
+            <Route path="/guides/best-peptides-weight-loss" element={<BestPeptidesWeightLoss />} />
+            <Route path="/guides/best-peptides-muscle-growth" element={<BestPeptidesMuscleGrowth />} />
+            <Route path="/guides/tb-500-research-guide" element={<TB500ResearchGuide />} />
+            <Route path="/guides/nad-peptides" element={<NADPeptides />} />
+            <Route path="/guides/vip-peptide" element={<VIPPeptide />} />
+            <Route path="/guides/peptide-reconstitution" element={<PeptideReconstitutionGuide />} />
+            <Route path="/guides/peptides-for-beginners" element={<PeptidesForBeginners />} />
+            <Route path="/guides/igf-1-peptide" element={<IGF1PeptideGuide />} />
+            <Route path="/guides/hgh-fragment" element={<HGHFragmentGuide />} />
             
             {/* Tool pages */}
             <Route path="/tools/peptide-calculator" element={<PeptideCalculator />} />
