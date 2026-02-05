@@ -25,11 +25,10 @@ const itemVariants = {
 
 // Enhanced line variants with blur-to-sharp reveal
 const enhancedLineVariants = {
-  hidden: { opacity: 0, x: -50, filter: "blur(8px)" },
+  hidden: { opacity: 0, x: -50 },
   visible: (i: number) => ({
     opacity: 1,
     x: 0,
-    filter: "blur(0px)",
     transition: { 
       delay: i * 0.25, 
       duration: 0.6, 
@@ -51,11 +50,10 @@ const letterContainerVariants = {
 };
 
 const letterVariants = {
-  hidden: { opacity: 0, y: 20, filter: "blur(4px)" },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: { duration: 0.4, ease: "easeOut" as const }
   }
 };
@@ -136,45 +134,14 @@ export function HeroSection() {
                       <motion.span
                         key={index}
                         variants={letterVariants}
-                        className="inline-block"
-                        style={{ 
+                        className="inline-block will-change-transform"
+                        style={{
                           whiteSpace: char === " " ? "pre" : "normal",
                         }}
                       >
                         {char === " " ? "\u00A0" : char}
                       </motion.span>
                     ))}
-                  </motion.span>
-                  
-                  {/* Subtle glow effect behind the text */}
-                  <motion.span
-                    className="absolute inset-0 bg-clip-text text-transparent pointer-events-none select-none"
-                    style={{
-                      backgroundImage: rainbowGradient,
-                      backgroundSize: "200% 100%",
-                      filter: "blur(20px)",
-                      opacity: 0,
-                    }}
-                    animate={{
-                      opacity: [0.2, 0.4, 0.2],
-                      backgroundPosition: ["0% 0%", "100% 0%", "0% 0%"],
-                    }}
-                    transition={{
-                      opacity: {
-                        duration: 2,
-                        ease: "easeInOut",
-                        repeat: Infinity,
-                        delay: 1.5,
-                      },
-                      backgroundPosition: {
-                        duration: 4,
-                        ease: "linear",
-                        repeat: Infinity,
-                      },
-                    }}
-                    aria-hidden="true"
-                  >
-                    {aiPeptideText}
                   </motion.span>
                 </motion.span>
                 
