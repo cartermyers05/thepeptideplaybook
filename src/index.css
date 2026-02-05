@@ -270,6 +270,22 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   }
 
+  /* Rainbow gradient underline for branded headers */
+  .nav-rainbow-underline {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      hsl(45, 80%, 50%),   /* Yellow */
+      hsl(25, 90%, 55%),   /* Orange */
+      hsl(350, 80%, 55%),  /* Pink */
+      hsl(270, 70%, 55%),  /* Purple */
+      hsl(210, 80%, 55%),  /* Blue */
+      hsl(160, 70%, 45%)   /* Teal */
+    );
+    background-size: 200% auto;
+    animation: shimmer 8s linear infinite;
+  }
+
   /* ========================================
      GRADIENT MESH BACKGROUND
      ======================================== */

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, MessageCircle, Database, FlaskConical, Newspaper, BookOpen, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useConversations } from "@/hooks/useConversations";
 import { useProtocol } from "@/hooks/useProtocol";
 import { formatDistanceToNow } from "date-fns";
-
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning";
@@ -91,64 +90,43 @@ export default function Dashboard() {
         {/* Stat Cards Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Active Protocol Card */}
-          <div 
+          <button 
             onClick={() => navigate("/dashboard/protocols")}
-            className="bg-card border border-border rounded-xl p-5 hover:border-foreground/20 transition-colors cursor-pointer group"
+            className="bg-card border border-border rounded-xl p-5 hover:border-foreground/20 transition-colors text-left group"
           >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-                <FlaskConical className="w-5 h-5 text-foreground" />
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">Active Protocol</span>
-            </div>
+            <span className="text-sm font-medium text-muted-foreground">Active Protocol</span>
             {isLoadingProtocol ? (
-              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-6 w-32 mt-2" />
             ) : protocol ? (
-              <p className="font-semibold text-foreground truncate">{protocol.protocol_name}</p>
+              <p className="font-semibold text-foreground truncate mt-2">{protocol.protocol_name}</p>
             ) : (
-              <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                No active protocol — Start one →
+              <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors mt-2">
+                No active protocol
               </p>
             )}
-          </div>
+          </button>
 
           {/* AI Conversations Card */}
-          <div 
+          <button 
             onClick={() => navigate("/dashboard/chat")}
-            className="bg-card border border-border rounded-xl p-5 hover:border-foreground/20 transition-colors cursor-pointer group"
+            className="bg-card border border-border rounded-xl p-5 hover:border-foreground/20 transition-colors text-left group"
           >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-foreground" />
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">AI Conversations</span>
-            </div>
+            <span className="text-sm font-medium text-muted-foreground">AI Research</span>
             {isLoadingConversations ? (
-              <Skeleton className="h-5 w-20" />
+              <Skeleton className="h-6 w-20 mt-2" />
             ) : (
-              <div className="flex items-center justify-between">
-                <p className="font-semibold text-foreground">{conversationCount} chats</p>
-                <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">View All →</span>
-              </div>
+              <p className="font-semibold text-foreground mt-2">{conversationCount} conversations</p>
             )}
-          </div>
+          </button>
 
           {/* Peptides Explored Card */}
-          <div 
+          <button 
             onClick={() => navigate("/dashboard/database")}
-            className="bg-card border border-border rounded-xl p-5 hover:border-foreground/20 transition-colors cursor-pointer group"
+            className="bg-card border border-border rounded-xl p-5 hover:border-foreground/20 transition-colors text-left group"
           >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
-                <Database className="w-5 h-5 text-foreground" />
-              </div>
-              <span className="text-sm font-medium text-muted-foreground">Peptide Database</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="font-semibold text-foreground">40+ peptides</p>
-              <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Browse →</span>
-            </div>
-          </div>
+            <span className="text-sm font-medium text-muted-foreground">Peptide Database</span>
+            <p className="font-semibold text-foreground mt-2">40+ peptides</p>
+          </button>
         </div>
 
         {/* Continue Where You Left Off / Starter Prompts */}
@@ -166,12 +144,9 @@ export default function Dashboard() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(recentChat.updated_at), { addSuffix: true })}
-                    </span>
-                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(recentChat.updated_at), { addSuffix: true })}
+                  </span>
                   <p className="font-medium text-foreground truncate mb-1">
                     {recentChat.title || "New Conversation"}
                   </p>
@@ -230,12 +205,9 @@ export default function Dashboard() {
                 onClick={() => navigate(guide.href)}
                 className="bg-card border border-border rounded-xl p-4 text-left hover:border-foreground/20 transition-colors group"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <BookOpen className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">
-                    {guide.category}
-                  </span>
-                </div>
+                <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded inline-block mb-2">
+                  {guide.category}
+                </span>
                 <p className="font-medium text-foreground mb-1 group-hover:text-foreground/80 transition-colors">
                   {guide.title}
                 </p>
@@ -245,37 +217,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Actions Bar */}
-        <div className="fixed bottom-0 left-0 right-0 md:left-60 bg-background/95 backdrop-blur border-t border-border p-4 z-40">
-          <div className="max-w-5xl mx-auto flex items-center justify-center gap-3">
-            <Button
-              onClick={() => navigate("/dashboard/chat")}
-              className="flex-1 max-w-[200px]"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Ask AI
-            </Button>
-            <Button
-              onClick={() => navigate("/dashboard/protocols")}
-              variant="outline"
-              className="flex-1 max-w-[200px]"
-            >
-              <FlaskConical className="w-4 h-4 mr-2" />
-              Build Protocol
-            </Button>
-            <Button
-              onClick={() => navigate("/dashboard/database")}
-              variant="outline"
-              className="flex-1 max-w-[200px]"
-            >
-              <Database className="w-4 h-4 mr-2" />
-              Browse Peptides
-            </Button>
-          </div>
-        </div>
-
-        {/* Spacer for fixed bottom bar */}
-        <div className="h-20" />
 
         {/* Legal Footer */}
         <div className="text-xs text-muted-foreground text-center py-4 border-t border-border">
