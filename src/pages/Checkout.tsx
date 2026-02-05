@@ -63,9 +63,9 @@ export default function Checkout() {
           queryClient.invalidateQueries({ queryKey: ["profile"] });
           toast({
             title: "VIP Access Activated!",
-            description: "Redirecting to dashboard...",
+            description: "Let's build your personalized course...",
           });
-          setTimeout(() => navigate("/dashboard"), 1500);
+          setTimeout(() => navigate("/quiz"), 1500);
         } else {
           toast({
             title: "Error",
@@ -140,9 +140,9 @@ export default function Checkout() {
             <Check className="w-8 h-8 text-success" />
           </div>
           <h2 className="text-xl font-semibold mb-2">VIP Access Activated!</h2>
-          <p className="text-muted-foreground mb-6">Redirecting to dashboard...</p>
-          <Button onClick={() => navigate("/dashboard")} className="w-full">
-            Go to Dashboard
+          <p className="text-muted-foreground mb-6">Let's personalize your course...</p>
+          <Button onClick={() => navigate("/quiz")} className="w-full">
+            Build My Course
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
         </div>

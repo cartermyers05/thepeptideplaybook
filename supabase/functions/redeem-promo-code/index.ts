@@ -162,47 +162,7 @@ serve(async (req) => {
       }
 
       logStep("User upgraded to member", { userId });
-
-      // Check if user already has a course
-      const { data: existingCourse } = await supabaseAdmin
-        .from("user_courses")
-        .select("id")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      if (!existingCourse) {
-        // Create a beginner course for promo code users
-        const { data: template } = await supabaseAdmin
-          .from("course_templates")
-          .select("*")
-          .eq("goal", "beginner")
-          .single();
-
-        if (template) {
-          const { error: courseError } = await supabaseAdmin
-            .from("user_courses")
-            .insert({
-              user_id: userId,
-              goal: "beginner",
-              title: template.title,
-              duration_days: template.duration_days,
-              lessons: template.lessons,
-              peptides: template.peptides,
-              template_id: template.id,
-              status: "not_started",
-              purchased_at: new Date().toISOString(),
-            });
-
-          if (courseError) {
-            logStep("Failed to create course", { error: courseError.message });
-            // Don't fail the request - tier was already upgraded
-          } else {
-            logStep("Beginner course created for promo user", { userId });
-          }
-        }
-      } else {
-        logStep("User already has a course", { userId });
-      }
+      // Course creation happens later in the quiz flow
     }
 
     logStep("Code redeemed successfully", { code: normalizedCode, userId, type: promoCode.type });
