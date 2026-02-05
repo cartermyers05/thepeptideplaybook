@@ -62,20 +62,26 @@ function PeptideRow({ peptide }: { peptide: Peptide }) {
         className="border-b border-border hover:bg-muted/50 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
-        <td className="p-4 font-medium">{peptide.name}</td>
-        <td className="p-4 text-muted-foreground">{peptide.category}</td>
-        <td className="p-4 text-muted-foreground text-sm">{peptide.primary_use}</td>
-        <td className="p-4">
-          <Badge variant="secondary" className={cn("text-xs", researchBadgeColors[peptide.research_status])}>
-            {peptide.research_status}
-          </Badge>
+        <td className="p-4" colSpan={5}>
+          <div className="space-y-1">
+            <h3 className="font-semibold text-foreground">{peptide.name}</h3>
+            <p className="text-sm text-muted-foreground">{peptide.primary_use}</p>
+            <p className="text-xs text-muted-foreground/70 line-clamp-1">
+              {peptide.mechanism}
+            </p>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-xs text-muted-foreground">{peptide.category}</span>
+              <span className="text-muted-foreground/40">•</span>
+              <Badge variant="secondary" className={cn("text-xs", researchBadgeColors[peptide.research_status])}>
+                {peptide.research_status}
+              </Badge>
+              <Badge variant="secondary" className={cn("text-xs", fdaBadgeColors[peptide.fda_status])}>
+                {peptide.fda_status}
+              </Badge>
+            </div>
+          </div>
         </td>
-        <td className="p-4">
-          <Badge variant="secondary" className={cn("text-xs", fdaBadgeColors[peptide.fda_status])}>
-            {peptide.fda_status}
-          </Badge>
-        </td>
-        <td className="p-4">
+        <td className="p-4 align-top">
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </td>
       </tr>
@@ -208,13 +214,9 @@ export default function Database() {
         {/* Table */}
         <div className="border border-border rounded-xl overflow-hidden">
           <table className="w-full">
-            <thead className="bg-muted">
+            <thead className="bg-muted hidden md:table-header-group">
               <tr>
-                <th className="p-4 text-left text-sm font-medium">Peptide Name</th>
-                <th className="p-4 text-left text-sm font-medium">Category</th>
-                <th className="p-4 text-left text-sm font-medium">Primary Use</th>
-                <th className="p-4 text-left text-sm font-medium">Research</th>
-                <th className="p-4 text-left text-sm font-medium">FDA Status</th>
+                <th className="p-4 text-left text-sm font-medium" colSpan={5}>Peptide</th>
                 <th className="p-4 w-10"></th>
               </tr>
             </thead>
