@@ -37,27 +37,6 @@ const enhancedLineVariants = {
   }),
 };
 
-// Letter-by-letter stagger for "AI Peptide"
-const letterContainerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.03,
-      delayChildren: 0.3,
-    }
-  }
-};
-
-const letterVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: "easeOut" as const }
-  }
-};
-
 // Floating animation that starts after entrance
 const floatingVariants = {
   initial: { y: 0 },
@@ -109,11 +88,10 @@ export function HeroSection() {
                 </motion.span>
                 
                 {/* "AI Peptide" - rainbow gradient with letter stagger */}
-                <motion.span 
-                  variants={letterContainerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="block relative whitespace-nowrap"
+                <motion.span
+                  variants={enhancedLineVariants}
+                  custom={1}
+                  className="block whitespace-nowrap"
                 >
                   <motion.span
                     className="inline-block bg-clip-text text-transparent"
@@ -130,18 +108,7 @@ export function HeroSection() {
                       repeat: Infinity,
                     }}
                   >
-                    {aiPeptideText.split("").map((char, index) => (
-                      <motion.span
-                        key={index}
-                        variants={letterVariants}
-                        className="inline-block will-change-transform"
-                        style={{
-                          whiteSpace: char === " " ? "pre" : "normal",
-                        }}
-                      >
-                        {char === " " ? "\u00A0" : char}
-                      </motion.span>
-                    ))}
+                    AI Peptide
                   </motion.span>
                 </motion.span>
                 
