@@ -21,6 +21,7 @@ export function useProfile() {
       return data;
     },
     enabled: !!user?.id,
+    staleTime: 30 * 1000, // 30 seconds - prevents excessive refetching
   });
 }
 
@@ -40,7 +41,27 @@ export function useUpdateProfile() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onMutate: async (updates) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["profile", user?.id] });
+      
+      // Snapshot the previous value
+      const previousProfile = queryClient.getQueryData<Profile>(["profile", user?.id]);
+      
+      // Optimistically update to the new value
+      queryClient.setQueryData<Profile | null>(["profile", user?.id], (old) => 
+        old ? { ...old, ...updates } : null
+      );
+      
+      return { previousProfile };
+    },
+    onError: (_err, _updates, context) => {
+      // Rollback on error
+      if (context?.previousProfile) {
+        queryClient.setQueryData(["profile", user?.id], context.previousProfile);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
     },
   });

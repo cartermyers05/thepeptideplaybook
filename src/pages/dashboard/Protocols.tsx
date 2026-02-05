@@ -38,14 +38,10 @@ export default function Protocols() {
   const [secondaryGoals, setSecondaryGoals] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<string>("");
   const [constraints, setConstraints] = useState<string[]>([]);
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const { protocol, createProtocol, startProtocol } = useProtocol();
   const { data: profile, isLoading: profileLoading } = useProfile();
-
-  // Check if user has already accepted the AI disclaimer
-  const hasAcceptedDisclaimer = !!profile?.ai_disclaimer_accepted_at || disclaimerAccepted;
 
   const totalSteps = 5;
   const progressPercent = (step / totalSteps) * 100;
@@ -155,8 +151,8 @@ export default function Protocols() {
   return (
     <DashboardLayout>
       {/* AI Disclaimer Modal - shows once per user, shared with AI Chat */}
-      {!profileLoading && !hasAcceptedDisclaimer && (
-        <AIDisclaimerModal onAccepted={() => setDisclaimerAccepted(true)} />
+      {!profileLoading && !profile?.ai_disclaimer_accepted_at && (
+        <AIDisclaimerModal onAccepted={() => {}} />
       )}
 
       <div className="space-y-6">
