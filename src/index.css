@@ -271,20 +271,65 @@
   }
 
   /* Rainbow gradient underline for branded headers */
-  .nav-rainbow-underline {
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      hsl(45, 80%, 50%),   /* Yellow */
-      hsl(25, 90%, 55%),   /* Orange */
-      hsl(350, 80%, 55%),  /* Pink */
-      hsl(270, 70%, 55%),  /* Purple */
-      hsl(210, 80%, 55%),  /* Blue */
-      hsl(160, 70%, 45%)   /* Teal */
-    );
-    background-size: 200% auto;
-    animation: shimmer 8s linear infinite;
-  }
+.nav-rainbow-underline {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    hsl(45, 80%, 50%),
+    hsl(25, 90%, 55%),
+    hsl(350, 80%, 55%),
+    hsl(270, 70%, 55%),
+    hsl(210, 80%, 55%),
+    hsl(160, 70%, 45%)
+  );
+  background-size: 200% auto;
+  animation: shimmer 8s linear infinite;
+}
+
+/* Dashboard Card Utilities */
+.dashboard-card {
+  @apply relative overflow-hidden rounded-2xl border border-border bg-card;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard gradient bars */
+.dashboard-gradient-orange { 
+  background: linear-gradient(135deg, hsl(25, 90%, 55%) 0%, hsl(15, 85%, 45%) 100%); 
+}
+.dashboard-gradient-blue { 
+  background: linear-gradient(135deg, hsl(210, 80%, 55%) 0%, hsl(220, 75%, 45%) 100%); 
+}
+.dashboard-gradient-pink { 
+  background: linear-gradient(135deg, hsl(350, 80%, 55%) 0%, hsl(340, 75%, 45%) 100%); 
+}
+.dashboard-gradient-purple { 
+  background: linear-gradient(135deg, hsl(270, 70%, 55%) 0%, hsl(280, 65%, 45%) 100%); 
+}
+.dashboard-gradient-teal { 
+  background: linear-gradient(135deg, hsl(160, 70%, 45%) 0%, hsl(170, 65%, 35%) 100%); 
+}
+.dashboard-gradient-yellow { 
+  background: linear-gradient(135deg, hsl(45, 80%, 50%) 0%, hsl(35, 75%, 40%) 100%); 
+}
+.dashboard-gradient-rose { 
+  background: linear-gradient(135deg, hsl(350, 80%, 60%) 0%, hsl(25, 90%, 55%) 100%); 
+}
+.dashboard-gradient-green { 
+  background: linear-gradient(135deg, hsl(160, 70%, 45%) 0%, hsl(140, 65%, 40%) 100%); 
+}
+
+/* Gradient text for headers */
+.dashboard-gradient-text {
+  background: linear-gradient(135deg, hsl(25, 90%, 55%), hsl(350, 80%, 55%), hsl(270, 70%, 55%));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
   /* ========================================
      GRADIENT MESH BACKGROUND

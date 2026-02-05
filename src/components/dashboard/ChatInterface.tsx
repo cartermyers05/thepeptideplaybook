@@ -442,7 +442,7 @@ export default function ChatInterface() {
                 {/* Protocol Builder CTA */}
                 <Button
                   onClick={() => navigate("/dashboard/protocols")}
-                  className="mb-8 gap-2"
+                  className="mb-8 gap-2 rounded-full"
                   variant="outline"
                 >
                   <Sparkles className="w-4 h-4" />
@@ -461,11 +461,11 @@ export default function ChatInterface() {
                       className={cn(
                         "inline-flex items-center gap-2 px-4 py-2 rounded-full border transition-all",
                         selectedCategory === index
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border hover:border-primary/30 hover:bg-accent"
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border hover:border-foreground/30 hover:bg-accent"
                       )}
                     >
-                      <cat.icon className={cn("w-4 h-4", cat.color)} />
+                      <cat.icon className={cn("w-4 h-4", selectedCategory === index ? "" : cat.color)} />
                       <span className="text-sm font-medium">{cat.label}</span>
                     </motion.button>
                   ))}
@@ -478,7 +478,7 @@ export default function ChatInterface() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto"
                   >
                     {(selectedCategory !== null
                       ? questionCategories[selectedCategory].questions
@@ -489,8 +489,9 @@ export default function ChatInterface() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
+                        whileHover={{ y: -2, boxShadow: "0 8px 16px -4px rgba(0,0,0,0.08)" }}
                         onClick={() => handleSuggestedQuestion(question)}
-                        className="p-3 text-left rounded-lg border border-border bg-card hover:border-primary/30 hover:bg-accent transition-colors group"
+                        className="p-4 text-left rounded-xl border border-border bg-card hover:border-foreground/20 transition-all group"
                       >
                         <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
                           {question}
