@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Send,
   ThumbsUp,
@@ -167,6 +168,7 @@ export default function ChatInterface() {
   
   const { user } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
+  const queryClient = useQueryClient();
   const createConversation = useCreateConversation();
   const updateConversationTitle = useUpdateConversationTitle();
   const saveMessage = useSaveMessage();
@@ -265,6 +267,9 @@ export default function ChatInterface() {
         throw new Error("Failed to get response");
       }
 
+      // Check if a protocol was created (custom header from edge function)
+      const protocolCreated = response.headers.get("X-Protocol-Created") === "true";
+
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let textBuffer = "";
@@ -324,6 +329,16 @@ export default function ChatInterface() {
         } catch (error) {
           console.error("Failed to save assistant message:", error);
         }
+      }
+
+      // If a protocol was created, invalidate the protocol query so it refreshes
+      if (protocolCreated) {
+        console.log("Protocol was created, invalidating query");
+        queryClient.invalidateQueries({ queryKey: ["protocol", user?.id] });
+        toast({
+          title: "Protocol Created! 🎉",
+          description: "Your new protocol is ready in the Protocol Builder.",
+        });
       }
 
       try {
