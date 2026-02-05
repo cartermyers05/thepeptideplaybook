@@ -25,8 +25,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useCreateConversation, useUpdateConversationTitle } from "@/hooks/useConversations";
 import { useSaveMessage, useUpdateMessage } from "@/hooks/useMessages";
-import { useIncrementQuestionsAsked } from "@/hooks/useProfile";
+import { useIncrementQuestionsAsked, useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
+import { AIDisclaimerModal } from "@/components/chat/AIDisclaimerModal";
 
 interface Message {
   id: string;
@@ -160,17 +161,22 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
   
   const { user } = useAuth();
+  const { data: profile, isLoading: profileLoading } = useProfile();
   const createConversation = useCreateConversation();
   const updateConversationTitle = useUpdateConversationTitle();
   const saveMessage = useSaveMessage();
   const updateMessage = useUpdateMessage();
   const incrementQuestions = useIncrementQuestionsAsked();
   const { toast } = useToast();
+
+  // Check if user has already accepted the AI disclaimer
+  const hasAcceptedDisclaimer = !!profile?.ai_disclaimer_accepted_at || disclaimerAccepted;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -395,6 +401,11 @@ export default function ChatInterface() {
 
   return (
     <div className="flex-1 flex flex-col h-full">
+      {/* AI Disclaimer Modal - shows once per user */}
+      {!profileLoading && !hasAcceptedDisclaimer && (
+        <AIDisclaimerModal onAccepted={() => setDisclaimerAccepted(true)} />
+      )}
+
       {/* Chat area */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full" ref={scrollRef}>

@@ -3,19 +3,12 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Sparkles, Download, Printer, AlertTriangle } from "lucide-react";
 import { useProtocol } from "@/hooks/useProtocol";
 import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { AIDisclaimerModal } from "@/components/chat/AIDisclaimerModal";
 
 const GOALS = [
   { id: "fat_loss", label: "Fat Loss", description: "Metabolic optimization & appetite control" },
@@ -45,12 +38,14 @@ export default function Protocols() {
   const [secondaryGoals, setSecondaryGoals] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState<string>("");
   const [constraints, setConstraints] = useState<string[]>([]);
-  const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const { protocol, createProtocol, startProtocol } = useProtocol();
-  const { data: profile } = useProfile();
+  const { data: profile, isLoading: profileLoading } = useProfile();
+
+  // Check if user has already accepted the AI disclaimer
+  const hasAcceptedDisclaimer = !!profile?.ai_disclaimer_accepted_at || disclaimerAccepted;
 
   const totalSteps = 5;
   const progressPercent = (step / totalSteps) * 100;
@@ -159,45 +154,10 @@ export default function Protocols() {
 
   return (
     <DashboardLayout>
-      {/* First-use disclaimer modal */}
-      <Dialog open={showDisclaimer && !disclaimerAccepted} onOpenChange={setShowDisclaimer}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-yellow-500" />
-              Important Disclaimer
-            </DialogTitle>
-            <DialogDescription className="text-left pt-4 space-y-4">
-              <p>
-                The Protocol Builder provides <strong>educational information only</strong> and is not medical advice.
-              </p>
-              <p>
-                Peptides are research compounds. Their safety and efficacy for human use has not been established by the FDA for most applications.
-              </p>
-              <p>
-                Always consult with a qualified healthcare provider before using any peptides or supplements.
-              </p>
-              <div className="flex items-start gap-3 pt-2">
-                <Checkbox
-                  id="disclaimer"
-                  checked={disclaimerAccepted}
-                  onCheckedChange={(checked) => setDisclaimerAccepted(!!checked)}
-                />
-                <label htmlFor="disclaimer" className="text-sm cursor-pointer">
-                  I understand this is for educational purposes only and I will consult a healthcare provider before using any peptides.
-                </label>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-          <Button
-            onClick={() => setShowDisclaimer(false)}
-            disabled={!disclaimerAccepted}
-            className="w-full"
-          >
-            Continue to Protocol Builder
-          </Button>
-        </DialogContent>
-      </Dialog>
+      {/* AI Disclaimer Modal - shows once per user, shared with AI Chat */}
+      {!profileLoading && !hasAcceptedDisclaimer && (
+        <AIDisclaimerModal onAccepted={() => setDisclaimerAccepted(true)} />
+      )}
 
       <div className="space-y-6">
         {/* Header */}

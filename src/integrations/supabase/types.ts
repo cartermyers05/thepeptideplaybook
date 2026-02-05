@@ -694,6 +694,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_disclaimer_accepted_at: string | null
           avatar_url: string | null
           created_at: string
           current_streak: number | null
@@ -713,6 +714,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_disclaimer_accepted_at?: string | null
           avatar_url?: string | null
           created_at?: string
           current_streak?: number | null
@@ -732,6 +734,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_disclaimer_accepted_at?: string | null
           avatar_url?: string | null
           created_at?: string
           current_streak?: number | null
