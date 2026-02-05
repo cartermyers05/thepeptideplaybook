@@ -28,7 +28,6 @@ const guides = [
     categoryLabel: "Recovery & Healing",
     readTime: "12 min",
     lastUpdated: "Jan 28, 2026",
-    reviewedBy: "Medical Review Team",
     featured: true,
   },
   {
@@ -50,7 +49,6 @@ const guides = [
     categoryLabel: "Safety & Legal",
     readTime: "10 min",
     lastUpdated: "Jan 20, 2026",
-    reviewedBy: "Medical Review Team",
   },
   {
     title: "BPC-157 vs TB-500",
@@ -71,7 +69,6 @@ const guides = [
     categoryLabel: "Weight Loss",
     readTime: "15 min",
     lastUpdated: "Jan 22, 2026",
-    reviewedBy: "Medical Review Team",
   },
   {
     title: "Tirzepatide vs Semaglutide",
@@ -102,7 +99,6 @@ const guides = [
     categoryLabel: "Safety & Legal",
     readTime: "7 min",
     lastUpdated: "Jan 10, 2026",
-    reviewedBy: "Medical Review Team",
   },
   {
     title: "BPC-157 Drug Test Detection",

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
   Send,
   ThumbsUp,
@@ -13,6 +14,7 @@ import {
   Brain,
   Moon,
   Dumbbell,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,7 +60,7 @@ const questionCategories = [
     icon: Activity,
     label: "Recovery",
     questions: [
-      "What peptides are studied for tissue repair?",
+      "Build me a recovery protocol for a knee injury",
       "What does research say about BPC-157 for healing?",
     ],
     color: "text-orange-500",
@@ -92,6 +94,14 @@ const questionCategories = [
   },
 ];
 
+// Actionable sample questions for empty state
+const sampleQuestions = [
+  "Build me a recovery protocol for a knee injury",
+  "What's the difference between BPC-157 and TB-500?",
+  "I'm new to peptides — where do I start?",
+  "Help me understand reconstitution for a 5mg vial",
+];
+
 function TypingIndicator() {
   return (
     <div className="flex items-center gap-1.5 px-3 py-2">
@@ -111,6 +121,39 @@ function TypingIndicator() {
   );
 }
 
+// Breathing/pulse animation for the avatar
+function PulsingAvatar() {
+  return (
+    <motion.div 
+      className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6 relative"
+      animate={{ 
+        boxShadow: [
+          "0 0 0 0 rgba(0, 0, 0, 0.1)",
+          "0 0 0 8px rgba(0, 0, 0, 0.05)",
+          "0 0 0 0 rgba(0, 0, 0, 0.1)"
+        ]
+      }}
+      transition={{
+        duration: 2.5,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    >
+      <motion.span 
+        className="text-xl font-bold text-primary-foreground"
+        animate={{ scale: [1, 1.05, 1] }}
+        transition={{
+          duration: 2.5,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      >
+        PP
+      </motion.span>
+    </motion.div>
+  );
+}
+
 export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -119,6 +162,7 @@ export default function ChatInterface() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate();
   
   const { user } = useAuth();
   const createConversation = useCreateConversation();
@@ -362,10 +406,8 @@ export default function ChatInterface() {
                 transition={{ duration: 0.3 }}
                 className="text-center py-8"
               >
-                {/* Logo */}
-                <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6">
-                  <span className="text-xl font-bold text-primary-foreground">PP</span>
-                </div>
+                {/* Pulsing Logo */}
+                <PulsingAvatar />
 
                 <h2 className="text-2xl font-bold mb-2">
                   Peptide Playbook AI
@@ -373,6 +415,16 @@ export default function ChatInterface() {
                 <p className="text-muted-foreground mb-8 max-w-md mx-auto">
                   Your AI research assistant for evidence-based peptide information. Ask anything.
                 </p>
+
+                {/* Protocol Builder CTA */}
+                <Button
+                  onClick={() => navigate("/dashboard/protocols")}
+                  className="mb-8 gap-2"
+                  variant="outline"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Build a Custom Protocol
+                </Button>
 
                 {/* Category chips */}
                 <div className="flex flex-wrap justify-center gap-2 mb-6">
@@ -407,7 +459,7 @@ export default function ChatInterface() {
                   >
                     {(selectedCategory !== null
                       ? questionCategories[selectedCategory].questions
-                      : questionCategories.slice(0, 4).map((c) => c.questions[0])
+                      : sampleQuestions
                     ).map((question, index) => (
                       <motion.button
                         key={question}
@@ -479,9 +531,10 @@ export default function ChatInterface() {
                         </div>
                         {message.role === "assistant" && message.content && !isLoading && (
                           <>
-                            <p className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border">
-                              ⚠️ This information is for educational purposes only. Most peptides are NOT FDA-approved for human use. Always consult a licensed healthcare provider.
-                            </p>
+                            <div className="flex items-start gap-1.5 text-xs text-muted-foreground mt-3 pt-2 border-t border-border">
+                              <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />
+                              <p>This information is for educational purposes only. Most peptides are NOT FDA-approved for human use. Always consult a licensed healthcare provider.</p>
+                            </div>
                             <div className="flex items-center gap-1 mt-2">
                               <Button 
                                 variant="ghost" 
@@ -533,7 +586,7 @@ export default function ChatInterface() {
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about any peptide..."
+              placeholder="Ask me anything — protocols, dosing, comparisons, research..."
               className="min-h-[52px] max-h-32 pr-12 resize-none rounded-xl border-border"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Clock, ShieldCheck } from "lucide-react";
+import { Clock, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface GuideCardEnhancedProps {
@@ -10,7 +10,6 @@ interface GuideCardEnhancedProps {
   categoryLabel: string;
   readTime: string;
   lastUpdated: string;
-  reviewedBy?: string;
   featured?: boolean;
 }
 
@@ -21,7 +20,6 @@ export function GuideCardEnhanced({
   categoryLabel,
   readTime,
   lastUpdated,
-  reviewedBy,
   featured = false,
 }: GuideCardEnhancedProps) {
   return (
@@ -60,14 +58,13 @@ export function GuideCardEnhanced({
             <span>Updated {lastUpdated}</span>
           </div>
 
-          {reviewedBy && (
-            <div className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-success" />
-                Reviewed by {reviewedBy}
-              </span>
-            </div>
-          )}
+          {/* Based on research label */}
+          <div className="mt-3 pt-3 border-t border-border/50 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <FileText className="w-3 h-3" />
+              Based on published research
+            </span>
+          </div>
         </div>
       </article>
     </Link>
