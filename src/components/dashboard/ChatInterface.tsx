@@ -29,6 +29,8 @@ import { useSaveMessage, useUpdateMessage } from "@/hooks/useMessages";
 import { useIncrementQuestionsAsked, useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { AIDisclaimerModal } from "@/components/chat/AIDisclaimerModal";
+import { AnimatedLogo } from "@/components/brand/AnimatedLogo";
+import { Logo } from "@/components/brand/Logo";
 
 interface Message {
   id: string;
@@ -127,7 +129,7 @@ function TypingIndicator() {
 function PulsingAvatar() {
   return (
     <motion.div 
-      className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6 relative"
+      className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-6 relative"
       animate={{ 
         boxShadow: [
           "0 0 0 0 rgba(0, 0, 0, 0.1)",
@@ -141,17 +143,7 @@ function PulsingAvatar() {
         ease: "easeInOut"
       }}
     >
-      <motion.span 
-        className="text-xl font-bold text-primary-foreground"
-        animate={{ scale: [1, 1.05, 1] }}
-        transition={{
-          duration: 2.5,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      >
-        PP
-      </motion.span>
+      <AnimatedLogo size={40} animate={true} />
     </motion.div>
   );
 }
@@ -536,9 +528,7 @@ export default function ChatInterface() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
-                              <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center">
-                                <span className="text-[8px] font-bold text-primary-foreground">PP</span>
-                              </div>
+                              <Logo showText={false} size="sm" />
                               <span className="text-xs font-medium text-muted-foreground">Peptide Playbook AI</span>
                             </div>
                           </>
