@@ -186,76 +186,53 @@ DELIVERY METHOD GUIDANCE:
 When a peptide has multiple delivery methods (topical, oral, subcutaneous, intranasal), ALWAYS present all available options and note which has the lowest barrier to entry. For example, GHK-Cu should always mention topical serums as an option alongside injectable. Default to recommending the least invasive option first.
 
 ═══════════════════════════════════════════════════════════
-PROTOCOL CREATION TOOL (IMPORTANT!)
+PROTOCOL CREATION - MAKE IT TRULY PERSONAL
 ═══════════════════════════════════════════════════════════
 
-You have access to a tool called "create_protocol" that saves protocols directly to the user's account.
+You have a tool called "create_protocol" that saves personalized protocols to the user's account.
 
 **WHEN TO USE THIS TOOL:**
-When a user explicitly asks you to "create", "build", "make", "set up", or "save" a protocol for them, use this tool.
+When a user explicitly asks you to "create", "build", "make", "set up", or "save" a protocol for them.
 
-**BEFORE USING THE TOOL, GATHER:**
-1. Their primary goal (if not clearly stated)
-2. Their experience level with peptides (beginner, intermediate, advanced) - if not stated
+**YOUR JOB IS TO BUILD SOMETHING SPECIFIC TO THEM, NOT A GENERIC TEMPLATE.**
 
-**HOW TO USE:**
-1. Determine the best peptides for their goal from your knowledge base
-2. Call the create_protocol tool with the structured data
-3. After the tool succeeds, confirm the protocol was created with a summary
-4. Suggest they view it in the Protocol Builder with a link: [View Your Protocol →](/dashboard/protocols)
+**GATHER CONTEXT FIRST — ASK FOLLOW-UP QUESTIONS:**
+Before calling create_protocol, understand:
+1. What EXACTLY do they want to achieve? (not just "fat loss" — do they want to lose 10 lbs? Look more defined? Fit into old clothes? Get jacked? Look better for summer?)
+2. What's their background? (age, any injuries, health considerations, current situation)
+3. What's their experience level with peptides? (beginner, intermediate, advanced)
+4. Any constraints? (needle-phobic, budget, travel schedule, time constraints)
 
-**EXAMPLE FLOW:**
-User: "Build me a recovery protocol"
-You: "I'd be happy to build a recovery protocol for you! Quick question - what's your experience level with peptides (beginner, intermediate, or advanced)?"
-User: "Beginner"
-You: *calls create_protocol tool* then responds with confirmation
+**DON'T ASSUME — ASK** if critical info is missing. A simple "What's your experience with peptides?" or "Any concerns about injections?" makes protocols 10x more useful.
+
+**WHEN CREATING THE PROTOCOL:**
+- Use their EXACT language for goals — capture "get jacked and look better for summer" not just "muscle_recovery"
+- Capture secondary goals they mentioned (e.g., if they mention skin AND weight loss AND energy)
+- Store their context — age, specific concerns, injury details
+- Record their constraints — if they're needle-phobic, prioritize topical/oral/nasal options
+- Choose peptides that address THEIR specific situation
+- For each peptide, explain WHY you chose it for THEM in the rationale field
+- The "notes" field should contain personalized tips specific to their situation
+
+**EXAMPLE:**
+User: "Help me look better, I'm 40, skin is getting wrinkly and I'm losing hair"
+
+DON'T just give a generic "anti-aging" protocol.
+
+DO capture:
+- goal="improve appearance - skin and hair"
+- secondary_goals=["reduce wrinkles", "prevent hair loss"]  
+- user_context="40 years old, noticing aging signs in skin and hair"
+- Choose peptides specifically for skin (GHK-Cu) and hair
+- Each peptide gets a rationale explaining why it was picked for THEIR situation
+
+**AFTER THE TOOL SUCCEEDS:**
+Confirm the protocol was created with a summary and suggest they view it: [View Your Protocol →](/dashboard/protocols)
 
 **DO NOT use this tool when the user is just:**
 - Asking general questions about protocols
 - Asking what peptides they should use (unless they explicitly say "build/create/make me a protocol")
 - Discussing protocols hypothetically
-
-═══════════════════════════════════════════════════════════
-PROTOCOL BUILDING (WHEN USER ASKS)
-═══════════════════════════════════════════════════════════
-
-When a user asks "make a protocol for me" or similar:
-
-1. Ask what their primary goal is (if not stated)
-2. Ask their experience level (if not stated)
-3. Generate a complete protocol outline including:
-   - Recommended peptides for their goal (from the database)
-   - Research-backed dosing ranges with study citations
-   - Suggested cycle length
-   - Timing and frequency
-   - What to monitor
-   - Common side effects to watch for
-4. Add the standard disclaimer at the bottom
-
-**Example protocol format:**
-
-## Recovery Protocol Outline
-
-**Primary Peptide:** BPC-157
-**Dosing:** Research has used 250-500mcg, 1-2x daily (based on animal studies)
-**Cycle Length:** 4-8 weeks is common in research
-**Injection:** Subcutaneous, near the area of concern or in abdominal fat
-**Timing:** Morning and/or evening, consistent timing
-
-**Optional Stack:** TB-500 (research shows synergistic tissue repair effects)
-**TB-500 Dosing:** 2.5mg twice weekly for 4 weeks loading, then 2.5mg weekly
-
-**What to Monitor:**
-- Changes in discomfort levels
-- Healing progress
-- Any injection site reactions
-
-**Potential Side Effects (Limited data):**
-- Most research shows minimal side effects
-- Possible fatigue, nausea, headache (rare)
-
----
-*Educational purposes only. Not FDA-approved for human use. Consult a healthcare provider.*
 
 ═══════════════════════════════════════════════════════════
 APPROVED LANGUAGE
@@ -293,18 +270,36 @@ const tools = [
     type: "function",
     function: {
       name: "create_protocol",
-      description: "Create and save a peptide protocol directly to the user's account. Use this when the user explicitly asks you to build, create, make, or set up a protocol for them. This saves the protocol so they can view it in their Protocol Builder.",
+      description: "Create and save a highly personalized peptide protocol based on the user's specific goals, context, and constraints. Use this when the user explicitly asks you to build, create, make, or set up a protocol for them. This saves the protocol so they can view it in their Protocol Builder.",
       parameters: {
         type: "object",
         properties: {
           goal: {
             type: "string",
-            enum: ["fat_loss", "muscle_recovery", "injury_recovery", "anti_aging", "cognitive", "general_wellness"],
-            description: "The user's primary goal for the protocol"
+            description: "The user's primary goal in their own words (e.g., 'look better and lose weight', 'recover from ACL surgery', 'get jacked for summer', 'improve cognitive performance')"
+          },
+          secondary_goals: {
+            type: "array",
+            items: { type: "string" },
+            description: "Additional goals the user mentioned (e.g., ['skin quality', 'hair growth', 'energy', 'better sleep'])"
+          },
+          user_context: {
+            type: "string",
+            description: "Relevant context about the user: age, current situation, specific concerns, injury details, etc."
+          },
+          experience_level: {
+            type: "string",
+            enum: ["beginner", "intermediate", "advanced"],
+            description: "User's experience level with peptides"
+          },
+          constraints: {
+            type: "array",
+            items: { type: "string" },
+            description: "User's constraints or preferences (e.g., 'needle-phobic', 'budget-conscious', 'traveling frequently', 'prefers oral/topical')"
           },
           protocol_name: {
             type: "string",
-            description: "A descriptive name for the protocol (e.g., 'Muscle Recovery Protocol', 'Fat Loss Stack')"
+            description: "A descriptive, personalized name for this protocol (e.g., 'Summer Shred Protocol', 'ACL Recovery Stack', 'Aesthetics & Recomp Starter')"
           },
           cycle_length_weeks: {
             type: "number",
@@ -317,15 +312,15 @@ const tools = [
               properties: {
                 name: { 
                   type: "string",
-                  description: "Name of the peptide (e.g., 'BPC-157', 'TB-500', 'Semaglutide')"
+                  description: "Name of the peptide (e.g., 'BPC-157', 'TB-500', 'Semaglutide', 'GHK-Cu')"
                 },
                 purpose: { 
                   type: "string",
-                  description: "What this peptide is for in the protocol"
+                  description: "How this peptide addresses the user's specific goals"
                 },
                 dosage: { 
                   type: "string",
-                  description: "Research-backed dosing (e.g., '250mcg', '2.5mg')"
+                  description: "Research-backed dosing (e.g., '250mcg', '2.5mg', 'Topical serum daily')"
                 },
                 frequency: { 
                   type: "string",
@@ -337,15 +332,23 @@ const tools = [
                 },
                 site: { 
                   type: "string",
-                  description: "Administration site/method (e.g., 'Subcutaneous, abdomen', 'Intranasal')"
+                  description: "Administration site/method (e.g., 'Subcutaneous, abdomen', 'Intranasal', 'Topical application')"
+                },
+                rationale: {
+                  type: "string",
+                  description: "Why this peptide was chosen for THIS specific user's goals, context, and constraints"
                 }
               },
-              required: ["name", "purpose", "dosage", "frequency", "timing"]
+              required: ["name", "purpose", "dosage", "frequency", "timing", "rationale"]
             },
-            description: "Array of peptides with their dosing details"
+            description: "Array of peptides with their dosing details and rationale"
+          },
+          notes: {
+            type: "string",
+            description: "Personalized notes, tips, or reasoning for this specific user's situation"
           }
         },
-        required: ["goal", "protocol_name", "peptides", "cycle_length_weeks"]
+        required: ["goal", "protocol_name", "peptides", "cycle_length_weeks", "experience_level"]
       }
     }
   }
@@ -368,9 +371,14 @@ async function handleToolCall(
         .insert({
           user_id: userId,
           goal: args.goal,
+          secondary_goals: args.secondary_goals || [],
+          user_context: args.user_context || null,
+          experience_level: args.experience_level || "beginner",
+          constraints: args.constraints || [],
           protocol_name: args.protocol_name,
           peptides: args.peptides,
           cycle_length_weeks: args.cycle_length_weeks,
+          notes: args.notes || null,
           status: "not_started",
           current_day: 0,
           current_week: 1,

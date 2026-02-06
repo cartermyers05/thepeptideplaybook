@@ -10,12 +10,17 @@ export interface Peptide {
   frequency: string;
   timing: string;
   site?: string;
+  rationale?: string;
 }
 
 export interface Protocol {
   id: string;
   user_id: string;
   goal: string;
+  secondary_goals?: string[];
+  user_context?: string;
+  experience_level?: string;
+  constraints?: string[];
   protocol_name: string;
   peptides: Peptide[];
   cycle_length_weeks: number;
@@ -23,6 +28,7 @@ export interface Protocol {
   current_week: number;
   status: "not_started" | "active" | "paused" | "completed";
   started_at: string | null;
+  notes?: string;
   created_at: string;
   updated_at: string;
 }
