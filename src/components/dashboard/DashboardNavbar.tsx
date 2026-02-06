@@ -3,6 +3,7 @@ import {
   BookOpen,
   ClipboardList, 
   MessageCircle, 
+  History,
   Settings,
   LogOut
 } from "lucide-react";
@@ -30,6 +31,7 @@ const navItems: NavItem[] = [
   { icon: BookOpen, label: "My Course", path: "/dashboard/course" },
   { icon: ClipboardList, label: "My Plan", path: "/dashboard/protocol" },
   { icon: MessageCircle, label: "AI Coach", path: "/dashboard/coach" },
+  { icon: History, label: "History", path: "/dashboard/history" },
 ];
 
 export function DashboardNavbar() {
