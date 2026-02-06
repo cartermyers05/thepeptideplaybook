@@ -43,6 +43,7 @@ import CourseLessons from "./pages/dashboard/CourseLessons";
 import MyPlan from "./pages/dashboard/MyPlan";
 import Protocols from "./pages/dashboard/Protocols";
 import CoursePreview from "./pages/CoursePreview";
+import History from "./pages/History";
 
 // SEO Guide pages
 import Guides from "./pages/Guides";
@@ -185,6 +186,7 @@ const App = () => (
             <Route path="/dashboard/coach" element={<ProtectedRoute><DashboardCoach /></ProtectedRoute>} />
             <Route path="/dashboard/progress" element={<ProtectedRoute><DashboardProgress /></ProtectedRoute>} />
             <Route path="/dashboard/settings" element={<ProtectedRoute><DashboardSettings /></ProtectedRoute>} />
+            <Route path="/dashboard/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
             
             {/* Legacy routes kept for backwards compatibility */}
             <Route path="/dashboard/checklist" element={<ProtectedRoute><DashboardChecklist /></ProtectedRoute>} />

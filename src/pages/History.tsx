@@ -25,12 +25,11 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/brand/Logo";
 
 const navItems = [
-  { icon: MessageSquare, label: "Chat", href: "/chat" },
-  { icon: HistoryIcon, label: "History", href: "/history", active: true },
-  { icon: Bookmark, label: "Saved", href: "/saved" },
-  { icon: BarChart3, label: "Stats", href: "/stats" },
-  { icon: Users, label: "Refer Friends", href: "/referral" },
-  { icon: Settings, label: "Account", href: "/account" },
+  { icon: MessageSquare, label: "Coach", href: "/dashboard/coach" },
+  { icon: HistoryIcon, label: "History", href: "/dashboard/history", active: true },
+  { icon: Bookmark, label: "My Course", href: "/dashboard/course" },
+  { icon: BarChart3, label: "My Plan", href: "/dashboard/protocol" },
+  { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ];
 
 export default function History() {
@@ -189,7 +188,7 @@ export default function History() {
                   Start chatting to see your history here
                 </p>
                 <Button asChild>
-                  <Link to="/chat">Start a conversation</Link>
+                  <Link to="/dashboard/coach">Start a conversation</Link>
                 </Button>
               </div>
             ) : (

@@ -1,10 +1,10 @@
-import { Home, MessageCircle, FlaskConical, Settings } from "lucide-react";
+import { Home, MessageCircle, History, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/dashboard" },
-  { icon: MessageCircle, label: "Chat", path: "/dashboard/chat" },
-  { icon: FlaskConical, label: "Protocols", path: "/dashboard/protocols" },
+  { icon: MessageCircle, label: "Coach", path: "/dashboard/coach" },
+  { icon: History, label: "History", path: "/dashboard/history" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
 
