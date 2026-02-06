@@ -34,6 +34,194 @@ async function getPeptideContext(supabase: ReturnType<typeof createClient>) {
   return { peptides, landmarkStudies };
 }
 
+// Fetch user's personal context (course, check-ins, lessons)
+async function getUserPersonalContext(supabase: ReturnType<typeof createClient>, userId: string) {
+  try {
+    // Fetch active course
+    const { data: userCourse } = await supabase
+      .from("user_courses")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // Fetch active protocol
+    const { data: protocol } = await supabase
+      .from("protocols")
+      .select("*")
+      .eq("user_id", userId)
+      .in("status", ["active", "in_progress"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // Fetch recent check-ins (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const { data: checkIns } = await supabase
+      .from("check_ins")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("date", sevenDaysAgo.toISOString().split('T')[0])
+      .order("date", { ascending: false });
+
+    // Fetch lesson progress if there's a course
+    let lessonProgress = null;
+    if (userCourse?.id) {
+      const { data: lessons } = await supabase
+        .from("lesson_progress")
+        .select("*")
+        .eq("course_id", userCourse.id)
+        .eq("user_id", userId);
+      lessonProgress = lessons;
+    }
+
+    // Fetch profile for streak info
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("current_streak")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    return { userCourse, protocol, checkIns, lessonProgress, profile };
+  } catch (error) {
+    console.error("Error fetching user personal context:", error);
+    return null;
+  }
+}
+
+// Format user context for system prompt
+function formatUserPersonalContext(context: any): string {
+  if (!context) return "";
+
+  let output = `
+═══════════════════════════════════════════════════════════
+USER'S PERSONAL JOURNEY
+═══════════════════════════════════════════════════════════
+
+`;
+
+  // Course info
+  if (context.userCourse) {
+    const course = context.userCourse;
+    const currentWeek = Math.ceil((course.current_day || 1) / 7);
+    const totalWeeks = Math.ceil(course.duration_days / 7);
+    
+    output += `**ACTIVE COURSE:**
+- Title: ${course.title}
+- Goal: ${course.goal}
+- Progress: Day ${course.current_day || 1} of ${course.duration_days} (Week ${currentWeek} of ${totalWeeks})
+- Status: ${course.status}
+${course.supplies_status ? `- Supplies: ${course.supplies_status}` : ""}
+
+**Peptides in Course:**
+`;
+    const peptides = course.peptides || [];
+    peptides.forEach((p: any) => {
+      output += `- ${p.name}: ${p.purpose} (${p.dosing_research || p.dosage || "see course details"})\n`;
+    });
+    output += "\n";
+  }
+
+  // Protocol info
+  if (context.protocol) {
+    const p = context.protocol;
+    output += `**ACTIVE PROTOCOL:**
+- Name: ${p.protocol_name}
+- Goal: ${p.goal}
+- Week: ${p.current_week || 1} of ${p.cycle_length_weeks}
+- Status: ${p.status}
+${p.notes ? `- Notes: ${p.notes}` : ""}
+
+`;
+  }
+
+  // Check-in insights
+  if (context.checkIns && context.checkIns.length > 0) {
+    const checkIns = context.checkIns;
+    
+    // Calculate averages
+    const energyValues = checkIns.filter((c: any) => c.energy_level != null).map((c: any) => c.energy_level);
+    const moodValues = checkIns.filter((c: any) => c.mood != null).map((c: any) => c.mood);
+    const sleepValues = checkIns.filter((c: any) => c.sleep_quality != null).map((c: any) => c.sleep_quality);
+    
+    const avgEnergy = energyValues.length > 0 ? (energyValues.reduce((a: number, b: number) => a + b, 0) / energyValues.length).toFixed(1) : null;
+    const avgMood = moodValues.length > 0 ? (moodValues.reduce((a: number, b: number) => a + b, 0) / moodValues.length).toFixed(1) : null;
+    const avgSleep = sleepValues.length > 0 ? (sleepValues.reduce((a: number, b: number) => a + b, 0) / sleepValues.length).toFixed(1) : null;
+    
+    // Count side effects
+    const sideEffectCounts: Record<string, number> = {};
+    checkIns.forEach((c: any) => {
+      (c.side_effects || []).forEach((effect: string) => {
+        if (effect && effect !== "None") {
+          sideEffectCounts[effect] = (sideEffectCounts[effect] || 0) + 1;
+        }
+      });
+    });
+    
+    output += `**CHECK-IN INSIGHTS (Last 7 Days):**
+- Check-ins recorded: ${checkIns.length}
+- Average Energy: ${avgEnergy !== null ? `${avgEnergy}/10` : "No data"}
+- Average Mood: ${avgMood !== null ? `${avgMood}/10` : "No data"}
+- Average Sleep: ${avgSleep !== null ? `${avgSleep}/10` : "No data"}
+`;
+
+    const sideEffects = Object.entries(sideEffectCounts)
+      .sort((a, b) => (b[1] as number) - (a[1] as number))
+      .slice(0, 5);
+    
+    if (sideEffects.length > 0) {
+      output += `- Reported Side Effects: ${sideEffects.map(([effect, count]) => `${effect} (${count}x)`).join(", ")}\n`;
+    }
+
+    // Today's check-in
+    const today = new Date().toISOString().split('T')[0];
+    const todayCheckIn = checkIns.find((c: any) => c.date === today);
+    if (todayCheckIn) {
+      output += `\n**Today's Check-in:**
+- Energy: ${todayCheckIn.energy_level ?? "Not rated"}/10
+- Mood: ${todayCheckIn.mood ?? "Not rated"}/10
+- Sleep: ${todayCheckIn.sleep_quality ?? "Not rated"}/10
+- Injection: ${todayCheckIn.injection_done === "yes" ? "✅ Done" : todayCheckIn.injection_done === "skipped" ? "⏭️ Skipped" : "Not yet"}
+`;
+    } else {
+      output += `\n⚠️ No check-in recorded today.\n`;
+    }
+    output += "\n";
+  }
+
+  // Lesson progress
+  if (context.lessonProgress && context.lessonProgress.length > 0) {
+    const completed = context.lessonProgress.filter((l: any) => l.completed).length;
+    const total = context.userCourse?.duration_days || completed;
+    const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+    
+    output += `**LESSON PROGRESS:**
+- Lessons Completed: ${completed} of ${total} (${rate}%)
+`;
+  }
+
+  // Profile streak
+  if (context.profile?.current_streak) {
+    output += `\n**STREAK:** ${context.profile.current_streak} days in a row! 🔥\n`;
+  }
+
+  output += `
+═══════════════════════════════════════════════════════════
+USE THIS CONTEXT:
+- Reference their actual data when relevant
+- Personalize advice based on their check-in trends
+- Celebrate their progress and streaks
+- If they ask about "how am I doing", use their metrics
+═══════════════════════════════════════════════════════════
+`;
+
+  return output;
+}
+
 // Format peptide data for system prompt
 function formatPeptideDatabase(peptides: any[], landmarkStudies: any[] | null): string {
   let output = `
@@ -834,7 +1022,12 @@ serve(async (req) => {
       peptideDatabase = "Database temporarily unavailable. Please provide general peptide information based on your training.";
     }
 
-    const SYSTEM_PROMPT = buildSystemPrompt(peptideDatabase);
+    // Fetch user's personal context (course, check-ins, lessons, protocols)
+    const userPersonalContext = await getUserPersonalContext(supabaseServiceRole, userId);
+    const personalContextPrompt = formatUserPersonalContext(userPersonalContext);
+
+    // Combine peptide database with personal context
+    const SYSTEM_PROMPT = buildSystemPrompt(peptideDatabase) + personalContextPrompt;
 
     // First API call - may include tool calls
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
