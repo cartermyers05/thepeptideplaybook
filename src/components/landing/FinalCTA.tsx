@@ -10,35 +10,32 @@ export function FinalCTA() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-2xl mx-auto text-center"
+          className="max-w-3xl mx-auto text-center"
         >
-          {/* Guarantee section */}
-          <div className="mb-12 p-8 bg-card border border-border rounded-2xl">
-            <h3 className="text-xl font-semibold mb-4">Not sure yet? No risk.</h3>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
-              Try Peptide Playbook for 30 days. If it's not the clearest peptide resource you've ever used, 
-              email us and we'll refund every penny. No questions asked.
-            </p>
-            <Link to="/quiz">
-              <PillButton variant="dark" size="lg" icon={<span>→</span>}>
-                Get Full Access — $67
-              </PillButton>
-            </Link>
-          </div>
-
-          {/* Final message */}
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
-            Still have questions?
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
+            You've Already Spent Hours Researching Peptides.
+            <br />
+            <span className="text-muted-foreground">Let's Make It Count.</span>
           </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            That's exactly why we built this.
+          
+          <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+            Get instant access to research-backed protocols, an AI that actually knows peptides, and the confidence to make informed decisions.
           </p>
+
           <Link to="/quiz">
-            <PillButton size="lg" className="btn-primary-clean h-12 px-8 text-base group">
-              Get Full Access — $67
-              <span className="ml-2 group-hover:translate-x-1 transition-transform inline-block">→</span>
+            <PillButton 
+              variant="dark" 
+              size="lg" 
+              className="h-14 px-10 text-lg"
+              icon={<span>→</span>}
+            >
+              Get The Peptide Playbook — $67
             </PillButton>
           </Link>
+          
+          <p className="mt-6 text-sm text-muted-foreground">
+            30-day money-back guarantee · Lifetime access · No subscription
+          </p>
         </motion.div>
       </div>
     </section>

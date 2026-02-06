@@ -4,28 +4,28 @@ import { Plus, Minus } from "lucide-react";
 
 const faqs = [
   {
-    question: "Is this medical advice?",
-    answer: "No. We share what research says about peptides. We don't tell you what to take or where to buy. Always talk to your doctor before trying anything.",
+    question: "Can't I just use ChatGPT for this?",
+    answer: "You can, but ChatGPT's peptide knowledge is general, sometimes outdated, and it doesn't track FDA status changes. Our AI is specifically built on peptide research and tells you when evidence is weak vs. strong. It also creates personalized protocols based on your specific goals.",
   },
   {
-    question: "How is this different from ChatGPT?",
-    answer: "ChatGPT gives generic answers. Peptide Playbook knows YOUR goals and guides you day-by-day through YOUR plan. It's like the difference between Googling 'learn Spanish' and using Duolingo.",
+    question: "Is this medical advice?",
+    answer: "No. The Peptide Playbook is an educational research tool. We help you understand the science so you can have informed conversations with your healthcare provider. We include doctor conversation scripts for exactly this reason.",
   },
   {
     question: "What if I'm a complete beginner?",
-    answer: "Perfect. We built this for you. Every guide assumes zero knowledge and walks you through step-by-step. From mixing to your first use.",
+    answer: "Perfect. The quiz personalizes everything to your experience level. The AI adapts its explanations to where you are. No jargon, no assumptions. We start from the basics and build up.",
+  },
+  {
+    question: "What if it's not for me?",
+    answer: "You're covered by our 30-day money-back guarantee. If the Playbook doesn't help you, email us and we'll refund you. No questions asked.",
   },
   {
     question: "Do you sell peptides?",
-    answer: "No. We only provide education. We don't sell peptides, recommend vendors, or have any affiliate deals with sellers.",
+    answer: "No. We don't sell peptides, we don't have affiliate deals with suppliers, and we have no financial incentive to recommend one peptide over another. This is pure education and research.",
   },
   {
-    question: "Is this worth $67?",
-    answer: "That's less than one doctor visit. And you get lifetime access to 500+ research-backed answers whenever you need them.",
-  },
-  {
-    question: "What if it doesn't work for me?",
-    answer: "Email us within 30 days for a full refund. No questions asked. We want you to feel confident trying it.",
+    question: "Is my information secure?",
+    answer: "Yes. We use 256-bit SSL encryption and Stripe for payments. We never share your data with third parties. Your research journey stays private.",
   },
 ];
 

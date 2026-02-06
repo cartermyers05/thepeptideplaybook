@@ -1,150 +1,96 @@
 import { motion } from "framer-motion";
-import { GridPattern } from "./GridPattern";
+import { Link } from "react-router-dom";
+import { ClipboardList, Sparkles, MessageCircle } from "lucide-react";
+import { PillButton } from "./PillButton";
 
-interface Step {
-  number: string;
-  title: string;
-  description: string;
-  details: string[];
-}
-
-const steps: Step[] = [
+const steps = [
   {
     number: "01",
-    title: "Tell Us Your Goal",
-    description: "Pick what you want: burn fat, build muscle, recover faster, or slow aging. Takes 60 seconds.",
-    details: [
-      "6 focused goal tracks to choose from",
-      "Quick quiz to understand your experience level",
-      "No overwhelm. Just clarity on where to start",
-    ],
+    icon: ClipboardList,
+    title: "Take the Quiz",
+    description: "Answer 5 quick questions about your goals, experience, and health priorities.",
   },
   {
     number: "02",
-    title: "We Build Your Plan",
-    description: "You get a custom plan with the right peptides for your goal. Based on real research, not random forums.",
-    details: [
-      "Peptides chosen specifically for your goal",
-      "Dosing based on published research, explained simply",
-      "42-84 day program created just for you",
-    ],
+    icon: Sparkles,
+    title: "Get Your Protocol",
+    description: "Our AI builds a personalized peptide protocol based on your answers and 500+ research studies.",
   },
   {
     number: "03",
-    title: "Learn How to Do It Safely",
-    description: "Step-by-step guides show you exactly how to mix and use peptides. No guessing.",
-    details: [
-      "Visual guides for mixing your first vial",
-      "Clear instructions for where and how to inject",
-      "Supply checklist so you know what to order",
-    ],
-  },
-  {
-    number: "04",
-    title: "Follow Along Day by Day",
-    description: "One lesson a day. Never overwhelming. Just what you need to know today.",
-    details: [
-      "Lessons unlock one at a time (8-week program)",
-      "Guidance based on where you are in your cycle",
-      "Simple action items to keep you on track",
-    ],
-  },
-  {
-    number: "05",
-    title: "Ask Questions Anytime",
-    description: "Stuck? Ask the AI coach anything. It knows 500+ studies and your specific plan.",
-    details: [
-      "Daily check-ins to track progress",
-      "Streak tracking and milestone celebrations",
-      "24/7 AI coach for questions anytime",
-    ],
+    icon: MessageCircle,
+    title: "Ask Anything",
+    description: "Have questions? The AI coach is available 24/7 to answer with real citations, not generic advice.",
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: "easeOut" as const },
-  },
-};
-
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="relative py-20 md:py-28 overflow-hidden">
-      {/* Background grid pattern */}
-      <GridPattern variant="dots" className="opacity-50" />
-      
-      <div className="container px-4 md:px-8 relative z-10">
+    <section id="how-it-works" className="py-20 md:py-28 bg-secondary/30">
+      <div className="container px-4 md:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-20"
+          className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-            How It
-            <br />
-            Works
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+            From Confused to Confident in 3 Steps
           </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Getting started with peptides doesn't have to be complicated.
+          </p>
         </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="space-y-16 md:space-y-24"
-        >
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {steps.map((step, index) => (
             <motion.div
               key={index}
-              variants={itemVariants}
-              className="grid md:grid-cols-12 gap-6 md:gap-12 items-start"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.15 }}
+              className="relative"
             >
-              {/* Step number */}
-              <div className="md:col-span-2">
-                <span className="text-6xl md:text-7xl font-bold text-muted-foreground/30">
+              {/* Connector line (hidden on mobile, shown on desktop) */}
+              {index < steps.length - 1 && (
+                <div className="hidden md:block absolute top-16 left-[60%] w-[80%] h-[2px] bg-border" />
+              )}
+              
+              <div className="text-center">
+                {/* Step number badge */}
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-lg mb-6">
                   {step.number}
-                </span>
-              </div>
-
-              {/* Content */}
-              <div className="md:col-span-10 md:border-t border-border pt-0 md:pt-8">
-                <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                  {step.title}
-                </h3>
-                <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed mb-6">
+                </div>
+                
+                {/* Icon */}
+                <div className="w-16 h-16 rounded-2xl bg-card border border-border mx-auto flex items-center justify-center mb-6">
+                  <step.icon className="w-8 h-8 text-foreground" />
+                </div>
+                
+                {/* Content */}
+                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+                <p className="text-muted-foreground leading-relaxed max-w-xs mx-auto">
                   {step.description}
                 </p>
-                
-                {/* Detail bullets */}
-                <div className="space-y-2">
-                  {step.details.map((detail, detailIndex) => (
-                    <div 
-                      key={detailIndex} 
-                      className="flex items-start gap-3 text-sm text-muted-foreground"
-                    >
-                      <span className="mt-2 h-1 w-1 rounded-full bg-muted-foreground/40 shrink-0" />
-                      <span>{detail}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </motion.div>
           ))}
+        </div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+          className="text-center mt-12"
+        >
+          <Link to="/quiz">
+            <PillButton variant="dark" size="lg" icon={<span>→</span>}>
+              Start Your Free Quiz
+            </PillButton>
+          </Link>
         </motion.div>
       </div>
     </section>

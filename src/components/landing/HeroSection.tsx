@@ -2,6 +2,14 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { PillButton } from "./PillButton";
 import { ChatPreviewCard, CoursePreviewCard, DigestPreviewCard } from "./HeroProductCards";
+import { Check } from "lucide-react";
+
+const trustItems = [
+  "500+ Studies Analyzed",
+  "45+ Peptides Covered",
+  "FDA Status Tracked",
+  "30-Day Money Back",
+];
 
 export function HeroSection() {
   return (
@@ -10,66 +18,80 @@ export function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
           {/* Left column - Typography */}
           <div>
-            {/* Headline - big bold letters */}
+            {/* Headline */}
             <motion.h1 
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold tracking-tight leading-[1.2]"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-[1.1]"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <span className="block text-foreground">Stop</span>
-              <span className="block text-foreground">Guessing</span>
-              <span className="block text-foreground">About</span>
-              <span className="block text-foreground">Peptides</span>
+              Stop Googling Peptides.{" "}
+              <span className="text-muted-foreground">
+                Get Research-Backed Answers in Seconds.
+              </span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-              className="mt-8 text-lg md:text-xl text-muted-foreground max-w-md leading-relaxed"
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed"
             >
-              Ask any question. Get answers backed by 500+ real studies. No bro-science. No TikTok hype.
+              The AI-powered peptide research platform trusted by biohackers, athletes, and health-conscious people who want real science, not bro-science.
             </motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.6 }}
-              className="mt-10 flex flex-wrap gap-4"
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="mt-8 flex flex-wrap gap-4"
             >
-              <Link to="/quiz">
+              <a
+                href="#demo"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('demo')?.scrollIntoView({ 
+                    behavior: 'smooth' 
+                  });
+                }}
+              >
                 <PillButton 
                   variant="dark" 
                   size="lg"
                   icon={<span>→</span>}
                 >
-                  Get Full Access — $67
+                  Try the AI Free
                 </PillButton>
-              </Link>
+              </a>
               <a
-                href="#how-it-works"
+                href="#features"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById('how-it-works')?.scrollIntoView({ 
+                  document.getElementById('features')?.scrollIntoView({ 
                     behavior: 'smooth' 
                   });
                 }}
               >
                 <PillButton variant="outline" size="lg">
-                  See How It Works
+                  See What's Inside
                 </PillButton>
               </a>
             </motion.div>
 
-            <motion.p
+            {/* Trust Bar */}
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.0, duration: 0.6 }}
-              className="mt-6 text-sm text-muted-foreground"
+              transition={{ delay: 0.7, duration: 0.6 }}
+              className="mt-8 flex flex-wrap gap-x-6 gap-y-2"
             >
-              $67 one-time · Lifetime access · 30-day guarantee
-            </motion.p>
+              {trustItems.map((item, index) => (
+                <div key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Check className="w-4 h-4 text-primary" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </motion.div>
           </div>
 
           {/* Right column - Product showcase cards */}
