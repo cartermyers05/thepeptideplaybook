@@ -2,6 +2,7 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { ConversationalQuiz } from "@/components/quiz/ConversationalQuiz";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 
 export default function Quiz() {
   return (
@@ -32,9 +33,7 @@ export default function Quiz() {
               <span className="hidden sm:inline">Back</span>
             </Link>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center">
-                <span className="text-xs font-bold text-background">PP</span>
-              </div>
+              <Logo showText={false} size="sm" />
             </div>
           </div>
         </header>

@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TypewriterMessage } from "@/components/dashboard/TypewriterMessage";
+import { Logo } from "@/components/brand/Logo";
 
 interface QuizMessageProps {
   role: 'user' | 'assistant';
@@ -25,11 +26,9 @@ export function QuizMessage({ role, content, isStreaming, isLatest }: QuizMessag
       )}
     >
       {isAssistant && (
-        <Avatar className="w-10 h-10 flex-shrink-0">
-          <AvatarFallback className="bg-muted text-foreground text-xs font-bold">
-            PP
-          </AvatarFallback>
-        </Avatar>
+        <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
+          <Logo showText={false} size="md" />
+        </div>
       )}
       
       <div
