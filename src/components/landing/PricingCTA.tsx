@@ -1,17 +1,23 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, Lock, Shield, RefreshCw } from "lucide-react";
 import { PillButton } from "./PillButton";
-import { TrustBadges } from "./TrustBadges";
 
 const features = [
-  "Custom plan for your goals",
-  "Step-by-step mixing guide",
-  "Complete injection walkthrough",
-  "Daily guidance through your cycle",
-  "24/7 AI coach access",
-  "Progress tracking",
-  "Lifetime access",
+  "AI Research Coach with 500+ studies",
+  "45+ peptide database with FDA status",
+  "Personalized protocol builder",
+  "Daily plan and progress tracking",
+  "Doctor conversation scripts",
+  "30+ research guides",
+  "Lifetime access to all updates",
+];
+
+const comparisons = [
+  { item: "Peptide clinic consultation", price: "$200-500" },
+  { item: "Medical provider peptide course", price: "$499-3,000" },
+  { item: "Hours of Reddit research", price: "Free but unreliable" },
+  { item: "Peptide Playbook", price: "$67 for everything", highlight: true },
 ];
 
 // Glow pulse component for the pricing card
@@ -42,24 +48,39 @@ export function PricingCTA() {
   return (
     <section id="pricing" className="py-32 md:py-40 bg-secondary/50">
       <div className="container px-4 md:px-8">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left - Heading */}
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
+          {/* Left - Heading + Comparison */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              One Price.
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+              One Payment.
               <br />
-              Everything
+              Lifetime Access.
               <br />
-              Included.
+              No Subscriptions.
             </h2>
-            <p className="mt-6 text-lg text-muted-foreground max-w-md">
-              $67 one-time. That's less than one doctor visit to ask these same questions.
-            </p>
+            
+            {/* Price comparison box */}
+            <div className="bg-card border border-border rounded-2xl p-6 mt-8">
+              <h3 className="font-semibold mb-4 text-foreground">What you'd pay elsewhere:</h3>
+              <ul className="space-y-3">
+                {comparisons.map((item, index) => (
+                  <li 
+                    key={index} 
+                    className={`flex justify-between items-center ${
+                      item.highlight ? "text-primary font-semibold" : "text-muted-foreground"
+                    }`}
+                  >
+                    <span>{item.item}</span>
+                    <span className={item.highlight ? "text-primary" : ""}>{item.price}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </motion.div>
 
           {/* Right - Pricing card */}
@@ -77,11 +98,11 @@ export function PricingCTA() {
               {/* Price */}
               <div className="mb-8">
                 <div className="flex items-baseline gap-2">
+                  <span className="text-2xl text-muted-foreground line-through">$99</span>
                   <span className="text-6xl md:text-7xl font-bold">$67</span>
-                  <span className="text-muted-foreground text-lg">one-time</span>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Lifetime access. No subscriptions.
+                <p className="mt-2 text-muted-foreground">
+                  One-time payment. Lifetime access.
                 </p>
               </div>
 
@@ -105,19 +126,32 @@ export function PricingCTA() {
                   className="w-full justify-center"
                   icon={<span>→</span>}
                 >
-                  Get Full Access — $67
+                  Get Instant Access
                 </PillButton>
               </Link>
               
               <p className="mt-4 text-sm text-muted-foreground text-center">
                 30-day money-back guarantee. No questions asked.
               </p>
+
+              {/* Trust badges */}
+              <div className="flex flex-wrap justify-center gap-4 mt-6 pt-6 border-t border-border">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>256-bit SSL</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Powered by Stripe</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>30-day refund</span>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
-
-        {/* Trust badges */}
-        <TrustBadges />
 
         <motion.p
           initial={{ opacity: 0 }}

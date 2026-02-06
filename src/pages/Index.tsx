@@ -1,10 +1,9 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { StatsBar } from "@/components/landing/StatsBar";
 import { GuidedDemo } from "@/components/landing/GuidedDemo";
 import { WhatsInsideSection } from "@/components/landing/WhatsInsideSection";
-import { ConversationPreviews } from "@/components/landing/ConversationPreviews";
 import { WhoThisIsForNew } from "@/components/landing/WhoThisIsForNew";
+import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { PricingCTA } from "@/components/landing/PricingCTA";
 import { FAQ } from "@/components/landing/FAQ";
 import { FinalCTA } from "@/components/landing/FinalCTA";
@@ -16,8 +15,8 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="Stop Guessing About Peptides | Peptide Playbook"
-        description="Ask any peptide question. Get answers backed by 500+ real studies. No bro-science. No TikTok hype. $67 one-time, lifetime access."
+        title="Stop Googling Peptides | Peptide Playbook"
+        description="The AI-powered peptide research platform with 500+ studies. Get research-backed answers, personalized protocols, and expert guidance. $67 one-time, lifetime access."
         canonical="/"
       />
       <HomepageSchemas />
@@ -25,11 +24,10 @@ const Index = () => {
         <Navbar />
         <main>
           <HeroSection />
-          <StatsBar />
           <GuidedDemo />
           <WhatsInsideSection />
-          <ConversationPreviews />
           <WhoThisIsForNew />
+          <HowItWorksSection />
           <PricingCTA />
           <FAQ />
           <FinalCTA />
