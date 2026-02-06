@@ -157,6 +157,7 @@ export function useProtocol() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Fetch single most recent protocol (for backward compatibility)
   const { data: protocol, isLoading, error } = useQuery({
     queryKey: ["protocol", user?.id],
     queryFn: async (): Promise<Protocol | null> => {
@@ -180,6 +181,31 @@ export function useProtocol() {
         current_day: data.current_day || 0,
         current_week: data.current_week || 1,
       } as Protocol;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch ALL protocols for the user
+  const { data: protocols, isLoading: isLoadingProtocols } = useQuery({
+    queryKey: ["protocols", user?.id],
+    queryFn: async (): Promise<Protocol[]> => {
+      if (!user?.id) return [];
+
+      const { data, error } = await supabase
+        .from("protocols")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      return (data || []).map((item) => ({
+        ...item,
+        peptides: (item.peptides as unknown as Peptide[]) || [],
+        status: (item.status as Protocol["status"]) || "not_started",
+        current_day: item.current_day || 0,
+        current_week: item.current_week || 1,
+      })) as Protocol[];
     },
     enabled: !!user?.id,
   });
@@ -269,7 +295,9 @@ export function useProtocol() {
 
   return {
     protocol,
+    protocols,
     isLoading,
+    isLoadingProtocols,
     error,
     createProtocol,
     startProtocol,
