@@ -17,9 +17,10 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <span className="block text-foreground">Your</span>
-               <span className="block text-foreground">AI Peptide</span>
-              <span className="block text-foreground">Journey</span>
+              <span className="block text-foreground">Stop</span>
+              <span className="block text-foreground">Guessing</span>
+              <span className="block text-foreground">About</span>
+              <span className="block text-foreground">Peptides</span>
             </motion.h1>
 
             <motion.p
@@ -28,7 +29,7 @@ export function HeroSection() {
               transition={{ delay: 0.6, duration: 0.6 }}
               className="mt-8 text-lg md:text-xl text-muted-foreground max-w-md leading-relaxed"
             >
-              The first AI powered peptide course personalized towards what goals you want to hit. From protocols to day by day guidance through your first cycle.
+              Ask any question. Get answers backed by 500+ real studies. No bro-science. No TikTok hype.
             </motion.p>
 
             <motion.div
@@ -43,7 +44,7 @@ export function HeroSection() {
                   size="lg"
                   icon={<span>→</span>}
                 >
-                  Start Your Course
+                  Get Full Access — $67
                 </PillButton>
               </Link>
               <a

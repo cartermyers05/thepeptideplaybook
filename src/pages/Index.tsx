@@ -1,11 +1,13 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { ScrollIndicator } from "@/components/landing/ScrollIndicator";
-import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { StatsBar } from "@/components/landing/StatsBar";
+import { GuidedDemo } from "@/components/landing/GuidedDemo";
 import { WhatsInsideSection } from "@/components/landing/WhatsInsideSection";
-import { GoalSelectionSection } from "@/components/landing/GoalSelectionSection";
+import { ConversationPreviews } from "@/components/landing/ConversationPreviews";
+import { WhoThisIsForNew } from "@/components/landing/WhoThisIsForNew";
 import { PricingCTA } from "@/components/landing/PricingCTA";
 import { FAQ } from "@/components/landing/FAQ";
+import { FinalCTA } from "@/components/landing/FinalCTA";
 import { Footer } from "@/components/landing/Footer";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { HomepageSchemas } from "@/components/seo/HomepageSchemas";
@@ -14,8 +16,8 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="The First AI-Powered Peptide Course | Peptide Playbook"
-        description="Not a generic course. Not a chatbot. A complete program built around YOUR goal — with day-by-day guidance through your first peptide cycle. $67 one-time."
+        title="Stop Guessing About Peptides | Peptide Playbook"
+        description="Ask any peptide question. Get answers backed by 500+ real studies. No bro-science. No TikTok hype. $67 one-time, lifetime access."
         canonical="/"
       />
       <HomepageSchemas />
@@ -23,12 +25,14 @@ const Index = () => {
         <Navbar />
         <main>
           <HeroSection />
-          <ScrollIndicator />
-          <HowItWorksSection />
+          <StatsBar />
+          <GuidedDemo />
           <WhatsInsideSection />
-          <GoalSelectionSection />
+          <ConversationPreviews />
+          <WhoThisIsForNew />
           <PricingCTA />
           <FAQ />
+          <FinalCTA />
         </main>
         <Footer />
       </div>

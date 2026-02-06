@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { GridPattern } from "./GridPattern";
+
 interface Step {
   number: string;
   title: string;
@@ -10,50 +11,50 @@ interface Step {
 const steps: Step[] = [
   {
     number: "01",
-    title: "Pick Your Goal",
-    description: "Choose from fat loss, muscle building, recovery, anti-aging, or cognitive enhancement. Your selection shapes everything that follows.",
+    title: "Tell Us Your Goal",
+    description: "Pick what you want: burn fat, build muscle, recover faster, or slow aging. Takes 60 seconds.",
     details: [
-      "6 focused goal tracks, each with curated peptide protocols",
-      "60-second quiz to understand your experience level",
+      "6 focused goal tracks to choose from",
+      "Quick quiz to understand your experience level",
       "No overwhelm. Just clarity on where to start",
     ],
   },
   {
     number: "02",
-    title: "AI Builds Your Course",
-    description: "In seconds, your personalized program is generated with specific peptides, research-backed dosing, and a day-by-day curriculum tailored to your goal.",
+    title: "We Build Your Plan",
+    description: "You get a custom plan with the right peptides for your goal. Based on real research, not random forums.",
     details: [
-      "Peptides selected specifically for your goal (not generic recommendations)",
-      "Dosing based on published research, clearly explained",
-      "42-84 day structured program generated instantly",
+      "Peptides chosen specifically for your goal",
+      "Dosing based on published research, explained simply",
+      "42-84 day program created just for you",
     ],
   },
   {
     number: "03",
-    title: "Learn the Fundamentals",
-    description: "Before you inject anything, master the essentials. Step-by-step walkthroughs for reconstitution, injection technique, and supply preparation.",
+    title: "Learn How to Do It Safely",
+    description: "Step-by-step guides show you exactly how to mix and use peptides. No guessing.",
     details: [
-      "Video-style guides for mixing your first vial",
-      "Injection site maps and needle selection guidance",
-      "Supply checklist so you know exactly what to order",
+      "Visual guides for mixing your first vial",
+      "Clear instructions for where and how to inject",
+      "Supply checklist so you know what to order",
     ],
   },
   {
     number: "04",
-    title: "Follow Daily Lessons",
-    description: "Each day, a new lesson unlocks. No information overload. Just what you need to know today, delivered in bite-sized format.",
+    title: "Follow Along Day by Day",
+    description: "One lesson a day. Never overwhelming. Just what you need to know today.",
     details: [
-      "Lessons unlock one day at a time (8-week program)",
-      "Contextual guidance based on where you are in your cycle",
-      "Action items to keep you on track",
+      "Lessons unlock one at a time (8-week program)",
+      "Guidance based on where you are in your cycle",
+      "Simple action items to keep you on track",
     ],
   },
   {
     number: "05",
-    title: "Track & Improve",
-    description: "Build streaks, hit milestones, and ask your AI coach anything along the way. Watch your progress unfold day by day.",
+    title: "Ask Questions Anytime",
+    description: "Stuck? Ask the AI coach anything. It knows 500+ studies and your specific plan.",
     details: [
-      "Daily check-ins to log progress",
+      "Daily check-ins to track progress",
       "Streak tracking and milestone celebrations",
       "24/7 AI coach for questions anytime",
     ],
