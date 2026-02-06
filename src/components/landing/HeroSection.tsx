@@ -5,8 +5,8 @@ import { ChatPreviewCard, CoursePreviewCard, DigestPreviewCard } from "./HeroPro
 import { Check } from "lucide-react";
 
 const trustItems = [
-  "500+ Studies Analyzed",
-  "45+ Peptides Covered",
+  "500+ Studies",
+  "45+ Peptides",
   "FDA Status Tracked",
   "30-Day Money Back",
 ];
@@ -25,10 +25,7 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              Stop Googling Peptides.{" "}
-              <span className="text-muted-foreground">
-                Get Research-Backed Answers in Seconds.
-              </span>
+              Your Personal Peptide Research Assistant
             </motion.h1>
 
             <motion.p
@@ -37,7 +34,7 @@ export function HeroSection() {
               transition={{ delay: 0.3, duration: 0.6 }}
               className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed"
             >
-              The AI-powered peptide research platform trusted by biohackers, athletes, and health-conscious people who want real science, not bro-science.
+              An AI-powered platform that answers your peptide questions with real research. Not Reddit threads, not bro-science. 500+ studies. 45+ peptides. Protocols built for your goals.
             </motion.p>
 
             <motion.div

@@ -7,37 +7,37 @@ const features = [
   {
     icon: MessageCircle,
     title: "AI Research Coach",
-    description: "Ask any peptide question and get answers backed by 500+ studies. Not ChatGPT guesses, real research with citations.",
+    description: "Ask any peptide question and get research-backed answers with study citations. Available 24/7.",
     gradient: "linear-gradient(135deg, hsl(173 55% 50%) 0%, hsl(180 60% 40%) 100%)",
   },
   {
     icon: Database,
     title: "45+ Peptide Database",
-    description: "Every peptide with mechanisms, studies, safety profiles, and current FDA status. Updated as regulations change.",
+    description: "Every peptide with mechanisms, dosing research, safety profiles, and live FDA status.",
     gradient: "linear-gradient(145deg, hsl(200 50% 50%) 0%, hsl(220 55% 45%) 100%)",
   },
   {
     icon: Target,
-    title: "Personalized Protocols",
-    description: "Tell the AI your goals, experience level, and constraints. Get a custom protocol built specifically for you in 60 seconds.",
+    title: "Custom Protocols",
+    description: "Tell the AI your goals and experience. Get a personalized protocol built in 60 seconds.",
     gradient: "linear-gradient(155deg, hsl(260 45% 55%) 0%, hsl(280 50% 45%) 100%)",
   },
   {
     icon: Calendar,
     title: "Daily Plan & Tracking",
-    description: "Know exactly what to take, when to take it, and track your progress day by day. No more spreadsheets or guessing.",
+    description: "See exactly what to take today, mark doses complete, and track your progress week by week.",
     gradient: "linear-gradient(165deg, hsl(340 45% 55%) 0%, hsl(320 50% 45%) 100%)",
   },
   {
     icon: Stethoscope,
-    title: "Doctor Conversation Scripts",
-    description: "Walking into a clinic? Get scripts for how to talk to your provider about peptides without sounding like TikTok.",
+    title: "Doctor Scripts",
+    description: "Pre-written conversation guides so you can talk to your provider about peptides confidently.",
     gradient: "linear-gradient(135deg, hsl(30 60% 50%) 0%, hsl(15 55% 45%) 100%)",
   },
   {
     icon: BookOpen,
-    title: "Research Library & Guides",
-    description: "30+ in-depth guides breaking down the science in plain English. From beginner basics to advanced stacking strategies.",
+    title: "30+ Research Guides",
+    description: "In-depth breakdowns of peptide science in plain English. Beginner to advanced.",
     gradient: "linear-gradient(145deg, hsl(142 50% 45%) 0%, hsl(160 55% 40%) 100%)",
   },
 ];
@@ -73,10 +73,10 @@ export function WhatsInsideSection() {
           className="mb-16 text-center"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-            Everything You Need to Navigate Peptides With Confidence
+            Everything Inside The Peptide Playbook
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            One platform. Complete peptide education. Backed by real research.
+            All of this. One payment. Lifetime access.
           </p>
         </motion.div>
 

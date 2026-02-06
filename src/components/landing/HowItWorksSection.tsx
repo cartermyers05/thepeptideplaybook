@@ -7,8 +7,8 @@ const steps = [
   {
     number: "01",
     icon: ClipboardList,
-    title: "Take the Quiz",
-    description: "Answer 5 quick questions about your goals, experience, and health priorities.",
+    title: "Take a 2-Minute Quiz",
+    description: "Tell us your goals, experience level, and what you're curious about.",
   },
   {
     number: "02",
@@ -35,11 +35,8 @@ export function HowItWorksSection() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-            From Confused to Confident in 3 Steps
+            3 Steps. That's It.
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Getting started with peptides doesn't have to be complicated.
-          </p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">

@@ -4,23 +4,23 @@ import { Beaker, Dumbbell, Clock, Search } from "lucide-react";
 const personas = [
   {
     icon: Beaker,
-    title: "The Biohacker",
-    description: "You've heard about BPC-157 and Semaglutide but don't know where to start. You want research, not Reddit threads.",
-  },
-  {
-    icon: Dumbbell,
-    title: "The Athlete",
-    description: "You want to recover faster, build more muscle, and optimize performance, but safely and with real science behind it.",
-  },
-  {
-    icon: Clock,
-    title: "The Anti-Aging Explorer",
-    description: "You're interested in longevity peptides like Epithalon and GHK-Cu but confused by conflicting information.",
+    title: "New to Peptides",
+    description: "You've heard about BPC-157 or Semaglutide but don't know where to start.",
   },
   {
     icon: Search,
-    title: "The Overwhelmed Researcher",
-    description: "You've spent 20+ hours reading forums, watching YouTube, and you still don't feel confident. This ends that.",
+    title: "Deep in the Rabbit Hole",
+    description: "You've spent hours on Reddit and YouTube and still don't feel confident.",
+  },
+  {
+    icon: Dumbbell,
+    title: "Athletes & Recovery-Focused",
+    description: "You want to recover faster and perform better with science behind your decisions.",
+  },
+  {
+    icon: Clock,
+    title: "Anti-Aging & Longevity",
+    description: "You're exploring peptides like Epithalon and GHK-Cu and want to separate hype from evidence.",
   },
 ];
 
@@ -54,11 +54,8 @@ export function WhoThisIsForNew() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-            Built For People Who Are Tired of Bad Peptide Info
+            Built For People Who Want Real Answers
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            If any of these sound like you, you're in the right place.
-          </p>
         </motion.div>
 
         <motion.div
