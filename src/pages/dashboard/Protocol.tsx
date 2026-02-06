@@ -39,7 +39,7 @@ export default function Protocol() {
           <p className="text-muted-foreground mb-6 max-w-md">
             Take our quick quiz to get a personalized peptide course tailored to your goals.
           </p>
-          <Button onClick={() => navigate("/quiz")} className="btn-primary-clean">Build My Course</Button>
+          <Button onClick={() => navigate("/dashboard/coach")} className="btn-primary-clean">Talk to AI Coach</Button>
         </div>
       </DashboardLayout>
     );
@@ -125,7 +125,7 @@ export default function Protocol() {
               Resume
             </Button>
           )}
-          <Button variant="outline" onClick={() => navigate("/quiz")}>
+          <Button variant="outline" onClick={() => navigate("/dashboard/coach")}>
             <RotateCcw className="w-4 h-4 mr-2" />
             New Protocol
           </Button>
