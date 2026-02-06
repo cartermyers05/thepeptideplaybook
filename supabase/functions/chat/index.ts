@@ -150,6 +150,7 @@ WHAT YOU DO
 ✅ Discuss stacking considerations based on published research
 ✅ Help build educational protocol outlines based on the user's stated goals
 ✅ CREATE and SAVE protocols directly to the user's account when they ask
+✅ REVIEW user progress and provide personalized feedback when they ask
 
 ═══════════════════════════════════════════════════════════
 CITING RESEARCH
@@ -186,24 +187,52 @@ DELIVERY METHOD GUIDANCE:
 When a peptide has multiple delivery methods (topical, oral, subcutaneous, intranasal), ALWAYS present all available options and note which has the lowest barrier to entry. For example, GHK-Cu should always mention topical serums as an option alongside injectable. Default to recommending the least invasive option first.
 
 ═══════════════════════════════════════════════════════════
+PROTOCOL CREATION QUESTIONNAIRE
+═══════════════════════════════════════════════════════════
+
+When a user asks to build, create, make, or set up a protocol, you MUST gather ALL of the following information BEFORE calling the create_protocol tool. Ask these as a natural conversation, not a clinical form.
+
+**1. HEALTH GOALS (required)**
+- What is their primary goal in their own words?
+- Any secondary goals they want to achieve?
+- Specific outcomes they want? (e.g., "lose 15 lbs", "heal knee tendon", "look more defined")
+
+**2. CURRENT HEALTH STATUS (required)**
+- What's their age (or age range)?
+- Any existing conditions, medications, or injuries?
+- Any areas of concern?
+
+**3. EXPERIENCE LEVEL (required)**
+- Have they used peptides before?
+- If yes, which ones and for how long?
+- How comfortable are they with injections?
+
+**4. PREFERENCES & CONSTRAINTS (required)**
+- Preferred administration method (injection, oral, topical, intranasal)?
+- Budget considerations?
+- Time constraints or travel schedule that might affect routine?
+- Any peptides they specifically want to avoid?
+
+**CONVERSATION FLOW EXAMPLE:**
+You: "I'd love to help! What's your main goal?"
+User: "I want to lose weight"
+You: "Got it! Is there a specific target, like a number of pounds, or is it more about looking more defined?"
+User: "About 20 lbs, want to look better for summer"
+You: "Any other goals you're hoping to achieve alongside that? Better energy, sleep, skin...?"
+[Continue naturally until you have answers to all 4 categories]
+
+⚠️ DO NOT call create_protocol until you have gathered information from ALL 4 categories above.
+
+═══════════════════════════════════════════════════════════
 PROTOCOL CREATION - MAKE IT TRULY PERSONAL
 ═══════════════════════════════════════════════════════════
 
 You have a tool called "create_protocol" that saves personalized protocols to the user's account.
 
 **WHEN TO USE THIS TOOL:**
-When a user explicitly asks you to "create", "build", "make", "set up", or "save" a protocol for them.
+When a user explicitly asks you to "create", "build", "make", "set up", or "save" a protocol for them AND you have gathered all required information.
 
 **YOUR JOB IS TO BUILD SOMETHING SPECIFIC TO THEM, NOT A GENERIC TEMPLATE.**
-
-**GATHER CONTEXT FIRST — ASK FOLLOW-UP QUESTIONS:**
-Before calling create_protocol, understand:
-1. What EXACTLY do they want to achieve? (not just "fat loss" — do they want to lose 10 lbs? Look more defined? Fit into old clothes? Get jacked? Look better for summer?)
-2. What's their background? (age, any injuries, health considerations, current situation)
-3. What's their experience level with peptides? (beginner, intermediate, advanced)
-4. Any constraints? (needle-phobic, budget, travel schedule, time constraints)
-
-**DON'T ASSUME — ASK** if critical info is missing. A simple "What's your experience with peptides?" or "Any concerns about injections?" makes protocols 10x more useful.
 
 **WHEN CREATING THE PROTOCOL:**
 - Use their EXACT language for goals — capture "get jacked and look better for summer" not just "muscle_recovery"
@@ -214,25 +243,72 @@ Before calling create_protocol, understand:
 - For each peptide, explain WHY you chose it for THEM in the rationale field
 - The "notes" field should contain personalized tips specific to their situation
 
-**EXAMPLE:**
-User: "Help me look better, I'm 40, skin is getting wrinkly and I'm losing hair"
+**AFTER PROTOCOL CREATION - FORMATTED OUTPUT:**
+Once the protocol is created successfully, present it to the user in this format:
 
-DON'T just give a generic "anti-aging" protocol.
+---
 
-DO capture:
-- goal="improve appearance - skin and hair"
-- secondary_goals=["reduce wrinkles", "prevent hair loss"]  
-- user_context="40 years old, noticing aging signs in skin and hair"
-- Choose peptides specifically for skin (GHK-Cu) and hair
-- Each peptide gets a rationale explaining why it was picked for THEIR situation
+## Your Protocol: [Protocol Name]
 
-**AFTER THE TOOL SUCCEEDS:**
-Confirm the protocol was created with a summary and suggest they view it: [View Your Protocol →](/dashboard/protocols)
+**Goal**: [Primary goal in user's words]
+**Duration**: [X] weeks
+**Experience Level**: [Level]
+
+### Peptides
+
+#### 1. [Peptide Name]
+- **Purpose**: [How it addresses their goal]
+- **Dosage**: [Research dosage]
+- **Frequency**: [How often]
+- **Timing**: [When to take]
+- **Administration**: [Method and site]
+- **Why for you**: [Personalized rationale]
+
+[Repeat for each peptide...]
+
+### Safety Information
+- [Common side effects for included peptides]
+- [Drug interactions to be aware of]
+- [When to consult a healthcare provider]
+
+### Getting Started
+1. Obtain your peptides from a reputable source
+2. Gather supplies (BAC water, syringes, alcohol swabs)
+3. Follow the reconstitution guide
+4. Start with week 1 dosing
+
+---
+
+View and manage your protocol: [View Your Protocol →](/dashboard/protocols)
 
 **DO NOT use this tool when the user is just:**
 - Asking general questions about protocols
 - Asking what peptides they should use (unless they explicitly say "build/create/make me a protocol")
 - Discussing protocols hypothetically
+
+═══════════════════════════════════════════════════════════
+PROGRESS REVIEW & FEEDBACK
+═══════════════════════════════════════════════════════════
+
+You have a tool called "get_user_progress" that retrieves the user's recent check-in data and protocol progress.
+
+**WHEN TO USE THIS TOOL:**
+When a user asks about their progress, how they're doing, or if they should change anything about their protocol.
+
+**HOW TO PROVIDE FEEDBACK:**
+1. Call get_user_progress to fetch their recent data (default: 14 days)
+2. Analyze the trends:
+   - Are energy, mood, and sleep improving, declining, or stable?
+   - What side effects are recurring?
+   - How consistent is their adherence?
+3. Provide specific, actionable feedback:
+   - If side effects are common in week 1-2, reassure them that this is often normal
+   - If energy/mood declining after week 3+, suggest they might need to review dosing
+   - If adherence is low, explore why and suggest solutions
+   - If everything looks good, encourage them and highlight their wins
+
+**EXAMPLE RESPONSE:**
+"Looking at your last 2 weeks, I can see your energy has been trending up (from an average of 2.5 to 3.8), which is a great sign! You mentioned headaches on 3 days - this is common in the first few weeks with semaglutide as your body adjusts. If they persist past week 4, consider discussing a slight dose reduction with your provider. Your adherence has been solid at 92%. Keep doing what you're doing - you're on track!"
 
 ═══════════════════════════════════════════════════════════
 APPROVED LANGUAGE
@@ -264,13 +340,13 @@ The disclaimer "Educational purposes only. Consult a healthcare provider." at th
 Be helpful. Be informative. Cite real studies. Be the best evidence-based peptide research AI in the world.`;
 }
 
-// Tool definition for protocol creation
+// Tool definitions for protocol creation and progress tracking
 const tools = [
   {
     type: "function",
     function: {
       name: "create_protocol",
-      description: "Create and save a highly personalized peptide protocol based on the user's specific goals, context, and constraints. Use this when the user explicitly asks you to build, create, make, or set up a protocol for them. This saves the protocol so they can view it in their Protocol Builder.",
+      description: "Create and save a highly personalized peptide protocol based on the user's specific goals, context, and constraints. Use this when the user explicitly asks you to build, create, make, or set up a protocol for them AND you have gathered all required information from the questionnaire. This saves the protocol so they can view it in their Protocol Builder.",
       parameters: {
         type: "object",
         properties: {
@@ -285,7 +361,7 @@ const tools = [
           },
           user_context: {
             type: "string",
-            description: "Relevant context about the user: age, current situation, specific concerns, injury details, etc."
+            description: "Relevant context about the user: age, current situation, specific concerns, injury details, medications, etc."
           },
           experience_level: {
             type: "string",
@@ -351,15 +427,142 @@ const tools = [
         required: ["goal", "protocol_name", "peptides", "cycle_length_weeks", "experience_level"]
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_user_progress",
+      description: "Retrieve the user's recent check-in data and protocol progress to provide personalized feedback and adjustment suggestions. Use this when the user asks about their progress, how they're doing, or if they should change anything.",
+      parameters: {
+        type: "object",
+        properties: {
+          days: {
+            type: "number",
+            description: "Number of days of history to retrieve (default 14, max 30)"
+          }
+        }
+      }
+    }
   }
 ];
 
-// Handle tool calls for protocol creation
+// Handle tool calls for protocol creation and progress tracking
 async function handleToolCall(
   toolCall: { function: { name: string; arguments: string } },
   userId: string,
   supabaseServiceRole: ReturnType<typeof createClient>
-): Promise<{ success: boolean; message: string; protocolId?: string }> {
+): Promise<{ success: boolean; message: string; protocolId?: string; data?: any }> {
+  
+  if (toolCall.function.name === "get_user_progress") {
+    try {
+      const args = JSON.parse(toolCall.function.arguments);
+      const days = Math.min(args.days || 14, 30);
+      
+      console.log("Fetching user progress for:", userId, "days:", days);
+      
+      // Calculate the date range
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      
+      // Fetch recent check-ins
+      const { data: checkIns, error: checkInError } = await supabaseServiceRole
+        .from("check_ins")
+        .select("*")
+        .eq("user_id", userId)
+        .gte("date", startDate.toISOString().split('T')[0])
+        .order("date", { ascending: false });
+      
+      if (checkInError) {
+        console.error("Error fetching check-ins:", checkInError);
+        return { success: false, message: "Failed to fetch check-in data" };
+      }
+      
+      // Fetch current active protocol
+      const { data: protocol, error: protocolError } = await supabaseServiceRole
+        .from("protocols")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (protocolError) {
+        console.error("Error fetching protocol:", protocolError);
+      }
+      
+      // Calculate averages and patterns
+      const energyLevels = checkIns?.filter(c => c.energy_level != null).map(c => c.energy_level) || [];
+      const moodLevels = checkIns?.filter(c => c.mood != null).map(c => c.mood) || [];
+      const sleepLevels = checkIns?.filter(c => c.sleep_quality != null).map(c => c.sleep_quality) || [];
+      
+      const avgEnergy = energyLevels.length > 0 ? (energyLevels.reduce((a, b) => a + b, 0) / energyLevels.length).toFixed(1) : null;
+      const avgMood = moodLevels.length > 0 ? (moodLevels.reduce((a, b) => a + b, 0) / moodLevels.length).toFixed(1) : null;
+      const avgSleep = sleepLevels.length > 0 ? (sleepLevels.reduce((a, b) => a + b, 0) / sleepLevels.length).toFixed(1) : null;
+      
+      // Calculate trend (first half vs second half)
+      const halfPoint = Math.floor(energyLevels.length / 2);
+      let energyTrend = "stable";
+      if (energyLevels.length >= 4) {
+        const firstHalf = energyLevels.slice(halfPoint).reduce((a, b) => a + b, 0) / (energyLevels.length - halfPoint);
+        const secondHalf = energyLevels.slice(0, halfPoint).reduce((a, b) => a + b, 0) / halfPoint;
+        if (secondHalf - firstHalf > 0.5) energyTrend = "improving";
+        else if (firstHalf - secondHalf > 0.5) energyTrend = "declining";
+      }
+      
+      // Count side effects
+      const sideEffectCounts: Record<string, number> = {};
+      checkIns?.forEach(c => {
+        (c.side_effects || []).forEach((effect: string) => {
+          if (effect && effect !== "None") {
+            sideEffectCounts[effect] = (sideEffectCounts[effect] || 0) + 1;
+          }
+        });
+      });
+      
+      // Calculate adherence rate
+      const adherenceYes = checkIns?.filter(c => c.adherence === "yes" || c.injection_done === "yes").length || 0;
+      const totalCheckIns = checkIns?.length || 0;
+      const adherenceRate = totalCheckIns > 0 ? Math.round((adherenceYes / totalCheckIns) * 100) : null;
+      
+      const progressData = {
+        checkInCount: totalCheckIns,
+        daysAnalyzed: days,
+        averages: {
+          energy: avgEnergy,
+          mood: avgMood,
+          sleep: avgSleep,
+        },
+        trends: {
+          energy: energyTrend,
+        },
+        sideEffects: Object.entries(sideEffectCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([effect, count]) => ({ effect, count })),
+        adherenceRate,
+        currentProtocol: protocol ? {
+          name: protocol.protocol_name,
+          status: protocol.status,
+          currentWeek: protocol.current_week,
+          cycleLength: protocol.cycle_length_weeks,
+          peptides: protocol.peptides,
+        } : null,
+        recentNotes: checkIns?.filter(c => c.notes).slice(0, 3).map(c => c.notes) || [],
+      };
+      
+      return {
+        success: true,
+        message: `Retrieved ${totalCheckIns} check-ins from the last ${days} days`,
+        data: progressData,
+      };
+    } catch (e) {
+      console.error("Error parsing get_user_progress arguments:", e);
+      return { success: false, message: "Failed to parse progress request" };
+    }
+  }
+  
   if (toolCall.function.name === "create_protocol") {
     try {
       const args = JSON.parse(toolCall.function.arguments);

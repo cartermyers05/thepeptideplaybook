@@ -2,15 +2,16 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCheckIn, CheckInData } from "@/hooks/useCheckIn";
 import { useMilestones } from "@/hooks/useMilestones";
 import { useProtocol } from "@/hooks/useProtocol";
-import { Check, Loader2, PartyPopper } from "lucide-react";
+import { Check, Loader2, PartyPopper, Pill } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type Step = "injection" | "energy" | "mood" | "sleep" | "side_effects" | "notes" | "complete";
+type Step = "injection" | "adherence" | "energy" | "mood" | "sleep" | "side_effects" | "weight" | "notes" | "complete";
 
 const SIDE_EFFECTS = [
   "None",
@@ -29,15 +30,27 @@ interface CheckInFlowProps {
   onComplete?: () => void;
 }
 
+interface ExtendedCheckInData extends Partial<CheckInData> {
+  adherence?: "yes" | "partial" | "no";
+  routine_changes?: string;
+  weight_kg?: number;
+}
+
 export function CheckInFlow({ onComplete }: CheckInFlowProps) {
   const { protocol } = useProtocol();
   const { hasCheckedInToday, submitCheckIn } = useCheckIn();
   const { awardMilestone, hasMilestone } = useMilestones();
 
   const [step, setStep] = useState<Step>("injection");
-  const [data, setData] = useState<Partial<CheckInData>>({
+  const [data, setData] = useState<ExtendedCheckInData>({
     side_effects: [],
+    adherence: "yes",
   });
+
+  // Check if protocol is fat-loss related (show weight tracking)
+  const isFatLossProtocol = protocol?.goal?.toLowerCase().includes("fat") || 
+    protocol?.goal?.toLowerCase().includes("weight") ||
+    protocol?.goal?.toLowerCase().includes("lose");
 
   const handleComplete = async () => {
     if (!data.injection_done || !data.energy_level || !data.mood || !data.sleep_quality) {
@@ -54,6 +67,9 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
           sleep_quality: data.sleep_quality,
           side_effects: data.side_effects || [],
           notes: data.notes,
+          adherence: data.adherence,
+          routine_changes: data.routine_changes,
+          weight_kg: data.weight_kg,
         },
       });
 
@@ -117,6 +133,19 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
   return (
     <Card>
       <CardContent className="pt-6">
+        {/* Protocol Context Banner */}
+        {protocol && protocol.status === "active" && (
+          <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+            <div className="flex items-center gap-2 mb-1">
+              <Pill className="w-4 h-4 text-primary" />
+              <p className="text-sm font-medium text-foreground">{protocol.protocol_name}</p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Week {protocol.current_week} of {protocol.cycle_length_weeks} • {protocol.peptides.map(p => p.name).join(', ')}
+            </p>
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
           {step === "injection" && (
             <StepWrapper key="injection">
@@ -132,7 +161,7 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
                   className="flex-1 h-14 text-lg"
                   onClick={() => {
                     setData({ ...data, injection_done: "yes" });
-                    setStep("energy");
+                    setStep("adherence");
                   }}
                 >
                   ✓ Yes
@@ -142,7 +171,7 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
                   className="flex-1 h-14 text-lg"
                   onClick={() => {
                     setData({ ...data, injection_done: "not_yet" });
-                    setStep("energy");
+                    setStep("adherence");
                   }}
                 >
                   ⏳ Not Yet
@@ -152,10 +181,53 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
                   className="flex-1 h-14 text-lg"
                   onClick={() => {
                     setData({ ...data, injection_done: "skipped" });
-                    setStep("energy");
+                    setStep("adherence");
                   }}
                 >
                   ✗ Skipped
+                </Button>
+              </div>
+            </StepWrapper>
+          )}
+
+          {step === "adherence" && (
+            <StepWrapper key="adherence">
+              <h2 className="text-xl font-semibold text-center mb-2">
+                Did you follow your protocol dosing?
+              </h2>
+              <p className="text-muted-foreground text-center mb-6">
+                Track how closely you followed the plan
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <Button
+                  variant={data.adherence === "yes" ? "default" : "outline"}
+                  className="flex-1 h-14 text-lg"
+                  onClick={() => {
+                    setData({ ...data, adherence: "yes" });
+                    setStep("energy");
+                  }}
+                >
+                  ✓ Fully
+                </Button>
+                <Button
+                  variant={data.adherence === "partial" ? "default" : "outline"}
+                  className="flex-1 h-14 text-lg"
+                  onClick={() => {
+                    setData({ ...data, adherence: "partial" });
+                    setStep("energy");
+                  }}
+                >
+                  ◐ Partially
+                </Button>
+                <Button
+                  variant={data.adherence === "no" ? "default" : "outline"}
+                  className="flex-1 h-14 text-lg"
+                  onClick={() => {
+                    setData({ ...data, adherence: "no" });
+                    setStep("energy");
+                  }}
+                >
+                  ✗ No
                 </Button>
               </div>
             </StepWrapper>
@@ -241,11 +313,48 @@ export function CheckInFlow({ onComplete }: CheckInFlowProps) {
               </div>
               <Button
                 className="w-full"
-                onClick={() => setStep("notes")}
+                onClick={() => setStep(isFatLossProtocol ? "weight" : "notes")}
                 disabled={!data.side_effects?.length}
               >
                 Continue
               </Button>
+            </StepWrapper>
+          )}
+
+          {step === "weight" && (
+            <StepWrapper key="weight">
+              <h2 className="text-xl font-semibold text-center mb-2">
+                Track your weight
+              </h2>
+              <p className="text-muted-foreground text-center mb-6">
+                Optional - helps track progress over time
+              </p>
+              <div className="flex items-center gap-3 mb-6">
+                <Input
+                  type="number"
+                  placeholder="Weight in kg"
+                  value={data.weight_kg || ""}
+                  onChange={(e) => setData({ ...data, weight_kg: e.target.value ? parseFloat(e.target.value) : undefined })}
+                  className="text-center text-lg"
+                  step="0.1"
+                />
+                <span className="text-muted-foreground">kg</span>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setStep("notes")}
+                >
+                  Skip
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={() => setStep("notes")}
+                >
+                  Continue
+                </Button>
+              </div>
             </StepWrapper>
           )}
 

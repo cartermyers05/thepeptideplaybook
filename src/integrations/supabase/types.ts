@@ -233,6 +233,7 @@ export type Database = {
       }
       check_ins: {
         Row: {
+          adherence: string | null
           completed: boolean | null
           created_at: string | null
           date: string
@@ -242,11 +243,14 @@ export type Database = {
           mood: number | null
           notes: string | null
           protocol_id: string | null
+          routine_changes: string | null
           side_effects: string[] | null
           sleep_quality: number | null
           user_id: string
+          weight_kg: number | null
         }
         Insert: {
+          adherence?: string | null
           completed?: boolean | null
           created_at?: string | null
           date: string
@@ -256,11 +260,14 @@ export type Database = {
           mood?: number | null
           notes?: string | null
           protocol_id?: string | null
+          routine_changes?: string | null
           side_effects?: string[] | null
           sleep_quality?: number | null
           user_id: string
+          weight_kg?: number | null
         }
         Update: {
+          adherence?: string | null
           completed?: boolean | null
           created_at?: string | null
           date?: string
@@ -270,9 +277,11 @@ export type Database = {
           mood?: number | null
           notes?: string | null
           protocol_id?: string | null
+          routine_changes?: string | null
           side_effects?: string[] | null
           sleep_quality?: number | null
           user_id?: string
+          weight_kg?: number | null
         }
         Relationships: [
           {
