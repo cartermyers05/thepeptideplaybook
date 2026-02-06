@@ -197,6 +197,7 @@ export default function History() {
                 {filteredConversations.map((conv) => (
                   <div
                     key={conv.id}
+                    onClick={() => navigate(`/dashboard/chat?conversation=${conv.id}`)}
                     className="group bg-card border border-border rounded-xl p-4 hover:shadow-soft transition-shadow cursor-pointer"
                   >
                     <div className="flex items-start justify-between gap-4">

@@ -16,6 +16,7 @@ import {
   Moon,
   Dumbbell,
   Sparkles,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCreateConversation, useUpdateConversationTitle } from "@/hooks/useConversations";
 import { useSaveMessage, useUpdateMessage } from "@/hooks/useMessages";
 import { useIncrementQuestionsAsked, useProfile } from "@/hooks/useProfile";
+import { useConversationMessages } from "@/hooks/useConversationMessages";
 import { useToast } from "@/hooks/use-toast";
 import { AIDisclaimerModal } from "@/components/chat/AIDisclaimerModal";
 import { AnimatedLogo } from "@/components/brand/AnimatedLogo";
@@ -39,6 +41,11 @@ interface Message {
   content: string;
   timestamp: Date;
   isSaved?: boolean;
+}
+
+interface ChatInterfaceProps {
+  initialConversationId?: string | null;
+  onConversationChange?: (conversationId: string | null) => void;
 }
 
 const questionCategories = [
@@ -148,12 +155,16 @@ function PulsingAvatar() {
   );
 }
 
-export default function ChatInterface() {
+export default function ChatInterface({ 
+  initialConversationId = null,
+  onConversationChange 
+}: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(initialConversationId);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
@@ -168,12 +179,47 @@ export default function ChatInterface() {
   const incrementQuestions = useIncrementQuestionsAsked();
   const { toast } = useToast();
 
+  // Fetch existing messages if resuming a conversation
+  const { data: existingMessages, isLoading: messagesLoading } = useConversationMessages(conversationId);
+
+  // Update conversationId when initialConversationId changes
+  useEffect(() => {
+    if (initialConversationId !== conversationId) {
+      setConversationId(initialConversationId);
+      setHasLoadedHistory(false);
+      setMessages([]);
+    }
+  }, [initialConversationId]);
+
+  // Load existing messages into state when resuming a conversation
+  useEffect(() => {
+    if (existingMessages && existingMessages.length > 0 && !hasLoadedHistory) {
+      const loadedMessages: Message[] = existingMessages.map((m) => ({
+        id: m.id,
+        dbId: m.id,
+        role: m.role as "user" | "assistant",
+        content: m.content,
+        timestamp: new Date(m.created_at),
+        isSaved: m.is_saved ?? false,
+      }));
+      setMessages(loadedMessages);
+      setHasLoadedHistory(true);
+    }
+  }, [existingMessages, hasLoadedHistory]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const handleNewChat = () => {
+    setMessages([]);
+    setConversationId(null);
+    setHasLoadedHistory(false);
+    setSelectedCategory(null);
+    onConversationChange?.(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,6 +245,7 @@ export default function ChatInterface() {
         const newConversation = await createConversation.mutateAsync(title);
         activeConversationId = newConversation.id;
         setConversationId(newConversation.id);
+        onConversationChange?.(newConversation.id);
       } catch (error) {
         console.error("Failed to create conversation:", error);
       }
@@ -238,6 +285,9 @@ export default function ChatInterface() {
         throw new Error("Not authenticated");
       }
 
+      // Send ALL messages (including loaded history) for full context
+      const allMessages = [...messages, userMessage];
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
         {
@@ -247,7 +297,7 @@ export default function ChatInterface() {
             Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
-            messages: [...messages, userMessage].map((m) => ({
+            messages: allMessages.map((m) => ({
               role: m.role,
               content: m.content,
             })),
@@ -403,11 +453,44 @@ export default function ChatInterface() {
     }
   };
 
+  // Show loading state while fetching existing messages
+  if (conversationId && messagesLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center">
+          <AnimatedLogo size={48} animate={true} />
+          <p className="text-muted-foreground mt-4">Loading conversation...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* AI Disclaimer Modal - shows once per user */}
       {!profileLoading && !profile?.ai_disclaimer_accepted_at && (
         <AIDisclaimerModal onAccepted={() => {}} />
+      )}
+
+      {/* Header with New Chat button when in a conversation */}
+      {messages.length > 0 && (
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-background/80 backdrop-blur-sm">
+          <div className="flex items-center gap-2">
+            <Logo showText={false} size="sm" />
+            <span className="text-sm font-medium text-muted-foreground">
+              {conversationId ? "Conversation" : "New Chat"}
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNewChat}
+            className="gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            New Chat
+          </Button>
+        </div>
       )}
 
       {/* Chat area */}
