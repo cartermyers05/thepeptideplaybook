@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import { DashboardTopNav } from "./DashboardTopNav";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { FloatingOrbs } from "@/components/landing/FloatingOrbs";
-import { FloatingChatButton } from "@/components/chat/FloatingChatButton";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -23,7 +22,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </main>
       <MobileBottomNav />
-      <FloatingChatButton />
     </div>
   );
 }

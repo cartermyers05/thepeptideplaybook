@@ -120,14 +120,14 @@ export default function Dashboard() {
             <div className="h-1 dashboard-gradient-purple" />
             <div className="p-6">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Active Protocol
+                {protocol ? "Active Protocol" : "Get Started"}
               </span>
               {isLoadingProtocol ? (
                 <Skeleton className="h-7 w-32 mt-2" />
               ) : protocol ? (
                 <p className="text-xl font-bold text-foreground mt-2 truncate">{protocol.protocol_name}</p>
               ) : (
-                <p className="text-lg text-muted-foreground mt-2">None yet</p>
+                <p className="text-lg font-semibold text-foreground mt-2">Start a Protocol</p>
               )}
             </div>
           </motion.button>

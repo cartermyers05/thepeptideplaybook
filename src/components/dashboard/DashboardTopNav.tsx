@@ -15,7 +15,7 @@ import {
 
 const navItems = [
   { label: "Home", path: "/dashboard" },
-  { label: "Research", path: "/dashboard/chat" },
+  { label: "Chat", path: "/dashboard/chat" },
   { label: "Protocols", path: "/dashboard/protocols" },
 ];
 
