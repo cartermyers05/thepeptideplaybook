@@ -2,10 +2,11 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Check } from "lucide-react";
 import { PillButton } from "./PillButton";
+import { TrustBadges } from "./TrustBadges";
 
 const features = [
-  "Personalized protocol for your goals",
-  "Step-by-step reconstitution guide",
+  "Custom plan for your goals",
+  "Step-by-step mixing guide",
   "Complete injection walkthrough",
   "Daily guidance through your cycle",
   "24/7 AI coach access",
@@ -57,8 +58,7 @@ export function PricingCTA() {
               Included.
             </h2>
             <p className="mt-6 text-lg text-muted-foreground max-w-md">
-              No hidden fees. No monthly subscriptions. Pay once, get lifetime access 
-              to your personalized peptide course.
+              $67 one-time. That's less than one doctor visit to ask these same questions.
             </p>
           </motion.div>
 
@@ -76,15 +76,12 @@ export function PricingCTA() {
             <div className="bg-card border border-border rounded-3xl p-8 md:p-12 relative overflow-hidden">
               {/* Price */}
               <div className="mb-8">
-                <span className="inline-block text-xs font-medium bg-primary/10 text-primary px-2.5 py-1 rounded-full mb-3">
-                  Early Access Pricing
-                </span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-6xl md:text-7xl font-bold">$67</span>
-                  <span className="text-muted-foreground text-lg line-through opacity-60">$99</span>
+                  <span className="text-muted-foreground text-lg">one-time</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Price increases soon • 30-day money-back guarantee
+                  Lifetime access. No subscriptions.
                 </p>
               </div>
 
@@ -108,12 +105,19 @@ export function PricingCTA() {
                   className="w-full justify-center"
                   icon={<span>→</span>}
                 >
-                  Start My Course
+                  Get Full Access — $67
                 </PillButton>
               </Link>
+              
+              <p className="mt-4 text-sm text-muted-foreground text-center">
+                30-day money-back guarantee. No questions asked.
+              </p>
             </div>
           </motion.div>
         </div>
+
+        {/* Trust badges */}
+        <TrustBadges />
 
         <motion.p
           initial={{ opacity: 0 }}

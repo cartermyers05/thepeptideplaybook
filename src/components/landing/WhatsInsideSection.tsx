@@ -2,33 +2,33 @@ import { motion } from "framer-motion";
 
 const features = [
   {
-    title: "Personalized Peptide Selection",
-    description: "Based on your goal, not generic recommendations. AI analyzes your specific situation.",
+    title: "Which Peptides Are Right for Me?",
+    description: "Tell us your goal. We'll show you the best options based on real research, not random forums.",
     gradient: "linear-gradient(135deg, hsl(173 55% 50%) 0%, hsl(180 60% 40%) 100%)",
   },
   {
-    title: "Research-Based Dosing",
-    description: "What studies have found, clearly explained. No guesswork, just science.",
+    title: "How Much Should I Take?",
+    description: "Get dosing info from actual studies. Clear numbers, not guesswork.",
     gradient: "linear-gradient(145deg, hsl(200 50% 50%) 0%, hsl(220 55% 45%) 100%)",
   },
   {
-    title: "8-Week Day-by-Day Program",
-    description: "Lessons unlock daily so you never feel overwhelmed. Pace yourself perfectly.",
+    title: "What Do I Do Each Day?",
+    description: "One lesson a day for 8 weeks. Never overwhelming. Just what you need today.",
     gradient: "linear-gradient(155deg, hsl(260 45% 55%) 0%, hsl(280 50% 45%) 100%)",
   },
   {
-    title: "Reconstitution Walkthrough",
-    description: "Step-by-step guide to mixing your peptides. Visual instructions included.",
+    title: "How Do I Mix It?",
+    description: "Step-by-step guide to reconstitution. Pictures included. Impossible to mess up.",
     gradient: "linear-gradient(165deg, hsl(340 45% 55%) 0%, hsl(320 50% 45%) 100%)",
   },
   {
-    title: "Injection Guide",
-    description: "First-timer friendly, covers everything. From needle selection to technique.",
+    title: "How Do I Actually Use It?",
+    description: "Complete injection guide for beginners. Where, how, and when explained simply.",
     gradient: "linear-gradient(135deg, hsl(30 60% 50%) 0%, hsl(15 55% 45%) 100%)",
   },
   {
-    title: "24/7 AI Coach Access",
-    description: "Ask questions anytime, get instant answers. Your personal peptide expert.",
+    title: "What If I Have Questions?",
+    description: "Ask the AI coach anything, anytime. It knows 500+ studies and your specific plan.",
     gradient: "linear-gradient(145deg, hsl(142 50% 45%) 0%, hsl(160 55% 40%) 100%)",
   },
 ];
@@ -64,12 +64,12 @@ export function WhatsInsideSection() {
           className="mb-20"
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-            What You
+            What's
             <br />
-            Get
+            Inside?
           </h2>
           <p className="mt-6 text-lg text-muted-foreground max-w-xl">
-            Everything you need to confidently complete your first peptide cycle.
+            Everything you need to start your first peptide cycle with confidence.
           </p>
         </motion.div>
 

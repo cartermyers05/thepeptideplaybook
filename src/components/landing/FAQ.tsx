@@ -5,19 +5,27 @@ import { Plus, Minus } from "lucide-react";
 const faqs = [
   {
     question: "Is this medical advice?",
-    answer: "No. Peptide Playbook provides educational information based on published research. It explains what studies show about mechanisms, safety, and research status. It does not tell you what to take, how much to take, or where to buy. Always work with a healthcare provider for medical decisions.",
+    answer: "No. We share what research says about peptides. We don't tell you what to take or where to buy. Always talk to your doctor before trying anything.",
   },
   {
     question: "How is this different from ChatGPT?",
-    answer: "ChatGPT gives generic answers. Peptide Playbook knows YOUR protocol, YOUR goals, and guides you day-by-day through YOUR specific journey. It's like the difference between Googling 'how to learn Spanish' and using Duolingo.",
+    answer: "ChatGPT gives generic answers. Peptide Playbook knows YOUR goals and guides you day-by-day through YOUR plan. It's like the difference between Googling 'learn Spanish' and using Duolingo.",
   },
   {
     question: "What if I'm a complete beginner?",
-    answer: "Perfect. We built this for you. The guides assume zero prior knowledge and walk you through every single step, from reconstitution to your first injection.",
+    answer: "Perfect. We built this for you. Every guide assumes zero knowledge and walks you through step-by-step. From mixing to your first use.",
   },
   {
     question: "Do you sell peptides?",
-    answer: "No. We provide education only. We don't sell peptides, recommend vendors, or have any affiliate relationships with peptide suppliers.",
+    answer: "No. We only provide education. We don't sell peptides, recommend vendors, or have any affiliate deals with sellers.",
+  },
+  {
+    question: "Is this worth $67?",
+    answer: "That's less than one doctor visit. And you get lifetime access to 500+ research-backed answers whenever you need them.",
+  },
+  {
+    question: "What if it doesn't work for me?",
+    answer: "Email us within 30 days for a full refund. No questions asked. We want you to feel confident trying it.",
   },
 ];
 
