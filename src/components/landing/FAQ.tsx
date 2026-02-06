@@ -4,8 +4,8 @@ import { Plus, Minus } from "lucide-react";
 
 const faqs = [
   {
-    question: "Can't I just use ChatGPT for this?",
-    answer: "You can, but ChatGPT's peptide knowledge is general, sometimes outdated, and it doesn't track FDA status changes. Our AI is specifically built on peptide research and tells you when evidence is weak vs. strong. It also creates personalized protocols based on your specific goals.",
+    question: "How is this different from ChatGPT?",
+    answer: "ChatGPT gives general answers and sometimes makes things up. Our AI is built specifically on peptide research. It cites real studies, tracks FDA status, and tells you when evidence is weak instead of guessing.",
   },
   {
     question: "Is this medical advice?",

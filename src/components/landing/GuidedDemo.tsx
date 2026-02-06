@@ -313,7 +313,7 @@ export function GuidedDemo() {
                 {/* CTA section */}
                 <div className="text-center pt-6 border-t border-border mt-8">
                   <p className="text-muted-foreground mb-4">
-                    This is 1 of 500+ questions Peptide Playbook can answer.
+                    This is real. Try it yourself.
                   </p>
                   <Link to="/quiz">
                     <PillButton variant="dark" size="lg" icon={<ArrowRight className="w-4 h-4" />}>
