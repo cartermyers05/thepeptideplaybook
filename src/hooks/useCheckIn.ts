@@ -15,6 +15,9 @@ export interface CheckIn {
   sleep_quality: number | null;
   side_effects: string[];
   notes: string | null;
+  adherence: "yes" | "partial" | "no" | null;
+  routine_changes: string | null;
+  weight_kg: number | null;
   created_at: string;
 }
 
@@ -25,6 +28,9 @@ export interface CheckInData {
   sleep_quality: number;
   side_effects: string[];
   notes?: string;
+  adherence?: "yes" | "partial" | "no";
+  routine_changes?: string;
+  weight_kg?: number;
 }
 
 export function useCheckIn() {
@@ -101,6 +107,9 @@ export function useCheckIn() {
           sleep_quality: data.sleep_quality,
           side_effects: data.side_effects,
           notes: data.notes || null,
+          adherence: data.adherence || "yes",
+          routine_changes: data.routine_changes || null,
+          weight_kg: data.weight_kg || null,
         },
         { onConflict: "user_id,date" }
       );
