@@ -39,20 +39,20 @@ const changelogEntries = [{ date: "Feb 5, 2026", change: "Initial publication" }
 
 const articleSchema = {
   "@context": "https://schema.org", "@type": "Article",
-  headline: "Best Peptides for Muscle Growth",
-  datePublished: "2026-02-05", dateModified: "2026-02-05",
+  headline: "Best Peptides for Muscle Growth & Muscle Building (2026)",
+  datePublished: "2026-02-05", dateModified: "2026-02-06",
   author: { "@type": "Organization", name: "Peptide Playbook" },
   publisher: { "@type": "Organization", name: "Peptide Playbook", url: SITE_URL },
 };
 
 export default function BestPeptidesMuscleGrowth() {
   return (
-    <GuideLayout title="Best Peptides for Muscle Growth" description="Peptides for muscle growth work through GH stimulation, IGF-1 pathways, or enhanced recovery. Guide to CJC-1295, Ipamorelin, IGF-1 LR3, BPC-157, and TB-500." slug="best-peptides-muscle-growth" articleSchema={articleSchema}>
+    <GuideLayout title="Best Peptides for Muscle Growth & Muscle Building (2026)" description="Best peptides for muscle growth and muscle building peptides guide. Research on CJC-1295, Ipamorelin, IGF-1 LR3, BPC-157, and TB-500 for body composition and recovery." slug="best-peptides-muscle-growth" articleSchema={articleSchema}>
       <div className="flex flex-col lg:flex-row gap-10">
         <aside className="lg:w-64 shrink-0"><GuideTableOfContents items={tocItems} /></aside>
         <article className="flex-1 min-w-0">
           <QuickAnswerBox answer="Peptides studied for muscle growth work primarily through growth hormone stimulation, IGF-1 pathways, or myostatin inhibition. The most researched include CJC-1295/Ipamorelin, IGF-1 LR3, Follistatin, BPC-157 for recovery, and MK-677." lastUpdated="February 2026" readTime="12 min" />
-          <h1 className="text-3xl md:text-4xl font-bold mt-8 mb-6">Best Peptides for Muscle Growth</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mt-8 mb-6">Best Peptides for Muscle Growth & Muscle Building (2026)</h1>
           
           <section id="overview" className="mb-10">
             <h2 className="text-2xl font-semibold mb-4">How Peptides Support Muscle Growth</h2>

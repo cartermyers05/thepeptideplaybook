@@ -86,9 +86,9 @@ const references = [
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
-  headline: "GHK-Cu Complete Research Guide: Mechanisms, Dosing & Clinical Evidence",
+  headline: "GHK-Cu Peptide Guide: Copper Peptide Research & Mechanisms (2026)",
   datePublished: "2026-02-05",
-  dateModified: "2026-02-05",
+  dateModified: "2026-02-06",
   author: { "@type": "Organization", name: "Peptide Playbook" },
   publisher: { "@type": "Organization", name: "Peptide Playbook", url: SITE_URL },
 };
@@ -96,8 +96,8 @@ const articleSchema = {
 export default function GHKCuCompleteGuide() {
   return (
     <GuideLayout
-      title="GHK-Cu Complete Research Guide: Mechanisms, Dosing & Clinical Evidence"
-      description="GHK-Cu is a naturally occurring copper-binding tripeptide studied for skin rejuvenation, wound healing, and anti-aging. Research shows 55.8% wrinkle reduction and modulation of 4,000+ genes."
+      title="GHK-Cu Peptide Guide: Copper Peptide Research & Mechanisms (2026)"
+      description="GHK-Cu copper peptide complete research guide. Evidence on skin rejuvenation, wound healing, hair growth. 55.8% wrinkle reduction, 4,000+ gene modulation. Dosing, safety, and clinical evidence."
       slug="ghk-cu-complete-guide"
       articleSchema={articleSchema}
     >
@@ -114,7 +114,7 @@ export default function GHKCuCompleteGuide() {
           />
 
           <h1 className="text-3xl md:text-4xl font-bold mt-8 mb-6">
-            GHK-Cu Complete Research Guide: Mechanisms, Dosing & Clinical Evidence
+            GHK-Cu Peptide Guide: Copper Peptide Research & Mechanisms (2026)
           </h1>
 
           <p className="text-muted-foreground mb-6 text-lg leading-relaxed">

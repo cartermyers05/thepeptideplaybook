@@ -21,6 +21,17 @@ const categories = [
 
 const guides = [
   {
+    title: "What Are Peptides? Complete Guide",
+    description:
+      "Comprehensive guide: how peptides work, all major categories, safety, legal status, and clinical research.",
+    href: "/guides/what-are-peptides",
+    category: "how-to",
+    categoryLabel: "How-To",
+    readTime: "25 min",
+    lastUpdated: "Feb 6, 2026",
+    featured: true,
+  },
+  {
     title: "BPC-157: Complete Research Guide",
     description:
       "Everything you need to know about BPC-157 — research, safety, and legal status in 2026.",
@@ -29,7 +40,6 @@ const guides = [
     categoryLabel: "Recovery & Healing",
     readTime: "12 min",
     lastUpdated: "Jan 28, 2026",
-    featured: true,
   },
   {
     title: "FDA Peptide Regulations 2026",
@@ -172,13 +182,14 @@ const guides = [
     lastUpdated: "Dec 20, 2025",
   },
   {
-    title: "GHK-Cu: Complete Research Guide",
+    title: "GHK-Cu Peptide: Copper Peptide Research Guide",
     description: "30+ years of research on skin rejuvenation, wound healing, and gene modulation.",
     href: "/guides/ghk-cu-complete-guide",
     category: "recovery",
     categoryLabel: "Recovery & Healing",
-    readTime: "14 min",
-    lastUpdated: "Feb 5, 2026",
+    readTime: "18 min",
+    lastUpdated: "Feb 6, 2026",
+    featured: true,
   },
   {
     title: "GHK-Cu: Topical vs Injectable",
@@ -235,13 +246,13 @@ const guides = [
     lastUpdated: "Feb 5, 2026",
   },
   {
-    title: "Best Peptides for Muscle Growth",
-    description: "GH secretagogues, IGF-1 variants, and recovery peptides for body composition.",
+    title: "Best Peptides for Muscle Growth & Muscle Building",
+    description: "GH secretagogues, IGF-1 variants, and muscle building peptides for body composition.",
     href: "/guides/best-peptides-muscle-growth",
     category: "recovery",
     categoryLabel: "Recovery & Healing",
     readTime: "12 min",
-    lastUpdated: "Feb 5, 2026",
+    lastUpdated: "Feb 6, 2026",
   },
   {
     title: "TB-500: Complete Research Guide",
