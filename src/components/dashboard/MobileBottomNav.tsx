@@ -3,7 +3,7 @@ import { NavLink } from "@/components/NavLink";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/dashboard" },
-  { icon: MessageCircle, label: "Research", path: "/dashboard/chat" },
+  { icon: MessageCircle, label: "Chat", path: "/dashboard/chat" },
   { icon: FlaskConical, label: "Protocols", path: "/dashboard/protocols" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
 ];
