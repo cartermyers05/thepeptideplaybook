@@ -41,7 +41,11 @@ export function SEOHead({
       ? getCanonicalUrl(`/articles/${article.slug}`)
       : undefined;
 
-  const ogImage = image || (article?.image ? article.image : getOgImageUrl(title || SITE_NAME));
+  const ogImage = image 
+    ? (image.startsWith('http') ? image : `${SITE_URL}${image}`)
+    : (article?.image 
+        ? (article.image.startsWith('http') ? article.image : `${SITE_URL}${article.image}`)
+        : `${SITE_URL}/og-image.png`);
 
   return (
     <Helmet>

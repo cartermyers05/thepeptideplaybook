@@ -123,8 +123,8 @@ export function PricingCTA() {
           className="text-center text-sm text-muted-foreground mt-16"
         >
           Questions? Email{" "}
-          <a href="mailto:support@peptideplaybook.com" className="text-primary hover:underline">
-            support@peptideplaybook.com
+          <a href="mailto:support@peptideplaybook.org" className="text-primary hover:underline">
+            support@peptideplaybook.org
           </a>
         </motion.p>
       </div>

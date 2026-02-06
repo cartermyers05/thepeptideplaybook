@@ -101,7 +101,7 @@ export default function Terms() {
 
               <h2>13. Contact Information</h2>
               <p>
-                For questions about these Terms of Service, please contact us at support@peptideplaybook.com.
+                For questions about these Terms of Service, please contact us at support@peptideplaybook.org.
               </p>
             </motion.div>
           </div>

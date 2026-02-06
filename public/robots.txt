@@ -51,4 +51,4 @@ User-agent: facebookexternalhit
 Allow: /
 
 # Sitemap location
-Sitemap: https://peptideplaybook.com/sitemap.xml
+Sitemap: https://peptideplaybook.org/sitemap.xml
