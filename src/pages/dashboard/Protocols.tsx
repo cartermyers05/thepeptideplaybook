@@ -396,6 +396,9 @@ function ProtocolCard({
 }
 
 export default function Protocols() {
+  const [mutatingId, setMutatingId] = useState<string | null>(null);
+  const [mutationType, setMutationType] = useState<"start" | "pause" | "resume" | null>(null);
+
   const { 
     protocols, 
     isLoadingProtocols, 
@@ -403,6 +406,39 @@ export default function Protocols() {
     pauseProtocol, 
     resumeProtocol 
   } = useProtocol();
+
+  const handleStart = async (id: string) => {
+    setMutatingId(id);
+    setMutationType("start");
+    try {
+      await startProtocol.mutateAsync(id);
+    } finally {
+      setMutatingId(null);
+      setMutationType(null);
+    }
+  };
+
+  const handlePause = async (id: string) => {
+    setMutatingId(id);
+    setMutationType("pause");
+    try {
+      await pauseProtocol.mutateAsync(id);
+    } finally {
+      setMutatingId(null);
+      setMutationType(null);
+    }
+  };
+
+  const handleResume = async (id: string) => {
+    setMutatingId(id);
+    setMutationType("resume");
+    try {
+      await resumeProtocol.mutateAsync(id);
+    } finally {
+      setMutatingId(null);
+      setMutationType(null);
+    }
+  };
 
   const handlePrint = (protocol: Protocol) => {
     const printContent = generateProtocolHTML(protocol);
@@ -496,14 +532,14 @@ export default function Protocols() {
                 <ProtocolCard
                   key={protocol.id}
                   protocol={protocol}
-                  onStart={(id) => startProtocol.mutate(id)}
-                  onPause={(id) => pauseProtocol.mutate(id)}
-                  onResume={(id) => resumeProtocol.mutate(id)}
+                  onStart={handleStart}
+                  onPause={handlePause}
+                  onResume={handleResume}
                   onPrint={handlePrint}
                   onExport={handleExport}
-                  isStarting={startProtocol.isPending}
-                  isPausing={pauseProtocol.isPending}
-                  isResuming={resumeProtocol.isPending}
+                  isStarting={mutatingId === protocol.id && mutationType === "start"}
+                  isPausing={mutatingId === protocol.id && mutationType === "pause"}
+                  isResuming={mutatingId === protocol.id && mutationType === "resume"}
                 />
               ))}
             </div>
