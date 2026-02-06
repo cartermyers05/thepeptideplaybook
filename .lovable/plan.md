@@ -1,111 +1,163 @@
 
-
-# Dashboard Navigation & Protocol UX Updates
+# Protocols Page Redesign: Chat-First Approach
 
 ## Overview
 
-Make two key changes to improve dashboard UX:
-1. **Remove the floating chat button** and rename "Research" → "Chat" in navigation
-2. **Show "Start" instead of "None yet"** for the Active Protocol card when user has no protocol
+Two changes:
+1. **Remove the protocol quiz** from the Protocols page — instead show a message directing users to the Chat to build custom protocols
+2. **Show ALL protocols** (including `not_started` ones created via chat) in a list view
 
 ---
 
-## Changes
+## Current Issues
 
-### 1. Remove Floating Chat Button
-
-**File: `src/components/dashboard/DashboardLayout.tsx`**
-
-Remove the `FloatingChatButton` import and component that was just added.
+| Problem | Cause |
+|---------|-------|
+| Chat-created protocols don't appear | Page only shows protocols where `status !== "not_started"` |
+| Quiz duplicates chat functionality | The 5-step quiz can be replaced by chat-based protocol creation |
 
 ---
 
-### 2. Rename "Research" → "Chat" in Navigation
+## Solution
 
-**File: `src/components/dashboard/DashboardTopNav.tsx`**
+### New Page Layout
 
-Update the nav items array:
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Your Protocols                                              │
+│  Personalized peptide protocols built for you               │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  💬 Build Your Custom Protocol                      │    │
+│  │                                                     │    │
+│  │  Go to the Chat and talk to our AI to build a      │    │
+│  │  personalized protocol made just for you.          │    │
+│  │                                                     │    │
+│  │               [Go to Chat →]                        │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ── Your Protocols ─────────────────────────────────────    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  Muscle & Recovery Protocol         [not_started]  │    │
+│  │  Week 1 of 8                                        │    │
+│  │  BPC-157, TB-500                                    │    │
+│  │  Created: Feb 4, 2026                               │    │
+│  │                               [Start] [View]        │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  Fat Loss Protocol                       [active]   │    │
+│  │  Week 2 of 8 • Day 12                               │    │
+│  │  Semaglutide                                        │    │
+│  │                                  [Pause] [View]     │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Implementation Details
+
+### 1. Update `useProtocol` hook to fetch ALL protocols
+
+**File: `src/hooks/useProtocol.ts`**
+
+Add a new query to fetch all user protocols (not just the most recent):
+
 ```typescript
-// Change from:
-{ label: "Research", path: "/dashboard/chat" }
+const { data: protocols, isLoading: isLoadingProtocols } = useQuery({
+  queryKey: ["protocols", user?.id],
+  queryFn: async (): Promise<Protocol[]> => {
+    if (!user?.id) return [];
 
-// To:
-{ label: "Chat", path: "/dashboard/chat" }
+    const { data, error } = await supabase
+      .from("protocols")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    
+    return (data || []).map(item => ({
+      ...item,
+      peptides: (item.peptides as unknown as Peptide[]) || [],
+      status: (item.status as Protocol["status"]) || "not_started",
+      current_day: item.current_day || 0,
+      current_week: item.current_week || 1,
+    }));
+  },
+  enabled: !!user?.id,
+});
 ```
 
-**File: `src/components/dashboard/MobileBottomNav.tsx`**
-
-Same change:
-```typescript
-// Change from:
-{ icon: MessageCircle, label: "Research", path: "/dashboard/chat" }
-
-// To:
-{ icon: MessageCircle, label: "Chat", path: "/dashboard/chat" }
-```
+Return both `protocol` (single most recent) and `protocols` (all) from the hook.
 
 ---
 
-### 3. Update Active Protocol Card for New Users
+### 2. Rewrite Protocols page
 
-**File: `src/pages/dashboard/Home.tsx`**
+**File: `src/pages/dashboard/Protocols.tsx`**
 
-Currently shows:
-- If protocol exists: Protocol name (e.g., "Fat Loss Protocol")
-- If no protocol: "None yet"
+Replace the entire 5-step quiz with a simpler layout:
 
-Change to:
-- If protocol exists: Protocol name
-- If no protocol: "Start a Protocol" (more actionable)
+**Header section**:
+- Title: "Your Protocols"
+- Subtitle: "Personalized peptide protocols built for you"
 
-Update lines 127-131:
-```tsx
-{isLoadingProtocol ? (
-  <Skeleton className="h-7 w-32 mt-2" />
-) : protocol ? (
-  <p className="text-xl font-bold text-foreground mt-2 truncate">{protocol.protocol_name}</p>
-) : (
-  <p className="text-lg font-semibold text-foreground mt-2">Start a Protocol</p>
-)}
-```
+**CTA card** (always visible):
+- Icon: MessageCircle or Sparkles
+- Heading: "Build Your Custom Protocol"
+- Text: "Go to the Chat and talk to our AI to build a personalized protocol made just for you."
+- Button: "Go to Chat" → links to `/dashboard/chat`
 
-Also update the card header label when there's no protocol:
-```tsx
-<span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-  {protocol ? "Active Protocol" : "Get Started"}
-</span>
-```
+**Protocols list**:
+- Show ALL protocols from the user, regardless of status
+- Each protocol card shows:
+  - Protocol name
+  - Status badge (not_started, active, paused, completed)
+  - Week/Day progress (if started)
+  - Peptide names as tags
+  - Created date
+  - Action buttons: Start (if not_started), Pause/Resume (if active/paused), View details
+
+**Empty state** (if no protocols):
+- "No protocols yet. Use the Chat to build your first one!"
 
 ---
 
-## Summary of Files Changed
+### 3. Add protocol detail view
+
+When user clicks "View" on a protocol, expand it or navigate to show:
+- Full peptide details (dosage, timing, frequency, site)
+- Disclaimer
+- Print/Export buttons (existing functionality)
+
+---
+
+## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/components/dashboard/DashboardLayout.tsx` | Remove `FloatingChatButton` |
-| `src/components/dashboard/DashboardTopNav.tsx` | "Research" → "Chat" |
-| `src/components/dashboard/MobileBottomNav.tsx` | "Research" → "Chat" |
-| `src/pages/dashboard/Home.tsx` | "None yet" → "Start a Protocol" |
+| `src/hooks/useProtocol.ts` | Add `protocols` (all) query alongside existing `protocol` (single) |
+| `src/pages/dashboard/Protocols.tsx` | Complete rewrite: remove quiz, show CTA + protocols list |
 
 ---
 
-## What Users Will See
+## Benefits
 
-**Before:**
-```
-[Home]  [Research]  [Protocols]
+1. **Chat-first approach** — Protocol creation is handled by the AI, which is more personalized
+2. **All protocols visible** — Users can see and manage every protocol they've created
+3. **Simpler UX** — No multi-step quiz to navigate
+4. **Status visibility** — Clear indication of which protocols are started vs waiting
 
-Active Protocol: None yet
-AI Research: Start exploring
-```
+---
 
-**After:**
-```
-[Home]  [Chat]  [Protocols]
+## What Gets Removed
 
-Get Started: Start a Protocol
-AI Research: Start exploring
-```
-
-The "Chat" nav item takes users directly to the AI chatbot page, making it obvious and one-tap accessible.
-
+- The 5-step protocol quiz (steps 1-4 + generate)
+- The `GOALS`, `EXPERIENCE_LEVELS`, `CONSTRAINTS` constants
+- All the step navigation logic
+- The `createProtocol` mutation from the page (still available via chat)
