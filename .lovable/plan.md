@@ -1,64 +1,115 @@
 
-# Fix: Protocol Buttons Triggering Together
+# Consolidate to One AI: Peptide Playbook AI
 
 ## The Problem
 
-When you click "Resume" or "Pause" on one protocol, all the buttons across all protocol cards react simultaneously. This happens because:
+There are currently two separate AI chatbots:
 
-1. The mutations (`pauseProtocol.isPending`, `resumeProtocol.isPending`) are **global** to the hook
-2. All `ProtocolCard` components receive the same pending state
-3. There's no tracking of **which specific protocol** is being mutated
+1. **AI Coach** (`/dashboard/coach`) - Uses `AskCoach.tsx` and `coach/index.ts`
+   - Limited scope: Only knows course data and check-ins
+   - No conversation history
+   - No protocol creation capability
+   - Called "AI Coach"
 
-## The Solution
+2. **Chat/Research** (`/dashboard/chat`) - Uses `ChatInterface.tsx` and `chat/index.ts`
+   - Full capability: 500+ study database, protocol creation, streaming
+   - Conversation persistence
+   - Called "Peptide Playbook AI"
 
-Track the currently-mutating protocol ID so only that specific card shows loading state.
+This creates confusion - users don't know which to use, and the "AI Coach" page is actually less capable.
 
-### Changes to `Protocols.tsx`
+---
 
-Add local state to track which protocol ID is currently being acted upon:
+## Solution: Merge Everything into Peptide Playbook AI
 
-```typescript
-const [mutatingId, setMutatingId] = useState<string | null>(null);
-const [mutationType, setMutationType] = useState<"start" | "pause" | "resume" | null>(null);
+Replace the AI Coach page with the full ChatInterface (Peptide Playbook AI), and merge the course/check-in context from the coach into the main chat function.
+
+### What This Means
+
+- **One AI** - Peptide Playbook AI everywhere
+- **One conversation system** - All chats saved and persistent
+- **Full capabilities** - Protocol creation, study database, AND user context
+- **Consistent branding** - No more "AI Coach" vs "Peptide Playbook AI" confusion
+
+---
+
+## Technical Changes
+
+### 1. Update Coach Page to Use ChatInterface
+
+Replace the limited `AskCoach` component with the full `ChatInterface`:
+
+**File: `src/pages/dashboard/Coach.tsx`**
+```text
+- Import and use AskCoach
++ Import and use ChatInterface (same as ChatPage)
++ Keep the same suggested questions UI
++ Update branding to show "Peptide Playbook AI"
 ```
 
-Wrap the mutation calls to set/clear the tracking state:
+### 2. Merge User Context into Chat Edge Function
 
-```typescript
-const handleStart = async (id: string) => {
-  setMutatingId(id);
-  setMutationType("start");
-  await startProtocol.mutateAsync(id);
-  setMutatingId(null);
-  setMutationType(null);
-};
+Add the course/check-in context from `coach/index.ts` to `chat/index.ts`:
 
-// Similar for pause and resume
+**File: `supabase/functions/chat/index.ts`**
+```text
++ Fetch user's active course (if any)
++ Fetch recent check-ins
++ Fetch lesson progress
++ Include this context in system prompt when available
++ Keep all existing peptide database functionality
 ```
 
-Pass per-card pending state:
+The chat function already has 1000+ lines of capability - we just need to add the ~100 lines of user context fetching from the coach function.
 
-```typescript
-<ProtocolCard
-  ...
-  isStarting={mutatingId === protocol.id && mutationType === "start"}
-  isPausing={mutatingId === protocol.id && mutationType === "pause"}
-  isResuming={mutatingId === protocol.id && mutationType === "resume"}
-/>
+### 3. Update Navigation Labels
+
+**File: `src/components/dashboard/DashboardNavbar.tsx`**
+```text
+- { icon: MessageCircle, label: "AI Coach", path: "/dashboard/coach" }
++ { icon: MessageCircle, label: "Chat", path: "/dashboard/coach" }
 ```
 
-## Files Changed
+### 4. Clean Up (Optional)
 
-| File | Changes |
-|------|---------|
-| `src/pages/dashboard/Protocols.tsx` | Add `mutatingId` and `mutationType` state, wrap mutation calls in handlers that track which card is loading |
+After consolidation works:
+- Remove `/dashboard/chat` route (redirect to coach)
+- Remove `AskCoach.tsx` component
+- Remove `coach/index.ts` edge function (if no longer needed)
+
+---
+
+## Files to Change
+
+| File | Change |
+|------|--------|
+| `src/pages/dashboard/Coach.tsx` | Replace AskCoach with ChatInterface |
+| `supabase/functions/chat/index.ts` | Add user context fetching (course, check-ins, lessons) |
+| `src/components/dashboard/DashboardNavbar.tsx` | Update label from "AI Coach" to "Chat" or "Ask AI" |
+| `src/components/dashboard/MobileBottomNav.tsx` | Update label to match |
+
+---
 
 ## Result
 
-- Click "Pause" on Protocol A → Only Protocol A's button shows "Pausing..."
-- Click "Resume" on Protocol B → Only Protocol B's button shows "Resuming..."
-- Other cards remain unaffected
+**Before:**
+- Two chatbots with different capabilities
+- Confusing branding (AI Coach vs Peptide Playbook AI)
+- Protocol creation only in one place
+- User context only in the other place
 
-## Technical Note
+**After:**
+- One unified Peptide Playbook AI
+- Full capabilities: peptide database + user context + protocol creation
+- Consistent branding everywhere
+- All conversations saved and persistent
 
-Using `mutateAsync` instead of `mutate` allows us to properly wait for completion before clearing the loading state. We wrap in try/finally to ensure state cleanup even on errors.
+---
+
+## User Flow After Change
+
+1. User clicks "Chat" (or "Ask AI") in nav
+2. Opens Peptide Playbook AI with full context awareness
+3. AI knows their course, check-ins, AND has full peptide database
+4. Can create protocols, answer research questions, AND give personalized advice
+5. All conversations saved for later reference
