@@ -162,6 +162,48 @@ function ProtocolCard({
               className="overflow-hidden"
             >
               <div className="pt-4 mt-4 border-t border-border space-y-3">
+                {/* Why This Protocol - AI Notes */}
+                {protocol.notes && (
+                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                    <h4 className="text-sm font-medium text-foreground mb-1.5 flex items-center gap-1.5">
+                      <MessageCircle className="w-3.5 h-3.5 text-primary" />
+                      Why This Protocol
+                    </h4>
+                    <p className="text-sm text-muted-foreground">{protocol.notes}</p>
+                  </div>
+                )}
+
+                {/* Secondary Goals */}
+                {protocol.secondary_goals && protocol.secondary_goals.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="text-xs text-muted-foreground">Also targeting:</span>
+                    {protocol.secondary_goals.map((goal, idx) => (
+                      <span 
+                        key={idx} 
+                        className="px-2 py-0.5 text-xs rounded-full bg-secondary text-secondary-foreground"
+                      >
+                        {goal}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Constraints Considered */}
+                {protocol.constraints && protocol.constraints.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="text-xs text-muted-foreground">Constraints:</span>
+                    {protocol.constraints.map((constraint, idx) => (
+                      <span 
+                        key={idx} 
+                        className="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                      >
+                        {constraint}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Peptides with Rationale */}
                 {protocol.peptides.map((peptide, index) => (
                   <div 
                     key={index} 
@@ -172,6 +214,16 @@ function ProtocolCard({
                       <Badge variant="outline" className="text-xs">{peptide.frequency}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mb-2">{peptide.purpose}</p>
+                    
+                    {/* Rationale - why this peptide for THIS user */}
+                    {peptide.rationale && (
+                      <div className="mb-2 p-2 rounded bg-primary/5 border border-primary/10">
+                        <p className="text-xs text-muted-foreground">
+                          <span className="font-medium text-primary">Why this peptide:</span> {peptide.rationale}
+                        </p>
+                      </div>
+                    )}
+                    
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div><span className="text-muted-foreground">Dosage:</span> {peptide.dosage}</div>
                       <div><span className="text-muted-foreground">Timing:</span> {peptide.timing}</div>
@@ -181,6 +233,15 @@ function ProtocolCard({
                     </div>
                   </div>
                 ))}
+
+                {/* User Context */}
+                {protocol.user_context && (
+                  <div className="p-3 rounded-lg bg-muted/30 border border-border">
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-medium">Your context:</span> {protocol.user_context}
+                    </p>
+                  </div>
+                )}
 
                 {/* Disclaimer */}
                 <div className="p-3 rounded-lg bg-muted border border-border">

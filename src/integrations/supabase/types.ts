@@ -875,48 +875,63 @@ export type Database = {
       }
       protocols: {
         Row: {
+          constraints: string[] | null
           created_at: string | null
           current_day: number | null
           current_week: number | null
           cycle_length_weeks: number
+          experience_level: string | null
           goal: string
           id: string
+          notes: string | null
           peptides: Json
           protocol_name: string
           quiz_response_id: string | null
+          secondary_goals: string[] | null
           started_at: string | null
           status: string | null
           updated_at: string | null
+          user_context: string | null
           user_id: string | null
         }
         Insert: {
+          constraints?: string[] | null
           created_at?: string | null
           current_day?: number | null
           current_week?: number | null
           cycle_length_weeks?: number
+          experience_level?: string | null
           goal: string
           id?: string
+          notes?: string | null
           peptides?: Json
           protocol_name: string
           quiz_response_id?: string | null
+          secondary_goals?: string[] | null
           started_at?: string | null
           status?: string | null
           updated_at?: string | null
+          user_context?: string | null
           user_id?: string | null
         }
         Update: {
+          constraints?: string[] | null
           created_at?: string | null
           current_day?: number | null
           current_week?: number | null
           cycle_length_weeks?: number
+          experience_level?: string | null
           goal?: string
           id?: string
+          notes?: string | null
           peptides?: Json
           protocol_name?: string
           quiz_response_id?: string | null
+          secondary_goals?: string[] | null
           started_at?: string | null
           status?: string | null
           updated_at?: string | null
+          user_context?: string | null
           user_id?: string | null
         }
         Relationships: [
