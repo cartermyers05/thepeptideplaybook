@@ -451,8 +451,8 @@ export default function Protocols() {
                   Go to the Chat and talk to our AI to build a personalized protocol made just for you.
                 </p>
                 <Button asChild className="rounded-full">
-                  <Link to="/dashboard/chat">
-                    Go to Chat
+                  <Link to="/dashboard/coach">
+                    Talk to AI Coach
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </Button>
@@ -518,8 +518,8 @@ export default function Protocols() {
                   Use the Chat to build your first personalized protocol!
                 </p>
                 <Button asChild variant="outline" className="rounded-full">
-                  <Link to="/dashboard/chat">
-                    Go to Chat
+                  <Link to="/dashboard/coach">
+                    Talk to AI Coach
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </Button>
