@@ -80,6 +80,7 @@ import PeptideReconstitutionGuide from "./pages/guides/PeptideReconstitutionGuid
 import PeptidesForBeginners from "./pages/guides/PeptidesForBeginners";
 import IGF1PeptideGuide from "./pages/guides/IGF1PeptideGuide";
 import HGHFragmentGuide from "./pages/guides/HGHFragmentGuide";
+import WhatArePeptides from "./pages/guides/WhatArePeptides";
 
 // Tool pages
 import PeptideCalculator from "./pages/tools/PeptideCalculator";
@@ -123,6 +124,7 @@ const App = () => (
             
             {/* SEO Guide pages */}
             <Route path="/guides" element={<Guides />} />
+            <Route path="/guides/what-are-peptides" element={<WhatArePeptides />} />
             <Route path="/guides/bpc-157-complete-guide" element={<BPC157Guide />} />
             <Route path="/guides/peptides-fda-legal-status-2026" element={<FDALegalStatusGuide />} />
             <Route path="/guides/are-peptides-safe" element={<ArePeptidesSafeGuide />} />

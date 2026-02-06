@@ -20,6 +20,13 @@
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+  <!-- PILLAR PAGE: What Are Peptides (1.2M volume head term) -->
+  <url>
+    <loc>https://peptideplaybook.org/guides/what-are-peptides</loc>
+    <lastmod>2026-02-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
   <!-- High-Volume Standalone Guides -->
   <url>
     <loc>https://peptideplaybook.org/guides/how-to-reconstitute-peptides</loc>
@@ -140,9 +147,9 @@
   <!-- New Guides (Feb 2026) -->
   <url>
     <loc>https://peptideplaybook.org/guides/ghk-cu-complete-guide</loc>
-    <lastmod>2026-02-05</lastmod>
+    <lastmod>2026-02-06</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://peptideplaybook.org/guides/ghk-cu-topical-vs-injectable</loc>
@@ -182,9 +189,9 @@
   </url>
   <url>
     <loc>https://peptideplaybook.org/guides/best-peptides-muscle-growth</loc>
-    <lastmod>2026-02-05</lastmod>
+    <lastmod>2026-02-06</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://peptideplaybook.org/guides/tb-500-research-guide</loc>
