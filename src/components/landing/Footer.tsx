@@ -125,10 +125,10 @@ export function Footer() {
             © 2026 Peptide Playbook. All rights reserved.
           </p>
           <a
-            href="mailto:hello@peptideplaybook.com"
+            href="mailto:hello@peptideplaybook.org"
             className="text-sm text-foreground hover:text-foreground transition-colors"
           >
-            hello@peptideplaybook.com
+            hello@peptideplaybook.org
           </a>
         </div>
       </div>

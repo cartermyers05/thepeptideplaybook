@@ -96,7 +96,7 @@ export default function Privacy() {
                 <li><strong>Deletion:</strong> Request deletion of your data</li>
                 <li><strong>Opt-out:</strong> Unsubscribe from marketing communications</li>
               </ul>
-              <p>To exercise these rights, contact us at privacy@peptideplaybook.com.</p>
+              <p>To exercise these rights, contact us at privacy@peptideplaybook.org.</p>
 
               <h2>9. Children's Privacy</h2>
               <p>
@@ -118,7 +118,7 @@ export default function Privacy() {
                 For questions about this Privacy Policy, contact us at:
               </p>
               <p>
-                Email: privacy@peptideplaybook.com
+                Email: privacy@peptideplaybook.org
               </p>
             </motion.div>
           </div>

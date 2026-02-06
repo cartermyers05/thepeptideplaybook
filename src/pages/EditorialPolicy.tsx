@@ -218,11 +218,11 @@ export default function EditorialPolicy() {
                   We strive for accuracy, but mistakes happen. If you find outdated or incorrect information in any of our guides, please let us know.
                 </p>
                 <a
-                  href="mailto:corrections@peptideplaybook.com"
+                  href="mailto:corrections@peptideplaybook.org"
                   className="inline-flex items-center gap-2 text-primary hover:underline font-medium"
                 >
                   <Mail className="w-4 h-4" />
-                  corrections@peptideplaybook.com
+                  corrections@peptideplaybook.org
                 </a>
               </motion.div>
 

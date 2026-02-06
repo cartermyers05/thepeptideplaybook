@@ -99,7 +99,7 @@ export default function Disclaimer() {
 
                 <h2>11. Contact Us</h2>
                 <p>
-                  If you have any questions about this disclaimer, please contact us at legal@peptideplaybook.com.
+                  If you have any questions about this disclaimer, please contact us at legal@peptideplaybook.org.
                 </p>
               </div>
             </motion.div>

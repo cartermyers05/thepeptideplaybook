@@ -34,7 +34,7 @@ serve(async (req) => {
 
     if (newsError) throw newsError;
 
-    const baseUrl = "https://peptideplaybook.com";
+    const baseUrl = "https://peptideplaybook.org";
 
     // Static pages with their priorities and change frequencies
     const staticPages = [

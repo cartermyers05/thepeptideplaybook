@@ -153,8 +153,8 @@ export default function Settings() {
           {isPaid && (
             <p className="text-sm text-gray-500 mt-6 pt-4 border-t border-gray-100">
               To request a refund, please contact{" "}
-              <a href="mailto:support@peptideplaybook.com" className="text-black hover:underline">
-                support@peptideplaybook.com
+              <a href="mailto:support@peptideplaybook.org" className="text-black hover:underline">
+                support@peptideplaybook.org
               </a>
             </p>
           )}
