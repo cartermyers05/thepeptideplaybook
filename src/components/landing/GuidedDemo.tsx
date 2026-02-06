@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import ReactMarkdown from "react-markdown";
 import { PillButton } from "./PillButton";
-import { ArrowRight, MessageCircle, User, Sparkles } from "lucide-react";
+import { ArrowRight, MessageCircle } from "lucide-react";
 
 const demoQuestions = [
   {
@@ -209,55 +209,11 @@ export function GuidedDemo() {
           className="max-w-4xl mx-auto"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-center mb-4">
-            See It In Action
+            Try It Yourself
           </h2>
           <p className="text-lg text-muted-foreground text-center mb-8">
             Ask any peptide question. Get research-backed answers with real citations.
           </p>
-
-          {/* Mock Conversation Example */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="bg-card border border-border rounded-2xl p-6 mb-8"
-          >
-            {/* User Message */}
-            <div className="flex gap-3 mb-4">
-              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                <User className="w-4 h-4 text-muted-foreground" />
-              </div>
-              <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
-                <p className="text-foreground">
-                  I'm 35, trying to recover faster from BJJ training. What peptides should I look into?
-                </p>
-              </div>
-            </div>
-
-            {/* AI Response */}
-            <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-4 h-4 text-primary" />
-              </div>
-              <div className="bg-primary/5 border border-primary/10 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
-                <p className="text-foreground leading-relaxed">
-                  Based on your recovery goals, here are 3 research-backed options:{" "}
-                  <strong>BPC-157</strong> (gut-joint healing, 12 studies),{" "}
-                  <strong>TB-500</strong> (tissue repair, 8 studies), and{" "}
-                  <strong>CJC-1295/Ipamorelin</strong> stack (recovery + sleep quality). 
-                  Each has different FDA statuses I can walk you through...
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Interactive Demo Title */}
-          <div className="text-center mb-6">
-            <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-              Try it yourself
-            </p>
-          </div>
 
           <AnimatePresence mode="wait">
             {!selectedQuestion ? (
