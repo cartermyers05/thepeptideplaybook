@@ -1,37 +1,95 @@
 
+# Global Copy Change: "Course" to "Blueprint" + CTA Standardization
 
-# Update Favicon to Rainbow Hexagon Logo
+## Overview
+Text-only branding changes across ~25 files. No layout, styling, or component structure modifications.
 
-## The Issue
+## Change Categories
 
-Your `index.html` correctly references `/favicon.svg` (the rainbow hexagon), but there's an old `public/favicon.ico` file that some browsers fall back to when they don't support SVG favicons.
+### 1. "Course" to "Blueprint" Replacements
 
-## The Fix
+| File | Current Text | New Text |
+|------|-------------|----------|
+| `src/components/quiz/ConversationalQuiz.tsx` | "Build Your Peptide Course" | "Build Your Peptide Blueprint" |
+| `src/components/quiz/ConversationalQuiz.tsx` | "Answer a few questions to personalize your 8-week program" | (keep as-is, no "course" here) |
+| `src/hooks/useQuizChat.ts` | "build your personalized peptide course" | "build your personalized Peptide Blueprint" |
+| `src/components/quiz/BuildingAnimation.tsx` | "Building your curriculum..." | "Building your blueprint..." |
+| `src/components/quiz/BuildingAnimation.tsx` | "Your Course is Ready!" | "Your Blueprint is Ready!" |
+| `src/components/quiz/BuildingAnimation.tsx` | "Building Your Course..." | "Building Your Blueprint..." |
+| `src/components/quiz/BuildingAnimation.tsx` | "Failed to create your course" | "Failed to create your blueprint" |
+| `src/components/quiz/BuildingAnimation.tsx` | "We couldn't save your course" | "We couldn't save your blueprint" |
+| `src/pages/Quiz.tsx` | "Build Your Peptide Course \| Peptide Playbook" | "Build Your Peptide Blueprint \| Peptide Playbook" |
+| `src/pages/Quiz.tsx` | "build a personalized peptide course" | "build a personalized Peptide Blueprint" |
+| `src/pages/QuizResults.tsx` | "Your Personalized Course" | "Your Peptide Blueprint" |
+| `src/pages/QuizResults.tsx` | "Start My Course" | "Start My Blueprint" |
+| `src/pages/QuizResults.tsx` | "Get My Course -- $67" | "Get Your Full Blueprint -- $67" |
+| `src/pages/CoursePreview.tsx` | "Course not found" | "Blueprint not found" |
+| `src/pages/CoursePreview.tsx` | "Building your personalized course..." | "Building your personalized blueprint..." |
+| `src/pages/CoursePreview.tsx` | "Course Ready" | "Blueprint Ready" |
+| `src/pages/CoursePreview.tsx` | "Get Your Course -- $67" | "Get Your Full Blueprint -- $67" |
+| `src/pages/Checkout.tsx` | "build your personalized course" | "build your personalized blueprint" |
+| `src/components/dashboard/DashboardNavbar.tsx` | "My Course" | "My Blueprint" |
+| `src/pages/History.tsx` | "My Course" | "My Blueprint" |
+| `src/components/dashboard/home/TodayLessonCard.tsx` | "Welcome to Your Course" | "Welcome to Your Blueprint" |
+| `src/components/dashboard/home/QuickActionCards.tsx` | "Ask anything about your course" | "Ask anything about your blueprint" |
+| `src/components/coach/AskCoach.tsx` | "your peptide course" | "your Peptide Blueprint" |
+| `src/pages/dashboard/CourseLessons.tsx` | "No course found. Purchase a course to get started." | "No blueprint found. Purchase a blueprint to get started." |
+| `src/pages/dashboard/Protocol.tsx` | "personalized peptide course" | "personalized Peptide Blueprint" |
+| `src/components/landing/CourseFeatures.tsx` | "Your Personal Peptide Course" | "Your Personal Peptide Blueprint" |
+| `src/components/landing/Footer.tsx` | "Your personal peptide course" | "Your personal Peptide Blueprint" |
+| `src/components/landing/PricingCTA.tsx` | "Medical provider peptide course" | "Medical provider peptide program" |
+| `src/components/landing/ProblemSection.tsx` | "Peptide courses are a scam" | "Peptide programs are a scam" |
+| `src/components/landing/HeroProductCards.tsx` | "Building your course..." | "Building your blueprint..." |
+| `src/pages/tools/PeptideCalculator.tsx` | "personalized peptide course" | "personalized Peptide Blueprint" |
 
-1. **Delete the old favicon.ico** - Remove `public/favicon.ico` to prevent browser fallback to the old "pp" icon
+### 2. CTA Standardization
 
-2. **Add multiple favicon formats for browser compatibility** - Update `index.html` to include:
-   - SVG favicon (modern browsers)
-   - Apple Touch Icon reference (iOS)
-   - Explicit fallback handling
+**Primary CTA: "Take the Free Quiz"**
 
-## Changes to Make
+| File | Current CTA | New CTA |
+|------|------------|---------|
+| `src/components/landing/FloatingCTA.tsx` | "Get Access" | "Take the Free Quiz" |
+| `src/components/landing/SolutionSection.tsx` | "Get Full Access" | "Take the Free Quiz" |
+| `src/components/landing/HowItWorksSection.tsx` | "Start Your Free Quiz" | "Take the Free Quiz" |
+| `src/components/blog/BlogCTA.tsx` | "Get Peptide Playbook AI" | "Take the Free Quiz" |
+| `src/components/chat/ChatWidget.tsx` | "Get Full Access" | "Take the Free Quiz" |
 
-**File: `public/favicon.ico`**
-- Delete this file entirely
+**Secondary CTA: "Get Your Full Blueprint -- $67"**
 
-**File: `index.html`**
-- Update the favicon section (lines 28-29) to:
-  - Keep the SVG as primary favicon
-  - Add `sizes="any"` attribute for better browser handling
+| File | Current CTA | New CTA |
+|------|------------|---------|
+| `src/components/landing/GuidedDemo.tsx` | "Get Full Access -- $67" | "Get Your Full Blueprint -- $67" |
+| `src/components/landing/FinalCTA.tsx` | "Get The Peptide Playbook -- $67" | "Get Your Full Blueprint -- $67" |
+| `src/components/landing/PricingCTA.tsx` | "Get Instant Access" | "Get Your Full Blueprint -- $67" |
+| `src/components/landing/WhatsInsideSection.tsx` | "Get Lifetime Access -- $99 $67" | "Get Your Full Blueprint -- $67" |
+| `src/pages/Pricing.tsx` (3 instances) | "Get Full Access -- $67" | "Get Your Full Blueprint -- $67" |
+| `src/pages/Checkout.tsx` | "Pay $67 -- Get Full Access" | "Get Your Full Blueprint -- $67" |
+| `src/components/dashboard/UpgradePrompt.tsx` | "Unlock Now -- $67" | "Get Your Full Blueprint -- $67" |
+| `src/components/dashboard/UpgradePrompt.tsx` | "Get full access to..." | "Get your full blueprint with..." |
 
-## Result
+### 3. Member Count / Social Proof Replacement
 
-After clearing browser cache (Cmd+Shift+R or Ctrl+Shift+R), the rainbow hexagon molecule logo will display in all browser tabs.
+| File | Current | New |
+|------|---------|-----|
+| `src/pages/Pricing.tsx` | "Join 4,200+ members who stopped relying on TikTok and Reddit for peptide information" | "Built on 500+ peer-reviewed studies. Zero hype." |
+| `src/pages/dashboard/Community.tsx` | "Active Members" | "Active Users" |
+| `src/pages/dashboard/Community.tsx` | "Connect with other members" | "Connect with other users" |
+| `src/pages/dashboard/Settings.tsx` | "Membership" heading | "Subscription" |
+| `src/components/dashboard/UpgradePrompt.tsx` | "Requires Membership" | "Requires Full Access" |
+| `src/pages/dashboard/Settings.tsx` | "Included with membership:" | "Included with your plan:" |
 
-## Note
+### 4. CTA Link Updates
 
-Browsers aggressively cache favicons. After the change, you may need to:
-1. Hard refresh the page (Cmd+Shift+R / Ctrl+Shift+R)
-2. Or open in an incognito window to see the updated favicon immediately
+Some CTAs currently link to `/signup` but should link to `/quiz` (for "Take the Free Quiz"):
+- `src/components/landing/FloatingCTA.tsx`: `/signup` to `/quiz`
+- `src/components/blog/BlogCTA.tsx`: `/signup` to `/quiz`
+- `src/components/chat/ChatWidget.tsx`: `/signup` to `/quiz`
 
+## Files NOT Changed
+- Brand name "Peptide Playbook" kept everywhere
+- Guide/article content untouched
+- All layout, styling, and component structure untouched
+- Internal variable names (e.g., `useCourse`, `courseStartDate`) kept as-is since they are code-only
+- Route paths (e.g., `/dashboard/course`) kept as-is to avoid breaking navigation
+
+## Total: ~25 files with text-only changes
