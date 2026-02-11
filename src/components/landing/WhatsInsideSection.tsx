@@ -128,7 +128,7 @@ export function WhatsInsideSection() {
         >
           <Link to="/quiz">
             <PillButton variant="dark" size="lg" icon={<span>→</span>}>
-              Get Lifetime Access — <span className="line-through opacity-60 mr-1">$99</span> $67
+              Get Your Full Blueprint — $67
             </PillButton>
           </Link>
         </motion.div>

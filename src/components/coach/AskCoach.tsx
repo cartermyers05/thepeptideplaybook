@@ -292,7 +292,7 @@ export function AskCoach() {
             </div>
             <h3 className="font-semibold text-lg text-black mb-2">Start a conversation</h3>
             <p className="text-gray-500 text-sm max-w-xs">
-              Ask me anything about your peptide course, dosing, side effects, or what to expect.
+              Ask me anything about your Peptide Blueprint, dosing, side effects, or what to expect.
             </p>
           </div>
         ) : (

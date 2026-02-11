@@ -61,7 +61,7 @@ export default function Community() {
             Private Community
           </h1>
           <p className="text-muted-foreground">
-            Connect with other members for discussions and support
+            Connect with other users for discussions and support
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export default function Community() {
           <div className="rounded-xl border border-border bg-card p-6 text-center">
             <Users className="w-8 h-8 text-primary mx-auto mb-2" />
             <p className="text-2xl font-bold">247</p>
-            <p className="text-sm text-muted-foreground">Active Members</p>
+            <p className="text-sm text-muted-foreground">Active Users</p>
           </div>
           <div className="rounded-xl border border-border bg-card p-6 text-center">
             <MessageCircle className="w-8 h-8 text-primary mx-auto mb-2" />

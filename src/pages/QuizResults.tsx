@@ -158,7 +158,7 @@ export default function QuizResults() {
             animate={{ opacity: 1, y: 0 }}
           >
             <p className="text-sm font-medium text-primary uppercase tracking-wide mb-3">
-              Your Personalized Course
+              Your Peptide Blueprint
             </p>
             <h1 className="text-3xl md:text-4xl font-bold mb-3">
               {protocol.name}
@@ -296,7 +296,7 @@ export default function QuizResults() {
                 <Link to="/dashboard">
                   <Button size="lg" className="h-12 px-8 gap-2 btn-primary-clean">
                     <Flame className="w-4 h-4" />
-                    Start My Course
+                    Start My Blueprint
                   </Button>
                 </Link>
                 <p className="text-sm text-muted-foreground mt-3">
@@ -307,7 +307,7 @@ export default function QuizResults() {
               <>
                 <Link to={`/course/${quizData.goal?.replace('_', '-') || 'beginner'}`}>
                   <Button size="lg" className="h-14 px-10 text-lg btn-primary-clean">
-                    Get My Course — $67
+                    Get Your Full Blueprint — $67
                   </Button>
                 </Link>
                 <p className="text-sm text-muted-foreground mt-4">

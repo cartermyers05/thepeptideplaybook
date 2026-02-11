@@ -49,7 +49,7 @@ export function ProblemSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
-            Peptide courses are a scam. Here's why.
+            Peptide programs are a scam. Here's why.
           </h2>
         </motion.div>
 
@@ -82,7 +82,7 @@ export function ProblemSection() {
           className="max-w-2xl mx-auto text-center"
         >
           <p className="text-lg text-foreground">
-            You don't need another course. You need a guide that knows YOUR goals, walks you through every step, and answers your questions at 2am when you're nervous about your first injection.
+            You don't need another program. You need a guide that knows YOUR goals, walks you through every step, and answers your questions at 2am when you're nervous about your first injection.
           </p>
         </motion.div>
       </div>

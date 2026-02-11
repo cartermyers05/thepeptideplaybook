@@ -63,7 +63,7 @@ export default function Checkout() {
           queryClient.invalidateQueries({ queryKey: ["profile"] });
           toast({
             title: "VIP Access Activated!",
-            description: "Let's build your personalized course...",
+            description: "Let's build your personalized blueprint...",
           });
           setTimeout(() => navigate("/quiz"), 1500);
         } else {
@@ -140,9 +140,9 @@ export default function Checkout() {
             <Check className="w-8 h-8 text-success" />
           </div>
           <h2 className="text-xl font-semibold mb-2">VIP Access Activated!</h2>
-          <p className="text-muted-foreground mb-6">Let's personalize your course...</p>
+          <p className="text-muted-foreground mb-6">Let's personalize your blueprint...</p>
           <Button onClick={() => navigate("/quiz")} className="w-full">
-            Build My Course
+            Build My Blueprint
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
         </div>
@@ -169,7 +169,7 @@ export default function Checkout() {
             className="w-full btn-primary-clean h-12 mb-6"
             onClick={() => startCheckout()}
           >
-            Pay $67 — Get Full Access
+            Get Your Full Blueprint — $67
           </Button>
         )}
 

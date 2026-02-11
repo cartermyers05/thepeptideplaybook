@@ -32,7 +32,7 @@ export default function CourseLessons() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <p className="text-gray-500">No course found. Purchase a course to get started.</p>
+          <p className="text-gray-500">No blueprint found. Purchase a blueprint to get started.</p>
         </div>
       </DashboardLayout>
     );

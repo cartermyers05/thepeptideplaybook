@@ -143,7 +143,7 @@ export function ConversationalQuiz() {
             Step {Math.min(currentStep + 1, totalSteps)} of {totalSteps}
           </p>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-            Build Your<br className="sm:hidden" /> Peptide Course
+            Build Your<br className="sm:hidden" /> Peptide Blueprint
           </h1>
           <p className="mt-4 text-muted-foreground max-w-md mx-auto">
             Answer a few questions to personalize your 8-week program

@@ -31,7 +31,7 @@ export function TodayLessonCard({ lesson, currentDay, hasCompletedToday, goalThe
         <div className={`h-1 bg-gradient-to-r ${gradientClass}`} />
         <div className="p-6 text-center py-10">
           <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-black mb-2">Welcome to Your Course</h2>
+          <h2 className="text-xl font-bold text-black mb-2">Welcome to Your Blueprint</h2>
           <p className="text-gray-500 mb-6">
             {goalTheme ? `${goalTheme.tagline} starts here` : "Your personalized journey starts here"}
           </p>

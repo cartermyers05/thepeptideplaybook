@@ -29,7 +29,7 @@ export function FinalCTA() {
               className="h-14 px-10 text-lg"
               icon={<span>→</span>}
             >
-              Get The Peptide Playbook — $67
+              Get Your Full Blueprint — $67
             </PillButton>
           </Link>
           

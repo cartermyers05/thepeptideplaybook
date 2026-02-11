@@ -85,7 +85,7 @@ export function HowItWorksSection() {
         >
           <Link to="/quiz">
             <PillButton variant="dark" size="lg" icon={<span>→</span>}>
-              Start Your Free Quiz
+              Take the Free Quiz
             </PillButton>
           </Link>
         </motion.div>

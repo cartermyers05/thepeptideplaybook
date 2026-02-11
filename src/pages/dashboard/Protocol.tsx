@@ -37,7 +37,7 @@ export default function Protocol() {
           <FileText className="w-16 h-16 text-muted-foreground mb-4" />
           <h1 className="text-2xl font-semibold mb-2">No Protocol Yet</h1>
           <p className="text-muted-foreground mb-6 max-w-md">
-            Take our quick quiz to get a personalized peptide course tailored to your goals.
+            Take our quick quiz to get a personalized Peptide Blueprint tailored to your goals.
           </p>
           <Button onClick={() => navigate("/dashboard/coach")} className="btn-primary-clean">Talk to AI Coach</Button>
         </div>

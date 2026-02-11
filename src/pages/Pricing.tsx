@@ -108,7 +108,7 @@ export default function Pricing() {
                     className="w-full btn-primary-clean h-14 text-lg mb-4"
                   >
                     <Link to="/checkout">
-                      Get Full Access — $67
+                      Get Your Full Blueprint — $67
                       <ArrowRight className="w-5 h-5 ml-2" />
                     </Link>
                   </Button>
@@ -171,7 +171,7 @@ export default function Pricing() {
                 Ready to Actually Understand Peptides?
               </h2>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Join 4,200+ members who stopped relying on TikTok and Reddit for peptide information.
+                Built on 500+ peer-reviewed studies. Zero hype.
               </p>
               <Button
                 asChild
@@ -179,7 +179,7 @@ export default function Pricing() {
                 className="btn-primary-clean h-12"
               >
                 <Link to="/checkout">
-                  Get Full Access — $67
+                  Get Your Full Blueprint — $67
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Link>
               </Button>

@@ -334,7 +334,7 @@ export default function PeptideCalculator() {
       <section className="glass-card-subtle p-8 text-center rounded-2xl">
         <h2 className="text-2xl font-bold mb-3">Ready to Start Your Peptide Journey?</h2>
         <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-          Get a personalized peptide course with built-in dosing calculator, step-by-step guides, and AI coaching.
+          Get a personalized Peptide Blueprint with built-in dosing calculator, step-by-step guides, and AI coaching.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link to="/quiz">
