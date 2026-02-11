@@ -113,7 +113,7 @@ export default function Settings() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
           <h2 className="font-semibold text-black mb-4 flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-gray-500" />
-            Membership
+            Subscription
           </h2>
 
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 mb-4">
@@ -129,7 +129,7 @@ export default function Settings() {
           {/* Feature Access List */}
           <div className="space-y-2">
             <p className="text-sm font-medium text-black mb-3">
-              {isPaid ? "Your features:" : "Included with membership:"}
+              {isPaid ? "Your features:" : "Included with your plan:"}
             </p>
             <ul className="space-y-2.5">
               {allFeatures.map((feature, i) => (

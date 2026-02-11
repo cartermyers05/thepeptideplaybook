@@ -177,7 +177,7 @@ export function CoursePreviewCard({
         transition={{ delay: delay + 0.6 }}
         className="space-y-2"
       >
-        <p className="text-[10px] text-muted-foreground">Building your course...</p>
+        <p className="text-[10px] text-muted-foreground">Building your blueprint...</p>
         <div className="h-1.5 bg-white/30 rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full"

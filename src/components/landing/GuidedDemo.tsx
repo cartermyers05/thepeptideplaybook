@@ -273,7 +273,7 @@ export function GuidedDemo() {
                   </p>
                   <Link to="/quiz">
                     <PillButton variant="dark" size="lg" icon={<ArrowRight className="w-4 h-4" />}>
-                      Get Full Access — $67
+                      Get Your Full Blueprint — $67
                     </PillButton>
                   </Link>
                   <p className="text-sm text-muted-foreground mt-3">

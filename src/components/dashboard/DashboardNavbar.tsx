@@ -28,7 +28,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
-  { icon: BookOpen, label: "My Course", path: "/dashboard/course" },
+  { icon: BookOpen, label: "My Blueprint", path: "/dashboard/course" },
   { icon: ClipboardList, label: "My Plan", path: "/dashboard/protocol" },
   { icon: MessageCircle, label: "Chat", path: "/dashboard/coach" },
   { icon: History, label: "History", path: "/dashboard/history" },

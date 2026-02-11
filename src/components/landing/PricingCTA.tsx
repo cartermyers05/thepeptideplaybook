@@ -15,7 +15,7 @@ const features = [
 
 const comparisons = [
   { item: "Peptide clinic consultation", price: "$200-500" },
-  { item: "Medical provider peptide course", price: "$499-3,000" },
+  { item: "Medical provider peptide program", price: "$499-3,000" },
   { item: "Hours of Reddit research", price: "Free but unreliable" },
   { item: "Peptide Playbook", price: "$67 for everything", highlight: true },
 ];
@@ -126,7 +126,7 @@ export function PricingCTA() {
                   className="w-full justify-center"
                   icon={<span>→</span>}
                 >
-                  Get Instant Access
+                  Get Your Full Blueprint — $67
                 </PillButton>
               </Link>
               

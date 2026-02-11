@@ -14,11 +14,11 @@ export function UpgradePrompt({ feature }: UpgradePromptProps) {
       </div>
       
       <h2 className="text-2xl font-semibold mb-2">
-        {feature} Requires Membership
+        {feature} Requires Full Access
       </h2>
       
       <p className="text-muted-foreground max-w-md mb-4">
-        Get full access to {feature.toLowerCase()} and all other features.
+        Get your full blueprint with {feature.toLowerCase()} and all other features.
       </p>
       
       <p className="text-sm text-primary font-medium mb-6">
@@ -27,7 +27,7 @@ export function UpgradePrompt({ feature }: UpgradePromptProps) {
       
       <Button asChild size="lg" className="btn-primary-clean">
         <Link to="/checkout">
-          Unlock Now — $67
+          Get Your Full Blueprint — $67
         </Link>
       </Button>
     </div>

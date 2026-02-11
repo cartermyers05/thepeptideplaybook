@@ -127,7 +127,7 @@ export default function CoursePreview() {
   if (!template) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Course not found</h1>
+        <h1 className="text-2xl font-bold">Blueprint not found</h1>
         <Link to="/">
           <Button>Back to Home</Button>
         </Link>
@@ -163,7 +163,7 @@ export default function CoursePreview() {
                 <div className="mb-8">
                   <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
                   <h2 className="text-2xl font-bold mb-2">
-                    Building your personalized course...
+                    Building your personalized blueprint...
                   </h2>
                 </div>
 
@@ -217,7 +217,7 @@ export default function CoursePreview() {
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4"
                   >
                     <Check className="w-4 h-4" />
-                    Course Ready
+                    Blueprint Ready
                   </motion.div>
                   <h1 className="text-3xl md:text-4xl font-bold mb-2">
                     Your {template.title}
@@ -292,7 +292,7 @@ export default function CoursePreview() {
                             Processing...
                           </>
                         ) : (
-                          "Get Your Course — $67"
+                          "Get Your Full Blueprint — $67"
                         )}
                       </Button>
                       <p className="mt-4 text-sm text-muted-foreground">

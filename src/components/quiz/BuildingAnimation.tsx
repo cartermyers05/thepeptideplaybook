@@ -18,7 +18,7 @@ interface BuildingAnimationProps {
 const buildSteps = [
   { id: 1, label: "Analyzing your goals...", duration: 1500 },
   { id: 2, label: "Selecting optimal peptides...", duration: 1800 },
-  { id: 3, label: "Building your curriculum...", duration: 2000 },
+  { id: 3, label: "Building your blueprint...", duration: 2000 },
   { id: 4, label: "Personalizing your schedule...", duration: 1500 },
 ];
 
@@ -51,7 +51,7 @@ export function BuildingAnimation({
       } catch (error) {
         console.error('Error in onComplete:', error);
         setHasError(true);
-        toast.error('Failed to create your course. Please try again.');
+        toast.error('Failed to create your blueprint. Please try again.');
       }
     }
   }, [currentStep, isComplete, hasError, onComplete]);
@@ -124,12 +124,12 @@ export function BuildingAnimation({
           {hasError 
             ? "Something went wrong" 
             : isComplete 
-              ? "Your Course is Ready!" 
-              : "Building Your Course..."}
+              ? "Your Blueprint is Ready!" 
+              : "Building Your Blueprint..."}
         </h1>
         <p className="text-muted-foreground mb-8">
           {hasError
-            ? "We couldn't save your course. Please try the quiz again."
+            ? "We couldn't save your blueprint. Please try the quiz again."
             : isComplete 
               ? "Taking you to see your personalized program..." 
               : "Personalizing your 8-week peptide program"}

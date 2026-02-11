@@ -64,7 +64,7 @@ export function CourseFeatures() {
             What You Get
           </p>
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Your Personal Peptide Course
+            Your Personal Peptide Blueprint
           </h2>
         </motion.div>
 

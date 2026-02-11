@@ -24,7 +24,7 @@ export function Footer() {
               </span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-              Your personal peptide course. Personalized protocols, step-by-step 
+              Your personal Peptide Blueprint. Personalized protocols, step-by-step 
               guidance, and 24/7 AI coaching.
             </p>
           </div>

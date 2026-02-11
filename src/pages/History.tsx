@@ -27,7 +27,7 @@ import { Logo } from "@/components/brand/Logo";
 const navItems = [
   { icon: MessageSquare, label: "Coach", href: "/dashboard/coach" },
   { icon: HistoryIcon, label: "History", href: "/dashboard/history", active: true },
-  { icon: Bookmark, label: "My Course", href: "/dashboard/course" },
+  { icon: Bookmark, label: "My Blueprint", href: "/dashboard/course" },
   { icon: BarChart3, label: "My Plan", href: "/dashboard/protocol" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ];

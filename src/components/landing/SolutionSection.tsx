@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { FloatingOrbs } from "./FloatingOrbs";
 
@@ -91,11 +92,11 @@ export function SolutionSection() {
           </div>
 
           <motion.div variants={itemVariants}>
-            <a href="#pricing">
+            <Link to="/quiz">
               <Button size="lg" className="btn-primary-clean h-12 px-8 text-base">
-                Get Full Access
+                Take the Free Quiz
               </Button>
-            </a>
+            </Link>
           </motion.div>
         </motion.div>
       </div>

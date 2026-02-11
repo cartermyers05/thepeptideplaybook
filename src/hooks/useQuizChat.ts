@@ -26,7 +26,7 @@ interface QuizChatState {
   error: string | null;
 }
 
-const INITIAL_MESSAGE = `Hey! I'm here to help you build your personalized peptide course.
+const INITIAL_MESSAGE = `Hey! I'm here to help you build your personalized Peptide Blueprint.
 
 I'll ask you a few questions to understand your goals, and then I'll create a custom program just for you.
 
@@ -75,7 +75,7 @@ export function useQuizChat(preSelectedGoal?: string | null) {
           role: 'assistant',
           content: `Great choice! You've selected **${goalLabel}** as your goal.
 
-Now let me ask a few more questions to personalize your course.
+Now let me ask a few more questions to personalize your blueprint.
 
 What's your experience level with peptides?`
         }],

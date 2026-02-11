@@ -8,8 +8,8 @@ export default function Quiz() {
   return (
     <>
       <SEOHead 
-        title="Build Your Peptide Course | Peptide Playbook"
-        description="Chat with our AI to build a personalized peptide course tailored to your goals."
+        title="Build Your Peptide Blueprint | Peptide Playbook"
+        description="Chat with our AI to build a personalized Peptide Blueprint tailored to your goals."
         canonical="/quiz"
       />
       <div className="min-h-screen bg-background relative overflow-hidden">

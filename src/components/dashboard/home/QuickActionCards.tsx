@@ -16,7 +16,7 @@ export function QuickActionCards() {
             <AnimatedLogo size={24} />
           </div>
           <h3 className="font-semibold text-black mb-1">AI Coach</h3>
-          <p className="text-sm text-gray-500">Ask anything about your course</p>
+          <p className="text-sm text-gray-500">Ask anything about your blueprint</p>
         </div>
       </Link>
 
