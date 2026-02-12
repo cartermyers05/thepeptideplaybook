@@ -1,19 +1,16 @@
 import { useState } from "react";
 import { PeptideDeepDive } from "@/components/protocol/PeptideDeepDive";
-import { getPeptideDeepDive } from "@/lib/peptideDeepDive";
-import { motion, AnimatePresence } from "framer-motion";
+import { getAllPeptideNames } from "@/lib/peptideDeepDive";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   MessageCircle, 
   ArrowRight, 
   Play, 
   Pause, 
-  Eye, 
   ChevronDown, 
   ChevronUp,
   AlertTriangle,
@@ -21,24 +18,26 @@ import {
   Printer,
   Download
 } from "lucide-react";
-import { useProtocol, Protocol, Peptide } from "@/hooks/useProtocol";
+import { useProtocol, Protocol } from "@/hooks/useProtocol";
+import { useQuizResponse } from "@/hooks/useQuizResponse";
+import { getGoalLabel, getPeptideMatch } from "@/lib/quizPersonalization";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-const statusConfig = {
-  not_started: { label: "Not Started", variant: "secondary" as const, color: "bg-muted text-muted-foreground" },
-  active: { label: "Active", variant: "default" as const, color: "bg-primary text-primary-foreground" },
-  paused: { label: "Paused", variant: "outline" as const, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
-  completed: { label: "Completed", variant: "secondary" as const, color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" },
+const statusConfig: Record<string, { label: string; color: string; bgColor: string }> = {
+  not_started: { label: "Not Started", color: "#6B7280", bgColor: "#F3F4F6" },
+  active: { label: "Active", color: "#10B981", bgColor: "rgba(16,185,129,0.1)" },
+  paused: { label: "Paused", color: "#F59E0B", bgColor: "rgba(245,158,11,0.1)" },
+  completed: { label: "Completed", color: "#10B981", bgColor: "rgba(16,185,129,0.1)" },
 };
 
-// Generate printable HTML content
+// Generate printable HTML
 function generateProtocolHTML(protocol: Protocol): string {
   const peptidesList = protocol.peptides.map(p => `
     <div style="margin-bottom: 16px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
       <h4 style="margin: 0 0 8px 0; color: #1a1a1a;">${p.name}</h4>
       <p style="margin: 0 0 8px 0; color: #666;">${p.purpose}</p>
-      ${p.rationale ? `<p style="margin: 0 0 8px 0; padding: 8px; background: #e8f4f8; border-radius: 4px; font-size: 14px;"><strong>Why this peptide:</strong> ${p.rationale}</p>` : ''}
+      ${p.rationale ? `<p style="margin: 0 0 8px 0; padding: 8px; background: #FFF7ED; border-radius: 4px; font-size: 14px;"><strong>Why this peptide:</strong> ${p.rationale}</p>` : ''}
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
         <div><strong>Dosage:</strong> ${p.dosage}</div>
         <div><strong>Frequency:</strong> ${p.frequency}</div>
@@ -48,416 +47,183 @@ function generateProtocolHTML(protocol: Protocol): string {
     </div>
   `).join('');
 
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>${protocol.protocol_name} - Peptide Playbook</title>
-      <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a; }
-        h1 { color: #7c3aed; margin-bottom: 8px; }
-        h2 { color: #374151; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-top: 32px; }
-        .meta { color: #6b7280; margin-bottom: 24px; }
-        .disclaimer { background: #fef3c7; padding: 16px; border-radius: 8px; font-size: 14px; margin-top: 32px; }
-        @media print { body { padding: 20px; } }
-      </style>
-    </head>
-    <body>
-      <h1>${protocol.protocol_name}</h1>
-      <div class="meta">
-        <p><strong>Goal:</strong> ${protocol.goal}</p>
-        <p><strong>Duration:</strong> ${protocol.cycle_length_weeks} weeks</p>
-        <p><strong>Experience Level:</strong> ${protocol.experience_level || 'Not specified'}</p>
-        ${protocol.secondary_goals && protocol.secondary_goals.length > 0 ? `<p><strong>Also targeting:</strong> ${protocol.secondary_goals.join(', ')}</p>` : ''}
-      </div>
-      
-      ${protocol.notes ? `<div style="background: #f0f4ff; padding: 16px; border-radius: 8px; margin-bottom: 24px;"><strong>Why This Protocol:</strong> ${protocol.notes}</div>` : ''}
-      
-      <h2>Peptides</h2>
-      ${peptidesList}
-      
-      ${protocol.user_context ? `<h2>Your Context</h2><p>${protocol.user_context}</p>` : ''}
-      
-      <div class="disclaimer">
-        <strong>⚠️ Disclaimer:</strong> This protocol is for educational purposes only. Consult a healthcare provider before using any peptides.
-      </div>
-      
-      <p style="color: #9ca3af; font-size: 12px; margin-top: 24px; text-align: center;">Generated by Peptide Playbook • ${new Date().toLocaleDateString()}</p>
-    </body>
-    </html>
-  `;
+  return `<!DOCTYPE html><html><head><title>${protocol.protocol_name}</title>
+    <style>body{font-family:system-ui,sans-serif;max-width:800px;margin:0 auto;padding:40px 20px;color:#1a1a1a}h1{color:#111827}h2{color:#374151;border-bottom:2px solid #e5e7eb;padding-bottom:8px;margin-top:32px}.meta{color:#6b7280;margin-bottom:24px}.disclaimer{background:#FFFBEB;padding:16px;border-radius:8px;font-size:14px;margin-top:32px;border-left:4px solid #F59E0B}@media print{body{padding:20px}}</style>
+    </head><body><h1>${protocol.protocol_name}</h1>
+    <div class="meta"><p><strong>Goal:</strong> ${protocol.goal}</p><p><strong>Duration:</strong> ${protocol.cycle_length_weeks} weeks</p></div>
+    ${protocol.notes ? `<div style="background:#FFF7ED;padding:16px;border-radius:8px;margin-bottom:24px"><strong>Why This Protocol:</strong> ${protocol.notes}</div>` : ''}
+    <h2>Peptides</h2>${peptidesList}
+    <div class="disclaimer"><strong>Disclaimer:</strong> This protocol is for educational purposes only. Consult a healthcare provider before using any peptides.</div>
+    <p style="color:#9ca3af;font-size:12px;margin-top:24px;text-align:center">Generated by Peptide Playbook · ${new Date().toLocaleDateString()}</p></body></html>`;
 }
 
-// Generate text content for export
 function generateProtocolText(protocol: Protocol): string {
   const lines = [
-    `═══════════════════════════════════════════════════════════`,
     `${protocol.protocol_name.toUpperCase()}`,
-    `═══════════════════════════════════════════════════════════`,
-    ``,
     `Goal: ${protocol.goal}`,
     `Duration: ${protocol.cycle_length_weeks} weeks`,
-    `Experience Level: ${protocol.experience_level || 'Not specified'}`,
+    '',
   ];
-  
-  if (protocol.secondary_goals && protocol.secondary_goals.length > 0) {
-    lines.push(`Also targeting: ${protocol.secondary_goals.join(', ')}`);
-  }
-  
-  if (protocol.notes) {
-    lines.push(``, `Why This Protocol:`, protocol.notes);
-  }
-  
-  lines.push(``, `───────────────────────────────────────────────────────────`, `PEPTIDES`, `───────────────────────────────────────────────────────────`);
-  
+  if (protocol.notes) lines.push(`Why This Protocol: ${protocol.notes}`, '');
   protocol.peptides.forEach((p, i) => {
-    lines.push(
-      ``,
-      `${i + 1}. ${p.name}`,
-      `   Purpose: ${p.purpose}`,
-      `   Dosage: ${p.dosage}`,
-      `   Frequency: ${p.frequency}`,
-      `   Timing: ${p.timing}`,
-    );
-    if (p.site) lines.push(`   Site: ${p.site}`);
-    if (p.rationale) lines.push(`   Why this peptide: ${p.rationale}`);
+    lines.push(`${i + 1}. ${p.name}`, `   Purpose: ${p.purpose}`, `   Dosage: ${p.dosage}`, `   Frequency: ${p.frequency}`, `   Timing: ${p.timing}`, '');
   });
-  
-  if (protocol.user_context) {
-    lines.push(``, `───────────────────────────────────────────────────────────`, `YOUR CONTEXT`, `───────────────────────────────────────────────────────────`, ``, protocol.user_context);
-  }
-  
-  lines.push(
-    ``,
-    `───────────────────────────────────────────────────────────`,
-    `DISCLAIMER`,
-    `───────────────────────────────────────────────────────────`,
-    ``,
-    `This protocol is for educational purposes only.`,
-    `Consult a healthcare provider before using any peptides.`,
-    ``,
-    `Generated by Peptide Playbook • ${new Date().toLocaleDateString()}`
-  );
-  
+  lines.push('DISCLAIMER: For educational purposes only. Consult a healthcare provider.');
   return lines.join('\n');
 }
 
-function ProtocolCard({ 
-  protocol, 
-  onStart, 
-  onPause, 
-  onResume,
-  onPrint,
-  onExport,
-  isStarting,
-  isPausing,
-  isResuming,
+// Protocol card for user-created protocols
+function UserProtocolCard({ 
+  protocol, onStart, onPause, onResume, onPrint, onExport,
+  isStarting, isPausing, isResuming
 }: { 
-  protocol: Protocol;
-  onStart: (id: string) => void;
-  onPause: (id: string) => void;
-  onResume: (id: string) => void;
-  onPrint: (protocol: Protocol) => void;
-  onExport: (protocol: Protocol) => void;
-  isStarting: boolean;
-  isPausing: boolean;
-  isResuming: boolean;
+  protocol: Protocol; onStart: (id: string) => void; onPause: (id: string) => void;
+  onResume: (id: string) => void; onPrint: (p: Protocol) => void; onExport: (p: Protocol) => void;
+  isStarting: boolean; isPausing: boolean; isResuming: boolean;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const status = statusConfig[protocol.status] || statusConfig.not_started;
-  
-  const peptideNames = protocol.peptides.map(p => p.name).join(", ");
   const createdDate = protocol.created_at ? format(new Date(protocol.created_at), "MMM d, yyyy") : "";
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="dashboard-card overflow-hidden"
-    >
-      <div className="h-1 dashboard-gradient-purple" />
+    <div className="rounded-2xl bg-white overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
       <div className="p-5">
-        {/* Header Row */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate">{protocol.protocol_name}</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-semibold truncate" style={{ color: "#111827" }}>{protocol.protocol_name}</h3>
+            <p className="text-sm" style={{ color: "#6B7280" }}>
               {protocol.status === "not_started" 
                 ? `${protocol.cycle_length_weeks} week cycle`
-                : `Week ${protocol.current_week} of ${protocol.cycle_length_weeks}${protocol.current_day ? ` • Day ${protocol.current_day}` : ""}`
-              }
+                : `Week ${protocol.current_week} of ${protocol.cycle_length_weeks}`}
             </p>
           </div>
-          <Badge className={cn("rounded-full shrink-0", status.color)}>
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0" style={{ backgroundColor: status.bgColor, color: status.color }}>
             {status.label}
-          </Badge>
-        </div>
-
-        {/* Peptide Tags */}
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {protocol.peptides.slice(0, 3).map((peptide, idx) => (
-            <span 
-              key={idx} 
-              className="px-2 py-0.5 text-xs rounded-full bg-muted text-muted-foreground"
-            >
-              {peptide.name}
-            </span>
-          ))}
-          {protocol.peptides.length > 3 && (
-            <span className="px-2 py-0.5 text-xs rounded-full bg-muted text-muted-foreground">
-              +{protocol.peptides.length - 3} more
-            </span>
-          )}
-        </div>
-
-        {/* Meta Info */}
-        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
-          <span className="flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            Created {createdDate}
           </span>
         </div>
 
-        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {protocol.peptides.slice(0, 3).map((p, idx) => (
+            <span key={idx} className="px-2 py-0.5 text-xs rounded-full" style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}>{p.name}</span>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 text-xs mb-4" style={{ color: "#9CA3AF" }}>
+          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Created {createdDate}</span>
+        </div>
+
         <div className="flex items-center gap-2">
           {protocol.status === "not_started" && (
-            <Button 
-              size="sm" 
-              onClick={() => onStart(protocol.id)}
-              disabled={isStarting}
-              className="rounded-full"
-            >
-              <Play className="w-3.5 h-3.5 mr-1.5" />
-              {isStarting ? "Starting..." : "Start"}
+            <Button size="sm" onClick={() => onStart(protocol.id)} disabled={isStarting} className="rounded-full" style={{ backgroundColor: "#111827" }}>
+              <Play className="w-3.5 h-3.5 mr-1.5" />{isStarting ? "Starting..." : "Start"}
             </Button>
           )}
           {protocol.status === "active" && (
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => onPause(protocol.id)}
-              disabled={isPausing}
-              className="rounded-full"
-            >
-              <Pause className="w-3.5 h-3.5 mr-1.5" />
-              {isPausing ? "Pausing..." : "Pause"}
+            <Button size="sm" variant="outline" onClick={() => onPause(protocol.id)} disabled={isPausing} className="rounded-full">
+              <Pause className="w-3.5 h-3.5 mr-1.5" />{isPausing ? "Pausing..." : "Pause"}
             </Button>
           )}
           {protocol.status === "paused" && (
-            <Button 
-              size="sm" 
-              onClick={() => onResume(protocol.id)}
-              disabled={isResuming}
-              className="rounded-full"
-            >
-              <Play className="w-3.5 h-3.5 mr-1.5" />
-              {isResuming ? "Resuming..." : "Resume"}
+            <Button size="sm" onClick={() => onResume(protocol.id)} disabled={isResuming} className="rounded-full" style={{ backgroundColor: "#111827" }}>
+              <Play className="w-3.5 h-3.5 mr-1.5" />{isResuming ? "Resuming..." : "Resume"}
             </Button>
           )}
-          <Button 
-            size="sm" 
-            variant="ghost"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="rounded-full"
-          >
-            <Eye className="w-3.5 h-3.5 mr-1.5" />
-            View
-            {isExpanded ? <ChevronUp className="w-3.5 h-3.5 ml-1" /> : <ChevronDown className="w-3.5 h-3.5 ml-1" />}
+          <Button size="sm" variant="ghost" onClick={() => setIsExpanded(!isExpanded)} className="rounded-full">
+            View {isExpanded ? <ChevronUp className="w-3.5 h-3.5 ml-1" /> : <ChevronDown className="w-3.5 h-3.5 ml-1" />}
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => onPrint(protocol)} className="rounded-full">
+            <Printer className="w-3.5 h-3.5" />
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => onExport(protocol)} className="rounded-full">
+            <Download className="w-3.5 h-3.5" />
           </Button>
         </div>
 
-        {/* Expanded Details */}
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden"
-            >
-              <div className="pt-4 mt-4 border-t border-border space-y-3">
-                {/* Why This Protocol - AI Notes */}
-                {protocol.notes && (
-                  <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                    <h4 className="text-sm font-medium text-foreground mb-1.5 flex items-center gap-1.5">
-                      <MessageCircle className="w-3.5 h-3.5 text-primary" />
-                      Why This Protocol
-                    </h4>
-                    <p className="text-sm text-muted-foreground">{protocol.notes}</p>
-                  </div>
-                )}
-
-                {/* Secondary Goals */}
-                {protocol.secondary_goals && protocol.secondary_goals.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className="text-xs text-muted-foreground">Also targeting:</span>
-                    {protocol.secondary_goals.map((goal, idx) => (
-                      <span 
-                        key={idx} 
-                        className="px-2 py-0.5 text-xs rounded-full bg-secondary text-secondary-foreground"
-                      >
-                        {goal}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Constraints Considered */}
-                {protocol.constraints && protocol.constraints.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className="text-xs text-muted-foreground">Constraints:</span>
-                    {protocol.constraints.map((constraint, idx) => (
-                      <span 
-                        key={idx} 
-                        className="px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
-                      >
-                        {constraint}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Peptides with Rationale */}
-                {protocol.peptides.map((peptide, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="p-3 rounded-lg bg-muted/50 border border-border">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-foreground">{peptide.name}</h4>
-                        <Badge variant="outline" className="text-xs">{peptide.frequency}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">{peptide.purpose}</p>
-                      
-                      {/* Rationale - why this peptide for THIS user */}
-                      {peptide.rationale && (
-                        <div className="mb-2 p-2 rounded bg-primary/5 border border-primary/10">
-                          <p className="text-xs text-muted-foreground">
-                            <span className="font-medium text-primary">Why this peptide:</span> {peptide.rationale}
-                          </p>
-                        </div>
-                      )}
-                      
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div><span className="text-muted-foreground">Dosage:</span> {peptide.dosage}</div>
-                        <div><span className="text-muted-foreground">Timing:</span> {peptide.timing}</div>
-                        {peptide.site && (
-                          <div className="col-span-2"><span className="text-muted-foreground">Site:</span> {peptide.site}</div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Research Deep Dive inline */}
-                    {getPeptideDeepDive(peptide.name) && (
-                      <PeptideDeepDive 
-                        peptideName={peptide.name} 
-                        goal={protocol.goal}
-                        isMatched
-                      />
-                    )}
-                  </div>
-                ))}
-
-                {/* User Context */}
-                {protocol.user_context && (
-                  <div className="p-3 rounded-lg bg-muted/30 border border-border">
-                    <p className="text-xs text-muted-foreground">
-                      <span className="font-medium">Your context:</span> {protocol.user_context}
-                    </p>
-                  </div>
-                )}
-
-                {/* Disclaimer */}
-                <div className="p-3 rounded-lg bg-muted border border-border">
-                  <p className="text-xs text-muted-foreground">
-                    <AlertTriangle className="w-3.5 h-3.5 inline mr-1" />
-                    <strong>Disclaimer:</strong> This protocol is for educational purposes only. Consult a healthcare provider before using any peptides.
-                  </p>
+        {isExpanded && (
+          <div className="pt-4 mt-4 space-y-3" style={{ borderTop: "1px solid #E5E7EB" }}>
+            {protocol.notes && (
+              <div className="p-3 rounded-xl" style={{ backgroundColor: "#FFF7ED" }}>
+                <h4 className="text-sm font-medium mb-1 flex items-center gap-1.5" style={{ color: "#111827" }}>
+                  <MessageCircle className="w-3.5 h-3.5" style={{ color: "#F97316" }} /> Why This Protocol
+                </h4>
+                <p className="text-sm" style={{ color: "#6B7280" }}>{protocol.notes}</p>
+              </div>
+            )}
+            {protocol.peptides.map((peptide, index) => (
+              <div key={index} className="p-3 rounded-xl" style={{ border: "1px solid #E5E7EB" }}>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium" style={{ color: "#111827" }}>{peptide.name}</h4>
+                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}>{peptide.frequency}</span>
                 </div>
-
-                {/* Export Actions */}
-                <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="flex-1 rounded-full"
-                    onClick={() => onPrint(protocol)}
-                  >
-                    <Printer className="w-3.5 h-3.5 mr-1.5" />
-                    Print
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="flex-1 rounded-full"
-                    onClick={() => onExport(protocol)}
-                  >
-                    <Download className="w-3.5 h-3.5 mr-1.5" />
-                    Export
-                  </Button>
+                <p className="text-sm mb-2" style={{ color: "#6B7280" }}>{peptide.purpose}</p>
+                {peptide.rationale && (
+                  <p className="text-xs p-2 rounded-lg mb-2" style={{ backgroundColor: "#FFF7ED", color: "#374151" }}>
+                    <span className="font-medium" style={{ color: "#F97316" }}>Why:</span> {peptide.rationale}
+                  </p>
+                )}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div><span style={{ color: "#9CA3AF" }}>Dosage:</span> <span style={{ color: "#374151" }}>{peptide.dosage}</span></div>
+                  <div><span style={{ color: "#9CA3AF" }}>Timing:</span> <span style={{ color: "#374151" }}>{peptide.timing}</span></div>
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            ))}
+            <div className="p-3 rounded-xl" style={{ backgroundColor: "#FFFBEB", borderLeft: "4px solid #F59E0B" }}>
+              <p className="text-xs" style={{ color: "#92400E" }}>
+                <AlertTriangle className="w-3.5 h-3.5 inline mr-1" />
+                This protocol is for educational purposes only. Consult a healthcare provider before using any peptides.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export default function Protocols() {
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [mutationType, setMutationType] = useState<"start" | "pause" | "resume" | null>(null);
 
-  const { 
-    protocols, 
-    isLoadingProtocols, 
-    startProtocol, 
-    pauseProtocol, 
-    resumeProtocol 
-  } = useProtocol();
+  const { protocols, isLoadingProtocols, startProtocol, pauseProtocol, resumeProtocol } = useProtocol();
+  const { data: quizResponse } = useQuizResponse();
+
+  const goalLabel = quizResponse ? getGoalLabel(quizResponse.primary_goal) : null;
+  const peptideMatch = quizResponse ? getPeptideMatch(quizResponse.primary_goal) : null;
+
+  // All available peptides from the deep dive library
+  const allPeptideNames = getAllPeptideNames();
+  
+  // Matched peptide names
+  const matchedNames = peptideMatch ? [peptideMatch.primary, peptideMatch.secondary] : [];
+  const otherNames = allPeptideNames.filter(name => !matchedNames.includes(name));
 
   const handleStart = async (id: string) => {
-    setMutatingId(id);
-    setMutationType("start");
-    try {
-      await startProtocol.mutateAsync(id);
-    } finally {
-      setMutatingId(null);
-      setMutationType(null);
-    }
+    setMutatingId(id); setMutationType("start");
+    try { await startProtocol.mutateAsync(id); } finally { setMutatingId(null); setMutationType(null); }
   };
-
   const handlePause = async (id: string) => {
-    setMutatingId(id);
-    setMutationType("pause");
-    try {
-      await pauseProtocol.mutateAsync(id);
-    } finally {
-      setMutatingId(null);
-      setMutationType(null);
-    }
+    setMutatingId(id); setMutationType("pause");
+    try { await pauseProtocol.mutateAsync(id); } finally { setMutatingId(null); setMutationType(null); }
   };
-
   const handleResume = async (id: string) => {
-    setMutatingId(id);
-    setMutationType("resume");
-    try {
-      await resumeProtocol.mutateAsync(id);
-    } finally {
-      setMutatingId(null);
-      setMutationType(null);
-    }
+    setMutatingId(id); setMutationType("resume");
+    try { await resumeProtocol.mutateAsync(id); } finally { setMutatingId(null); setMutationType(null); }
   };
 
   const handlePrint = (protocol: Protocol) => {
     const printContent = generateProtocolHTML(protocol);
     const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      printWindow.print();
-    }
+    if (printWindow) { printWindow.document.write(printContent); printWindow.document.close(); printWindow.print(); }
   };
 
   const handleExport = (protocol: Protocol) => {
@@ -465,114 +231,128 @@ export default function Protocols() {
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${protocol.protocol_name.replace(/\s+/g, '-')}-protocol.txt`;
-    a.click();
+    a.href = url; a.download = `${protocol.protocol_name.replace(/\s+/g, '-')}-protocol.txt`; a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
     <DashboardLayout>
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-8 py-4 md:py-8"
       >
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Your Protocols</h1>
-          <p className="text-muted-foreground">Personalized peptide protocols built for you</p>
-        </div>
+        <motion.div variants={itemVariants}>
+          <h1 className="text-[28px] font-bold" style={{ color: "#111827" }}>Your Peptide Protocols</h1>
+          <p className="text-[15px]" style={{ color: "#6B7280" }}>Research-backed protocols matched to your goals</p>
+        </motion.div>
 
-        {/* Chat CTA Card */}
-        <Card className="border-dashed border-2 bg-gradient-to-br from-muted/50 to-muted">
-          <CardContent className="p-6">
+        {/* User-created protocols (if any) */}
+        {protocols && protocols.length > 0 && (
+          <motion.div variants={itemVariants} className="space-y-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>
+              Your Custom Protocols
+            </h2>
+            {protocols.map((protocol) => (
+              <UserProtocolCard
+                key={protocol.id}
+                protocol={protocol}
+                onStart={handleStart}
+                onPause={handlePause}
+                onResume={handleResume}
+                onPrint={handlePrint}
+                onExport={handleExport}
+                isStarting={mutatingId === protocol.id && mutationType === "start"}
+                isPausing={mutatingId === protocol.id && mutationType === "pause"}
+                isResuming={mutatingId === protocol.id && mutationType === "resume"}
+              />
+            ))}
+          </motion.div>
+        )}
+
+        {/* Chat CTA */}
+        <motion.div variants={itemVariants}>
+          <div className="rounded-2xl p-6 bg-white" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)", border: "2px dashed #E5E7EB" }}>
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <MessageCircle className="w-6 h-6 text-primary" />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(249,115,22,0.1)" }}>
+                <MessageCircle className="w-6 h-6" style={{ color: "#F97316" }} />
               </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-semibold text-foreground mb-1">Build Your Custom Protocol</h2>
-                <p className="text-muted-foreground mb-4">
-                  Go to the Chat and talk to our AI to build a personalized protocol made just for you.
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold mb-1" style={{ color: "#111827" }}>Build Your Custom Protocol</h2>
+                <p className="text-sm mb-4" style={{ color: "#6B7280" }}>
+                  Talk to our AI Coach to build a personalized protocol tailored to your goals, health history, and experience level.
                 </p>
-                <Button asChild className="rounded-full">
-                  <Link to="/dashboard/coach">
-                    Talk to AI Coach
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                <Button asChild className="rounded-full" style={{ backgroundColor: "#111827" }}>
+                  <Link to="/dashboard/chat">
+                    Talk to AI Coach <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </motion.div>
 
-        {/* Protocols List */}
-        <div className="space-y-4">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            Your Protocols
-          </h2>
-
-          {isLoadingProtocols ? (
-            <div className="space-y-4">
-              {[1, 2].map((i) => (
-                <div key={i} className="dashboard-card p-5">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex-1">
-                      <Skeleton className="h-5 w-48 mb-2" />
-                      <Skeleton className="h-4 w-32" />
-                    </div>
-                    <Skeleton className="h-6 w-20 rounded-full" />
-                  </div>
-                  <div className="flex gap-2 mb-3">
-                    <Skeleton className="h-5 w-16 rounded-full" />
-                    <Skeleton className="h-5 w-16 rounded-full" />
-                  </div>
-                  <Skeleton className="h-4 w-28 mb-4" />
-                  <div className="flex gap-2">
-                    <Skeleton className="h-8 w-20 rounded-full" />
-                    <Skeleton className="h-8 w-20 rounded-full" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : protocols && protocols.length > 0 ? (
-            <div className="space-y-4">
-              {protocols.map((protocol) => (
-                <ProtocolCard
-                  key={protocol.id}
-                  protocol={protocol}
-                  onStart={handleStart}
-                  onPause={handlePause}
-                  onResume={handleResume}
-                  onPrint={handlePrint}
-                  onExport={handleExport}
-                  isStarting={mutatingId === protocol.id && mutationType === "start"}
-                  isPausing={mutatingId === protocol.id && mutationType === "pause"}
-                  isResuming={mutatingId === protocol.id && mutationType === "resume"}
+        {/* Matched Peptides Section */}
+        {matchedNames.length > 0 && (
+          <motion.div variants={itemVariants} className="space-y-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>
+              {goalLabel ? `Matched to Your ${goalLabel} Goal` : "Your Matched Peptides"}
+            </h2>
+            {matchedNames.map((name, index) => (
+              <motion.div
+                key={name}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <PeptideDeepDive
+                  peptideName={name}
+                  goal={goalLabel?.toLowerCase()}
+                  isMatched
+                  defaultOpen={index === 0}
                 />
-              ))}
-            </div>
-          ) : (
-            <Card className="border-dashed">
-              <CardContent className="py-12 text-center">
-                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <h3 className="font-semibold text-foreground mb-2">No protocols yet</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Use the Chat to build your first personalized protocol!
-                </p>
-                <Button asChild variant="outline" className="rounded-full">
-                  <Link to="/dashboard/coach">
-                    Talk to AI Coach
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Other Peptides */}
+        <motion.div variants={itemVariants} className="space-y-4">
+          <div className="pt-4" style={{ borderTop: "1px solid #E5E7EB" }}>
+            <h2 className="text-[20px] font-bold mb-1" style={{ color: "#111827" }}>Explore Other Peptides</h2>
+            <p className="text-sm mb-4" style={{ color: "#6B7280" }}>Full research profiles for all peptides in our database</p>
+          </div>
+          {otherNames.map((name, index) => (
+            <motion.div
+              key={name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+            >
+              <PeptideDeepDive peptideName={name} goal={goalLabel?.toLowerCase()} />
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Loading state */}
+        {isLoadingProtocols && (
+          <div className="space-y-4">
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-32 w-full rounded-2xl" />
+            ))}
+          </div>
+        )}
+
+        {/* Disclaimer footer */}
+        <motion.div
+          variants={itemVariants}
+          className="text-xs text-center py-6"
+          style={{ color: "#9CA3AF", borderTop: "1px solid #E5E7EB" }}
+        >
+          <p>For educational purposes only. Not medical advice. Always consult a healthcare provider before using any peptides.</p>
+        </motion.div>
       </motion.div>
     </DashboardLayout>
   );

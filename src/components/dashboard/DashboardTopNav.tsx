@@ -29,57 +29,54 @@ export function DashboardTopNav() {
   const initials = displayName.charAt(0).toUpperCase();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm">
-      {/* Main nav bar */}
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#E5E7EB]">
       <nav className="flex items-center justify-between h-16 px-4 md:px-8 max-w-7xl mx-auto">
         {/* Logo */}
         <Link to="/dashboard" className="flex-shrink-0 hover:opacity-80 transition-opacity">
           <Logo size="sm" />
         </Link>
 
-        {/* Desktop Nav Pills - Center */}
+        {/* Desktop Nav Pills */}
         <div className="hidden md:flex items-center gap-1">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               end={item.path === "/dashboard"}
-              className="px-4 py-2 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
-              activeClassName="bg-foreground text-background"
+              className="px-4 py-2 rounded-full text-sm font-medium text-[#6B7280] hover:text-[#111827] hover:bg-gray-50 transition-all"
+              activeClassName="!bg-[#111827] !text-white"
             >
               {item.label}
             </NavLink>
           ))}
         </div>
 
-        {/* Right side - User dropdown */}
+        {/* Right side */}
         <div className="flex items-center gap-3">
-          {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-full hover:bg-accent transition-colors"
+            className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
           >
             {mobileMenuOpen ? (
-              <X className="w-5 h-5 text-foreground" />
+              <X className="w-5 h-5 text-[#111827]" />
             ) : (
-              <Menu className="w-5 h-5 text-foreground" />
+              <Menu className="w-5 h-5 text-[#111827]" />
             )}
           </button>
 
-          {/* User Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-accent transition-colors">
-                <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center">
-                  <span className="text-background font-medium text-sm">{initials}</span>
+              <button className="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-gray-100 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-[#111827] flex items-center justify-center">
+                  <span className="text-white font-medium text-sm">{initials}</span>
                 </div>
-                <ChevronDown className="w-4 h-4 text-muted-foreground hidden md:block" />
+                <ChevronDown className="w-4 h-4 text-[#6B7280] hidden md:block" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <div className="px-3 py-2 border-b border-border">
-                <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
-                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              <div className="px-3 py-2 border-b border-[#E5E7EB]">
+                <p className="text-sm font-medium text-[#111827] truncate">{displayName}</p>
+                <p className="text-xs text-[#6B7280] truncate">{user?.email}</p>
               </div>
               <DropdownMenuItem onClick={() => navigate("/guides")} className="cursor-pointer">
                 <BookOpen className="w-4 h-4 mr-2" />
@@ -99,17 +96,14 @@ export function DashboardTopNav() {
         </div>
       </nav>
 
-      {/* Rainbow gradient underline */}
-      <div className="nav-rainbow-underline" />
-
       {/* Mobile menu overlay */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 top-16 bg-foreground/20 backdrop-blur-sm md:hidden z-40"
+          className="fixed inset-0 top-16 bg-black/20 backdrop-blur-sm md:hidden z-40"
           onClick={() => setMobileMenuOpen(false)}
         >
           <div
-            className="bg-background border-b border-border p-4 space-y-1"
+            className="bg-white p-4 space-y-1 border-b border-[#E5E7EB]"
             onClick={(e) => e.stopPropagation()}
           >
             {navItems.map((item) => (
@@ -118,8 +112,8 @@ export function DashboardTopNav() {
                 to={item.path}
                 end={item.path === "/dashboard"}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
-                activeClassName="bg-foreground text-background"
+                className="block px-4 py-3 rounded-xl text-base font-medium text-[#6B7280] hover:text-[#111827] hover:bg-gray-50 transition-all"
+                activeClassName="!bg-[#111827] !text-white"
               >
                 {item.label}
               </NavLink>

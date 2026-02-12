@@ -15,11 +15,9 @@ import {
   Brain,
   Moon,
   Dumbbell,
-  Sparkles,
   Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { TypewriterMessage } from "./TypewriterMessage";
@@ -33,6 +31,8 @@ import { useToast } from "@/hooks/use-toast";
 import { AIDisclaimerModal } from "@/components/chat/AIDisclaimerModal";
 import { AnimatedLogo } from "@/components/brand/AnimatedLogo";
 import { Logo } from "@/components/brand/Logo";
+import { useQuizResponse } from "@/hooks/useQuizResponse";
+import { getGoalLabel } from "@/lib/quizPersonalization";
 
 interface Message {
   id: string;
@@ -49,69 +49,47 @@ interface ChatInterfaceProps {
 }
 
 const questionCategories = [
-  {
-    icon: Scale,
-    label: "Compare",
-    questions: [
-      "What's the difference between BPC-157 and TB-500?",
-      "Compare semaglutide vs tirzepatide for weight loss",
-    ],
-    color: "text-blue-500",
-  },
-  {
-    icon: Shield,
-    label: "FDA Status",
-    questions: [
-      "Is semaglutide FDA approved?",
-      "Which peptides are actually FDA approved?",
-    ],
-    color: "text-green-500",
-  },
-  {
-    icon: Activity,
-    label: "Recovery",
-    questions: [
-      "Build me a recovery protocol for a knee injury",
-      "What does research say about BPC-157 for healing?",
-    ],
-    color: "text-orange-500",
-  },
-  {
-    icon: Dumbbell,
-    label: "Performance",
-    questions: [
-      "What are growth hormone secretagogues?",
-      "What's the research on MK-677?",
-    ],
-    color: "text-purple-500",
-  },
-  {
-    icon: Moon,
-    label: "Sleep",
-    questions: [
-      "Does MK-677 affect sleep quality?",
-      "What peptides are studied for sleep?",
-    ],
-    color: "text-indigo-500",
-  },
-  {
-    icon: Brain,
-    label: "Cognitive",
-    questions: [
-      "What are nootropic peptides?",
-      "What does research say about Semax and Selank?",
-    ],
-    color: "text-pink-500",
-  },
+  { icon: Scale, label: "Compare" },
+  { icon: Shield, label: "FDA Status" },
+  { icon: Activity, label: "Recovery" },
+  { icon: Dumbbell, label: "Performance" },
+  { icon: Moon, label: "Weight Loss" },
+  { icon: Brain, label: "Safety" },
 ];
 
-// Actionable sample questions for empty state
-const sampleQuestions = [
-  "Build me a recovery protocol for a knee injury",
-  "What's the difference between BPC-157 and TB-500?",
-  "I'm new to peptides — where do I start?",
-  "Help me understand reconstitution for a 5mg vial",
-];
+// Goal-personalized starter prompts
+const goalStarterPrompts: Record<string, string[]> = {
+  weight_loss: [
+    "What's the difference between semaglutide and tirzepatide?",
+    "What side effects should I watch for with GLP-1 medications?",
+    "How do I talk to my doctor about starting semaglutide?",
+    "What does the research say about long-term GLP-1 use?",
+  ],
+  recovery: [
+    "Is BPC-157 safe to combine with anti-inflammatories?",
+    "What's the recommended BPC-157 protocol for tendon injury?",
+    "How does TB-500 compare to BPC-157 for recovery?",
+    "What should I tell my doctor about BPC-157?",
+  ],
+  longevity: [
+    "What's the evidence for GHK-Cu in anti-aging?",
+    "How does Epitalon affect telomere length?",
+    "What's the safest way to start with longevity peptides?",
+    "Are there long-term safety concerns with GHK-Cu?",
+  ],
+  performance: [
+    "How does CJC-1295/Ipamorelin boost growth hormone?",
+    "What blood work should I get before starting?",
+    "Can I combine growth hormone peptides with BPC-157?",
+    "What are the side effects of CJC-1295?",
+  ],
+  general: [
+    "What are the most well-researched peptides right now?",
+    "Which peptide has the best safety profile for beginners?",
+    "How do I bring up peptides with a skeptical doctor?",
+    "What's the difference between FDA-approved and research peptides?",
+  ],
+};
 
 function TypingIndicator() {
   return (
@@ -119,39 +97,13 @@ function TypingIndicator() {
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
-          className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50"
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ backgroundColor: "#9CA3AF" }}
           animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            delay: i * 0.2,
-          }}
+          transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
         />
       ))}
     </div>
-  );
-}
-
-// Breathing/pulse animation for the avatar
-function PulsingAvatar() {
-  return (
-    <motion.div 
-      className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-6 relative"
-      animate={{ 
-        boxShadow: [
-          "0 0 0 0 rgba(0, 0, 0, 0.1)",
-          "0 0 0 8px rgba(0, 0, 0, 0.05)",
-          "0 0 0 0 rgba(0, 0, 0, 0.1)"
-        ]
-      }}
-      transition={{
-        duration: 2.5,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-    >
-      <AnimatedLogo size={40} animate={true} />
-    </motion.div>
   );
 }
 
@@ -171,6 +123,7 @@ export default function ChatInterface({
   
   const { user } = useAuth();
   const { data: profile, isLoading: profileLoading } = useProfile();
+  const { data: quizResponse } = useQuizResponse();
   const queryClient = useQueryClient();
   const createConversation = useCreateConversation();
   const updateConversationTitle = useUpdateConversationTitle();
@@ -179,10 +132,12 @@ export default function ChatInterface({
   const incrementQuestions = useIncrementQuestionsAsked();
   const { toast } = useToast();
 
-  // Fetch existing messages if resuming a conversation
   const { data: existingMessages, isLoading: messagesLoading } = useConversationMessages(conversationId);
 
-  // Update conversationId when initialConversationId changes
+  const starterPrompts = quizResponse
+    ? (goalStarterPrompts[quizResponse.primary_goal] || goalStarterPrompts.general)
+    : goalStarterPrompts.general;
+
   useEffect(() => {
     if (initialConversationId !== conversationId) {
       setConversationId(initialConversationId);
@@ -191,7 +146,6 @@ export default function ChatInterface({
     }
   }, [initialConversationId]);
 
-  // Load existing messages into state when resuming a conversation
   useEffect(() => {
     if (existingMessages && existingMessages.length > 0 && !hasLoadedHistory) {
       const loadedMessages: Message[] = existingMessages.map((m) => ({
@@ -279,13 +233,11 @@ export default function ChatInterface({
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
-      // Get user's auth token
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
         throw new Error("Not authenticated");
       }
 
-      // Send ALL messages (including loaded history) for full context
       const allMessages = [...messages, userMessage];
 
       const response = await fetch(
@@ -309,7 +261,6 @@ export default function ChatInterface({
         throw new Error("Failed to get response");
       }
 
-      // Check if a protocol was created (custom header from edge function)
       const protocolCreated = response.headers.get("X-Protocol-Created") === "true";
 
       const reader = response.body?.getReader();
@@ -373,13 +324,12 @@ export default function ChatInterface({
         }
       }
 
-      // If a protocol was created, invalidate the protocol query so it refreshes
       if (protocolCreated) {
         console.log("Protocol was created, invalidating query");
         queryClient.invalidateQueries({ queryKey: ["protocol", user?.id] });
         toast({
-          title: "Protocol Created! 🎉",
-          description: "Your new protocol is ready in the Protocol Builder.",
+          title: "Protocol Created",
+          description: "Your new protocol is ready in the Protocols tab.",
         });
       }
 
@@ -453,13 +403,12 @@ export default function ChatInterface({
     }
   };
 
-  // Show loading state while fetching existing messages
   if (conversationId && messagesLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <AnimatedLogo size={48} animate={true} />
-          <p className="text-muted-foreground mt-4">Loading conversation...</p>
+          <p className="mt-4" style={{ color: "#6B7280" }}>Loading conversation...</p>
         </div>
       </div>
     );
@@ -467,17 +416,17 @@ export default function ChatInterface({
 
   return (
     <div className="flex-1 flex flex-col h-full">
-      {/* AI Disclaimer Modal - shows once per user */}
+      {/* AI Disclaimer Modal */}
       {!profileLoading && !profile?.ai_disclaimer_accepted_at && (
         <AIDisclaimerModal onAccepted={() => {}} />
       )}
 
       {/* Header with New Chat button when in a conversation */}
       {messages.length > 0 && (
-        <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-background/80 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-4 py-2 bg-white" style={{ borderBottom: "1px solid #E5E7EB" }}>
           <div className="flex items-center gap-2">
             <Logo showText={false} size="sm" />
-            <span className="text-sm font-medium text-muted-foreground">
+            <span className="text-sm font-medium" style={{ color: "#6B7280" }}>
               {conversationId ? "Conversation" : "New Chat"}
             </span>
           </div>
@@ -485,7 +434,7 @@ export default function ChatInterface({
             variant="outline"
             size="sm"
             onClick={handleNewChat}
-            className="gap-2"
+            className="gap-2 rounded-full"
           >
             <Plus className="w-4 h-4" />
             New Chat
@@ -502,79 +451,69 @@ export default function ChatInterface({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="text-center py-8"
+                className="py-8"
               >
-                {/* Pulsing Logo */}
-                <PulsingAvatar />
+                {/* Minimal header */}
+                <div className="mb-8">
+                  <span
+                    className="text-[11px] font-mono uppercase tracking-[2px] font-semibold"
+                    style={{ color: "#F97316" }}
+                  >
+                    AI RESEARCH COACH
+                  </span>
+                  <p className="text-[15px] mt-1" style={{ color: "#6B7280" }}>
+                    Ask anything about peptides. Every answer cites research.
+                  </p>
+                </div>
 
-                <h2 className="text-2xl font-bold mb-2">
-                  Peptide Playbook AI
-                </h2>
-                <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                  Your AI research assistant for evidence-based peptide information. Ask anything.
-                </p>
-
-                {/* Protocol Builder CTA */}
-                <Button
-                  onClick={() => navigate("/dashboard/protocols")}
-                  className="mb-8 gap-2 rounded-full"
-                  variant="outline"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  Build a Custom Protocol
-                </Button>
-
-                {/* Category chips */}
-                <div className="flex flex-wrap justify-center gap-2 mb-6">
+                {/* Topic pills - horizontal scrollable */}
+                <div className="flex flex-wrap gap-2 mb-8">
                   {questionCategories.map((cat, index) => (
                     <motion.button
                       key={cat.label}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 + index * 0.05 }}
+                      transition={{ delay: 0.05 + index * 0.03 }}
                       onClick={() => setSelectedCategory(selectedCategory === index ? null : index)}
                       className={cn(
-                        "inline-flex items-center gap-2 px-4 py-2 rounded-full border transition-all",
+                        "inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium transition-all",
                         selectedCategory === index
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border hover:border-foreground/30 hover:bg-accent"
+                          ? "border"
+                          : "bg-white border border-[#E5E7EB] hover:border-[#F97316]/30"
                       )}
+                      style={
+                        selectedCategory === index
+                          ? { backgroundColor: "#FFF7ED", borderColor: "#F97316", color: "#F97316" }
+                          : { color: "#6B7280" }
+                      }
                     >
-                      <cat.icon className={cn("w-4 h-4", selectedCategory === index ? "" : cat.color)} />
-                      <span className="text-sm font-medium">{cat.label}</span>
+                      {cat.label}
                     </motion.button>
                   ))}
                 </div>
 
-                {/* Questions grid */}
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={selectedCategory ?? "default"}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto"
-                  >
-                    {(selectedCategory !== null
-                      ? questionCategories[selectedCategory].questions
-                      : sampleQuestions
-                    ).map((question, index) => (
-                      <motion.button
-                        key={question}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        whileHover={{ y: -2, boxShadow: "0 8px 16px -4px rgba(0,0,0,0.08)" }}
-                        onClick={() => handleSuggestedQuestion(question)}
-                        className="p-4 text-left rounded-xl border border-border bg-card hover:border-foreground/20 transition-all group"
-                      >
-                        <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                          {question}
-                        </p>
-                      </motion.button>
-                    ))}
-                  </motion.div>
-                </AnimatePresence>
+                {/* Starter prompts - 2x2 grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {starterPrompts.map((question, index) => (
+                    <motion.button
+                      key={question}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 + index * 0.05 }}
+                      whileHover={{ y: -2, boxShadow: "0 8px 16px -4px rgba(0,0,0,0.08)" }}
+                      onClick={() => handleSuggestedQuestion(question)}
+                      className="p-4 text-left rounded-2xl bg-white transition-all hover:border-[#F97316]/30"
+                      style={{
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                        border: "1px solid #E5E7EB",
+                      }}
+                    >
+                      <p className="text-sm" style={{ color: "#374151" }}>
+                        {question}
+                      </p>
+                    </motion.button>
+                  ))}
+                </div>
               </motion.div>
             ) : (
               <div className="space-y-4">
@@ -593,30 +532,35 @@ export default function ChatInterface({
                     >
                       <div
                         className={cn(
-                          "max-w-[85%] rounded-xl px-4 py-3",
+                          "max-w-[85%] px-4 py-3",
                           message.role === "user"
-                            ? "bg-primary text-primary-foreground rounded-br-sm"
-                            : "bg-card border border-border rounded-bl-sm"
+                            ? "rounded-2xl rounded-br-md text-white"
+                            : "rounded-2xl rounded-bl-md border"
                         )}
+                        style={
+                          message.role === "user"
+                            ? { backgroundColor: "#111827" }
+                            : { backgroundColor: "#F9FAFB", borderColor: "#E5E7EB" }
+                        }
                       >
                         {message.role === "assistant" && (
                           <>
                             {/* Pre-response disclaimer */}
-                            <div className="mb-2 pb-2 border-b border-amber-500/20 bg-amber-500/5 -mx-4 -mt-3 px-4 pt-2 rounded-t-xl">
+                            <div className="mb-2 pb-2 -mx-4 -mt-3 px-4 pt-2 rounded-t-2xl" style={{ backgroundColor: "rgba(245,158,11,0.05)", borderBottom: "1px solid rgba(245,158,11,0.15)" }}>
                               <div className="flex items-center gap-1.5">
-                                <AlertTriangle className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                                <p className="text-xs text-amber-600 dark:text-amber-400">
+                                <AlertTriangle className="w-3 h-3" style={{ color: "#F59E0B" }} />
+                                <p className="text-xs" style={{ color: "#92400E" }}>
                                   Educational information only. Not medical advice.
                                 </p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border">
+                            <div className="flex items-center gap-2 mb-2 pb-2" style={{ borderBottom: "1px solid #E5E7EB" }}>
                               <Logo showText={false} size="sm" />
-                              <span className="text-xs font-medium text-muted-foreground">Peptide Playbook AI</span>
+                              <span className="text-xs font-medium" style={{ color: "#6B7280" }}>Peptide Playbook AI</span>
                             </div>
                           </>
                         )}
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <div className="prose prose-sm max-w-none" style={{ color: message.role === "user" ? "#FFFFFF" : "#374151" }}>
                           {message.role === "assistant" ? (
                             <TypewriterMessage
                               content={message.content}
@@ -628,7 +572,7 @@ export default function ChatInterface({
                         </div>
                         {message.role === "assistant" && message.content && !isLoading && (
                           <>
-                            <div className="flex items-start gap-1.5 text-xs text-muted-foreground mt-3 pt-2 border-t border-border">
+                            <div className="flex items-start gap-1.5 text-xs mt-3 pt-2" style={{ borderTop: "1px solid #E5E7EB", color: "#6B7280" }}>
                               <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />
                               <p>This information is for educational purposes only. Most peptides are NOT FDA-approved for human use. Always consult a licensed healthcare provider.</p>
                             </div>
@@ -652,7 +596,7 @@ export default function ChatInterface({
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
-                                className={cn("h-7 px-2", message.isSaved && "text-primary")}
+                                className={cn("h-7 px-2", message.isSaved && "text-[#F97316]")}
                                 onClick={() => handleToggleSave(message)}
                                 disabled={!message.dbId}
                               >
@@ -676,15 +620,22 @@ export default function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="border-t border-border bg-background">
+      <div className="bg-white" style={{ borderTop: "1px solid #E5E7EB" }}>
         <div className="max-w-3xl mx-auto px-4 py-4">
           <form onSubmit={handleSubmit} className="relative">
-            <Textarea
+            <textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything — protocols, dosing, comparisons, research..."
-              className="min-h-[52px] max-h-32 pr-12 resize-none rounded-xl border-border"
+              placeholder="Ask about any peptide — dosing, safety, research..."
+              className="w-full min-h-[52px] max-h-32 pr-12 resize-none rounded-2xl px-4 py-3.5 text-[16px] outline-none transition-all"
+              style={{
+                backgroundColor: "#F9FAFB",
+                border: "1px solid #E5E7EB",
+                color: "#374151",
+              }}
+              onFocus={(e) => (e.target.style.borderColor = "#F97316")}
+              onBlur={(e) => (e.target.style.borderColor = "#E5E7EB")}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -692,14 +643,14 @@ export default function ChatInterface({
                 }
               }}
             />
-            <Button
+            <button
               type="submit"
-              size="icon"
               disabled={!input.trim() || isLoading}
-              className="absolute right-2 bottom-2 h-8 w-8 rounded-lg"
+              className="absolute right-3 bottom-3 h-9 w-9 rounded-xl flex items-center justify-center transition-all disabled:opacity-30"
+              style={{ backgroundColor: "#F97316", color: "#FFFFFF" }}
             >
               <Send className="w-4 h-4" />
-            </Button>
+            </button>
           </form>
         </div>
       </div>
