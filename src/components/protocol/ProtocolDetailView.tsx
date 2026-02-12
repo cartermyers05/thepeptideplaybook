@@ -1,6 +1,16 @@
 import { Protocol } from "@/hooks/useProtocol";
 import { useProtocolTemplate } from "@/hooks/useProtocolTemplate";
+import {
+  useProtocolProgress,
+  useWeeklyContent,
+  useNextMilestone,
+  usePauseTracking,
+  computeCurrentWeek,
+} from "@/hooks/useProtocolProgress";
 import { EvidenceRating } from "./EvidenceRating";
+import { ProtocolProgressHeader } from "./ProtocolProgressHeader";
+import { ThisWeekCard } from "./ThisWeekCard";
+import { StartTrackingCard } from "./StartTrackingCard";
 import { Download, ArrowLeft } from "lucide-react";
 import {
   Accordion,
@@ -22,6 +32,18 @@ export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps
 
   const { data: template, isLoading } = useProtocolTemplate(peptideSlug, goalSlug);
 
+  const { data: progress, isLoading: progressLoading } = useProtocolProgress(
+    template?.id,
+    peptideSlug,
+    goalSlug
+  );
+
+  const currentWeek = progress?.status === "active" ? computeCurrentWeek(progress.start_date) : 0;
+
+  const { data: weeklyContent } = useWeeklyContent(peptideSlug, currentWeek);
+  const { data: nextMilestoneText } = useNextMilestone(peptideSlug, currentWeek);
+  const pauseTracking = usePauseTracking();
+
   const displayName = template?.peptide_display_name || protocol.peptides?.[0]?.name || "Peptide";
   const protocolName = template?.protocol_name || protocol.protocol_name;
   const evidenceLevel = template?.evidence_level || 4;
@@ -32,6 +54,9 @@ export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps
   const defaultOpen = sections
     .filter((s) => s.default_open)
     .map((s) => `section-${s.section_number}`);
+
+  const isActive = progress?.status === "active";
+  const isPaused = progress?.status === "paused";
 
   if (isLoading) {
     return (
@@ -158,6 +183,44 @@ export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps
           </button>
         </div>
       </div>
+
+      {/* Tracking section */}
+      {!progressLoading && isActive && weeklyContent && (
+        <>
+          <ProtocolProgressHeader
+            currentWeek={currentWeek}
+            weeklyContent={weeklyContent}
+            nextMilestoneText={nextMilestoneText || ""}
+          />
+          <ThisWeekCard weeklyContent={weeklyContent} />
+          <button
+            onClick={() => progress && pauseTracking.mutate(progress.id)}
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 13,
+              color: "#64748B",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              marginBottom: 16,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#94A3B8")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#64748B")}
+          >
+            Pause tracking
+          </button>
+        </>
+      )}
+
+      {!progressLoading && !isActive && template && (
+        <StartTrackingCard
+          templateId={template.id}
+          peptideSlug={peptideSlug}
+          goalSlug={goalSlug}
+          pausedProgressId={isPaused ? progress?.id : null}
+        />
+      )}
 
       {/* Accordion sections */}
       <div

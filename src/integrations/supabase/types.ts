@@ -903,6 +903,50 @@ export type Database = {
         }
         Relationships: []
       }
+      protocol_progress: {
+        Row: {
+          created_at: string | null
+          goal_slug: string
+          id: string
+          peptide_slug: string
+          protocol_template_id: string
+          start_date: string
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          goal_slug: string
+          id?: string
+          peptide_slug: string
+          protocol_template_id: string
+          start_date: string
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          goal_slug?: string
+          id?: string
+          peptide_slug?: string
+          protocol_template_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "protocol_progress_protocol_template_id_fkey"
+            columns: ["protocol_template_id"]
+            isOneToOne: false
+            referencedRelation: "protocol_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       protocol_templates: {
         Row: {
           created_at: string
@@ -942,6 +986,48 @@ export type Database = {
           protocol_name?: string
           sections?: Json
           updated_at?: string
+        }
+        Relationships: []
+      }
+      protocol_weekly_content: {
+        Row: {
+          alert_message: string | null
+          content: string
+          dose_change: boolean | null
+          dose_info: string | null
+          id: string
+          new_dose: string | null
+          peptide_slug: string
+          phase_name: string | null
+          previous_dose: string | null
+          title: string
+          week_number: number
+        }
+        Insert: {
+          alert_message?: string | null
+          content: string
+          dose_change?: boolean | null
+          dose_info?: string | null
+          id?: string
+          new_dose?: string | null
+          peptide_slug: string
+          phase_name?: string | null
+          previous_dose?: string | null
+          title: string
+          week_number: number
+        }
+        Update: {
+          alert_message?: string | null
+          content?: string
+          dose_change?: boolean | null
+          dose_info?: string | null
+          id?: string
+          new_dose?: string | null
+          peptide_slug?: string
+          phase_name?: string | null
+          previous_dose?: string | null
+          title?: string
+          week_number?: number
         }
         Relationships: []
       }
