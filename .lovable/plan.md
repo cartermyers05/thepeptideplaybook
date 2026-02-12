@@ -1,76 +1,57 @@
 
+# Add SEO Crawlability Infrastructure
 
-# Add UTM and Referrer Tracking
+## Current State
+The site already has significant SEO infrastructure in place:
+- A static `public/sitemap.xml` with all guide URLs
+- A dynamic sitemap edge function for articles/news
+- A `public/robots.txt` with detailed crawler rules
+- `SEOHead` component used on every guide page (via `GuideLayout`) and the homepage
+- `RouteCanonical` component for canonical tags on every route
 
-## What This Does
-Every visitor's first landing page, traffic source (Google, Reddit, etc.), and UTM parameters get captured automatically. When they sign up or buy, that data is saved to their profile so you can see exactly which page and source brought each paying customer.
+Most of what you requested is already working. Here are the specific gaps to fill:
 
-## How It Works
+## Changes
 
-1. **Capture on first visit** -- A small script runs on every page load. If no tracking data exists in localStorage yet, it saves the current page path, UTM parameters from the URL, the referrer (e.g. google.com), and a timestamp.
+### 1. Update robots.txt (minor tweak)
+**File:** `public/robots.txt`
 
-2. **Write to profile on signup** -- When the user creates an account, the Signup page reads these values from localStorage and writes them to the profile record.
+Add `Disallow: /dashboard` (currently only disallows `/chat`, `/history`, `/saved`, `/stats`, etc. individually but not the `/dashboard` prefix). The rest of the requested rules are already present.
 
-3. **Write to profile on payment verification** -- The verify-payment backend function also writes the tracking data (passed from the ThankYou page) as a fallback for users who buy without signing up first.
+### 2. Update sitemap.xml with correct date
+**File:** `public/sitemap.xml`
 
-## Technical Details
+Update all `<lastmod>` dates from `2026-02-05` / `2026-02-06` to `2026-02-12`. Add `/quiz` entry (priority 0.7) if not already present. All guide URLs, homepage, `/guides`, and `/pricing` are already listed.
 
-### Step 1: Database Migration
-Add 7 columns to the `profiles` table:
+### 3. Add explicit "index, follow" meta tag to guide pages
+**File:** `src/components/seo/SEOHead.tsx`
 
-```sql
-ALTER TABLE profiles
-  ADD COLUMN IF NOT EXISTS landing_page text,
-  ADD COLUMN IF NOT EXISTS utm_source text,
-  ADD COLUMN IF NOT EXISTS utm_medium text,
-  ADD COLUMN IF NOT EXISTS utm_campaign text,
-  ADD COLUMN IF NOT EXISTS utm_content text,
-  ADD COLUMN IF NOT EXISTS referrer_url text,
-  ADD COLUMN IF NOT EXISTS first_visit_at timestamptz;
-```
+Add `<meta name="robots" content="index, follow">` when `noIndex` is false (the default). Currently the component only sets a robots meta tag when `noIndex` is true.
 
-### Step 2: Create tracking capture utility
-**New file:** `src/lib/trackingCapture.ts`
+### 4. Update homepage title and description
+**File:** `src/pages/Index.tsx`
 
-- On first page load, check if `pp_tracking` exists in localStorage
-- If not, capture `window.location.pathname`, all `utm_*` params from URL, `document.referrer`, and `new Date().toISOString()`
-- Store as a JSON object in `localStorage.pp_tracking`
-- Export a `getTrackingData()` helper that reads and parses it
-- Export a `clearTrackingData()` helper to clean up after writing to DB
+Change the `SEOHead` props to match the requested copy:
+- title: "Peptide Playbook -- Personalized, Research-Backed Peptide Protocols"
+- description: "Stop guessing about peptides. Take a 60-second quiz and get a personalized, research-backed protocol matched to your goals. Based on 500+ peer-reviewed studies."
 
-### Step 3: Run capture on app load
-**File:** `src/main.tsx`
+### 5. Add OG "article" type to guide pages
+**File:** `src/components/guides/GuideLayout.tsx`
 
-- Import and call `captureTracking()` before React renders so it fires on every page load (including guide pages where conversions start)
+The `SEOHead` component already sets `og:type` to "article" when an `article` prop is passed. Since `GuideLayout` doesn't pass an `article` prop, guides get `og:type: "website"` instead of `"article"`. Fix by passing an article-shaped object or adding dedicated OG props.
 
-### Step 4: Write tracking data on signup
-**File:** `src/pages/Signup.tsx`
-
-- After successful `signUp()`, call `supabase.from("profiles").update(trackingData)` with the captured values
-- Then call `clearTrackingData()`
-
-### Step 5: Pass tracking data through payment verification
-**File:** `src/pages/ThankYou.tsx`
-
-- Include `getTrackingData()` in the body sent to `verify-payment`
-
-**File:** `supabase/functions/verify-payment/index.ts`
-
-- Read the tracking fields from the request body
-- When updating the profile (alongside tier update), also write `landing_page`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `referrer_url`, `first_visit_at`
-- Only write if the profile doesn't already have tracking data (don't overwrite)
-
-### Step 6: Also write on `handle_new_user` trigger (belt-and-suspenders)
-Update the existing `handle_new_user` database function to default `first_visit_at` to `now()` so every profile has a timestamp even if the frontend capture fails.
+## What Already Works (no changes needed)
+- Every guide page already gets `<title>`, `<meta description>`, `<link canonical>`, `<og:title>`, `<og:description>`, and `<og:url>` via `GuideLayout` -> `SEOHead`
+- The sitemap already lists all 35+ guide URLs, homepage, /guides, /pricing
+- robots.txt already allows all major AI and search engine crawlers
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| Database migration | Add 7 columns to `profiles` |
-| `src/lib/trackingCapture.ts` | New -- capture and read UTM/referrer from localStorage |
-| `src/main.tsx` | Call `captureTracking()` on app load |
-| `src/pages/Signup.tsx` | Write tracking data to profile after signup |
-| `src/pages/ThankYou.tsx` | Pass tracking data to verify-payment |
-| `supabase/functions/verify-payment/index.ts` | Write tracking data to profile on payment |
-
+| `public/robots.txt` | Add `Disallow: /dashboard` line |
+| `public/sitemap.xml` | Update lastmod dates to 2026-02-12; add /quiz entry |
+| `src/components/seo/SEOHead.tsx` | Add explicit `index, follow` robots meta tag |
+| `src/pages/Index.tsx` | Update homepage title and description |
+| `src/components/guides/GuideLayout.tsx` | Pass article metadata so og:type becomes "article" |
+| `supabase/functions/sitemap/index.ts` | Add /quiz to the static pages list |
