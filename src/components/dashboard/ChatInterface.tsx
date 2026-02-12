@@ -457,7 +457,7 @@ export default function ChatInterface({
                 <div className="mb-8">
                   <span
                     className="text-[11px] font-mono uppercase tracking-[2px] font-semibold"
-                    style={{ color: "#F97316" }}
+                    style={{ color: "#8B5CF6" }}
                   >
                     AI RESEARCH COACH
                   </span>
@@ -479,11 +479,11 @@ export default function ChatInterface({
                         "inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium transition-all",
                         selectedCategory === index
                           ? "border"
-                          : "bg-white border border-[#E5E7EB] hover:border-[#F97316]/30"
+                          : "bg-white border border-[#E5E7EB] hover:border-[#8B5CF6]/30"
                       )}
                       style={
                         selectedCategory === index
-                          ? { backgroundColor: "#FFF7ED", borderColor: "#F97316", color: "#F97316" }
+                          ? { backgroundColor: "#F3E8FF", borderColor: "#8B5CF6", color: "#8B5CF6" }
                           : { color: "#6B7280" }
                       }
                     >
@@ -502,7 +502,7 @@ export default function ChatInterface({
                       transition={{ delay: 0.1 + index * 0.05 }}
                       whileHover={{ y: -2, boxShadow: "0 8px 16px -4px rgba(0,0,0,0.08)" }}
                       onClick={() => handleSuggestedQuestion(question)}
-                      className="p-4 text-left rounded-2xl bg-white transition-all hover:border-[#F97316]/30"
+                      className="p-4 text-left rounded-2xl bg-white transition-all hover:border-[#8B5CF6]/30"
                       style={{
                         boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
                         border: "1px solid #E5E7EB",

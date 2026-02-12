@@ -36,7 +36,7 @@ function EvidenceCircles({ rating, size = 12 }: { rating: number; size?: number 
           style={{
             width: size,
             height: size,
-            backgroundColor: i < rating ? "#F97316" : "#E5E7EB",
+            backgroundColor: i < rating ? "#8B5CF6" : "#E5E7EB",
           }}
         />
       ))}
@@ -132,7 +132,7 @@ export default function Dashboard() {
             className="rounded-2xl p-6 md:p-7"
             style={{
               backgroundColor: "#FFF7ED",
-              boxShadow: "0 1px 3px rgba(249,115,22,0.08), 0 4px 12px rgba(249,115,22,0.04)",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)",
             }}
           >
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
@@ -163,7 +163,7 @@ export default function Dashboard() {
 
               {/* Secondary Match - Right (40%) */}
               {secondaryData && (
-                <div className="md:col-span-2 md:border-l md:border-[#F97316]/20 md:pl-6">
+                <div className="md:col-span-2 md:border-l md:border-[#E5E7EB] md:pl-6">
                   <span
                     className="text-[11px] font-mono uppercase tracking-[2px]"
                     style={{ color: "#9CA3AF" }}
@@ -226,10 +226,10 @@ export default function Dashboard() {
             className="bg-white rounded-2xl text-left overflow-hidden transition-all"
             style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
           >
-            <div className="h-1" style={{ backgroundColor: "#F97316" }} />
+            <div className="h-1" style={{ backgroundColor: "#8B5CF6" }} />
             <div className="p-5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: "rgba(249,115,22,0.1)" }}>
-                <MessageCircle className="w-5 h-5" style={{ color: "#F97316" }} />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: "rgba(139,92,246,0.1)" }}>
+                <MessageCircle className="w-5 h-5" style={{ color: "#8B5CF6" }} />
               </div>
               <h3 className="text-[18px] font-bold mb-1" style={{ color: "#111827" }}>Ask the AI Coach</h3>
               <p className="text-sm mb-3" style={{ color: "#6B7280" }}>Every answer cites peer-reviewed research</p>
