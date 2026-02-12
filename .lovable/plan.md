@@ -1,84 +1,42 @@
 
 
-# Upgrade Peptide Database Page
+# Add Trust Signals and FAQ to Checkout Page
 
 ## Overview
-Replace the dropdown-based filter UI with a search bar + horizontally scrollable filter pills, add "Your Match" personalization badges, a comparison mode with side-by-side view, and enhance each peptide card's content. All within the existing card/list design.
+Add trust-building content below the existing payment button on `/checkout`. The page currently ends after the trust text line at line 207. All new content goes below that, inside the existing `max-w-sm` container. The page layout changes from `flex items-center justify-center` (vertically centered) to a scrollable page so the added content is accessible.
 
-## Changes
+## Changes (single file)
 
-### 1. Update `src/pages/dashboard/Database.tsx`
-**Replace filter UI (lines 82-136):**
-- Keep the search `Input` but update placeholder to "Search peptides by name, goal, or keyword..."
-- Replace the 3 `Select` dropdowns with horizontally scrollable filter pills: "All" | "Weight Loss" | "Recovery" | "Anti-Aging" | "Performance" | "FDA Approved" | "Most Researched"
-- Active pill gets the accent/primary background color; inactive pills get outline style
-- Pills map to client-side filtering logic:
-  - "Weight Loss" filters to categories containing "GLP-1" or primary_use containing "weight"
-  - "Recovery" filters to category "Recovery"
-  - "Anti-Aging" filters to categories "Skin/Hair" or "Longevity"
-  - "Performance" filters to category "Growth Hormone"
-  - "FDA Approved" filters to fda_status = "FDA Approved"
-  - "Most Researched" sorts by total_study_count descending (or research_status = "strong")
+### `src/pages/Checkout.tsx`
 
-**Add comparison state:**
-- New state: `selectedForCompare: string[]` (peptide IDs, max 3)
-- New state: `showComparison: boolean`
-- Pass `selectedForCompare` and `onToggleCompare` to each `PeptideCard`
+**Layout adjustment (line 154):**
+Change the outer container from vertically centered (`flex items-center justify-center`) to top-aligned with vertical padding (`flex justify-center pt-16 pb-16`) so the page scrolls naturally when content extends beyond the viewport. Also widen the inner container from `max-w-sm` to `max-w-md` to give the trust cards and FAQ a bit more room.
 
-**Add quiz personalization:**
-- Import `useQuizResponse` and `getPeptideMatch`
-- Sort matched peptides to top of list before rendering
-- Pass `isMatch` boolean prop to `PeptideCard` for matched peptides
+**After the existing trust bar (line 207), add these sections in order:**
 
-**Add floating compare button:**
-- When `selectedForCompare.length >= 2`, show a fixed-bottom button: "Compare Selected (N)"
-- Clicking it sets `showComparison = true`
+1. **Trust Cards** (3 cards in a vertical stack):
+   - Uses the existing `Card` component from `@/components/ui/card`
+   - Each card: icon area (using Lucide icons: `FlaskConical`, `ShieldCheck`, `RefreshCw`), bold title, and muted description text
+   - Card 1: "Research-Backed" / "Every recommendation cites peer-reviewed studies with evidence ratings. Not opinions. Evidence."
+   - Card 2: "We Don't Sell Peptides" / "Zero financial incentive to push any product. We're education-only, which means completely unbiased."
+   - Card 3: "30-Day Guarantee" / "Not helpful? Full refund, no questions asked. Email support@peptideplaybook.org."
 
-**Add comparison view:**
-- When `showComparison` is true, render a `ComparisonTable` component instead of the card list
-- "Back to Database" button at top to close
+2. **Checkout FAQ** using the existing `Accordion` components from `@/components/ui/accordion` (same Radix accordion used elsewhere on the site):
+   - "Common Questions" header
+   - 5 FAQ items with the exact Q&A copy provided
+   - Uses `AccordionItem`, `AccordionTrigger`, `AccordionContent` with the same `glass-card-subtle` styling used in `GuideFAQ`
 
-### 2. Update `src/components/database/PeptideCard.tsx`
-**New props:**
-- `isMatch?: boolean` -- shows a "Your Match" badge in accent color next to the name
-- `isSelectedForCompare?: boolean` -- checkbox checked state
-- `onToggleCompare?: (id: string) => void` -- checkbox handler
+3. **Second CTA** at the bottom:
+   - Same `Button` as the primary checkout button, calling `startCheckout()`
+   - Below it: "One-time payment. Lifetime access. Instant delivery." in muted small text
 
-**Add to card header area:**
-- If `isMatch`, render a small Badge "Your Match" with accent/primary color styling next to the peptide name
-- Add a small Checkbox in the top-right corner of the card (next to existing badges) with "Compare" label. Uses `onToggleCompare` on click, stops propagation so it doesn't toggle the card expand.
-
-**Enhance footer content:**
-- Add a star display for evidence rating: map research_status to stars (strong=5, moderate=3, limited=2, emerging=1)
-- Add "View Full Protocol" link that navigates to `/dashboard/plan` (using existing `useNavigate`)
-
-### 3. New component: `src/components/database/ComparisonTable.tsx`
-A side-by-side comparison table for 2-3 peptides.
-
-**Layout:** Responsive table (horizontal scroll on mobile)
-- Rows: Evidence Rating (star display), Primary Use, FDA Status, Side Effect Profile (derived from research_status), Study Count, Best For (primary_use), Legal Status
-- Columns: one per selected peptide
-- Uses existing `Table` UI components
-- "Back to Database" button at top
-
-**Data source:** Receives the full peptide objects as props, plus deep dive data from `peptideDeepDiveLibrary` for richer comparison (side effect profile, cost range)
-
-### 4. Update `src/hooks/usePeptides.ts`
-- Add `total_study_count` and `human_study_count` to the `Peptide` interface (they already exist in the DB and are returned by `select("*")`, just not typed)
-- No query changes needed -- `select("*")` already fetches all columns
+**New imports added:**
+- `Card, CardContent` from `@/components/ui/card`
+- `Accordion, AccordionContent, AccordionItem, AccordionTrigger` from `@/components/ui/accordion`
+- `FlaskConical, ShieldCheck, RefreshCw, Lock` from `lucide-react`
 
 ## What Does NOT Change
-- Card visual design (colors, spacing, rounded corners, font sizes)
-- Sidebar and navigation
-- StudyBrowser tab and its content
-- No other dashboard pages modified
-- No peptide data removed
-- No pagination added
-
-## Technical Notes
-- All filtering is client-side (data already fetched via `usePeptides`)
-- Filter pills use the existing `Button` component with variant toggling (default vs outline)
-- Comparison table uses existing `Table`, `TableRow`, `TableHead`, `TableCell` components
-- "Your Match" badge color uses existing primary/accent CSS variables
-- The `peptideDeepDiveLibrary` from `src/lib/peptideDeepDive.ts` is used to enrich comparison data where a peptide has deep dive content available
-- Star ratings: `strong` = 4-5 stars, `moderate` = 3 stars, `limited` = 2 stars, `emerging` = 1 star
+- Everything above and including the trust bar (lines 153-207) stays exactly the same
+- Loading states, promo code flow, redirect logic untouched
+- No other pages modified
+- No sidebar, navigation, or layout changes elsewhere
