@@ -1,77 +1,97 @@
 
-# Critical Fix: Stripe Checkout + check-subscription Mismatch + Flow Gaps
 
-## The Root Problem
+# Fix the Funnel: From 80% Bounce to Conversions
 
-The `check-subscription` edge function searches for **active Stripe subscriptions**, but the product is a **one-time $67 payment** (mode: "payment"). A one-time payment never creates a subscription, so `check-subscription` will always return `subscribed: false` -- and **worse**, it actively resets the user's tier to "free" on every check (line 93-96 of check-subscription). This means:
+## The 3 Root Causes (and the smart fixes)
 
-1. User pays $67 (one-time)
-2. `verify-payment` correctly sets `profiles.tier = "member"`
-3. On next page load, `useTier` calls `check-subscription`
-4. `check-subscription` finds no subscription, sets tier back to `"free"`
-5. User is locked out of the dashboard they just paid for
+Based on the analytics and codebase analysis, three specific problems are causing the funnel to collapse:
 
-This is the fundamental break. Everything downstream fails because of this.
+### Problem 1: The Hero pushes people DOWN the page, not INTO the funnel
+The primary hero CTA says "Try the AI Free" and scrolls to a demo section. 90% of your traffic is mobile TikTok users with 5-second attention spans -- they need ONE clear action, not a scroll destination. Meanwhile, the "Take the Free Quiz" floating CTA only appears after 600px of scrolling (most bouncers never get there).
 
-## Fix Plan (4 changes)
+### Problem 2: The quiz completion flow is a 3-step maze
+After completing the quiz, users go through: Quiz -> BuildingAnimation -> /course/{goal} (CoursePreview page) -> Stripe opens in a NEW TAB. On mobile, popup blockers kill that new tab silently. The user taps "Get Your Blueprint" and literally nothing happens. This alone could explain why 35 signups produced 0 purchases.
 
-### 1. Fix `check-subscription` edge function to support one-time purchases
+### Problem 3: Zero email capture = zero follow-up
+Quiz takers who don't buy immediately are gone forever. The results page shows personalized matches but never asks for an email. With 262 visitors and 0 purchases, every single lead was lost.
 
-The function currently only checks for active Stripe subscriptions. It needs to ALSO check:
-- Whether `profiles.tier` is already "member" (set by verify-payment or promo codes)
-- Whether there's a completed one-time payment in the `purchases` table
-- Stop resetting tier to "free" when no subscription is found (one-time buyers lose access)
+---
 
-**Changes:**
-- Before querying Stripe subscriptions, check the profile tier first -- if already "member", return `subscribed: true` immediately
-- Also check the `purchases` table for a recorded payment
-- Remove the destructive `tier: "free"` update when no subscription is found
-- Only downgrade tier if the user has never made a one-time purchase AND has no active subscription
+## The Fix Plan
 
-### 2. Fix `create-checkout` edge function -- use a real Stripe Price ID
+### Fix 1: Make the Hero CTA drive directly to the quiz
+**File:** `src/components/landing/HeroSection.tsx`
 
-The current function uses `price_data` (inline price) instead of a pre-created Stripe Price ID. This works technically but makes it harder to track in Stripe. More importantly, we need to verify the function actually deploys and executes correctly since there are zero logs.
+- Change primary CTA from "Try the AI Free" (scroll to #demo) to **"Take the Free Quiz"** linking to `/quiz`
+- Change secondary CTA from "See What's Inside" (scroll to #features) to **"Try the AI Free"** (scroll to #demo) -- keeps the demo accessible but deprioritized
+- This matches the proven "How It Works" and "Final CTA" sections which already link to /quiz
 
-**Changes:**
-- Create a Stripe product + price ($67, one-time) using the Stripe tools
-- Replace the `price_data` block with the real `price` ID
-- Add the `quizGoal` field name fix (currently reads `quizGoal` from body but the CoursePreview sends `goal`)
+### Fix 2: Simplify the post-quiz flow (eliminate the CoursePreview detour)
+**File:** `src/components/quiz/BuildingAnimation.tsx`
 
-### 3. Fix `useTier` hook -- handle one-time purchase tier correctly
+- Change the redirect destination from `/course/{goal}` to `/quiz/results`
+- The QuizResults page already has the personalized match, blurred content, value stack, and $67 CTA -- it's a better conversion page than CoursePreview
 
-The `useTier` hook maps "member" tier to "annual" (line 66), which works for `isPaid` but the naming is confusing. The real issue: `check-subscription` returns `subscribed: false` for one-time buyers, which makes the hook ignore the profile tier when it shouldn't.
+**File:** `src/pages/QuizResults.tsx`
 
-**Changes:**
-- Prioritize `profile.tier === "member"` as a paid state regardless of what `check-subscription` returns
-- The subscription check should be additive (can upgrade from member to subscriber), never destructive
+- Change the CTA from linking to `/course/{goal}` to linking directly to `/signup` (for non-authenticated users) or `/checkout` (for authenticated users)
+- Fix the "Unlock with subscription" text to say "Unlock with your Blueprint"
+- This eliminates the entire CoursePreview popup-blocker problem
 
-### 4. Fix the Quiz Results CTA link
+### Fix 3: Add email gate before showing quiz results
+**File:** `src/pages/QuizResults.tsx`
 
-Currently, QuizResults links to `/course/{goal}` (CoursePreview page), which opens Stripe in a **new tab** via `window.open`. The Checkout page (`/checkout`) opens Stripe in the **same tab** via `window.location.href`. These are two different checkout flows:
+- Before revealing the personalized results, show a simple email capture overlay:
+  - Heading: "Your Blueprint Is Ready"
+  - Subtext: "Enter your email to see your personalized peptide match"
+  - Email input + "See My Results" button
+  - Small text: "No spam. Just your results."
+- On submit, save to the existing `leads` table (columns: email, source = "quiz_results", first_name = null)
+- Also save email to localStorage so returning visitors skip the gate
+- After email submission, reveal the full results page
 
-- `/quiz/results` CTA -> `/course/{goal}` -> new tab Stripe
-- `/checkout` CTA -> same tab Stripe
+### Fix 4: Fix stale copy throughout the funnel
+**Files:** `src/pages/QuizResults.tsx`, `src/components/quiz/ConversationalQuiz.tsx`
 
-Both should work, but the inconsistency and popup-blocker risk on the CoursePreview path is a problem. No changes needed here -- just documenting that both paths exist and both call `create-checkout`.
+- "Unlock with subscription" -> "Unlock with your Blueprint"
+- "8-week program" -> "personalized blueprint" (in quiz subtitle)
+- Ensure "Blueprint" terminology is consistent everywhere in the funnel
 
-## File Changes Summary
+### Fix 5: Add the FloatingCTA to the homepage
+**File:** `src/pages/Index.tsx`
 
+- Import and render `FloatingCTA` on the homepage -- it already exists and links to /quiz, but it's never rendered on the page. Adding it gives mobile users a persistent "Take the Free Quiz" button as they scroll.
+
+---
+
+## Technical Details
+
+### BuildingAnimation redirect change (Fix 2)
+Line 64-67 of `BuildingAnimation.tsx`: Change `navigate(\`/course/\${goal}\`)` to `navigate('/quiz/results')`. The quiz data is already in localStorage, so QuizResults will pick it up.
+
+### QuizResults CTA change (Fix 2)
+Lines 307-312 of `QuizResults.tsx`: Replace the `Link to={/course/...}` with:
+- If not logged in: `Link to="/signup"`
+- If logged in but not paid: `Link to="/checkout"`
+This keeps the user in the same tab and avoids popup blockers entirely.
+
+### Email gate implementation (Fix 3)
+Add state `emailCaptured` (boolean) to QuizResults. Check localStorage for `quiz_email` on mount. If not found, render an overlay with email input. On submit, call `supabase.from('leads').insert(...)` and set localStorage. Then reveal the results content underneath.
+
+### Files modified
 | File | Change |
 |------|--------|
-| `supabase/functions/check-subscription/index.ts` | Check profile tier + purchases table before Stripe; stop resetting tier to free |
-| `supabase/functions/create-checkout/index.ts` | Use real Stripe Price ID; fix body field name |
-| `src/hooks/useTier.ts` | Prioritize profile tier for one-time purchase users |
+| `src/components/landing/HeroSection.tsx` | Swap primary CTA to quiz link |
+| `src/components/quiz/BuildingAnimation.tsx` | Redirect to /quiz/results instead of /course/{goal} |
+| `src/pages/QuizResults.tsx` | Email gate + fix CTA destination + fix copy |
+| `src/components/quiz/ConversationalQuiz.tsx` | Fix "8-week program" copy |
+| `src/pages/Index.tsx` | Add FloatingCTA component |
 
-## What This Fixes
+### What does NOT change
+- Quiz conversational flow and AI logic
+- Checkout page (trust signals already added)
+- Dashboard pages
+- Guide pages
+- CoursePreview page (still accessible at /course/{goal} for direct links, just no longer the default path)
+- Stripe edge functions (already fixed in previous session)
 
-- Users who pay $67 will retain "member" tier permanently
-- `check-subscription` stops destroying one-time purchase access
-- Stripe checkout creates sessions with a trackable Price ID
-- The entire paid flow works: Quiz -> Results -> Signup -> Checkout -> Stripe -> Thank You -> Dashboard
-
-## What This Does NOT Change
-
-- No UI/layout changes
-- No changes to the checkout page design (trust signals and FAQ already added)
-- No changes to quiz, homepage, or dashboard pages
-- No changes to verify-payment (it already works correctly)
