@@ -28,62 +28,60 @@ serve(async (req) => {
       throw new Error("Missing required environment variables");
     }
 
-    // Authenticate user
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("No authorization header provided");
-    }
-
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-    
-    if (userError || !userData.user) {
-      throw new Error("Invalid user token");
+
+    // Auth is OPTIONAL — user may have lost session after payment
+    const authHeader = req.headers.get("Authorization");
+    let user: { id: string; email?: string } | null = null;
+
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData, error: userError } = await supabase.auth.getUser(token);
+      if (!userError && userData.user) {
+        user = userData.user;
+        logStep("User authenticated", { userId: user.id, email: user.email });
+      } else {
+        logStep("Auth header present but invalid, proceeding without user");
+      }
+    } else {
+      logStep("No auth header, proceeding as unauthenticated");
     }
-    
-    const user = userData.user;
-    logStep("User authenticated", { userId: user.id, email: user.email });
 
     // Get session_id from request body
     const { session_id } = await req.json();
-    
+
     if (!session_id) {
-      // No session_id means this is a backup check - verify via customer payments
+      // No session_id — backup check requires auth
+      if (!user) {
+        return new Response(JSON.stringify({ verified: false, reason: "no_session" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
       logStep("No session_id, checking existing payments");
-      
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("stripe_customer_id, tier")
         .eq("user_id", user.id)
         .single();
-      
+
       if (!profile?.stripe_customer_id) {
-        logStep("No Stripe customer found");
-        return new Response(JSON.stringify({ 
-          verified: false, 
-          reason: "no_customer" 
-        }), {
+        return new Response(JSON.stringify({ verified: false, reason: "no_customer" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
         });
       }
 
-      // Already a member, no need to verify
       if (profile.tier === "member") {
-        logStep("User already a member");
-        return new Response(JSON.stringify({ 
-          verified: true, 
-          already_member: true 
-        }), {
+        return new Response(JSON.stringify({ verified: true, already_member: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
         });
       }
 
-      // Check Stripe for successful payments
       const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-      
       const paymentIntents = await stripe.paymentIntents.list({
         customer: profile.stripe_customer_id,
         limit: 10,
@@ -94,9 +92,8 @@ serve(async (req) => {
       );
 
       if (successfulPayment) {
-        logStep("Found successful payment, updating tier", { paymentId: successfulPayment.id });
-        
-        // Check if purchase already recorded
+        logStep("Found successful payment", { paymentId: successfulPayment.id });
+
         const { data: existingPurchase } = await supabase
           .from("purchases")
           .select("id")
@@ -104,13 +101,7 @@ serve(async (req) => {
           .maybeSingle();
 
         if (!existingPurchase) {
-          // Update profile tier
-          await supabase
-            .from("profiles")
-            .update({ tier: "member" })
-            .eq("user_id", user.id);
-
-          // Record purchase
+          await supabase.from("profiles").update({ tier: "member" }).eq("user_id", user.id);
           await supabase.from("purchases").insert({
             user_id: user.id,
             tier: "member",
@@ -125,57 +116,46 @@ serve(async (req) => {
         });
       }
 
-      logStep("No successful member payment found");
-      return new Response(JSON.stringify({ 
-        verified: false, 
-        reason: "no_payment" 
-      }), {
+      return new Response(JSON.stringify({ verified: false, reason: "no_payment" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Verify specific checkout session
+    // ── Verify specific checkout session ──
     logStep("Verifying checkout session", { session_id });
-    
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const session = await stripe.checkout.sessions.retrieve(session_id);
 
-    logStep("Session retrieved", { 
+    logStep("Session retrieved", {
       payment_status: session.payment_status,
+      customer_email: session.customer_email,
       metadata_user_id: session.metadata?.user_id,
-      metadata_goal: session.metadata?.goal
+      metadata_quiz_goal: session.metadata?.quiz_goal,
     });
 
-    // Verify payment was successful
     if (session.payment_status !== "paid") {
-      logStep("Payment not completed");
-      return new Response(JSON.stringify({ 
-        verified: false, 
+      return new Response(JSON.stringify({
+        verified: false,
         reason: "not_paid",
-        payment_status: session.payment_status 
+        payment_status: session.payment_status,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Verify the session belongs to this user
-    if (session.metadata?.user_id !== user.id) {
-      logStep("User ID mismatch", { 
-        session_user: session.metadata?.user_id, 
-        auth_user: user.id 
-      });
-      return new Response(JSON.stringify({ 
-        verified: false, 
-        reason: "user_mismatch" 
-      }), {
+    // If authenticated, verify user_id matches session metadata
+    if (user && session.metadata?.user_id && session.metadata.user_id !== user.id) {
+      logStep("User ID mismatch", { session_user: session.metadata.user_id, auth_user: user.id });
+      return new Response(JSON.stringify({ verified: false, reason: "user_mismatch" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Check if purchase already recorded (idempotency)
+    // Idempotency: check if purchase already recorded
     const paymentIntentId = session.payment_intent as string;
     const { data: existingPurchase } = await supabase
       .from("purchases")
@@ -185,109 +165,113 @@ serve(async (req) => {
 
     if (existingPurchase) {
       logStep("Purchase already recorded, skipping insert");
-      return new Response(JSON.stringify({ 
-        verified: true, 
-        already_processed: true 
+      return new Response(JSON.stringify({
+        verified: true,
+        already_processed: true,
+        email: session.customer_email,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Get goal from session metadata
-    const goal = session.metadata?.goal || 'beginner';
+    // If no authenticated user, try to find by email from Stripe session
+    if (!user && session.customer_email) {
+      const { data: users } = await supabase.auth.admin.listUsers();
+      const found = users?.users?.find(u => u.email === session.customer_email);
+      if (found) {
+        user = { id: found.id, email: found.email };
+        logStep("Found user by email", { userId: user.id });
+      }
+    }
+
+    // Use quiz_goal from metadata (matches create-checkout)
+    const goal = session.metadata?.quiz_goal || 'beginner';
     logStep("Creating user course", { goal });
 
-    // Get course template for this goal
-    const { data: template } = await supabase
-      .from("course_templates")
-      .select("*")
-      .eq("goal", goal)
-      .single();
+    // Only do user-specific operations if we have a user
+    if (user) {
+      // Get course template for this goal
+      const { data: template } = await supabase
+        .from("course_templates")
+        .select("*")
+        .eq("goal", goal)
+        .single();
 
-    // Create user_courses record
-    const courseData = {
-      user_id: user.id,
-      goal: goal,
-      title: template?.title || `${goal.replace('_', ' ')} Course`,
-      duration_days: template?.duration_days || 56,
-      lessons: template?.lessons || {},
-      peptides: template?.peptides || {},
-      template_id: template?.id || null,
-      status: 'not_started', // Quiz already happened, waiting for supplies check
-      purchased_at: new Date().toISOString(),
-    };
+      const courseData = {
+        user_id: user.id,
+        goal: goal,
+        title: template?.title || `${goal.replace('_', ' ')} Course`,
+        duration_days: template?.duration_days || 56,
+        lessons: template?.lessons || {},
+        peptides: template?.peptides || {},
+        template_id: template?.id || null,
+        status: 'not_started',
+        purchased_at: new Date().toISOString(),
+      };
 
-    const { error: courseError } = await supabase
-      .from("user_courses")
-      .insert(courseData);
+      const { error: courseError } = await supabase.from("user_courses").insert(courseData);
+      if (courseError) {
+        logStep("Error creating user course", { error: courseError.message });
+      } else {
+        logStep("User course created successfully");
+      }
 
-    if (courseError) {
-      logStep("Error creating user course", { error: courseError.message });
-      // Don't throw - continue with other operations
-    } else {
-      logStep("User course created successfully");
-    }
+      // Update profile tier to member
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ tier: "member" })
+        .eq("user_id", user.id);
 
-    // Update profile tier to member
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({ tier: "member" })
-      .eq("user_id", user.id);
+      if (updateError) {
+        logStep("Error updating profile", { error: updateError.message });
+      } else {
+        logStep("Profile tier updated to member");
+      }
 
-    if (updateError) {
-      logStep("Error updating profile", { error: updateError.message });
-      throw new Error("Failed to update profile tier");
-    }
+      // Record purchase
+      const { error: purchaseError } = await supabase.from("purchases").insert({
+        user_id: user.id,
+        tier: "member",
+        amount: session.amount_total || 0,
+        stripe_payment_id: paymentIntentId,
+        course_goal: goal,
+      });
 
-    logStep("Profile tier updated to member");
+      if (purchaseError) {
+        logStep("Error recording purchase", { error: purchaseError.message });
+      } else {
+        logStep("Purchase recorded");
+      }
 
-    // Record purchase with goal
-    const { error: purchaseError } = await supabase.from("purchases").insert({
-      user_id: user.id,
-      tier: "member",
-      amount: session.amount_total || 0,
-      stripe_payment_id: paymentIntentId,
-      course_goal: goal,
-    });
-
-    if (purchaseError) {
-      logStep("Error recording purchase", { error: purchaseError.message });
-      // Don't throw - tier was updated successfully
-    } else {
-      logStep("Purchase recorded");
-    }
-
-    // Check if this user was referred and mark the referral as completed
-    try {
-      const { data: referralData, error: referralFetchError } = await supabase
-        .from("referrals")
-        .select("id, status")
-        .eq("referred_id", user.id)
-        .eq("status", "pending")
-        .maybeSingle();
-
-      if (!referralFetchError && referralData) {
-        const { error: referralUpdateError } = await supabase
+      // Check referral completion
+      try {
+        const { data: referralData, error: referralFetchError } = await supabase
           .from("referrals")
-          .update({ 
-            status: "completed",
-            reward_applied: true 
-          })
-          .eq("id", referralData.id);
+          .select("id, status")
+          .eq("referred_id", user.id)
+          .eq("status", "pending")
+          .maybeSingle();
 
-        if (referralUpdateError) {
-          logStep("Error updating referral", { error: referralUpdateError.message });
-        } else {
+        if (!referralFetchError && referralData) {
+          await supabase
+            .from("referrals")
+            .update({ status: "completed", reward_applied: true })
+            .eq("id", referralData.id);
           logStep("Referral marked as completed", { referralId: referralData.id });
         }
+      } catch (refError) {
+        logStep("Error processing referral", { error: String(refError) });
       }
-    } catch (refError) {
-      logStep("Error processing referral completion", { error: String(refError) });
-      // Don't throw - this is a non-critical operation
+    } else {
+      logStep("No user found, skipping user-specific operations");
     }
 
-    return new Response(JSON.stringify({ verified: true, goal }), {
+    return new Response(JSON.stringify({
+      verified: true,
+      goal,
+      email: session.customer_email,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
