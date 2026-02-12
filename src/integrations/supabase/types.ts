@@ -903,6 +903,48 @@ export type Database = {
         }
         Relationships: []
       }
+      protocol_templates: {
+        Row: {
+          created_at: string
+          evidence_description: string
+          evidence_level: number
+          goal_slug: string
+          id: string
+          last_updated: string
+          peptide_display_name: string
+          peptide_slug: string
+          protocol_name: string
+          sections: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          evidence_description: string
+          evidence_level: number
+          goal_slug: string
+          id?: string
+          last_updated: string
+          peptide_display_name: string
+          peptide_slug: string
+          protocol_name: string
+          sections: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          evidence_description?: string
+          evidence_level?: number
+          goal_slug?: string
+          id?: string
+          last_updated?: string
+          peptide_display_name?: string
+          peptide_slug?: string
+          protocol_name?: string
+          sections?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       protocols: {
         Row: {
           constraints: string[] | null
