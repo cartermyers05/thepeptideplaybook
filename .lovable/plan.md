@@ -1,54 +1,76 @@
 
 
-# Bulletproof the Payment Verification Pipeline
+# Add UTM and Referrer Tracking
 
-## Root Cause Analysis
+## What This Does
+Every visitor's first landing page, traffic source (Google, Reddit, etc.), and UTM parameters get captured automatically. When they sign up or buy, that data is saved to their profile so you can see exactly which page and source brought each paying customer.
 
-The logs confirm: when `assistant2je@aol.com` hit the thank-you page, `verify-payment` received **no session_id**. The fallback path checked `profiles.stripe_customer_id` but it was `null`, so it returned `verified: false` and the tier was never updated. Meanwhile the purchase WAS recorded (likely on a second attempt or via the `listUsers` email-lookup path), but the profile tier update failed silently due to the constraint issue we already fixed.
+## How It Works
 
-There are **three gaps** that let this happen:
+1. **Capture on first visit** -- A small script runs on every page load. If no tracking data exists in localStorage yet, it saves the current page path, UTM parameters from the URL, the referrer (e.g. google.com), and a timestamp.
 
-1. **ThankYou page doesn't retry with session_id** -- if the initial call fails or auth is lost, it never re-attempts with the session_id after the user logs in
-2. **verify-payment silently succeeds but doesn't update tier** -- when purchase is recorded but profile update fails (constraint error), the function still returns `verified: true`
-3. **No retry/polling on the frontend** -- if verify-payment returns an error, the user sees a static error with no automatic recovery
+2. **Write to profile on signup** -- When the user creates an account, the Signup page reads these values from localStorage and writes them to the profile record.
 
-## Changes
+3. **Write to profile on payment verification** -- The verify-payment backend function also writes the tracking data (passed from the ThankYou page) as a fallback for users who buy without signing up first.
 
-### 1. verify-payment: Add retry logic and error surfacing (backend)
+## Technical Details
+
+### Step 1: Database Migration
+Add 7 columns to the `profiles` table:
+
+```sql
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS landing_page text,
+  ADD COLUMN IF NOT EXISTS utm_source text,
+  ADD COLUMN IF NOT EXISTS utm_medium text,
+  ADD COLUMN IF NOT EXISTS utm_campaign text,
+  ADD COLUMN IF NOT EXISTS utm_content text,
+  ADD COLUMN IF NOT EXISTS referrer_url text,
+  ADD COLUMN IF NOT EXISTS first_visit_at timestamptz;
+```
+
+### Step 2: Create tracking capture utility
+**New file:** `src/lib/trackingCapture.ts`
+
+- On first page load, check if `pp_tracking` exists in localStorage
+- If not, capture `window.location.pathname`, all `utm_*` params from URL, `document.referrer`, and `new Date().toISOString()`
+- Store as a JSON object in `localStorage.pp_tracking`
+- Export a `getTrackingData()` helper that reads and parses it
+- Export a `clearTrackingData()` helper to clean up after writing to DB
+
+### Step 3: Run capture on app load
+**File:** `src/main.tsx`
+
+- Import and call `captureTracking()` before React renders so it fires on every page load (including guide pages where conversions start)
+
+### Step 4: Write tracking data on signup
+**File:** `src/pages/Signup.tsx`
+
+- After successful `signUp()`, call `supabase.from("profiles").update(trackingData)` with the captured values
+- Then call `clearTrackingData()`
+
+### Step 5: Pass tracking data through payment verification
+**File:** `src/pages/ThankYou.tsx`
+
+- Include `getTrackingData()` in the body sent to `verify-payment`
 
 **File:** `supabase/functions/verify-payment/index.ts`
 
-- After inserting the purchase, verify the profile update actually succeeded by re-reading the profile
-- If the profile update fails, retry once, then include `tier_update_failed: true` in the response so the frontend knows
-- Log the exact constraint error so we catch similar issues early
+- Read the tracking fields from the request body
+- When updating the profile (alongside tier update), also write `landing_page`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `referrer_url`, `first_visit_at`
+- Only write if the profile doesn't already have tracking data (don't overwrite)
 
-### 2. ThankYou page: Retry verification after password/login (frontend)
-
-**File:** `src/pages/ThankYou.tsx`
-
-- When the user sets their password and logs in, re-call `verify-payment` WITH the `session_id` (not without it)
-- Add a retry counter: if verification fails, auto-retry up to 3 times with a 2-second delay
-- Store `session_id` in component state so it persists across re-renders
-
-### 3. useTier: Client-side safety net (frontend)
-
-**File:** `src/hooks/useTier.ts`
-
-- Already calls `check-subscription` which has the auto-heal logic we added
-- No changes needed here -- the auto-heal in `check-subscription` is the last line of defense
-
-## Defense-in-Depth Summary
-
-```text
-Layer 1: verify-payment confirms tier update succeeded (not just attempted)
-Layer 2: ThankYou page retries with session_id after login
-Layer 3: check-subscription auto-heals on every dashboard load (already done)
-```
+### Step 6: Also write on `handle_new_user` trigger (belt-and-suspenders)
+Update the existing `handle_new_user` database function to default `first_visit_at` to `now()` so every profile has a timestamp even if the frontend capture fails.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `supabase/functions/verify-payment/index.ts` | Verify profile update succeeded; retry on failure; surface errors in response |
-| `src/pages/ThankYou.tsx` | Re-verify with session_id after login; auto-retry up to 3 times on failure |
+| Database migration | Add 7 columns to `profiles` |
+| `src/lib/trackingCapture.ts` | New -- capture and read UTM/referrer from localStorage |
+| `src/main.tsx` | Call `captureTracking()` on app load |
+| `src/pages/Signup.tsx` | Write tracking data to profile after signup |
+| `src/pages/ThankYou.tsx` | Pass tracking data to verify-payment |
+| `supabase/functions/verify-payment/index.ts` | Write tracking data to profile on payment |
 
