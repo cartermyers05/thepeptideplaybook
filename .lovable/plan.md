@@ -1,86 +1,60 @@
 
 
-# Personalize Dashboard Home from Quiz Responses
+# Upgrade AI Research Coach System Prompt
 
-## Overview
-Update the content inside existing dashboard sections to reflect each user's quiz answers. No layout, styling, or structural changes.
+## What Changes
 
-## Data Source
-Create a new `useQuizResponse` hook that fetches the user's most recent row from `quiz_responses` (matched by `user_id`). The table contains:
-- `primary_goal` (e.g., "weight_loss", "recovery", "longevity", "performance", "general")
-- `age_range` (e.g., "25-34")
-- `experience_level` (e.g., "beginner", "intermediate")
-- `main_concerns` (string array, e.g., ["safety", "cost"])
+### 1. Replace system prompt in `supabase/functions/chat/index.ts`
 
-## Changes
+The `buildSystemPrompt` function (lines 323-651) will be replaced with the new prompt provided. The new prompt will be inserted **before** the existing peptide database and landmark studies data, which will continue to be appended as dynamic context.
 
-### New file: `src/hooks/useQuizResponse.ts`
-- Simple React Query hook: fetch from `quiz_responses` where `user_id = auth.uid()`, order by `created_at desc`, limit 1
-- Returns typed quiz response data or null
+**New prompt structure:**
+- Core identity: "Peptide Playbook AI Research Coach" (research assistant, not generic chatbot)
+- Response format: Direct answer first, evidence basis with star ratings, practical context, doctor talking point
+- Evidence ratings: 5-star scale (Strong/Good/Moderate/Preliminary/Emerging)
+- Safety rules: Always recommend healthcare provider, never say "safe" without qualification
+- Legal status awareness: 2026-current status for semaglutide, tirzepatide, BPC-157, TB-500, GHK-Cu, CJC-1295/Ipamorelin
+- Banned words list: "comprehensive," "cutting-edge," "unlock," "leverage," "utilize," "empower"
 
-### New file: `src/lib/quizPersonalization.ts`
-Static mapping data used by the dashboard (keeps Home.tsx clean):
+**What stays the same inside the function:**
+- The peptide database section (dynamically fetched from DB) continues to be appended
+- The landmark studies section continues to be appended
+- The reconstitution reference section stays
+- The aesthetics/looksmaxxing protocol section stays
+- The protocol creation questionnaire and tool definitions stay
+- All tool handling logic (create_protocol, get_user_progress) stays
+- The personal context section (check-ins, course, protocol) stays
 
-**Goal labels:**
-- weight_loss -> "Weight Loss"
-- recovery -> "Recovery & Healing"
-- longevity -> "Anti-Aging & Longevity"
-- performance -> "Performance & Energy"
-- general -> "Wellness"
+### 2. Add quiz response fetching to `supabase/functions/chat/index.ts`
 
-**Peptide matching:**
-- weight_loss -> Primary: Semaglutide, Secondary: Tirzepatide
-- recovery -> Primary: BPC-157, Secondary: TB-500
-- longevity -> Primary: GHK-Cu, Secondary: Epitalon
-- performance -> Primary: CJC-1295/Ipamorelin, Secondary: BPC-157
-- general -> Primary: BPC-157, Secondary: GHK-Cu
+Add a new function `getQuizContext` that queries the `quiz_responses` table for the authenticated user (using the service role client). If a quiz response exists, prepend this context block to the system prompt:
 
-**Concern-based "Next Step" card:**
-- doctor -> "Prepare for your doctor visit" (link to doctor script section)
-- safety -> "Review safety profile" (link to peptide safety section)
-- legality -> "Check 2026 legal status" (link to legal guide)
-- cost -> "See cost breakdown" (link to cost section)
-- effectiveness -> "Read the evidence" (link to research section)
-- fallback -> "Explore the research" (link to guides)
+```
+The user took our quiz and reported: Goal = [goal], Biggest Concern = [concern], 
+Experience Level = [experience], Age Range = [age_range]. Tailor your responses to 
+their experience level and focus on their stated goal. If they're a beginner 
+(experience = 'none' or 'researching'), explain concepts simply. If experienced, 
+you can use more technical language.
+```
 
-**Goal-specific starter prompts** (4 per goal, as specified in the request)
+This will be fetched alongside the existing `getPeptideContext` and `getUserPersonalContext` calls (around line 1015-1027).
 
-### Modified file: `src/pages/dashboard/Home.tsx`
-Content-only updates inside existing elements:
+### 3. Also update the `coach/index.ts` system prompt
 
-1. **Greeting section** (lines 102-109)
-   - If quiz data exists: "{getGreeting()}, {displayName} -- here's your {goalLabel} Blueprint"
-   - Add personalization badge below: "Personalized for: {goalLabel} . {ageRange} . {experienceLevel}" in muted text
-   - If no quiz data: keep current generic greeting
+The coach function has a simpler inline prompt (lines 104-325). Replace **both** prompts (the no-context fallback at line 106-128 and the full context version at line 184-324) with the same new core prompt, while keeping all the existing user-context-aware sections (check-in data, lesson progress, streak, etc.) that make the coach personalized.
 
-2. **Stat Card 1** (lines 114-133) -- currently "Active Protocol / Get Started"
-   - If quiz data and no protocol: Show "Your Protocol: {primaryPeptide}" with subtitle "Matched to your {goalLabel} goal"
-   - If protocol exists: keep current behavior (show protocol name)
+## Files Modified
 
-3. **Stat Card 2** (lines 136-155) -- currently "AI Research"
-   - If quiz data: Show "Research Confidence" with evidence info for their primary peptide
-   - If no quiz data: keep current behavior (conversation count)
+1. `supabase/functions/chat/index.ts` -- Replace `buildSystemPrompt` content, add quiz context fetching
+2. `supabase/functions/coach/index.ts` -- Replace both system prompt variants with new prompt
 
-4. **Stat Card 3** (lines 158-171) -- currently "Peptide Database"
-   - If quiz data: Show personalized "Next Step" based on first item in `main_concerns` array
-   - If no quiz data: keep current behavior (40+ peptides)
+## What Does NOT Change
 
-5. **Starter prompts** (lines 219-235)
-   - Replace the hardcoded 3 generic prompts with 4 goal-specific prompts from the mapping
-   - Grid changes from `sm:grid-cols-3` to `sm:grid-cols-2` to fit 4 prompts cleanly
-   - If no quiz data: keep current generic prompts
+- Chat UI layout or message bubble styling
+- No other backend functions modified
+- No other pages changed
+- Conversation history functionality stays intact
+- All existing tool calling (create_protocol, get_user_progress) stays
+- Dynamic peptide database fetching stays
+- Personal context (check-ins, courses, protocols) stays
 
-6. **Popular Guides** section -- no changes (already good as-is)
-
-## What stays the same
-- All layout, card designs, colors, spacing, fonts, animations
-- Sidebar/nav, all other pages
-- "Continue Where You Left Off" section logic (recent chat)
-- Popular Guides section
-- Legal footer
-- Loading skeleton states
-
-## Technical Notes
-- The `useQuizResponse` hook is added to the existing data-fetching block in Home.tsx alongside `useProfile`, `useConversations`, `useProtocol`
-- All personalization is conditional: if `quizResponse` is null/undefined, every section falls back to its current generic content
-- No new dependencies needed
