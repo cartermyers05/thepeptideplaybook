@@ -105,7 +105,7 @@ const whatsIncluded = [
 ];
 
 const valueStack = [
-  { item: "Personalized protocol", value: "$299", note: "(Jay charges $299 for generic)" },
+  { item: "Personalized protocol", value: "$299", note: "(clinics charge $299+ for generic plans)" },
   { item: "Reconstitution masterclass", value: "$49", note: "(courses charge $49)" },
   { item: "24/7 AI coaching", value: "∞", note: "(priceless)" },
 ];
