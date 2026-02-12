@@ -1,57 +1,79 @@
 
-# Add SEO Crawlability Infrastructure
+
+# Add Standardized JSON-LD and Visible Metadata to Guide Pages
+
+## What This Does
+1. Ensures every guide page has consistent, correctly-formatted Article and FAQPage JSON-LD schemas in the page head
+2. Adds a visible "Last updated: February 2025" line and "Based on peer-reviewed research · Not medical advice" disclaimer below the breadcrumbs on every guide page
+3. Removes duplicate FAQ schema injection (currently injected by both GuideLayout and GuideFAQ)
 
 ## Current State
-The site already has significant SEO infrastructure in place:
-- A static `public/sitemap.xml` with all guide URLs
-- A dynamic sitemap edge function for articles/news
-- A `public/robots.txt` with detailed crawler rules
-- `SEOHead` component used on every guide page (via `GuideLayout`) and the homepage
-- `RouteCanonical` component for canonical tags on every route
-
-Most of what you requested is already working. Here are the specific gaps to fill:
+- All 49 guide pages already define `articleSchema` and `faqSchema` inline and pass them to `GuideLayout`, which injects them via React Helmet
+- `GuideFAQ` component **also** injects the same FAQ schema via its own Helmet block, creating duplicates
+- Schema formats vary slightly between guides (some include publisher URL, some don't; dates differ)
+- No visible "Last updated" or research disclaimer line exists
 
 ## Changes
 
-### 1. Update robots.txt (minor tweak)
-**File:** `public/robots.txt`
-
-Add `Disallow: /dashboard` (currently only disallows `/chat`, `/history`, `/saved`, `/stats`, etc. individually but not the `/dashboard` prefix). The rest of the requested rules are already present.
-
-### 2. Update sitemap.xml with correct date
-**File:** `public/sitemap.xml`
-
-Update all `<lastmod>` dates from `2026-02-05` / `2026-02-06` to `2026-02-12`. Add `/quiz` entry (priority 0.7) if not already present. All guide URLs, homepage, `/guides`, and `/pricing` are already listed.
-
-### 3. Add explicit "index, follow" meta tag to guide pages
-**File:** `src/components/seo/SEOHead.tsx`
-
-Add `<meta name="robots" content="index, follow">` when `noIndex` is false (the default). Currently the component only sets a robots meta tag when `noIndex` is true.
-
-### 4. Update homepage title and description
-**File:** `src/pages/Index.tsx`
-
-Change the `SEOHead` props to match the requested copy:
-- title: "Peptide Playbook -- Personalized, Research-Backed Peptide Protocols"
-- description: "Stop guessing about peptides. Take a 60-second quiz and get a personalized, research-backed protocol matched to your goals. Based on 500+ peer-reviewed studies."
-
-### 5. Add OG "article" type to guide pages
+### 1. Centralize schema generation in GuideLayout
 **File:** `src/components/guides/GuideLayout.tsx`
 
-The `SEOHead` component already sets `og:type` to "article" when an `article` prop is passed. Since `GuideLayout` doesn't pass an `article` prop, guides get `og:type: "website"` instead of `"article"`. Fix by passing an article-shaped object or adding dedicated OG props.
+Instead of relying on each guide page to build its own schemas (which leads to inconsistencies), GuideLayout will generate standardized Article and FAQ schemas from the props it already receives (title, description, slug). The existing `articleSchema` and `faqSchema` props remain but become optional overrides.
 
-## What Already Works (no changes needed)
-- Every guide page already gets `<title>`, `<meta description>`, `<link canonical>`, `<og:title>`, `<og:description>`, and `<og:url>` via `GuideLayout` -> `SEOHead`
-- The sitemap already lists all 35+ guide URLs, homepage, /guides, /pricing
-- robots.txt already allows all major AI and search engine crawlers
+New standardized Article schema format:
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "[title]",
+  "author": {
+    "@type": "Organization",
+    "name": "Peptide Playbook",
+    "url": "https://peptideplaybook.org"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Peptide Playbook",
+    "url": "https://peptideplaybook.org"
+  },
+  "datePublished": "2025-01-15",
+  "dateModified": "2025-02-12",
+  "description": "[description truncated to 155 chars]",
+  "mainEntityOfPage": "https://peptideplaybook.org/guides/[slug]"
+}
+```
+
+The FAQ schema is already correctly generated from faqItems by each guide -- GuideLayout will continue injecting it from the prop. No format changes needed there.
+
+### 2. Remove duplicate FAQ schema from GuideFAQ
+**File:** `src/components/guides/GuideFAQ.tsx`
+
+Remove the `<Helmet>` block that injects a duplicate FAQPage schema. The schema is already injected by GuideLayout via the `faqSchema` prop. GuideFAQ will only render the visible accordion UI.
+
+### 3. Add visible metadata lines in GuideLayout
+**File:** `src/components/guides/GuideLayout.tsx`
+
+Add two lines between the breadcrumbs and `{children}`:
+- "Last updated: February 2025"
+- "Based on peer-reviewed research · Not medical advice"
+
+Styled with: `font-size: 14px`, `color: #64748B`, `font-family: 'JetBrains Mono'`, `margin-top: 8px`
+
+These appear at the top of every guide page content area, right below the breadcrumb navigation.
+
+### 4. Add JetBrains Mono font
+**File:** `index.html`
+
+Add a Google Fonts link for JetBrains Mono (only the 400 weight needed).
+
+## No Changes to Individual Guide Files
+Because GuideLayout generates the standardized schema internally, the 49 individual guide page files do not need to be modified. Their existing `articleSchema` props will still be accepted but the centralized version takes priority.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `public/robots.txt` | Add `Disallow: /dashboard` line |
-| `public/sitemap.xml` | Update lastmod dates to 2026-02-12; add /quiz entry |
-| `src/components/seo/SEOHead.tsx` | Add explicit `index, follow` robots meta tag |
-| `src/pages/Index.tsx` | Update homepage title and description |
-| `src/components/guides/GuideLayout.tsx` | Pass article metadata so og:type becomes "article" |
-| `supabase/functions/sitemap/index.ts` | Add /quiz to the static pages list |
+| `src/components/guides/GuideLayout.tsx` | Generate standardized Article schema; add visible metadata lines |
+| `src/components/guides/GuideFAQ.tsx` | Remove duplicate Helmet/schema block |
+| `index.html` | Add JetBrains Mono font link |
+
