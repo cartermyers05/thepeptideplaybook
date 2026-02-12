@@ -49,8 +49,37 @@ serve(async (req) => {
     const profileTier = profile?.tier;
     logStep("Profile tier check", { profileTier });
 
-    // If profile tier indicates a paid user (member, insider, monthly, annual), check purchases to confirm
     const paidTiers = ["member", "insider", "monthly", "annual"];
+
+    // AUTO-HEAL: If profile is free but user has a purchase, fix the tier
+    if (!profileTier || !paidTiers.includes(profileTier)) {
+      const { data: healPurchases } = await supabaseClient
+        .from("purchases")
+        .select("id, tier")
+        .eq("user_id", user.id)
+        .limit(1);
+
+      if (healPurchases && healPurchases.length > 0) {
+        const healTier = healPurchases[0].tier || "member";
+        logStep("AUTO-HEAL: Purchase found but tier is free, fixing", { from: profileTier, to: healTier });
+        await supabaseClient
+          .from("profiles")
+          .update({ tier: healTier, subscription_status: "active" })
+          .eq("user_id", user.id);
+
+        return new Response(JSON.stringify({
+          subscribed: true,
+          plan: healTier,
+          subscription_end: null,
+          subscription_id: null,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+    }
+
+    // If profile tier indicates a paid user, check purchases to confirm
     if (profileTier && paidTiers.includes(profileTier)) {
       // Verify there's a purchase record (prevents manual tier manipulation)
       const { data: purchases } = await supabaseClient
