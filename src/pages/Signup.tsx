@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PromoCodeInput } from "@/components/auth/PromoCodeInput";
 import { Logo } from "@/components/brand/Logo";
+import { getTrackingData, clearTrackingData } from "@/lib/trackingCapture";
 
 const steps = [
   { id: 1, title: "Email" },
@@ -78,6 +79,18 @@ export default function Signup() {
           }
         } catch (refError) {
           console.error("Failed to link referral:", refError);
+        }
+      }
+
+      // Write tracking data to profile
+      if (signUpData.user) {
+        const tracking = getTrackingData();
+        if (tracking.landing_page || tracking.utm_source || tracking.referrer_url) {
+          await supabase
+            .from("profiles")
+            .update(tracking as any)
+            .eq("user_id", signUpData.user.id);
+          clearTrackingData();
         }
       }
 

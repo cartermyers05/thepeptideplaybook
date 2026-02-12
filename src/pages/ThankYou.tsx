@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useQueryClient } from "@tanstack/react-query";
+import { getTrackingData } from "@/lib/trackingCapture";
 
 type VerificationState = "verifying" | "success" | "error" | "no_session" | "needs_password";
 
@@ -40,8 +41,9 @@ export default function ThankYou() {
     setErrorMessage("");
 
     try {
+      const tracking = getTrackingData();
       const { data, error } = await supabase.functions.invoke("verify-payment", {
-        body: { session_id: sessionId },
+        body: { session_id: sessionId, tracking },
       });
 
       if (error) {
