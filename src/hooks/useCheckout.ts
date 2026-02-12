@@ -2,47 +2,37 @@ import { useState, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-export type Plan = "monthly" | "annual";
-
 export function useCheckout() {
   const [isLoading, setIsLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const redirectingRef = useRef(false);
   const isProcessingRef = useRef(false);
   const { toast } = useToast();
 
-  const startCheckout = useCallback(async (plan: Plan = "monthly", goal?: string) => {
-    // Only block if we're currently redirecting to Stripe
+  const startCheckout = useCallback(async () => {
     if (redirectingRef.current) return;
-    // Allow retry if not currently loading
     if (isProcessingRef.current && isLoading) return;
-    
+
     isProcessingRef.current = true;
     setIsLoading(true);
-    
+    setCheckoutError(null);
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
-        toast({
-          title: "Please sign in",
-          description: "You need to be signed in to subscribe.",
-          variant: "destructive",
-        });
+        const msg = "You need to be signed in to purchase.";
+        setCheckoutError(msg);
+        toast({ title: "Please sign in", description: msg, variant: "destructive" });
         isProcessingRef.current = false;
         setIsLoading(false);
         return;
       }
 
-      // Use provided goal, or fallback to localStorage, or default to "beginner"
-      const courseGoal = goal || localStorage.getItem('selectedCourseGoal') || 'beginner';
+      const quizGoal = localStorage.getItem("selectedCourseGoal") || "beginner";
 
       const response = await supabase.functions.invoke("create-checkout", {
-        body: {
-          plan,
-          goal: courseGoal,
-          successUrl: `${window.location.origin}/thank-you`,
-          cancelUrl: `${window.location.origin}/pricing`,
-        },
+        body: { quizGoal },
       });
 
       if (response.error) {
@@ -50,7 +40,7 @@ export function useCheckout() {
       }
 
       const { url } = response.data;
-      
+
       if (url) {
         redirectingRef.current = true;
         window.location.href = url;
@@ -60,23 +50,21 @@ export function useCheckout() {
       }
     } catch (error) {
       if (!redirectingRef.current) {
+        const msg = error instanceof Error ? error.message : "Something went wrong";
         console.error("Checkout error:", error);
-        toast({
-          title: "Checkout failed",
-          description: error instanceof Error ? error.message : "Something went wrong",
-          variant: "destructive",
-        });
+        setCheckoutError(msg);
+        toast({ title: "Checkout failed", description: msg, variant: "destructive" });
         isProcessingRef.current = false;
         setIsLoading(false);
       }
     }
-  }, [toast]);
+  }, [toast, isLoading]);
 
   const openCustomerPortal = useCallback(async () => {
     setIsLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         toast({
           title: "Please sign in",
@@ -94,7 +82,7 @@ export function useCheckout() {
       }
 
       const { url } = response.data;
-      
+
       if (url) {
         window.location.href = url;
       } else {
@@ -115,5 +103,6 @@ export function useCheckout() {
     startCheckout,
     openCustomerPortal,
     isLoading,
+    checkoutError,
   };
 }

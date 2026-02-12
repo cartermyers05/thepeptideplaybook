@@ -18,7 +18,7 @@ serve(async (req) => {
 
   try {
     logStep("Function started");
-    
+
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) {
       throw new Error("STRIPE_SECRET_KEY is not configured");
@@ -38,11 +38,14 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    
+
     if (userError || !user) {
       throw new Error("Invalid user token");
     }
     logStep("User authenticated", { userId: user.id, email: user.email });
+
+    // Read request body
+    const { quizGoal } = await req.json().catch(() => ({ quizGoal: undefined }));
 
     const stripe = new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
@@ -57,7 +60,7 @@ serve(async (req) => {
 
     // Check if user already has an active subscription
     if (profile?.subscription_status === "active") {
-      throw new Error("You already have an active subscription. Go to your dashboard to manage it.");
+      throw new Error("You already have active access. Go to your dashboard.");
     }
 
     let customerId = profile?.stripe_customer_id;
@@ -66,9 +69,7 @@ serve(async (req) => {
       logStep("Creating new Stripe customer");
       const customer = await stripe.customers.create({
         email: user.email,
-        metadata: {
-          supabase_user_id: user.id,
-        },
+        metadata: { supabase_user_id: user.id },
       });
       customerId = customer.id;
 
@@ -76,42 +77,38 @@ serve(async (req) => {
         .from("profiles")
         .update({ stripe_customer_id: customerId })
         .eq("user_id", user.id);
-      
+
       logStep("Stripe customer created", { customerId });
     } else {
       logStep("Using existing Stripe customer", { customerId });
     }
 
-    // Create subscription checkout session - $29/month
+    const origin = req.headers.get("origin") || "https://thepeptideplaybook.lovable.app";
+
+    // Create one-time payment checkout session — $67
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
           price_data: {
-            currency: 'usd',
+            currency: "usd",
             product_data: {
-              name: 'Peptide Playbook - AI Research Platform',
-              description: 'Full access to AI research assistant, peptide database, protocol builder, and more',
+              name: "Peptide Blueprint — Lifetime Access",
+              description: "Personalized peptide protocol, AI Research Coach, Decision Matrix, Doctor Script, Legal Guide",
             },
-            unit_amount: 2900, // $29.00
-            recurring: {
-              interval: 'month',
-            },
+            unit_amount: 6700, // $67.00
           },
           quantity: 1,
         },
       ],
-      mode: "subscription",
-      success_url: `${req.headers.get("origin")}/dashboard?subscription=success`,
-      cancel_url: `${req.headers.get("origin")}/checkout`,
+      mode: "payment",
+      success_url: `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/checkout`,
       metadata: {
         user_id: user.id,
+        quiz_goal: quizGoal || "not_specified",
       },
-      subscription_data: {
-        metadata: {
-          user_id: user.id,
-        },
-      },
+      allow_promotion_codes: true,
     });
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
