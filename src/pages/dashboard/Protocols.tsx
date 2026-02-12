@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { PeptideDeepDive } from "@/components/protocol/PeptideDeepDive";
+import { getPeptideDeepDive } from "@/lib/peptideDeepDive";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -319,32 +321,40 @@ function ProtocolCard({
 
                 {/* Peptides with Rationale */}
                 {protocol.peptides.map((peptide, index) => (
-                  <div 
-                    key={index} 
-                    className="p-3 rounded-lg bg-muted/50 border border-border"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-foreground">{peptide.name}</h4>
-                      <Badge variant="outline" className="text-xs">{peptide.frequency}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">{peptide.purpose}</p>
-                    
-                    {/* Rationale - why this peptide for THIS user */}
-                    {peptide.rationale && (
-                      <div className="mb-2 p-2 rounded bg-primary/5 border border-primary/10">
-                        <p className="text-xs text-muted-foreground">
-                          <span className="font-medium text-primary">Why this peptide:</span> {peptide.rationale}
-                        </p>
+                  <div key={index} className="space-y-2">
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-foreground">{peptide.name}</h4>
+                        <Badge variant="outline" className="text-xs">{peptide.frequency}</Badge>
                       </div>
-                    )}
-                    
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div><span className="text-muted-foreground">Dosage:</span> {peptide.dosage}</div>
-                      <div><span className="text-muted-foreground">Timing:</span> {peptide.timing}</div>
-                      {peptide.site && (
-                        <div className="col-span-2"><span className="text-muted-foreground">Site:</span> {peptide.site}</div>
+                      <p className="text-sm text-muted-foreground mb-2">{peptide.purpose}</p>
+                      
+                      {/* Rationale - why this peptide for THIS user */}
+                      {peptide.rationale && (
+                        <div className="mb-2 p-2 rounded bg-primary/5 border border-primary/10">
+                          <p className="text-xs text-muted-foreground">
+                            <span className="font-medium text-primary">Why this peptide:</span> {peptide.rationale}
+                          </p>
+                        </div>
                       )}
+                      
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div><span className="text-muted-foreground">Dosage:</span> {peptide.dosage}</div>
+                        <div><span className="text-muted-foreground">Timing:</span> {peptide.timing}</div>
+                        {peptide.site && (
+                          <div className="col-span-2"><span className="text-muted-foreground">Site:</span> {peptide.site}</div>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Research Deep Dive inline */}
+                    {getPeptideDeepDive(peptide.name) && (
+                      <PeptideDeepDive 
+                        peptideName={peptide.name} 
+                        goal={protocol.goal}
+                        isMatched
+                      />
+                    )}
                   </div>
                 ))}
 

@@ -3,17 +3,25 @@ import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useProtocol } from "@/hooks/useProtocol";
 import { useCheckIn } from "@/hooks/useCheckIn";
+import { useQuizResponse } from "@/hooks/useQuizResponse";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyProtocolState } from "@/components/protocol/EmptyProtocolState";
 import { ProtocolHeader } from "@/components/protocol/ProtocolHeader";
 import { TodaySchedule } from "@/components/protocol/TodaySchedule";
 import { ProtocolReasoning } from "@/components/protocol/ProtocolReasoning";
 import { ProtocolPeptideList } from "@/components/protocol/ProtocolPeptideList";
+import { PeptideDeepDive } from "@/components/protocol/PeptideDeepDive";
+import { getAllPeptideNames, getPeptideDeepDive } from "@/lib/peptideDeepDive";
+import { getGoalLabel } from "@/lib/quizPersonalization";
 import { toast } from "@/hooks/use-toast";
 
 export default function MyPlan() {
   const { protocol, isLoading, startProtocol, pauseProtocol, resumeProtocol } = useProtocol();
   const { submitCheckIn, hasCheckedInToday } = useCheckIn();
+  const { data: quizResponse } = useQuizResponse();
+
+  const userGoal = quizResponse?.primary_goal;
+  const goalLabel = userGoal ? getGoalLabel(userGoal) : undefined;
   
   // Track completed doses locally (persists for today via check-in)
   const [completedDoses, setCompletedDoses] = useState<string[]>([]);
@@ -129,7 +137,68 @@ export default function MyPlan() {
 
         {/* Full peptide details (collapsible) */}
         <ProtocolPeptideList peptides={protocol.peptides} />
+
+        {/* Peptide Research Library */}
+        <PeptideResearchLibrary
+          protocolPeptideNames={protocol.peptides.map(p => p.name)}
+          goalLabel={goalLabel}
+        />
       </motion.div>
     </DashboardLayout>
+  );
+}
+
+function PeptideResearchLibrary({ 
+  protocolPeptideNames, 
+  goalLabel 
+}: { 
+  protocolPeptideNames: string[];
+  goalLabel?: string;
+}) {
+  const allNames = getAllPeptideNames();
+  
+  // Find matched peptides (ones in the protocol that have deep dive data)
+  const matchedNames = protocolPeptideNames.filter(name => getPeptideDeepDive(name));
+  const otherNames = allNames.filter(name => !matchedNames.some(
+    m => m.toLowerCase() === name.toLowerCase() || 
+         name.toLowerCase().includes(m.toLowerCase()) || 
+         m.toLowerCase().includes(name.toLowerCase())
+  ));
+
+  if (matchedNames.length === 0 && otherNames.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-foreground">Peptide Research Library</h2>
+        <p className="text-sm text-muted-foreground">Deep research profiles for your protocol peptides</p>
+      </div>
+
+      {/* Matched peptides first */}
+      {matchedNames.map(name => (
+        <PeptideDeepDive 
+          key={name} 
+          peptideName={name} 
+          goal={goalLabel} 
+          isMatched 
+        />
+      ))}
+
+      {/* Other peptides */}
+      {otherNames.length > 0 && (
+        <>
+          <div className="pt-2">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Browse Other Peptides</h3>
+          </div>
+          {otherNames.map(name => (
+            <PeptideDeepDive 
+              key={name} 
+              peptideName={name} 
+              goal={goalLabel} 
+            />
+          ))}
+        </>
+      )}
+    </div>
   );
 }
