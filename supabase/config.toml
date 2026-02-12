@@ -53,3 +53,6 @@ verify_jwt = false
 
 [functions.submit-partner-application]
 verify_jwt = false
+
+[functions.send-quiz-results-email]
+verify_jwt = false

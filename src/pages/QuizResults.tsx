@@ -8,6 +8,7 @@ import { SEOHead } from "@/components/seo/SEOHead";
 import { useAuth } from "@/hooks/useAuth";
 import { useTier } from "@/hooks/useTier";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface QuizResponse {
   id?: string;
@@ -137,16 +138,32 @@ export default function QuizResults() {
     if (!email.trim()) return;
     setIsSubmittingEmail(true);
     try {
-      await supabase.from("leads").insert({
+      const { error } = await supabase.from("leads").insert({
         email: email.trim(),
         source: "quiz_results",
       });
+      if (error) {
+        console.error("Failed to save lead:", error);
+        toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
+        setIsSubmittingEmail(false);
+        return;
+      }
       localStorage.setItem("quiz_email", email.trim());
       setEmailCaptured(true);
+
+      // Send quiz results email in the background
+      const currentProtocol = protocolMap[quizData?.goal || ""] || protocolMap.general_wellness;
+      supabase.functions.invoke("send-quiz-results-email", {
+        body: {
+          email: email.trim(),
+          goal: quizData?.goal || "general_wellness",
+          protocolName: currentProtocol.name,
+          peptides: currentProtocol.peptides,
+        },
+      }).catch((err) => console.error("Failed to send quiz email:", err));
     } catch (err) {
       console.error("Failed to save email:", err);
-      // Still let them through
-      setEmailCaptured(true);
+      toast({ title: "Something went wrong", description: "Please try again.", variant: "destructive" });
     } finally {
       setIsSubmittingEmail(false);
     }
