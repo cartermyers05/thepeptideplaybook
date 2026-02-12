@@ -1,68 +1,84 @@
 
 
-# Add Deep Peptide Content to Protocol/Blueprint Pages
+# Upgrade Peptide Database Page
 
 ## Overview
-Create a rich, research-grade content library for each of the 7 matched peptides and display it within the existing protocol pages. The user's matched peptides (from quiz data) appear first with a "Your Match" badge; other peptides appear in a "Browse Other Peptides" section below.
+Replace the dropdown-based filter UI with a search bar + horizontally scrollable filter pills, add "Your Match" personalization badges, a comparison mode with side-by-side view, and enhance each peptide card's content. All within the existing card/list design.
 
-## New Files
+## Changes
 
-### 1. `src/lib/peptideDeepDive.ts` -- Static content library
-A single data file containing the full protocol structure for all 7 peptides. Each entry includes:
+### 1. Update `src/pages/dashboard/Database.tsx`
+**Replace filter UI (lines 82-136):**
+- Keep the search `Input` but update placeholder to "Search peptides by name, goal, or keyword..."
+- Replace the 3 `Select` dropdowns with horizontally scrollable filter pills: "All" | "Weight Loss" | "Recovery" | "Anti-Aging" | "Performance" | "FDA Approved" | "Most Researched"
+- Active pill gets the accent/primary background color; inactive pills get outline style
+- Pills map to client-side filtering logic:
+  - "Weight Loss" filters to categories containing "GLP-1" or primary_use containing "weight"
+  - "Recovery" filters to category "Recovery"
+  - "Anti-Aging" filters to categories "Skin/Hair" or "Longevity"
+  - "Performance" filters to category "Growth Hormone"
+  - "FDA Approved" filters to fda_status = "FDA Approved"
+  - "Most Researched" sorts by total_study_count descending (or research_status = "strong")
 
-- **overview**: one-line summary, evidence rating (1-5), legal status ("fda_approved" | "compounding" | "research_only")
-- **mechanism**: 3-4 sentence plain-language explanation of how it works
-- **evidence**: array of key findings, each with finding text + journal/year source
-- **dosing**: array of phases (phase name, dose, duration, source) + optional notes
-- **safety**: common side effects, serious concerns, known interactions, contraindications
-- **legal2026**: FDA status, prescription requirements, compounding availability, last updated date
-- **doctorScript**: opening line (templated with `{goal}`), key studies to reference, questions to ask, "if doctor isn't familiar" fallback text
+**Add comparison state:**
+- New state: `selectedForCompare: string[]` (peptide IDs, max 3)
+- New state: `showComparison: boolean`
+- Pass `selectedForCompare` and `onToggleCompare` to each `PeptideCard`
 
-Peptides included: Semaglutide, Tirzepatide, BPC-157, TB-500, GHK-Cu, Epitalon, CJC-1295/Ipamorelin
+**Add quiz personalization:**
+- Import `useQuizResponse` and `getPeptideMatch`
+- Sort matched peptides to top of list before rendering
+- Pass `isMatch` boolean prop to `PeptideCard` for matched peptides
 
-All content uses accurate, research-based information with real journal names, trial names, and sample sizes where available.
+**Add floating compare button:**
+- When `selectedForCompare.length >= 2`, show a fixed-bottom button: "Compare Selected (N)"
+- Clicking it sets `showComparison = true`
 
-### 2. `src/components/protocol/PeptideDeepDive.tsx` -- Display component
-A collapsible/accordion component that renders all 7 sections for a given peptide using the existing Card, Badge, and Collapsible UI components. Sections:
+**Add comparison view:**
+- When `showComparison` is true, render a `ComparisonTable` component instead of the card list
+- "Back to Database" button at top to close
 
-1. **Overview card** (always visible): Peptide name (bold), one-line summary, star rating display, "Matched to your [Goal] goal" line (if matched), legal status badge (green/yellow/red)
-2. **How It Works**: mechanism text in a simple paragraph
-3. **Evidence Summary**: "What the research shows:" header, bulleted findings with journal citations
-4. **Dosing Reference**: disclaimer banner at top, then a simple HTML table (Phase | Dose | Duration | Source), plus notes
-5. **Safety Profile**: 4 sub-lists (common side effects, serious concerns, interactions, contraindications)
-6. **Legal Status (2026)**: structured info block
-7. **Doctor Conversation Script**: opening line (with user's goal inserted), studies to reference, questions to ask, "if doctor isn't familiar" fallback
+### 2. Update `src/components/database/PeptideCard.tsx`
+**New props:**
+- `isMatch?: boolean` -- shows a "Your Match" badge in accent color next to the name
+- `isSelectedForCompare?: boolean` -- checkbox checked state
+- `onToggleCompare?: (id: string) => void` -- checkbox handler
 
-Each section uses a Collapsible so the card doesn't overwhelm -- Overview is always open, other sections expand on click.
+**Add to card header area:**
+- If `isMatch`, render a small Badge "Your Match" with accent/primary color styling next to the peptide name
+- Add a small Checkbox in the top-right corner of the card (next to existing badges) with "Compare" label. Uses `onToggleCompare` on click, stops propagation so it doesn't toggle the card expand.
 
-## Modified Files
+**Enhance footer content:**
+- Add a star display for evidence rating: map research_status to stars (strong=5, moderate=3, limited=2, emerging=1)
+- Add "View Full Protocol" link that navigates to `/dashboard/plan` (using existing `useNavigate`)
 
-### 3. `src/pages/dashboard/MyPlan.tsx`
-After the existing `ProtocolPeptideList` component (line 131), add a new section:
+### 3. New component: `src/components/database/ComparisonTable.tsx`
+A side-by-side comparison table for 2-3 peptides.
 
-- Import `useQuizResponse` and `PeptideDeepDive`
-- If the user has a protocol, render a "Peptide Research Library" section showing deep dives for each peptide in their protocol (matched peptides first with "Your Match" badge)
-- Below matched peptides, show "Browse Other Peptides" with the remaining peptides from the library
-- If no protocol but quiz data exists, show all peptides with the matched ones highlighted at top
+**Layout:** Responsive table (horizontal scroll on mobile)
+- Rows: Evidence Rating (star display), Primary Use, FDA Status, Side Effect Profile (derived from research_status), Study Count, Best For (primary_use), Legal Status
+- Columns: one per selected peptide
+- Uses existing `Table` UI components
+- "Back to Database" button at top
 
-### 4. `src/pages/dashboard/Protocols.tsx`
-Inside the existing `ProtocolCard` expanded view (the `AnimatePresence` block around line 232), after the existing peptide detail cards and before the disclaimer:
+**Data source:** Receives the full peptide objects as props, plus deep dive data from `peptideDeepDiveLibrary` for richer comparison (side effect profile, cost range)
 
-- Add a "Research Deep Dive" link/button for each peptide that expands the `PeptideDeepDive` component inline
-- This keeps the Protocols list page lighter -- deep content is one click away per peptide
+### 4. Update `src/hooks/usePeptides.ts`
+- Add `total_study_count` and `human_study_count` to the `Peptide` interface (they already exist in the DB and are returned by `select("*")`, just not typed)
+- No query changes needed -- `select("*")` already fetches all columns
 
 ## What Does NOT Change
-- Dashboard layout, sidebar, navigation, card designs
-- Colors, fonts, spacing
-- No other pages modified
-- No existing sections removed
-- The `ProtocolHeader`, `TodaySchedule`, `ProtocolReasoning`, `EmptyProtocolState` components stay as-is
-- The Protocols list page card structure stays the same
+- Card visual design (colors, spacing, rounded corners, font sizes)
+- Sidebar and navigation
+- StudyBrowser tab and its content
+- No other dashboard pages modified
+- No peptide data removed
+- No pagination added
 
 ## Technical Notes
-- All content is static (no API calls needed) -- lives in `peptideDeepDive.ts`
-- The `PeptideDeepDive` component accepts a peptide name string and optional goal string for personalization
-- Legal status badge uses existing Badge component with color variants: `bg-green-100 text-green-800` (FDA Approved), `bg-yellow-100 text-yellow-800` (Compounding), `bg-red-100 text-red-800` (Research Only)
-- Star ratings rendered as repeated star emoji characters matching the evidence rating number
-- Doctor script goal placeholder `{goal}` is replaced with the user's goal label from `quizPersonalization.ts`
-- The `peptideDeepDive.ts` file will be large (~500-700 lines) since it contains research content for 7 peptides -- this is intentional as static content
+- All filtering is client-side (data already fetched via `usePeptides`)
+- Filter pills use the existing `Button` component with variant toggling (default vs outline)
+- Comparison table uses existing `Table`, `TableRow`, `TableHead`, `TableCell` components
+- "Your Match" badge color uses existing primary/accent CSS variables
+- The `peptideDeepDiveLibrary` from `src/lib/peptideDeepDive.ts` is used to enrich comparison data where a peptide has deep dive content available
+- Star ratings: `strong` = 4-5 stars, `moderate` = 3 stars, `limited` = 2 stars, `emerging` = 1 star
