@@ -8,6 +8,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useConversations } from "@/hooks/useConversations";
 import { useProtocol } from "@/hooks/useProtocol";
+import { useQuizResponse } from "@/hooks/useQuizResponse";
+import { getGoalLabel, getPeptideMatch, getNextStep, getStarterPrompts } from "@/lib/quizPersonalization";
 import { formatDistanceToNow } from "date-fns";
 
 function getGreeting() {
@@ -39,8 +41,8 @@ const popularGuides = [
   },
 ];
 
-// Suggested starter prompts
-const starterPrompts = [
+// Default starter prompts (used when no quiz data)
+const defaultStarterPrompts = [
   "What peptides are best for recovery?",
   "Help me build a fat loss protocol",
   "Compare BPC-157 vs TB-500",
@@ -66,9 +68,16 @@ export default function Dashboard() {
   const { data: profile, isLoading: isLoadingProfile } = useProfile();
   const { data: conversations, isLoading: isLoadingConversations } = useConversations();
   const { protocol, isLoading: isLoadingProtocol } = useProtocol();
+  const { data: quizResponse } = useQuizResponse();
 
   const displayName = profile?.full_name?.split(' ')[0] || user?.user_metadata?.full_name?.split(" ")[0] || "there";
   const isLoading = isLoadingProfile;
+
+  // Personalization derived data
+  const goalLabel = quizResponse ? getGoalLabel(quizResponse.primary_goal) : null;
+  const peptideMatch = quizResponse ? getPeptideMatch(quizResponse.primary_goal) : null;
+  const nextStep = quizResponse ? getNextStep(quizResponse.main_concerns) : null;
+  const activePrompts = quizResponse ? getStarterPrompts(quizResponse.primary_goal) : defaultStarterPrompts;
 
   // Get most recent conversation
   const recentChat = conversations?.[0];
@@ -102,10 +111,17 @@ export default function Dashboard() {
         <motion.div variants={itemVariants}>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-2">
             {getGreeting()}, {displayName}
+            {goalLabel && <> — here's your {goalLabel} Blueprint</>}
           </h1>
-          <p className="text-lg text-muted-foreground">
-            Your peptide research command center.
-          </p>
+          {quizResponse ? (
+            <p className="text-sm text-muted-foreground">
+              Personalized for: {goalLabel} · {quizResponse.age_range || "All ages"} · {quizResponse.experience_level}
+            </p>
+          ) : (
+            <p className="text-lg text-muted-foreground">
+              Your peptide research command center.
+            </p>
+          )}
         </motion.div>
 
         {/* Stat Cards Row */}
@@ -120,12 +136,17 @@ export default function Dashboard() {
             <div className="h-1 dashboard-gradient-purple" />
             <div className="p-6">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                {protocol ? "Active Protocol" : "Get Started"}
+                {protocol ? "Active Protocol" : quizResponse ? "Your Protocol" : "Get Started"}
               </span>
               {isLoadingProtocol ? (
                 <Skeleton className="h-7 w-32 mt-2" />
               ) : protocol ? (
                 <p className="text-xl font-bold text-foreground mt-2 truncate">{protocol.protocol_name}</p>
+              ) : quizResponse && peptideMatch ? (
+                <>
+                  <p className="text-xl font-bold text-foreground mt-2 truncate">{peptideMatch.primary}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Matched to your {goalLabel} goal</p>
+                </>
               ) : (
                 <p className="text-lg font-semibold text-foreground mt-2">Start a Protocol</p>
               )}
@@ -142,10 +163,15 @@ export default function Dashboard() {
             <div className="h-1 dashboard-gradient-blue" />
             <div className="p-6">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                AI Research
+                {quizResponse ? "Research Confidence" : "AI Research"}
               </span>
               {isLoadingConversations ? (
                 <Skeleton className="h-7 w-24 mt-2" />
+              ) : quizResponse && peptideMatch ? (
+                <>
+                  <p className="text-xl font-bold text-foreground mt-2">{peptideMatch.studies} studies</p>
+                  <p className="text-xs text-muted-foreground mt-1">Based on peer-reviewed research</p>
+                </>
               ) : conversationCount > 0 ? (
                 <p className="text-xl font-bold text-foreground mt-2">{conversationCount} conversations</p>
               ) : (
@@ -158,15 +184,22 @@ export default function Dashboard() {
           <motion.button
             variants={itemVariants}
             whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(0,0,0,0.1)" }}
-            onClick={() => navigate("/dashboard/database")}
+            onClick={() => navigate(nextStep ? nextStep.href : "/dashboard/database")}
             className="dashboard-card text-left"
           >
             <div className="h-1 dashboard-gradient-teal" />
             <div className="p-6">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Peptide Database
+                {quizResponse ? "Next Step" : "Peptide Database"}
               </span>
-              <p className="text-xl font-bold text-foreground mt-2">40+ peptides</p>
+              {quizResponse && nextStep ? (
+                <>
+                  <p className="text-lg font-semibold text-foreground mt-2">{nextStep.label}</p>
+                  <p className="text-xs text-muted-foreground mt-1">→</p>
+                </>
+              ) : (
+                <p className="text-xl font-bold text-foreground mt-2">40+ peptides</p>
+              )}
             </div>
           </motion.button>
         </div>
@@ -216,8 +249,8 @@ export default function Dashboard() {
                   </span>
                   <p className="text-xl font-bold text-foreground mt-2">Ask your first question</p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {starterPrompts.map((prompt, index) => (
+                <div className={`grid grid-cols-1 ${activePrompts.length > 3 ? "sm:grid-cols-2" : "sm:grid-cols-3"} gap-3`}>
+                  {activePrompts.map((prompt, index) => (
                     <motion.button
                       key={prompt}
                       initial={{ opacity: 0, y: 10 }}
