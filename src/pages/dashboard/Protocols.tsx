@@ -144,7 +144,7 @@ function UserProtocolCard({
             {protocol.notes && (
               <div className="p-3 rounded-xl" style={{ backgroundColor: "#FFF7ED" }}>
                 <h4 className="text-sm font-medium mb-1 flex items-center gap-1.5" style={{ color: "#111827" }}>
-                  <MessageCircle className="w-3.5 h-3.5" style={{ color: "#F97316" }} /> Why This Protocol
+                  <MessageCircle className="w-3.5 h-3.5" style={{ color: "#3B82F6" }} /> Why This Protocol
                 </h4>
                 <p className="text-sm" style={{ color: "#6B7280" }}>{protocol.notes}</p>
               </div>
@@ -158,7 +158,7 @@ function UserProtocolCard({
                 <p className="text-sm mb-2" style={{ color: "#6B7280" }}>{peptide.purpose}</p>
                 {peptide.rationale && (
                   <p className="text-xs p-2 rounded-lg mb-2" style={{ backgroundColor: "#FFF7ED", color: "#374151" }}>
-                    <span className="font-medium" style={{ color: "#F97316" }}>Why:</span> {peptide.rationale}
+                    <span className="font-medium" style={{ color: "#8B5CF6" }}>Why:</span> {peptide.rationale}
                   </p>
                 )}
                 <div className="grid grid-cols-2 gap-2 text-xs">
@@ -276,8 +276,8 @@ export default function Protocols() {
         <motion.div variants={itemVariants}>
           <div className="rounded-2xl p-6 bg-white" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)", border: "2px dashed #E5E7EB" }}>
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(249,115,22,0.1)" }}>
-                <MessageCircle className="w-6 h-6" style={{ color: "#F97316" }} />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(139,92,246,0.1)" }}>
+                <MessageCircle className="w-6 h-6" style={{ color: "#8B5CF6" }} />
               </div>
               <div className="flex-1">
                 <h2 className="text-lg font-semibold mb-1" style={{ color: "#111827" }}>Build Your Custom Protocol</h2>

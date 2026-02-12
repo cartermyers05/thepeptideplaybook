@@ -19,7 +19,7 @@ function EvidenceCircles({ rating }: { rating: number }) {
         <span
           key={i}
           className="w-3 h-3 rounded-full inline-block"
-          style={{ backgroundColor: i < rating ? "#F97316" : "#E5E7EB" }}
+          style={{ backgroundColor: i < rating ? "#8B5CF6" : "#E5E7EB" }}
         />
       ))}
     </span>
@@ -143,7 +143,7 @@ export function PeptideDeepDive({ peptideName, goal, isMatched, defaultOpen = fa
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-[20px] font-bold" style={{ color: "#111827" }}>{data.name}</h3>
               {isMatched && (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold" style={{ backgroundColor: "rgba(249,115,22,0.1)", color: "#F97316" }}>
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold" style={{ backgroundColor: "rgba(16,185,129,0.1)", color: "#10B981" }}>
                   YOUR MATCH
                 </span>
               )}
@@ -161,7 +161,7 @@ export function PeptideDeepDive({ peptideName, goal, isMatched, defaultOpen = fa
         <div className="flex items-center gap-3 mt-3">
           <EvidenceCircles rating={data.evidenceRating} />
           {isMatched && goal && (
-            <span className="text-xs" style={{ color: "#F97316" }}>Matched to your {goalText} goal</span>
+            <span className="text-xs" style={{ color: "#10B981" }}>Matched to your {goalText} goal</span>
           )}
         </div>
       </button>
@@ -177,7 +177,7 @@ export function PeptideDeepDive({ peptideName, goal, isMatched, defaultOpen = fa
             className="overflow-hidden"
           >
             {/* How It Works */}
-            <Section title="How It Works" icon={Beaker} defaultOpen accentColor="#F97316">
+            <Section title="How It Works" icon={Beaker} defaultOpen accentColor="#3B82F6">
               <div className="rounded-xl p-4" style={{ backgroundColor: "#FFF7ED" }}>
                 <p className="text-sm leading-relaxed" style={{ color: "#374151" }}>{data.mechanism}</p>
               </div>
@@ -189,7 +189,7 @@ export function PeptideDeepDive({ peptideName, goal, isMatched, defaultOpen = fa
                 {data.evidence.map((e, i) => (
                   <div key={i} className="rounded-xl p-4 bg-white" style={{ border: "1px solid #E5E7EB" }}>
                     <p className="text-sm" style={{ color: "#374151" }}>
-                      <span style={{ color: "#F97316" }}>→</span> {e.finding}
+                      <span style={{ color: "#8B5CF6" }}>→</span> {e.finding}
                     </p>
                     <p className="text-xs font-mono mt-1" style={{ color: "#9CA3AF" }}>— {e.source}</p>
                   </div>
