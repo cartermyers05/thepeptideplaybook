@@ -13,6 +13,8 @@ export interface Peptide {
   studies: string;
   safety: string;
   related_peptides: string[];
+  total_study_count?: number;
+  human_study_count?: number;
   created_at: string;
   updated_at: string;
 }
