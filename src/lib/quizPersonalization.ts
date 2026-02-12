@@ -1,9 +1,27 @@
+// Normalize quiz-stored goal keys to canonical keys
+const goalAliases: Record<string, string> = {
+  fat_loss: "weight_loss",
+  anti_aging: "longevity",
+  muscle: "performance",
+  beginner: "general",
+  cognitive: "general",
+};
+
+function resolveGoal(goal: string): string {
+  return goalAliases[goal] || goal;
+}
+
 // Goal labels
 export const goalLabels: Record<string, string> = {
   weight_loss: "Weight Loss",
+  fat_loss: "Weight Loss",
   recovery: "Recovery & Healing",
   longevity: "Anti-Aging & Longevity",
+  anti_aging: "Anti-Aging & Longevity",
   performance: "Performance & Energy",
+  muscle: "Performance & Energy",
+  cognitive: "Wellness",
+  beginner: "Wellness",
   general: "Wellness",
 };
 
@@ -66,7 +84,8 @@ export function getGoalLabel(goal: string): string {
 }
 
 export function getPeptideMatch(goal: string) {
-  return peptideMatching[goal] || peptideMatching.general;
+  const resolved = resolveGoal(goal);
+  return peptideMatching[resolved] || peptideMatching.general;
 }
 
 export function getNextStep(concerns: string[]) {
@@ -76,5 +95,6 @@ export function getNextStep(concerns: string[]) {
 }
 
 export function getStarterPrompts(goal: string): string[] {
-  return goalStarterPrompts[goal] || goalStarterPrompts.general;
+  const resolved = resolveGoal(goal);
+  return goalStarterPrompts[resolved] || goalStarterPrompts.general;
 }
