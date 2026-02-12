@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronDown, ChevronUp, AlertTriangle, BookOpen, Users } from "lucide-react";
+import { ChevronDown, ChevronUp, AlertTriangle, BookOpen, Users, Star, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 export interface Peptide {
@@ -36,12 +38,36 @@ const fdaBadgeColors: Record<string, string> = {
   "Not Regulated": "bg-muted text-muted-foreground",
 };
 
-interface PeptideCardProps {
-  peptide: Peptide;
+const researchToStars: Record<string, number> = {
+  strong: 5,
+  moderate: 3,
+  limited: 2,
+  emerging: 1,
+};
+
+function StarRating({ count }: { count: number }) {
+  return (
+    <span className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star
+          key={i}
+          className={`w-3 h-3 ${i < count ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`}
+        />
+      ))}
+    </span>
+  );
 }
 
-export function PeptideCard({ peptide }: PeptideCardProps) {
+interface PeptideCardProps {
+  peptide: Peptide;
+  isMatch?: boolean;
+  isSelectedForCompare?: boolean;
+  onToggleCompare?: (id: string) => void;
+}
+
+export function PeptideCard({ peptide, isMatch, isSelectedForCompare, onToggleCompare }: PeptideCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <motion.div
@@ -53,15 +79,29 @@ export function PeptideCard({ peptide }: PeptideCardProps) {
       <div className="p-5">
         {/* Header: Name + Badges */}
         <div className="flex items-start justify-between gap-4 mb-4">
-          <div>
+          <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-lg font-semibold text-foreground">
               {peptide.name}
             </h3>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {peptide.primary_use}
-            </p>
+            {isMatch && (
+              <Badge className="bg-primary text-primary-foreground text-xs">
+                Your Match
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {onToggleCompare && (
+              <label
+                className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Checkbox
+                  checked={isSelectedForCompare}
+                  onCheckedChange={() => onToggleCompare(peptide.id)}
+                />
+                Compare
+              </label>
+            )}
             <Badge variant="outline" className="text-xs">
               {peptide.category}
             </Badge>
@@ -72,6 +112,13 @@ export function PeptideCard({ peptide }: PeptideCardProps) {
               {peptide.research_status}
             </Badge>
           </div>
+        </div>
+
+        {/* Quick stats row */}
+        <div className="flex items-center gap-3 mb-4 flex-wrap">
+          <StarRating count={researchToStars[peptide.research_status] || 1} />
+          <span className="text-xs text-muted-foreground">·</span>
+          <span className="text-sm text-muted-foreground">{peptide.primary_use}</span>
         </div>
 
         {/* 3 Info Sections */}
@@ -154,6 +201,16 @@ export function PeptideCard({ peptide }: PeptideCardProps) {
                 Related: {peptide.related_peptides.join(", ")}
               </span>
             )}
+
+            <button
+              className="text-xs text-primary flex items-center gap-1 hover:underline"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate("/dashboard/plan");
+              }}
+            >
+              View Full Protocol <ArrowRight className="w-3 h-3" />
+            </button>
           </div>
           <button
             className="text-xs text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors"
