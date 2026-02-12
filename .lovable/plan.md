@@ -1,108 +1,104 @@
 
 
-# Protocol Tracking System
+# Weekly Check-In System for Protocol Tracking
 
 ## Overview
-Add a live progress tracking system that lets users start tracking a protocol and see their current week, dose, phase, and personalized weekly guidance -- all driven by two new database tables.
+Add a weekly check-in feature that appears below the "This Week" card when a user has an active protocol. Users can log weight, symptom severity, energy level, and notes each week. A progress chart and history table show trends over time.
 
 ## Database Changes
 
-### Table 1: protocol_progress
-Stores each user's active tracking state for a protocol.
+### New Table: protocol_checkins
 
 | Column | Type | Details |
 |--------|------|---------|
 | id | uuid | PK, default gen_random_uuid() |
 | user_id | uuid | NOT NULL, references auth.users(id) |
-| protocol_template_id | uuid | NOT NULL, references protocol_templates(id) |
-| peptide_slug | text | NOT NULL |
-| goal_slug | text | NOT NULL |
-| start_date | date | NOT NULL |
-| status | text | NOT NULL, default 'active' |
-| created_at | timestamptz | default now() |
-| updated_at | timestamptz | default now() |
-
-RLS: Users can SELECT, INSERT, UPDATE their own rows (user_id = auth.uid()). Add updated_at trigger.
-
-### Table 2: protocol_weekly_content
-Stores week-by-week guidance content for each peptide.
-
-| Column | Type | Details |
-|--------|------|---------|
-| id | uuid | PK, default gen_random_uuid() |
-| peptide_slug | text | NOT NULL |
+| protocol_progress_id | uuid | NOT NULL, references protocol_progress(id) |
 | week_number | integer | NOT NULL |
-| title | text | NOT NULL |
-| content | text | NOT NULL |
-| dose_info | text | nullable |
-| dose_change | boolean | default false |
-| new_dose | text | nullable |
-| previous_dose | text | nullable |
-| alert_message | text | nullable |
-| phase_name | text | nullable |
+| weight_lbs | decimal | nullable |
+| symptom_rating | integer | nullable, 1-5 |
+| energy_rating | integer | nullable, 1-5 |
+| notes | text | nullable |
+| created_at | timestamptz | default now() |
 
-Unique constraint on (peptide_slug, week_number). RLS: SELECT for authenticated users.
-
-### Seed Data
-Insert 20 rows for semaglutide weeks 1-20 with all the content from the prompt (dose titration from 0.25mg through 2.4mg across 5 phases).
+- Unique constraint on (protocol_progress_id, week_number)
+- RLS: SELECT and INSERT for own rows (user_id = auth.uid())
+- UPDATE policy also needed for the "Edit this entry" feature
 
 ## Code Changes
 
-### New Hook: `src/hooks/useProtocolProgress.ts`
-- `useProtocolProgress(templateId, peptideSlug, goalSlug)` -- fetches the user's active/paused protocol_progress entry
-- `useWeeklyContent(peptideSlug, weekNumber)` -- fetches the protocol_weekly_content for the current week
-- `useStartTracking()` -- mutation to insert a new protocol_progress row
-- `usePauseTracking()` -- mutation to update status to 'paused'
-- `useResumeTracking()` -- mutation to update status to 'active'
-- Current week computed in frontend: `Math.floor((Date.now() - start_date) / (7 * 86400000)) + 1`
+### 1. New Hook: `src/hooks/useProtocolCheckins.ts`
 
-### New Component: `src/components/protocol/ProtocolProgressHeader.tsx`
-Renders the live progress display when the user has an active tracking entry:
+React Query hooks for check-in CRUD:
+- `useCurrentWeekCheckin(progressId, weekNumber)` -- fetches the check-in for the current week if it exists
+- `useAllCheckins(progressId)` -- fetches all check-ins for the progress entry, ordered by week
+- `useSubmitCheckin()` -- mutation to upsert a check-in row (insert or update on conflict)
+- Returns loading states and the last logged weight for placeholder purposes
 
-- Left column: large week number (48px, JetBrains Mono, #06D6A0), phase name below
-- Right column: current dose badge (green pill), next milestone text, progress bar (week X of 68)
-- Background: gradient with subtle green tint, green border
-- Mobile: single column stack
+### 2. New Component: `src/components/protocol/WeeklyCheckinCard.tsx`
 
-### New Component: `src/components/protocol/ThisWeekCard.tsx`
-Renders the weekly content card below the progress header:
+The main check-in card rendered below the ThisWeekCard.
 
-- Shows weekly_content.title as heading
-- Shows weekly_content.content as body text
-- If dose_change is true, shows an amber WarningBox with the alert_message above the content
-- Dark card styling (#111827 background)
+**Already-logged state:**
+- Shows "Week X logged" with a green checkmark
+- Displays logged values: weight, symptom emoji, energy emoji, notes
+- "Edit this entry" link that switches back to the form pre-filled with existing values
 
-### New Component: `src/components/protocol/StartTrackingCard.tsx`
-Shown when user has no active protocol_progress entry:
+**Form state (not yet logged or editing):**
+- Heading: "Week X Check-in" with "Quick update -- takes 30 seconds" subtext
+- Weight input: number field with JetBrains Mono font, placeholder shows last logged weight
+- Symptom rating: 5 emoji buttons (None/Mild/Moderate/Rough/Severe) with color-coded selected states
+- Energy rating: 5 emoji buttons (Great/Good/Okay/Low/Drained) with matching color-coded states
+- Notes: single-line text input
+- Submit button: "Log Check-in" green button, shows "Logged!" confirmation for 2 seconds after success
+- All buttons 56px tall with 12px border-radius, emoji 24px, labels 11px
 
-- Centered card with heading "Start Tracking Your Protocol"
-- Date picker input (default: today) with 16px font size (prevents iOS zoom)
-- "Start Tracking" button (#06D6A0 background)
-- On click: inserts protocol_progress row and invalidates query cache
-- Dark card styling (#111827 background)
+### 3. New Component: `src/components/protocol/CheckinHistory.tsx`
 
-### Updated: `src/components/protocol/ProtocolDetailView.tsx`
-- Import and use the new hooks and components
-- After the header card and before the accordion sections:
-  1. If user has active/paused progress: render ProtocolProgressHeader + ThisWeekCard + "Pause tracking" link
-  2. If user has no progress entry (or paused): render StartTrackingCard (with "Resume" messaging if paused)
-- The 8-section accordion remains completely untouched below these new elements
+Visible when user has 2+ check-ins.
+
+**Weight chart:**
+- Recharts LineChart: green line (#06D6A0), JetBrains Mono axis labels, 200px height
+- Custom tooltip with dark background showing "Week X: Y lbs"
+- Only plots weeks where weight was logged
+
+**Symptom dot row:**
+- Colored dots (green to red) for each logged week's symptom rating
+- Week numbers below dots
+- Gray dots for weeks without symptom data
+
+**Expandable history table:**
+- "See all entries" collapsible section using shadcn Collapsible
+- Table with columns: Week, Weight, Symptoms (emoji), Energy (emoji), Notes, Date
+- Alternating row backgrounds, horizontal scroll on mobile
+
+### 4. Updated: `src/components/protocol/ProtocolDetailView.tsx`
+
+Insert the new components into the active tracking section (lines 188-213), between the ThisWeekCard and the "Pause tracking" button:
+
+```
+<ProtocolProgressHeader ... />
+<ThisWeekCard ... />
+<WeeklyCheckinCard progressId={progress.id} currentWeek={currentWeek} />
+<CheckinHistory progressId={progress.id} />
+<button>Pause tracking</button>
+```
+
+No changes to the header, accordion sections, or any other part of the view.
 
 ## Files Summary
 
 | File | Change |
 |------|--------|
-| Database migration | Create protocol_progress + protocol_weekly_content tables, seed 20 weeks of semaglutide data |
-| `src/hooks/useProtocolProgress.ts` | New -- hooks for progress CRUD and weekly content |
-| `src/components/protocol/ProtocolProgressHeader.tsx` | New -- live progress display |
-| `src/components/protocol/ThisWeekCard.tsx` | New -- weekly guidance card |
-| `src/components/protocol/StartTrackingCard.tsx` | New -- start tracking flow with date picker |
-| `src/components/protocol/ProtocolDetailView.tsx` | Updated -- integrates new tracking components above accordion |
+| Database migration | Create protocol_checkins table with RLS |
+| `src/hooks/useProtocolCheckins.ts` | New -- hooks for check-in CRUD and history |
+| `src/components/protocol/WeeklyCheckinCard.tsx` | New -- check-in form and logged state |
+| `src/components/protocol/CheckinHistory.tsx` | New -- weight chart, symptom dots, history table |
+| `src/components/protocol/ProtocolDetailView.tsx` | Updated -- render check-in components in active tracking section |
 
 ## What Does NOT Change
-- No changes to the 8-section accordion or its content
+- No changes to ProtocolProgressHeader, ThisWeekCard, StartTrackingCard, or accordion sections
 - No changes to EvidenceRating, WarningBox, QuoteBox, or StudyCard components
 - No changes to navigation, sidebar, or other dashboard pages
-- No changes to the protocol list view or UserProtocolCard
 - No removal of any existing components or routes
 
