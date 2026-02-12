@@ -84,7 +84,9 @@ const goalLabels: Record<string, string> = {
 
 const experienceLabels: Record<string, string> = {
   beginner: "Complete Beginner",
+  never: "Complete Beginner",
   some_experience: "Some Experience",
+  researched: "Some Experience",
   experienced: "Experienced",
 };
 
@@ -92,7 +94,9 @@ const fearLabels: Record<string, string> = {
   reconstitution: "Reconstitution",
   dosing: "Dosing",
   injections: "Injections",
+  needles: "Injections",
   side_effects: "Side Effects",
+  legality: "Legal Status",
   nothing: "Ready to Start",
 };
 
