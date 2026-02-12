@@ -43,6 +43,15 @@ export function HeroSection() {
               transition={{ delay: 0.5, duration: 0.6 }}
               className="mt-8 flex flex-wrap gap-4"
             >
+              <Link to="/quiz">
+                <PillButton 
+                  variant="dark" 
+                  size="lg"
+                  icon={<span>→</span>}
+                >
+                  Take the Free Quiz
+                </PillButton>
+              </Link>
               <a
                 href="#demo"
                 onClick={(e) => {
@@ -52,25 +61,8 @@ export function HeroSection() {
                   });
                 }}
               >
-                <PillButton 
-                  variant="dark" 
-                  size="lg"
-                  icon={<span>→</span>}
-                >
-                  Try the AI Free
-                </PillButton>
-              </a>
-              <a
-                href="#features"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('features')?.scrollIntoView({ 
-                    behavior: 'smooth' 
-                  });
-                }}
-              >
                 <PillButton variant="outline" size="lg">
-                  See What's Inside
+                  Try the AI Free
                 </PillButton>
               </a>
             </motion.div>

@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Check, Lock, Flame } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Check, Lock, Flame, Mail } from "lucide-react";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { useAuth } from "@/hooks/useAuth";
 import { useTier } from "@/hooks/useTier";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuizResponse {
   id?: string;
@@ -113,6 +115,9 @@ export default function QuizResults() {
   const { user } = useAuth();
   const { isPaid } = useTier();
   const [quizData, setQuizData] = useState<QuizResponse | null>(null);
+  const [emailCaptured, setEmailCaptured] = useState(false);
+  const [email, setEmail] = useState("");
+  const [isSubmittingEmail, setIsSubmittingEmail] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("quizResponse");
@@ -121,12 +126,90 @@ export default function QuizResults() {
     } else {
       navigate("/quiz");
     }
+    // Check if email already captured
+    if (localStorage.getItem("quiz_email")) {
+      setEmailCaptured(true);
+    }
   }, [navigate]);
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setIsSubmittingEmail(true);
+    try {
+      await supabase.from("leads").insert({
+        email: email.trim(),
+        source: "quiz_results",
+      });
+      localStorage.setItem("quiz_email", email.trim());
+      setEmailCaptured(true);
+    } catch (err) {
+      console.error("Failed to save email:", err);
+      // Still let them through
+      setEmailCaptured(true);
+    } finally {
+      setIsSubmittingEmail(false);
+    }
+  };
 
   if (!quizData) return null;
 
   const protocol = protocolMap[quizData.goal] || protocolMap.general_wellness;
   const showFull = user && isPaid;
+
+  // Email gate overlay
+  if (!emailCaptured && !showFull) {
+    return (
+      <>
+        <SEOHead 
+          title="Your Blueprint Is Ready | Peptide Playbook"
+          description="Enter your email to see your personalized peptide protocol."
+          canonical="/quiz/results"
+        />
+        <div className="min-h-screen bg-background flex items-center justify-center px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-md w-full text-center"
+          >
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <Mail className="w-8 h-8 text-primary" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">
+              Your Blueprint Is Ready
+            </h1>
+            <p className="text-muted-foreground mb-8">
+              Enter your email to see your personalized peptide match
+            </p>
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <Input
+                type="email"
+                required
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-12 text-base"
+              />
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full h-12 btn-primary-clean"
+                disabled={isSubmittingEmail}
+              >
+                {isSubmittingEmail ? "Loading..." : "See My Results"}
+              </Button>
+            </form>
+            <p className="text-xs text-muted-foreground mt-4">
+              No spam. Just your results.
+            </p>
+          </motion.div>
+        </div>
+      </>
+    );
+  }
+
+  // Determine CTA destination
+  const ctaDestination = user ? "/checkout" : "/signup";
 
   return (
     <>
@@ -188,7 +271,7 @@ export default function QuizResults() {
             </div>
 
             <div className="divide-y">
-              {protocol.peptides.map((peptide, i) => (
+              {protocol.peptides.map((peptide) => (
                 <div key={peptide.name} className="p-6">
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -223,7 +306,7 @@ export default function QuizResults() {
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm border">
                           <Lock className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm font-medium">Unlock with subscription</span>
+                          <span className="text-sm font-medium">Unlock with your Blueprint</span>
                         </div>
                       </div>
                     </div>
@@ -305,7 +388,7 @@ export default function QuizResults() {
               </>
             ) : (
               <>
-                <Link to={`/course/${quizData.goal?.replace('_', '-') || 'beginner'}`}>
+                <Link to={ctaDestination}>
                   <Button size="lg" className="h-14 px-10 text-lg btn-primary-clean">
                     Get Your Full Blueprint — $67
                   </Button>

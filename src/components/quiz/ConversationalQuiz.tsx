@@ -146,7 +146,7 @@ export function ConversationalQuiz() {
             Build Your<br className="sm:hidden" /> Peptide Blueprint
           </h1>
           <p className="mt-4 text-muted-foreground max-w-md mx-auto">
-            Answer a few questions to personalize your 8-week program
+            Answer a few questions to personalize your blueprint
           </p>
         </motion.div>
       </div>

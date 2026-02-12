@@ -8,6 +8,7 @@ import { PricingCTA } from "@/components/landing/PricingCTA";
 import { FAQ } from "@/components/landing/FAQ";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { Footer } from "@/components/landing/Footer";
+import { FloatingCTA } from "@/components/landing/FloatingCTA";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { HomepageSchemas } from "@/components/seo/HomepageSchemas";
 
@@ -33,6 +34,7 @@ const Index = () => {
           <FinalCTA />
         </main>
         <Footer />
+        <FloatingCTA />
       </div>
     </>
   );
