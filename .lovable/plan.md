@@ -1,97 +1,55 @@
 
-
-# Rebuild Protocol Detail View with Rich 8-Section Accordion
+# Create protocol_templates Table and Connect to Detail View
 
 ## Overview
-Replace the current simple expand/collapse detail view inside `UserProtocolCard` on `/dashboard/protocols` with a rich, dark-themed protocol detail panel featuring a structured header and 8 accordion sections.
+Create a new `protocol_templates` database table to store rich protocol content, seed it with semaglutide fat-loss data, and update the `ProtocolDetailView` component to fetch and render content from this table instead of using hardcoded placeholders.
 
-## Current State
-- `UserProtocolCard` in `src/pages/dashboard/Protocols.tsx` has a basic `isExpanded` toggle showing protocol notes and peptide cards in a light theme
-- The page uses white cards on a #FAFAFA background (via DashboardLayout)
-- Evidence rating circles exist in `PeptideDeepDive.tsx` but use purple (#8B5CF6) on light gray -- not reusable for the dark theme spec
+## Database Changes
 
-## Changes
+### 1. Create protocol_templates table
+Create the table with all specified columns, a unique constraint on `(peptide_slug, goal_slug)`, RLS enabled with a SELECT policy for authenticated users, and an `updated_at` trigger.
 
-### 1. Create Reusable Components
+### 2. Seed semaglutide fat-loss data
+Insert one row with `evidence_level: 5`, the full Section 1 markdown content, and placeholder text for Sections 2-8.
 
-**New file:** `src/components/protocol/EvidenceRating.tsx`
-- Props: `level` (1-5), `description` (string)
-- Renders 5 circles: filled = #06D6A0, empty = #1a1a2e, diameter 12px, gap 4px
-- Description text in DM Sans, 14px, color #94A3B8
+## Code Changes
 
-**New file:** `src/components/protocol/WarningBox.tsx`
-- Props: `type` ('amber' | 'red' | 'info'), `children`
-- Three visual variants with specified backgrounds, borders, and icons
-- Red variant includes "STOP AND SEEK MEDICAL CARE" heading
+### 3. Create a hook to fetch protocol template data
+**New file:** `src/hooks/useProtocolTemplate.ts`
 
-**New file:** `src/components/protocol/QuoteBox.tsx`
-- Props: `children`
-- Dark slate background with green left border, italic text
+A React Query hook that accepts `peptideSlug` and `goalSlug` parameters and queries the `protocol_templates` table. Returns the template data including the sections JSONB array.
 
-**New file:** `src/components/protocol/StudyCard.tsx`
-- Props: `name`, `year`, `sampleSize`, `finding`, `limitation`
-- Dark card with green accent for sample size, JetBrains Mono for numbers
+Since `protocol_templates` won't exist in the auto-generated types yet, we'll use `.from('protocol_templates' as any)` or a typed query approach to work around the type system.
 
-### 2. Create Protocol Detail View Component
+### 4. Update ProtocolDetailView to use database content
+**File:** `src/components/protocol/ProtocolDetailView.tsx`
 
-**New file:** `src/components/protocol/ProtocolDetailView.tsx`
+Changes:
+- Import and call the new `useProtocolTemplate` hook, deriving `peptideSlug` from the protocol's first peptide name (lowercased, e.g. "Semaglutide" becomes "semaglutide") and `goalSlug` from the protocol's goal field (e.g. "fat_loss" becomes "fat-loss")
+- When template data is loaded, use it for:
+  - Header: `protocol_name`, `peptide_display_name`, `evidence_level`, `evidence_description`, `last_updated`
+  - Sections: map over `sections` JSONB array to render AccordionItems dynamically
+  - `default_open` field determines which sections are in the Accordion's `defaultValue`
+- Parse markdown content using `react-markdown` (already installed) for bold, line breaks, headers
+- Show a loading skeleton while fetching
+- Show "Your protocol content is being prepared. Check back soon." fallback if no template found
+- Fall back to current hardcoded data if the query fails (graceful degradation)
 
-This component receives a `Protocol` object and renders the full dark-themed detail:
+### 5. Map protocol goal to slug
+The user's protocol has `goal: "fat_loss"` (underscore). The table uses `goal_slug: "fat-loss"` (hyphen). The hook will handle this conversion (replace underscores with hyphens).
 
-**Header section:**
-- Row 1: Protocol name (DM Sans, text-2xl, bold, #F1F5F9) + first peptide name as a green pill badge
-- Row 2: EvidenceRating component (hardcoded to level 4 for now since protocols don't have evidence_level yet) + description
-- Row 3: "Last updated: February 2026" + separator + disclaimer in JetBrains Mono 12px, #64748B
-- Row 4: Download PDF button (non-functional placeholder) with hover state
-
-**8 Accordion sections** using shadcn Accordion with `type="multiple"` and `defaultValue={["section-1"]}`:
-- Each trigger has a numbered circle badge (#06D6A0 on rgba background) + section title in DM Sans 18px 600 #F1F5F9
-- Content has left padding 44px on desktop, 16px on mobile
-
-Section contents (placeholder for now):
-1. "Why This Peptide For You" -- uses the exact placeholder text from the spec (opens by default)
-2. "Your Protocol (Week-by-Week)" -- placeholder
-3. "What to Expect (Timeline)" -- placeholder
-4. "Side Effects -- What's Normal vs. What's Not" -- placeholder
-5. "Doctor Conversation Script" -- placeholder
-6. "Legal Status and Access" -- placeholder
-7. "What the Research Shows" -- placeholder
-8. "Alternatives If This Isn't Right" -- placeholder
-
-**Mobile responsive:** stacked layout, full-width download button, reduced padding, 48px tap targets
-
-### 3. Integrate into Protocols Page
-
-**File:** `src/pages/dashboard/Protocols.tsx`
-
-- Add state: `selectedProtocol: Protocol | null`
-- When user clicks "View" on a `UserProtocolCard`, set `selectedProtocol` to that protocol
-- When `selectedProtocol` is set, render `ProtocolDetailView` with a back button, replacing (hiding) the protocol list
-- The dark background (#0a0a0f) applies to the detail view container, card backgrounds use #111827
-- The existing protocol list, Chat CTA, peptide deep dives, and all other sections remain untouched
-
-### 4. Add DM Sans Font
-
-**File:** `index.html`
-
-Add Google Fonts link for DM Sans (400, 500, 600, 700 weights). JetBrains Mono is already loaded from the previous change.
+Similarly, peptide names like "Semaglutide" need to be lowercased to match `peptide_slug: "semaglutide"`.
 
 ## Files
 
 | File | Change |
 |------|--------|
-| `src/components/protocol/EvidenceRating.tsx` | New -- reusable evidence circles |
-| `src/components/protocol/WarningBox.tsx` | New -- amber/red/info warning boxes |
-| `src/components/protocol/QuoteBox.tsx` | New -- green-bordered quote block |
-| `src/components/protocol/StudyCard.tsx` | New -- research study card |
-| `src/components/protocol/ProtocolDetailView.tsx` | New -- full 8-section detail view |
-| `src/pages/dashboard/Protocols.tsx` | Add selected protocol state and render detail view |
-| `index.html` | Add DM Sans font |
+| Database migration | Create `protocol_templates` table + seed data |
+| `src/hooks/useProtocolTemplate.ts` | New hook to query protocol_templates |
+| `src/components/protocol/ProtocolDetailView.tsx` | Fetch template data, render dynamic sections with markdown |
 
 ## What Does NOT Change
-- No changes to navigation, sidebar, DashboardLayout, or routing
-- No changes to other dashboard pages (Coach, Database, etc.)
-- No removal of existing components or pages
-- Existing protocol list, Chat CTA, PeptideDeepDive sections all remain
-- No light theme changes -- dark theme only applies to the detail view
-
+- No changes to Accordion styling, EvidenceRating, WarningBox, QuoteBox, or StudyCard components
+- No changes to navigation, sidebar, or other dashboard pages
+- No changes to the protocol list view or UserProtocolCard
+- No removal of any existing components or routes
