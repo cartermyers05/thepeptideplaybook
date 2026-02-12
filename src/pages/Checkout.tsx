@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function Checkout() {
-  const { startCheckout, isLoading } = useCheckout();
+  const { startCheckout, isLoading, checkoutError } = useCheckout();
   const { user, isLoading: authLoading, isRedeemingPromoCode } = useAuth();
   const { isPaid, isLoading: tierLoading } = useTier();
   const navigate = useNavigate();
@@ -164,13 +164,18 @@ export default function Checkout() {
 
         {/* Pay button as fallback */}
         {!isLoading && !isRedeeming && (
-          <Button 
-            size="lg" 
-            className="w-full btn-primary-clean h-12 mb-6"
-            onClick={() => startCheckout()}
-          >
-            Get Your Full Blueprint — $67
-          </Button>
+          <div className="mb-6">
+            <Button 
+              size="lg" 
+              className="w-full btn-primary-clean h-12"
+              onClick={() => startCheckout()}
+            >
+              Get Your Full Blueprint — $67
+            </Button>
+            {checkoutError && (
+              <p className="text-destructive text-sm mt-2">{checkoutError}</p>
+            )}
+          </div>
         )}
 
         {/* Promo code section */}
