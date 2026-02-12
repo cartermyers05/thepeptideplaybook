@@ -903,6 +903,50 @@ export type Database = {
         }
         Relationships: []
       }
+      protocol_checkins: {
+        Row: {
+          created_at: string | null
+          energy_rating: number | null
+          id: string
+          notes: string | null
+          protocol_progress_id: string
+          symptom_rating: number | null
+          user_id: string
+          week_number: number
+          weight_lbs: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          energy_rating?: number | null
+          id?: string
+          notes?: string | null
+          protocol_progress_id: string
+          symptom_rating?: number | null
+          user_id: string
+          week_number: number
+          weight_lbs?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          energy_rating?: number | null
+          id?: string
+          notes?: string | null
+          protocol_progress_id?: string
+          symptom_rating?: number | null
+          user_id?: string
+          week_number?: number
+          weight_lbs?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "protocol_checkins_protocol_progress_id_fkey"
+            columns: ["protocol_progress_id"]
+            isOneToOne: false
+            referencedRelation: "protocol_progress"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       protocol_progress: {
         Row: {
           created_at: string | null
