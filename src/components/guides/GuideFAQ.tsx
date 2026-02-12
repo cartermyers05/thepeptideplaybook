@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 import {
   Accordion,
   AccordionContent,
@@ -16,26 +15,7 @@ interface GuideFAQProps {
 }
 
 export function GuideFAQ({ items }: GuideFAQProps) {
-  // Generate FAQPage schema
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: items.map((item) => ({
-      "@type": "Question",
-      name: item.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: item.answer,
-      },
-    })),
-  };
-
   return (
-    <>
-      <Helmet>
-        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
-      </Helmet>
-
       <section className="my-12">
         <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
         <Accordion type="single" collapsible className="w-full space-y-3">
@@ -55,6 +35,5 @@ export function GuideFAQ({ items }: GuideFAQProps) {
           ))}
         </Accordion>
       </section>
-    </>
   );
 }
