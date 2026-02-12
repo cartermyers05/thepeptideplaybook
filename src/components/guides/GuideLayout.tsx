@@ -24,6 +24,27 @@ export function GuideLayout({
 }: GuideLayoutProps) {
   const canonicalUrl = `${SITE_URL}/guides/${slug}`;
 
+  // Standardized Article schema
+  const standardArticleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: title,
+    author: {
+      "@type": "Organization",
+      name: "Peptide Playbook",
+      url: SITE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Peptide Playbook",
+      url: SITE_URL,
+    },
+    datePublished: "2025-01-15",
+    dateModified: "2025-02-12",
+    description: description.slice(0, 155),
+    mainEntityOfPage: canonicalUrl,
+  };
+
   // Breadcrumb schema
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -63,7 +84,7 @@ export function GuideLayout({
         }}
       />
       <Helmet>
-        <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(standardArticleSchema)}</script>
         <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
         {faqSchema && (
           <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
@@ -86,6 +107,12 @@ export function GuideLayout({
               <span className="mx-2">/</span>
               <span className="text-foreground">{title}</span>
             </nav>
+
+            {/* Visible metadata */}
+            <div className="mb-6" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '14px', color: '#64748B', marginTop: '8px' }}>
+              <p>Last updated: February 2025</p>
+              <p>Based on peer-reviewed research · Not medical advice</p>
+            </div>
 
             {children}
           </div>
