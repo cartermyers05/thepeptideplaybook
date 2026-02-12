@@ -1,51 +1,37 @@
 
-# Fix Critical Goal Mapping + Quiz Data Issues
+# Fix Buyer's Tier Mismatch (Immediate)
 
-## Issues Found During End-to-End Testing
+## The Problem
+User `assistant2je@aol.com` paid $67 (confirmed in `purchases` table) but their `profiles.tier` is still `free`. They cannot access paid dashboard content.
 
-### Issue 1: Goal Key Mismatch (CRITICAL -- Breaks All Personalization)
-The conversational quiz (`useQuizChat.ts`) stores these goal values in the database:
-- `fat_loss`, `muscle`, `recovery`, `anti_aging`, `cognitive`, `beginner`
+## The Fix
 
-But `quizPersonalization.ts` expects:
-- `weight_loss`, `recovery`, `longevity`, `performance`, `general`
+### Step 1: Database Migration (one statement)
+Run a SQL migration to set their tier to `member`:
 
-Only `recovery` matches. Everything else falls through to the default "Wellness" match (BPC-157 + GHK-Cu). This means every user who picks Fat Loss, Anti-Aging, Muscle Building, or Cognitive gets the wrong peptide match on their dashboard.
+```sql
+UPDATE profiles SET tier = 'member' WHERE user_id = 'fba483f8-bdbb-457f-937d-a8c7a1aea3a8';
+```
 
-**Fix:** Update `quizPersonalization.ts` to add aliases for the quiz-stored keys, OR update the mapping to include both sets of keys.
+### Step 2: Investigate Root Cause
+Check the `verify-payment` edge function logs to see why it failed to update the profile after their Stripe checkout completed. The function at `supabase/functions/verify-payment/index.ts` should have run `UPDATE profiles SET tier = 'member'` automatically. Possible causes:
+- Race condition between auth session creation and profile update
+- The user wasn't authenticated when the thank-you page called verify-payment
+- The function errored silently
 
-### Issue 2: Results Page "Built for [blank] . Addressing [blank]"
-`QuizResults.tsx` reads `quizData.experience` and `quizData.fear` but the quiz stores data with different field names and values:
-- Quiz stores `experience` as: `never`, `researched`, `experienced`
-- Results expects: `beginner`, `some_experience`, `experienced`
-- Quiz stores `concern` (not `fear`) as: `side_effects`, `needles`, `dosing`, `legality`, `nothing`
-- Results expects: `reconstitution`, `dosing`, `injections`, `side_effects`, `nothing`
+### Step 3: Add Defensive Check (Prevent Future Occurrences)
+Update the `check-subscription` edge function to also verify the `purchases` table. If a purchase exists but `profiles.tier` is still `free`, auto-heal by updating the tier. This ensures no paying customer ever gets stuck on the free tier.
 
-Also, the localStorage `quizResponse` object has keys `goal`, `experience`, `fear`, `timeline` but the conversational quiz may store differently.
+**File:** `supabase/functions/check-subscription/index.ts`
 
-**Fix:** Align the label maps in `QuizResults.tsx` with the actual stored values, OR normalize values when saving.
+Add after the existing profile tier check:
+- Query `purchases` table for the user
+- If a purchase with `tier = 'member'` exists but profile shows `free`, update profile to `member`
+- Log the auto-heal for monitoring
 
-### Issue 3: Chat Starter Prompts Not Personalized
-Same root cause as Issue 1 -- `getStarterPrompts(quizResponse.primary_goal)` returns `general` prompts because `fat_loss` doesn't match `weight_loss`.
-
-**Fix:** Resolved by fixing Issue 1.
-
-## Files to Modify
+## Files Modified
 
 | File | Change |
 |------|--------|
-| `src/lib/quizPersonalization.ts` | Add quiz-stored goal keys as aliases: `fat_loss` maps same as `weight_loss`, `anti_aging` maps same as `longevity`, `muscle` maps same as `performance`, `beginner`/`cognitive` map to `general` |
-| `src/pages/QuizResults.tsx` | Update `experienceLabels` and `fearLabels` to include the actual quiz-stored values (`never`, `researched`, `needles`, `legality`, etc.) |
-
-## What This Fixes
-- Dashboard shows "Your Weight Loss Blueprint" with Semaglutide + Tirzepatide for fat_loss users
-- Chat shows weight-loss-specific starter prompts
-- Protocols page shows Semaglutide as "YOUR MATCH" instead of BPC-157
-- Results page shows "Built for Complete Beginner . Addressing Side Effects" instead of blank text
-- All goal-specific content (doctor scripts, legal guides, quick action cards) personalizes correctly
-
-## What Does NOT Change
-- No backend, edge function, or database changes
-- No UI/styling changes
-- No route or auth changes
-- Quiz flow itself works correctly -- only the downstream mapping is broken
+| Database migration | `UPDATE profiles SET tier = 'member'` for this specific user |
+| `supabase/functions/check-subscription/index.ts` | Add purchase-table fallback to auto-heal tier mismatches |
