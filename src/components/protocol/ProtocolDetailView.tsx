@@ -1,40 +1,85 @@
 import { Protocol } from "@/hooks/useProtocol";
+import { useProtocolTemplate } from "@/hooks/useProtocolTemplate";
 import { EvidenceRating } from "./EvidenceRating";
 import { Download, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Skeleton } from "@/components/ui/skeleton";
+import ReactMarkdown from "react-markdown";
 
 interface ProtocolDetailViewProps {
   protocol: Protocol;
   onBack: () => void;
 }
 
-const sections = [
-  { id: "section-1", num: 1, title: "Why This Peptide For You" },
-  { id: "section-2", num: 2, title: "Your Protocol (Week-by-Week)" },
-  { id: "section-3", num: 3, title: "What to Expect (Timeline)" },
-  { id: "section-4", num: 4, title: "Side Effects — What's Normal vs. What's Not" },
-  { id: "section-5", num: 5, title: "Doctor Conversation Script" },
-  { id: "section-6", num: 6, title: "Legal Status & Access" },
-  { id: "section-7", num: 7, title: "What the Research Shows" },
-  { id: "section-8", num: 8, title: "Alternatives If This Isn't Right" },
-];
-
-function getSectionContent(sectionId: string, protocol: Protocol): string {
-  if (sectionId === "section-1") {
-    return "You selected fat loss as your primary goal, and you mentioned you're concerned about safety. That's exactly why semaglutide is your top match. It's the most studied weight-loss peptide in history — not by a little, by a lot. We're talking 14,000+ participants across multiple Phase 3 trials, FDA approval, and real-world data from millions of prescriptions. You're not guinea-pigging anything here.";
-  }
-  const section = sections.find((s) => s.id === sectionId);
-  return `[Content for this section will be loaded from the database. Section: ${section?.title}]`;
-}
-
 export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps) {
-  const primaryPeptide = protocol.peptides?.[0]?.name || "Peptide";
+  const peptideSlug = (protocol.peptides?.[0]?.name || "").toLowerCase().trim();
+  const goalSlug = (protocol.goal || "").replace(/_/g, "-");
+
+  const { data: template, isLoading } = useProtocolTemplate(peptideSlug, goalSlug);
+
+  const displayName = template?.peptide_display_name || protocol.peptides?.[0]?.name || "Peptide";
+  const protocolName = template?.protocol_name || protocol.protocol_name;
+  const evidenceLevel = template?.evidence_level || 4;
+  const evidenceDesc = template?.evidence_description || "Strong — Multiple large-scale Phase 3 RCTs";
+  const lastUpdated = template?.last_updated || "February 2026";
+  const sections = template?.sections || [];
+
+  const defaultOpen = sections
+    .filter((s) => s.default_open)
+    .map((s) => `section-${s.section_number}`);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen px-4 md:px-0" style={{ background: "#0a0a0f" }}>
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 mb-6 transition-colors"
+          style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#64748B" }}
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to protocols
+        </button>
+        <div className="rounded-2xl p-5 md:p-8 mb-6" style={{ background: "#111827", border: "1px solid #1E293B" }}>
+          <Skeleton className="h-8 w-64 mb-4" style={{ background: "#1E293B" }} />
+          <Skeleton className="h-4 w-48 mb-4" style={{ background: "#1E293B" }} />
+          <Skeleton className="h-3 w-72 mb-4" style={{ background: "#1E293B" }} />
+        </div>
+        <div className="rounded-2xl p-5 md:p-8" style={{ background: "#111827", border: "1px solid #1E293B" }}>
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-12 w-full mb-3" style={{ background: "#1E293B" }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!template && !isLoading) {
+    return (
+      <div className="min-h-screen px-4 md:px-0" style={{ background: "#0a0a0f" }}>
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 mb-6 transition-colors"
+          style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#64748B" }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#F1F5F9")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#64748B")}
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to protocols
+        </button>
+        <div
+          className="rounded-2xl p-8 flex items-center justify-center"
+          style={{ background: "#111827", border: "1px solid #1E293B", minHeight: 200 }}
+        >
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#94A3B8", textAlign: "center" }}>
+            Your protocol content is being prepared. Check back soon.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen px-4 md:px-0" style={{ background: "#0a0a0f" }}>
@@ -54,17 +99,12 @@ export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps
         className="rounded-2xl p-5 md:p-8 mb-6"
         style={{ background: "#111827", border: "1px solid #1E293B" }}
       >
-        {/* Row 1: Name + Peptide badge */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
           <h1
-            style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 700,
-              color: "#F1F5F9",
-            }}
+            style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, color: "#F1F5F9" }}
             className="text-2xl"
           >
-            {protocol.protocol_name}
+            {protocolName}
           </h1>
           <span
             className="rounded-full self-start sm:self-auto"
@@ -77,23 +117,20 @@ export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps
               fontFamily: "'DM Sans', sans-serif",
             }}
           >
-            {primaryPeptide}
+            {displayName}
           </span>
         </div>
 
-        {/* Row 2: Evidence Rating */}
         <div className="mb-4">
-          <EvidenceRating level={4} description="Strong — Multiple large-scale Phase 3 RCTs" />
+          <EvidenceRating level={evidenceLevel} description={evidenceDesc} />
         </div>
 
-        {/* Row 3: Metadata */}
         <div className="mb-4 flex flex-wrap items-center gap-1" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: "#64748B" }}>
-          <span>Last updated: February 2026</span>
+          <span>Last updated: {lastUpdated}</span>
           <span className="mx-1">·</span>
           <span>Based on peer-reviewed research · Not medical advice</span>
         </div>
 
-        {/* Row 4: Download button */}
         <div className="flex justify-end">
           <button
             className="flex items-center gap-2 transition-colors w-full sm:w-auto justify-center sm:justify-start"
@@ -122,16 +159,16 @@ export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps
         </div>
       </div>
 
-      {/* 8-Section Accordion */}
+      {/* Accordion sections */}
       <div
         className="rounded-2xl p-5 md:p-8"
         style={{ background: "#111827", border: "1px solid #1E293B" }}
       >
-        <Accordion type="multiple" defaultValue={["section-1"]}>
+        <Accordion type="multiple" defaultValue={defaultOpen}>
           {sections.map((section) => (
             <AccordionItem
-              key={section.id}
-              value={section.id}
+              key={section.section_number}
+              value={`section-${section.section_number}`}
               className="border-b"
               style={{ borderColor: "#1E293B" }}
             >
@@ -151,7 +188,7 @@ export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps
                       fontFamily: "'JetBrains Mono', monospace",
                     }}
                   >
-                    {section.num}
+                    {section.section_number}
                   </div>
                   <span
                     style={{
@@ -167,7 +204,7 @@ export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps
               </AccordionTrigger>
               <AccordionContent>
                 <div
-                  className="pl-4 md:pl-11"
+                  className="pl-4 md:pl-11 prose prose-invert max-w-none"
                   style={{
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: 15,
@@ -177,7 +214,7 @@ export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps
                     paddingBottom: 24,
                   }}
                 >
-                  {getSectionContent(section.id, protocol)}
+                  <ReactMarkdown>{section.content}</ReactMarkdown>
                 </div>
               </AccordionContent>
             </AccordionItem>
