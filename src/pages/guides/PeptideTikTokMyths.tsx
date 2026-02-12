@@ -187,7 +187,7 @@ export default function PeptideTikTokMyths() {
             <MythCard
               myth={"\"All the celebrities and athletes use BPC-157, that's why they recover so fast\""}
               reality="This is unverifiable speculation used to sell products. Some celebrities may use peptides, but their use doesn't prove safety or efficacy."
-              evidence="No verified data on celebrity peptide use exists. Athletes who are caught using banned peptides face suspension (Joe Rogan has discussed this openly). Anecdotes from wealthy people don't equal clinical evidence."
+              evidence="No verified data on celebrity peptide use exists. Athletes caught using banned peptides face suspension. Anecdotes from public figures don't equal clinical evidence."
             />
             <p className="text-muted-foreground leading-relaxed">
               Celebrity endorsement (real or imagined) is a marketing tactic, not evidence. Rich people use unproven treatments too.
