@@ -39,6 +39,7 @@ serve(async (req) => {
     // Static pages with their priorities and change frequencies
     const staticPages = [
       { path: "/", priority: "1.0", changefreq: "daily" },
+      { path: "/quiz", priority: "0.7", changefreq: "weekly" },
       { path: "/articles", priority: "0.9", changefreq: "daily" },
       { path: "/blog", priority: "0.9", changefreq: "daily" },
       { path: "/about", priority: "0.7", changefreq: "monthly" },

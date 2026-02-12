@@ -53,7 +53,11 @@ export function SEOHead({
       <title>{pageTitle}</title>
       <meta name="description" content={pageDescription} />
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
-      {noIndex && <meta name="robots" content="noindex, nofollow" />}
+      {noIndex ? (
+        <meta name="robots" content="noindex, nofollow" />
+      ) : (
+        <meta name="robots" content="index, follow" />
+      )}
 
       {/* Open Graph */}
       <meta property="og:type" content={article ? "article" : "website"} />
