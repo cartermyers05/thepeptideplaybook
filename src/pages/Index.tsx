@@ -16,8 +16,8 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="The Peptide Playbook — AI-Powered Peptide Research Platform"
-        description="Stop Googling peptides. Get research-backed answers, personalized protocols, and a 45+ peptide database. Powered by 500+ studies. $67 lifetime access."
+        title="Peptide Playbook — Personalized, Research-Backed Peptide Protocols"
+        description="Stop guessing about peptides. Take a 60-second quiz and get a personalized, research-backed protocol matched to your goals. Based on 500+ peer-reviewed studies."
         canonical="/"
       />
       <HomepageSchemas />

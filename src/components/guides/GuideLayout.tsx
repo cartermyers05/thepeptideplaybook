@@ -56,6 +56,11 @@ export function GuideLayout({
         title={title}
         description={description}
         canonical={`/guides/${slug}`}
+        article={{
+          slug,
+          description,
+          title,
+        }}
       />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
