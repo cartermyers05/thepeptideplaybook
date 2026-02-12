@@ -3,9 +3,11 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useCheckout } from "@/hooks/useCheckout";
 import { useAuth } from "@/hooks/useAuth";
 import { useTier } from "@/hooks/useTier";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, FlaskConical, ShieldCheck, RefreshCw, Lock } from "lucide-react";
 import { PromoCodeInput } from "@/components/auth/PromoCodeInput";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -151,8 +153,8 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center max-w-sm px-4">
+    <div className="min-h-screen flex justify-center bg-background pt-16 pb-16">
+      <div className="text-center max-w-md px-4">
         {/* Header */}
         <div className="mb-6">
           <p className="text-xs text-primary font-medium mb-1">Early Access Pricing</p>
@@ -204,6 +206,57 @@ export default function Checkout() {
           <span>Powered by Stripe</span>
           <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
           <span>30-day refund</span>
+        </div>
+
+        {/* Trust Cards */}
+        <div className="mt-10 space-y-3 text-left">
+          {[
+            { icon: FlaskConical, title: "Research-Backed", desc: "Every recommendation cites peer-reviewed studies with evidence ratings. Not opinions. Evidence." },
+            { icon: ShieldCheck, title: "We Don't Sell Peptides", desc: "Zero financial incentive to push any product. We're education-only, which means completely unbiased." },
+            { icon: RefreshCw, title: "30-Day Guarantee", desc: "Not helpful? Full refund, no questions asked. Email support@peptideplaybook.org." },
+          ].map((card) => (
+            <Card key={card.title}>
+              <CardContent className="flex items-start gap-3 p-4">
+                <card.icon className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-sm">{card.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{card.desc}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Checkout FAQ */}
+        <div className="mt-10 text-left">
+          <h2 className="text-lg font-semibold mb-4">Common Questions</h2>
+          <Accordion type="single" collapsible className="w-full space-y-2">
+            {[
+              { q: "Can I find this information for free?", a: "You can find peptide information everywhere. That's the problem. One source says BPC-157 is safe, another says it's dangerous. We organize 500+ peer-reviewed studies, match them to YOUR goal, and give you a clear protocol with confidence ratings. That's what $67 buys: clarity instead of 10 more hours of confusion." },
+              { q: "Is this just a PDF?", a: "No. You get a personalized blueprint, an AI research coach you can ask unlimited questions (every answer cites studies), an interactive peptide comparison tool, a doctor conversation script, and a legal guide that updates as regulations change. It's a living toolkit." },
+              { q: "How do I know this isn't biased?", a: "We don't sell peptides, earn vendor commissions, or accept clinic sponsorships. Our only revenue is from the blueprint. Every recommendation includes its evidence rating so you can see the strength of the research yourself." },
+              { q: "What if it doesn't help me?", a: "Full refund within 30 days, no questions asked. Email support@peptideplaybook.org and we process it immediately." },
+              { q: "When do I get access?", a: "Instantly. Your blueprint, AI coach, and all tools are available the moment your payment processes. No waiting." },
+            ].map((item, i) => (
+              <AccordionItem key={i} value={`faq-${i}`} className="glass-card-subtle px-5 border-none">
+                <AccordionTrigger className="text-left text-sm font-medium py-3 hover:no-underline">{item.q}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-xs pb-3">{item.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+
+        {/* Second CTA */}
+        <div className="mt-10 mb-4">
+          <Button
+            size="lg"
+            className="w-full btn-primary-clean h-12"
+            onClick={() => startCheckout()}
+            disabled={isLoading || isRedeeming}
+          >
+            Get My Blueprint: $67
+          </Button>
+          <p className="text-xs text-muted-foreground mt-3">One-time payment. Lifetime access. Instant delivery.</p>
         </div>
       </div>
     </div>
