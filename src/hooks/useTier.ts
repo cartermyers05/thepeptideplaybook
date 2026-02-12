@@ -51,20 +51,26 @@ export function useTier() {
     }
   }, [user, checkSubscription]);
 
-  // Determine tier from profile or subscription status
+  // Determine tier: profile tier is the source of truth for one-time buyers
   const rawTier = profile?.tier || "free";
+  const paidTiers = ["member", "insider", "monthly", "annual"];
   
-  // Check if user has active subscription
+  // Check if user has active subscription (additive, never destructive)
   const isSubscribed = subscriptionStatus?.subscribed || false;
   const subscriptionPlan = subscriptionStatus?.plan;
   
-  // Determine effective tier
+  // Determine effective tier:
+  // 1. Profile tier "member" = one-time $67 purchase (permanent)
+  // 2. Subscription plan from check-subscription (if active)
+  // 3. Fall back to free
   let currentTier: Tier = "free";
+  if (paidTiers.includes(rawTier)) {
+    // One-time purchase or promo code — profile tier is authoritative
+    currentTier = "annual"; // Map all paid tiers to "annual" for isPaid logic
+  }
   if (isSubscribed && subscriptionPlan) {
+    // Active subscription overrides (could be a future upgrade)
     currentTier = subscriptionPlan as Tier;
-  } else if (rawTier === "monthly" || rawTier === "annual" || rawTier === "insider" || rawTier === "member") {
-    // Legacy paid users (one-time $67 purchase) - treat as annual
-    currentTier = "annual";
   }
 
   // User is paid if they have any paid tier

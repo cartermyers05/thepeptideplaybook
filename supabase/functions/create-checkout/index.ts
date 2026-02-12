@@ -44,8 +44,9 @@ serve(async (req) => {
     }
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Read request body
-    const { quizGoal } = await req.json().catch(() => ({ quizGoal: undefined }));
+    // Read request body — accept both "quizGoal" and "goal" field names
+    const body = await req.json().catch(() => ({}));
+    const quizGoal = body.quizGoal || body.goal || "not_specified";
 
     const stripe = new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
@@ -54,50 +55,50 @@ serve(async (req) => {
     // Check if user already has a Stripe customer
     const { data: profile } = await supabase
       .from("profiles")
-      .select("stripe_customer_id, subscription_status")
+      .select("stripe_customer_id, subscription_status, tier")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
-    // Check if user already has an active subscription
-    if (profile?.subscription_status === "active") {
+    // Check if user already has paid access
+    const paidTiers = ["member", "insider", "monthly", "annual"];
+    if (profile?.tier && paidTiers.includes(profile.tier)) {
       throw new Error("You already have active access. Go to your dashboard.");
     }
 
     let customerId = profile?.stripe_customer_id;
 
     if (!customerId) {
-      logStep("Creating new Stripe customer");
-      const customer = await stripe.customers.create({
-        email: user.email,
-        metadata: { supabase_user_id: user.id },
-      });
-      customerId = customer.id;
+      // Check if a Stripe customer exists by email
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        logStep("Found existing Stripe customer by email", { customerId });
+      } else {
+        logStep("Creating new Stripe customer");
+        const customer = await stripe.customers.create({
+          email: user.email,
+          metadata: { supabase_user_id: user.id },
+        });
+        customerId = customer.id;
+        logStep("Stripe customer created", { customerId });
+      }
 
       await supabase
         .from("profiles")
         .update({ stripe_customer_id: customerId })
         .eq("user_id", user.id);
-
-      logStep("Stripe customer created", { customerId });
     } else {
       logStep("Using existing Stripe customer", { customerId });
     }
 
     const origin = req.headers.get("origin") || "https://thepeptideplaybook.lovable.app";
 
-    // Create one-time payment checkout session — $67
+    // Create one-time payment checkout session using real Stripe Price ID
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: "Peptide Blueprint — Lifetime Access",
-              description: "Personalized peptide protocol, AI Research Coach, Decision Matrix, Doctor Script, Legal Guide",
-            },
-            unit_amount: 6700, // $67.00
-          },
+          price: "price_1SzoE7KivWYlZk5Kcze9jEXZ",
           quantity: 1,
         },
       ],
@@ -106,7 +107,7 @@ serve(async (req) => {
       cancel_url: `${origin}/checkout`,
       metadata: {
         user_id: user.id,
-        quiz_goal: quizGoal || "not_specified",
+        quiz_goal: quizGoal,
       },
       allow_promotion_codes: true,
     });
