@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PeptideDeepDive } from "@/components/protocol/PeptideDeepDive";
+import { ProtocolDetailView } from "@/components/protocol/ProtocolDetailView";
 import { getAllPeptideNames } from "@/lib/peptideDeepDive";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -74,11 +75,12 @@ function generateProtocolText(protocol: Protocol): string {
 
 // Protocol card for user-created protocols
 function UserProtocolCard({ 
-  protocol, onStart, onPause, onResume, onPrint, onExport,
+  protocol, onStart, onPause, onResume, onPrint, onExport, onView,
   isStarting, isPausing, isResuming
 }: { 
   protocol: Protocol; onStart: (id: string) => void; onPause: (id: string) => void;
   onResume: (id: string) => void; onPrint: (p: Protocol) => void; onExport: (p: Protocol) => void;
+  onView: (p: Protocol) => void;
   isStarting: boolean; isPausing: boolean; isResuming: boolean;
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -128,8 +130,8 @@ function UserProtocolCard({
               <Play className="w-3.5 h-3.5 mr-1.5" />{isResuming ? "Resuming..." : "Resume"}
             </Button>
           )}
-          <Button size="sm" variant="ghost" onClick={() => setIsExpanded(!isExpanded)} className="rounded-full">
-            View {isExpanded ? <ChevronUp className="w-3.5 h-3.5 ml-1" /> : <ChevronDown className="w-3.5 h-3.5 ml-1" />}
+          <Button size="sm" variant="ghost" onClick={() => onView(protocol)} className="rounded-full">
+            View <ArrowRight className="w-3.5 h-3.5 ml-1" />
           </Button>
           <Button size="sm" variant="ghost" onClick={() => onPrint(protocol)} className="rounded-full">
             <Printer className="w-3.5 h-3.5" />
@@ -138,43 +140,6 @@ function UserProtocolCard({
             <Download className="w-3.5 h-3.5" />
           </Button>
         </div>
-
-        {isExpanded && (
-          <div className="pt-4 mt-4 space-y-3" style={{ borderTop: "1px solid #E5E7EB" }}>
-            {protocol.notes && (
-              <div className="p-3 rounded-xl" style={{ backgroundColor: "#FFF7ED" }}>
-                <h4 className="text-sm font-medium mb-1 flex items-center gap-1.5" style={{ color: "#111827" }}>
-                  <MessageCircle className="w-3.5 h-3.5" style={{ color: "#3B82F6" }} /> Why This Protocol
-                </h4>
-                <p className="text-sm" style={{ color: "#6B7280" }}>{protocol.notes}</p>
-              </div>
-            )}
-            {protocol.peptides.map((peptide, index) => (
-              <div key={index} className="p-3 rounded-xl" style={{ border: "1px solid #E5E7EB" }}>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium" style={{ color: "#111827" }}>{peptide.name}</h4>
-                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}>{peptide.frequency}</span>
-                </div>
-                <p className="text-sm mb-2" style={{ color: "#6B7280" }}>{peptide.purpose}</p>
-                {peptide.rationale && (
-                  <p className="text-xs p-2 rounded-lg mb-2" style={{ backgroundColor: "#FFF7ED", color: "#374151" }}>
-                    <span className="font-medium" style={{ color: "#8B5CF6" }}>Why:</span> {peptide.rationale}
-                  </p>
-                )}
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div><span style={{ color: "#9CA3AF" }}>Dosage:</span> <span style={{ color: "#374151" }}>{peptide.dosage}</span></div>
-                  <div><span style={{ color: "#9CA3AF" }}>Timing:</span> <span style={{ color: "#374151" }}>{peptide.timing}</span></div>
-                </div>
-              </div>
-            ))}
-            <div className="p-3 rounded-xl" style={{ backgroundColor: "#FFFBEB", borderLeft: "4px solid #F59E0B" }}>
-              <p className="text-xs" style={{ color: "#92400E" }}>
-                <AlertTriangle className="w-3.5 h-3.5 inline mr-1" />
-                This protocol is for educational purposes only. Consult a healthcare provider before using any peptides.
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -193,6 +158,7 @@ const itemVariants = {
 export default function Protocols() {
   const [mutatingId, setMutatingId] = useState<string | null>(null);
   const [mutationType, setMutationType] = useState<"start" | "pause" | "resume" | null>(null);
+  const [selectedProtocol, setSelectedProtocol] = useState<Protocol | null>(null);
 
   const { protocols, isLoadingProtocols, startProtocol, pauseProtocol, resumeProtocol } = useProtocol();
   const { data: quizResponse } = useQuizResponse();
@@ -235,6 +201,14 @@ export default function Protocols() {
     URL.revokeObjectURL(url);
   };
 
+  if (selectedProtocol) {
+    return (
+      <DashboardLayout>
+        <ProtocolDetailView protocol={selectedProtocol} onBack={() => setSelectedProtocol(null)} />
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <motion.div 
@@ -264,6 +238,7 @@ export default function Protocols() {
                 onResume={handleResume}
                 onPrint={handlePrint}
                 onExport={handleExport}
+                onView={setSelectedProtocol}
                 isStarting={mutatingId === protocol.id && mutationType === "start"}
                 isPausing={mutatingId === protocol.id && mutationType === "pause"}
                 isResuming={mutatingId === protocol.id && mutationType === "resume"}
