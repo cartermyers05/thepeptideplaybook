@@ -1,60 +1,86 @@
 
 
-# Fix Post-Payment Flow
+# Personalize Dashboard Home from Quiz Responses
 
-## Problems Found
+## Overview
+Update the content inside existing dashboard sections to reflect each user's quiz answers. No layout, styling, or structural changes.
 
-1. **Metadata key mismatch**: `create-checkout` stores `quiz_goal` in Stripe metadata, but `verify-payment` reads `session.metadata?.goal` — the goal is never found, defaulting to "beginner" every time
-2. **ThankYou page hangs if not logged in**: If the auth session is lost (rare but possible), the page shows "verifying" forever with no escape
-3. **Wrong success copy**: Shows "Payment Confirmed!" instead of "Welcome to Peptide Playbook!" and "Your personalized blueprint is ready."
-4. **Redirects to /welcome**: Should redirect to `/dashboard` after 5 seconds
-5. **No password-set flow for unauthenticated users**: If somehow a user lands on /thank-you without being logged in, there's no way to set a password and access the dashboard
+## Data Source
+Create a new `useQuizResponse` hook that fetches the user's most recent row from `quiz_responses` (matched by `user_id`). The table contains:
+- `primary_goal` (e.g., "weight_loss", "recovery", "longevity", "performance", "general")
+- `age_range` (e.g., "25-34")
+- `experience_level` (e.g., "beginner", "intermediate")
+- `main_concerns` (string array, e.g., ["safety", "cost"])
 
 ## Changes
 
-### 1. Fix `verify-payment` metadata key (`supabase/functions/verify-payment/index.ts`)
-- Change `session.metadata?.goal` to `session.metadata?.quiz_goal` (line 198) to match what `create-checkout` stores
-- Also support unauthenticated verification: if no auth header, verify payment by session alone, return email so the frontend can help the user log in
-- Keep all existing logic (idempotency, referral completion, course creation, tier update)
+### New file: `src/hooks/useQuizResponse.ts`
+- Simple React Query hook: fetch from `quiz_responses` where `user_id = auth.uid()`, order by `created_at desc`, limit 1
+- Returns typed quiz response data or null
 
-### 2. Update `ThankYou.tsx` (`src/pages/ThankYou.tsx`)
-- **If user is logged in**: Call verify-payment as before, on success show:
-  - "Welcome to Peptide Playbook!"
-  - "Your personalized blueprint is ready."
-  - "Go to My Dashboard" button
-  - Auto-redirect to `/dashboard` after 5 seconds
-- **If user is NOT logged in** (session expired/lost):
-  - Still call verify-payment without auth to confirm payment is valid
-  - On success, show email from Stripe session + "Set your password" form (just password field)
-  - On password set, sign the user in and redirect to `/dashboard`
-- **If no session_id**: Show current "Looking for Something?" state (no change)
+### New file: `src/lib/quizPersonalization.ts`
+Static mapping data used by the dashboard (keeps Home.tsx clean):
 
-### 3. No changes to:
-- `create-checkout/index.ts` (already fixed in previous prompt)
-- `ProtectedRoute.tsx` (already correctly gates dashboard)
-- `useTier.ts` (correctly treats "member" as paid)
-- `Checkout.tsx` (no changes requested)
-- Any page layouts or designs
-- Navigation or other pages
+**Goal labels:**
+- weight_loss -> "Weight Loss"
+- recovery -> "Recovery & Healing"
+- longevity -> "Anti-Aging & Longevity"
+- performance -> "Performance & Energy"
+- general -> "Wellness"
 
-## Technical Details
+**Peptide matching:**
+- weight_loss -> Primary: Semaglutide, Secondary: Tirzepatide
+- recovery -> Primary: BPC-157, Secondary: TB-500
+- longevity -> Primary: GHK-Cu, Secondary: Epitalon
+- performance -> Primary: CJC-1295/Ipamorelin, Secondary: BPC-157
+- general -> Primary: BPC-157, Secondary: GHK-Cu
 
-### verify-payment changes
-```text
-Line 32-35: Make auth optional instead of required
-- If auth header present: authenticate user as before
-- If no auth header: proceed without user context, verify session only
-Line 164: Remove user_id mismatch check when no authenticated user
-Line 198: Change session.metadata?.goal to session.metadata?.quiz_goal
-Line 290: Return email from Stripe session in response
-```
+**Concern-based "Next Step" card:**
+- doctor -> "Prepare for your doctor visit" (link to doctor script section)
+- safety -> "Review safety profile" (link to peptide safety section)
+- legality -> "Check 2026 legal status" (link to legal guide)
+- cost -> "See cost breakdown" (link to cost section)
+- effectiveness -> "Read the evidence" (link to research section)
+- fallback -> "Explore the research" (link to guides)
 
-### ThankYou.tsx changes
-- Add new state: `stripeEmail` (string from verify response)
-- Add new state: `needsPassword` (boolean)
-- Add password form with single field + submit button
-- On form submit: call `supabase.auth.signInWithPassword({ email, password })` or `supabase.auth.updateUser({ password })` depending on whether user exists
-- On success: redirect to `/dashboard`
-- Update success copy text
-- Change auto-redirect target from `/welcome` to `/dashboard`
+**Goal-specific starter prompts** (4 per goal, as specified in the request)
 
+### Modified file: `src/pages/dashboard/Home.tsx`
+Content-only updates inside existing elements:
+
+1. **Greeting section** (lines 102-109)
+   - If quiz data exists: "{getGreeting()}, {displayName} -- here's your {goalLabel} Blueprint"
+   - Add personalization badge below: "Personalized for: {goalLabel} . {ageRange} . {experienceLevel}" in muted text
+   - If no quiz data: keep current generic greeting
+
+2. **Stat Card 1** (lines 114-133) -- currently "Active Protocol / Get Started"
+   - If quiz data and no protocol: Show "Your Protocol: {primaryPeptide}" with subtitle "Matched to your {goalLabel} goal"
+   - If protocol exists: keep current behavior (show protocol name)
+
+3. **Stat Card 2** (lines 136-155) -- currently "AI Research"
+   - If quiz data: Show "Research Confidence" with evidence info for their primary peptide
+   - If no quiz data: keep current behavior (conversation count)
+
+4. **Stat Card 3** (lines 158-171) -- currently "Peptide Database"
+   - If quiz data: Show personalized "Next Step" based on first item in `main_concerns` array
+   - If no quiz data: keep current behavior (40+ peptides)
+
+5. **Starter prompts** (lines 219-235)
+   - Replace the hardcoded 3 generic prompts with 4 goal-specific prompts from the mapping
+   - Grid changes from `sm:grid-cols-3` to `sm:grid-cols-2` to fit 4 prompts cleanly
+   - If no quiz data: keep current generic prompts
+
+6. **Popular Guides** section -- no changes (already good as-is)
+
+## What stays the same
+- All layout, card designs, colors, spacing, fonts, animations
+- Sidebar/nav, all other pages
+- "Continue Where You Left Off" section logic (recent chat)
+- Popular Guides section
+- Legal footer
+- Loading skeleton states
+
+## Technical Notes
+- The `useQuizResponse` hook is added to the existing data-fetching block in Home.tsx alongside `useProfile`, `useConversations`, `useProtocol`
+- All personalization is conditional: if `quizResponse` is null/undefined, every section falls back to its current generic content
+- No new dependencies needed
