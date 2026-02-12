@@ -60,11 +60,9 @@ export function BuildingAnimation({
   useEffect(() => {
     if (isComplete && !isSubmitting && !hasError) {
       const timer = setTimeout(() => {
-        // Navigate to personalized course preview
-        const goal = extractedValues.goal?.replace('_', '-') || 'beginner';
-        // Store goal in localStorage for checkout fallback
+        // Store goal in localStorage for results page
         localStorage.setItem('selectedCourseGoal', extractedValues.goal || 'beginner');
-        navigate(`/course/${goal}`, { replace: true });
+        navigate('/quiz/results', { replace: true });
       }, 1500);
       return () => clearTimeout(timer);
     }
