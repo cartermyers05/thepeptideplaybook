@@ -39,14 +39,50 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // 1. Check profile tier first — one-time buyers have tier = "member" set by verify-payment
+    const { data: profile } = await supabaseClient
+      .from("profiles")
+      .select("tier, stripe_customer_id, subscription_status")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const profileTier = profile?.tier;
+    logStep("Profile tier check", { profileTier });
+
+    // If profile tier indicates a paid user (member, insider, monthly, annual), check purchases to confirm
+    const paidTiers = ["member", "insider", "monthly", "annual"];
+    if (profileTier && paidTiers.includes(profileTier)) {
+      // Verify there's a purchase record (prevents manual tier manipulation)
+      const { data: purchases } = await supabaseClient
+        .from("purchases")
+        .select("id")
+        .eq("user_id", user.id)
+        .limit(1);
+
+      if (purchases && purchases.length > 0) {
+        logStep("One-time purchase confirmed, returning paid status", { tier: profileTier });
+        return new Response(JSON.stringify({
+          subscribed: true,
+          plan: profileTier,
+          subscription_end: null,
+          subscription_id: null,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+      logStep("Tier is paid but no purchase record found, checking Stripe");
+    }
+
+    // 2. Check Stripe for active subscriptions (future-proofing for recurring plans)
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     
-    // Get customer by email
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     
     if (customers.data.length === 0) {
-      logStep("No customer found");
-      return new Response(JSON.stringify({ subscribed: false }), {
+      logStep("No Stripe customer found");
+      // Don't reset tier — user may have been granted access via promo code
+      return new Response(JSON.stringify({ subscribed: false, plan: null, subscription_end: null }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
@@ -55,7 +91,6 @@ serve(async (req) => {
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
-    // Check for active subscriptions
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: "active",
@@ -73,7 +108,6 @@ serve(async (req) => {
       
       logStep("Active subscription found", { subscriptionId, endDate: subscriptionEnd });
 
-      // Update profile with subscription info
       await supabaseClient
         .from("profiles")
         .update({ 
@@ -83,24 +117,62 @@ serve(async (req) => {
           stripe_subscription_id: subscriptionId
         })
         .eq("user_id", user.id);
-    } else {
-      logStep("No active subscription found");
-      
-      // Check if they were previously subscribed (for churn tracking)
+
+      return new Response(JSON.stringify({
+        subscribed: true,
+        plan: "member",
+        subscription_end: subscriptionEnd,
+        subscription_id: subscriptionId,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // 3. No active subscription — check for one-time payment via Stripe sessions
+    logStep("No active subscription, checking for one-time payments");
+
+    // Also check purchases table as a fallback
+    const { data: purchases } = await supabaseClient
+      .from("purchases")
+      .select("id")
+      .eq("user_id", user.id)
+      .limit(1);
+
+    if (purchases && purchases.length > 0) {
+      logStep("Found purchase record — user has lifetime access");
+      // Ensure profile tier is correct
       await supabaseClient
         .from("profiles")
-        .update({ 
-          subscription_status: "inactive",
-          tier: "free"
-        })
+        .update({ tier: "member", subscription_status: "active" })
+        .eq("user_id", user.id);
+
+      return new Response(JSON.stringify({
+        subscribed: true,
+        plan: "member",
+        subscription_end: null,
+        subscription_id: null,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // No subscription AND no purchase — user is genuinely free
+    logStep("No subscription or purchase found — free tier");
+    // Only set to free if currently not in a paid tier (avoid race conditions)
+    if (!profileTier || !paidTiers.includes(profileTier)) {
+      await supabaseClient
+        .from("profiles")
+        .update({ subscription_status: "inactive" })
         .eq("user_id", user.id);
     }
 
     return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
-      tier: hasActiveSub ? "member" : "free",
-      subscription_end: subscriptionEnd,
-      subscription_id: subscriptionId,
+      subscribed: false,
+      plan: null,
+      subscription_end: null,
+      subscription_id: null,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
