@@ -755,12 +755,15 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           current_streak: number | null
+          first_visit_at: string | null
           full_name: string | null
           id: string
+          landing_page: string | null
           last_active_at: string | null
           questions_asked: number | null
           referral_code: string | null
           referred_by: string | null
+          referrer_url: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_status: string | null
@@ -769,18 +772,25 @@ export type Database = {
           trial_ends_at: string | null
           updated_at: string
           user_id: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
         }
         Insert: {
           ai_disclaimer_accepted_at?: string | null
           avatar_url?: string | null
           created_at?: string
           current_streak?: number | null
+          first_visit_at?: string | null
           full_name?: string | null
           id?: string
+          landing_page?: string | null
           last_active_at?: string | null
           questions_asked?: number | null
           referral_code?: string | null
           referred_by?: string | null
+          referrer_url?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
@@ -789,18 +799,25 @@ export type Database = {
           trial_ends_at?: string | null
           updated_at?: string
           user_id: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Update: {
           ai_disclaimer_accepted_at?: string | null
           avatar_url?: string | null
           created_at?: string
           current_streak?: number | null
+          first_visit_at?: string | null
           full_name?: string | null
           id?: string
+          landing_page?: string | null
           last_active_at?: string | null
           questions_asked?: number | null
           referral_code?: string | null
           referred_by?: string | null
+          referrer_url?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
@@ -809,6 +826,10 @@ export type Database = {
           trial_ends_at?: string | null
           updated_at?: string
           user_id?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Relationships: [
           {

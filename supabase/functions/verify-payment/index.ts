@@ -79,8 +79,8 @@ serve(async (req) => {
       logStep("No auth header, proceeding as unauthenticated");
     }
 
-    // Get session_id from request body
-    const { session_id } = await req.json();
+    // Get session_id and tracking data from request body
+    const { session_id, tracking } = await req.json();
 
     if (!session_id) {
       // No session_id — backup check requires auth
@@ -299,6 +299,29 @@ serve(async (req) => {
         logStep("Error recording purchase", { error: purchaseError.message });
       } else {
         logStep("Purchase recorded");
+      }
+
+      // Write tracking data to profile (only if not already set)
+      if (tracking && (tracking.landing_page || tracking.utm_source || tracking.referrer_url)) {
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("landing_page")
+          .eq("user_id", user.id)
+          .single();
+
+        if (!existingProfile?.landing_page) {
+          const trackingFields: Record<string, unknown> = {};
+          if (tracking.landing_page) trackingFields.landing_page = tracking.landing_page;
+          if (tracking.utm_source) trackingFields.utm_source = tracking.utm_source;
+          if (tracking.utm_medium) trackingFields.utm_medium = tracking.utm_medium;
+          if (tracking.utm_campaign) trackingFields.utm_campaign = tracking.utm_campaign;
+          if (tracking.utm_content) trackingFields.utm_content = tracking.utm_content;
+          if (tracking.referrer_url) trackingFields.referrer_url = tracking.referrer_url;
+          if (tracking.first_visit_at) trackingFields.first_visit_at = tracking.first_visit_at;
+
+          await supabase.from("profiles").update(trackingFields).eq("user_id", user.id);
+          logStep("Tracking data written to profile", trackingFields);
+        }
       }
 
       // Check referral completion
