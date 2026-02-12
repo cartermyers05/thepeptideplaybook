@@ -1,60 +1,68 @@
 
 
-# Upgrade AI Research Coach System Prompt
+# Add Deep Peptide Content to Protocol/Blueprint Pages
 
-## What Changes
+## Overview
+Create a rich, research-grade content library for each of the 7 matched peptides and display it within the existing protocol pages. The user's matched peptides (from quiz data) appear first with a "Your Match" badge; other peptides appear in a "Browse Other Peptides" section below.
 
-### 1. Replace system prompt in `supabase/functions/chat/index.ts`
+## New Files
 
-The `buildSystemPrompt` function (lines 323-651) will be replaced with the new prompt provided. The new prompt will be inserted **before** the existing peptide database and landmark studies data, which will continue to be appended as dynamic context.
+### 1. `src/lib/peptideDeepDive.ts` -- Static content library
+A single data file containing the full protocol structure for all 7 peptides. Each entry includes:
 
-**New prompt structure:**
-- Core identity: "Peptide Playbook AI Research Coach" (research assistant, not generic chatbot)
-- Response format: Direct answer first, evidence basis with star ratings, practical context, doctor talking point
-- Evidence ratings: 5-star scale (Strong/Good/Moderate/Preliminary/Emerging)
-- Safety rules: Always recommend healthcare provider, never say "safe" without qualification
-- Legal status awareness: 2026-current status for semaglutide, tirzepatide, BPC-157, TB-500, GHK-Cu, CJC-1295/Ipamorelin
-- Banned words list: "comprehensive," "cutting-edge," "unlock," "leverage," "utilize," "empower"
+- **overview**: one-line summary, evidence rating (1-5), legal status ("fda_approved" | "compounding" | "research_only")
+- **mechanism**: 3-4 sentence plain-language explanation of how it works
+- **evidence**: array of key findings, each with finding text + journal/year source
+- **dosing**: array of phases (phase name, dose, duration, source) + optional notes
+- **safety**: common side effects, serious concerns, known interactions, contraindications
+- **legal2026**: FDA status, prescription requirements, compounding availability, last updated date
+- **doctorScript**: opening line (templated with `{goal}`), key studies to reference, questions to ask, "if doctor isn't familiar" fallback text
 
-**What stays the same inside the function:**
-- The peptide database section (dynamically fetched from DB) continues to be appended
-- The landmark studies section continues to be appended
-- The reconstitution reference section stays
-- The aesthetics/looksmaxxing protocol section stays
-- The protocol creation questionnaire and tool definitions stay
-- All tool handling logic (create_protocol, get_user_progress) stays
-- The personal context section (check-ins, course, protocol) stays
+Peptides included: Semaglutide, Tirzepatide, BPC-157, TB-500, GHK-Cu, Epitalon, CJC-1295/Ipamorelin
 
-### 2. Add quiz response fetching to `supabase/functions/chat/index.ts`
+All content uses accurate, research-based information with real journal names, trial names, and sample sizes where available.
 
-Add a new function `getQuizContext` that queries the `quiz_responses` table for the authenticated user (using the service role client). If a quiz response exists, prepend this context block to the system prompt:
+### 2. `src/components/protocol/PeptideDeepDive.tsx` -- Display component
+A collapsible/accordion component that renders all 7 sections for a given peptide using the existing Card, Badge, and Collapsible UI components. Sections:
 
-```
-The user took our quiz and reported: Goal = [goal], Biggest Concern = [concern], 
-Experience Level = [experience], Age Range = [age_range]. Tailor your responses to 
-their experience level and focus on their stated goal. If they're a beginner 
-(experience = 'none' or 'researching'), explain concepts simply. If experienced, 
-you can use more technical language.
-```
+1. **Overview card** (always visible): Peptide name (bold), one-line summary, star rating display, "Matched to your [Goal] goal" line (if matched), legal status badge (green/yellow/red)
+2. **How It Works**: mechanism text in a simple paragraph
+3. **Evidence Summary**: "What the research shows:" header, bulleted findings with journal citations
+4. **Dosing Reference**: disclaimer banner at top, then a simple HTML table (Phase | Dose | Duration | Source), plus notes
+5. **Safety Profile**: 4 sub-lists (common side effects, serious concerns, interactions, contraindications)
+6. **Legal Status (2026)**: structured info block
+7. **Doctor Conversation Script**: opening line (with user's goal inserted), studies to reference, questions to ask, "if doctor isn't familiar" fallback
 
-This will be fetched alongside the existing `getPeptideContext` and `getUserPersonalContext` calls (around line 1015-1027).
+Each section uses a Collapsible so the card doesn't overwhelm -- Overview is always open, other sections expand on click.
 
-### 3. Also update the `coach/index.ts` system prompt
+## Modified Files
 
-The coach function has a simpler inline prompt (lines 104-325). Replace **both** prompts (the no-context fallback at line 106-128 and the full context version at line 184-324) with the same new core prompt, while keeping all the existing user-context-aware sections (check-in data, lesson progress, streak, etc.) that make the coach personalized.
+### 3. `src/pages/dashboard/MyPlan.tsx`
+After the existing `ProtocolPeptideList` component (line 131), add a new section:
 
-## Files Modified
+- Import `useQuizResponse` and `PeptideDeepDive`
+- If the user has a protocol, render a "Peptide Research Library" section showing deep dives for each peptide in their protocol (matched peptides first with "Your Match" badge)
+- Below matched peptides, show "Browse Other Peptides" with the remaining peptides from the library
+- If no protocol but quiz data exists, show all peptides with the matched ones highlighted at top
 
-1. `supabase/functions/chat/index.ts` -- Replace `buildSystemPrompt` content, add quiz context fetching
-2. `supabase/functions/coach/index.ts` -- Replace both system prompt variants with new prompt
+### 4. `src/pages/dashboard/Protocols.tsx`
+Inside the existing `ProtocolCard` expanded view (the `AnimatePresence` block around line 232), after the existing peptide detail cards and before the disclaimer:
+
+- Add a "Research Deep Dive" link/button for each peptide that expands the `PeptideDeepDive` component inline
+- This keeps the Protocols list page lighter -- deep content is one click away per peptide
 
 ## What Does NOT Change
+- Dashboard layout, sidebar, navigation, card designs
+- Colors, fonts, spacing
+- No other pages modified
+- No existing sections removed
+- The `ProtocolHeader`, `TodaySchedule`, `ProtocolReasoning`, `EmptyProtocolState` components stay as-is
+- The Protocols list page card structure stays the same
 
-- Chat UI layout or message bubble styling
-- No other backend functions modified
-- No other pages changed
-- Conversation history functionality stays intact
-- All existing tool calling (create_protocol, get_user_progress) stays
-- Dynamic peptide database fetching stays
-- Personal context (check-ins, courses, protocols) stays
-
+## Technical Notes
+- All content is static (no API calls needed) -- lives in `peptideDeepDive.ts`
+- The `PeptideDeepDive` component accepts a peptide name string and optional goal string for personalization
+- Legal status badge uses existing Badge component with color variants: `bg-green-100 text-green-800` (FDA Approved), `bg-yellow-100 text-yellow-800` (Compounding), `bg-red-100 text-red-800` (Research Only)
+- Star ratings rendered as repeated star emoji characters matching the evidence rating number
+- Doctor script goal placeholder `{goal}` is replaced with the user's goal label from `quizPersonalization.ts`
+- The `peptideDeepDive.ts` file will be large (~500-700 lines) since it contains research content for 7 peptides -- this is intentional as static content
