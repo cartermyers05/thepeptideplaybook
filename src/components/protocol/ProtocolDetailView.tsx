@@ -12,6 +12,8 @@ import { ProtocolProgressHeader } from "./ProtocolProgressHeader";
 import { ThisWeekCard } from "./ThisWeekCard";
 import { StartTrackingCard } from "./StartTrackingCard";
 import { Download, ArrowLeft } from "lucide-react";
+import { WeeklyCheckinCard } from "./WeeklyCheckinCard";
+import { CheckinHistory } from "./CheckinHistory";
 import {
   Accordion,
   AccordionContent,
@@ -193,6 +195,8 @@ export function ProtocolDetailView({ protocol, onBack }: ProtocolDetailViewProps
             nextMilestoneText={nextMilestoneText || ""}
           />
           <ThisWeekCard weeklyContent={weeklyContent} />
+          <WeeklyCheckinCard progressId={progress!.id} currentWeek={currentWeek} />
+          <CheckinHistory progressId={progress!.id} />
           <button
             onClick={() => progress && pauseTracking.mutate(progress.id)}
             style={{
