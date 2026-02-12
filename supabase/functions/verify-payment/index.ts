@@ -12,6 +12,38 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[VERIFY-PAYMENT] ${step}${detailsStr}`);
 };
 
+/** Update profile tier and verify it actually persisted */
+async function updateAndVerifyTier(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+): Promise<{ success: boolean; error?: string }> {
+  // Attempt update
+  const { error: updateError } = await supabase
+    .from("profiles")
+    .update({ tier: "member" })
+    .eq("user_id", userId);
+
+  if (updateError) {
+    logStep("Profile update failed", { error: updateError.message, code: updateError.code });
+    return { success: false, error: updateError.message };
+  }
+
+  // Verify the update actually stuck
+  const { data: verify, error: verifyError } = await supabase
+    .from("profiles")
+    .select("tier")
+    .eq("user_id", userId)
+    .single();
+
+  if (verifyError || verify?.tier !== "member") {
+    logStep("Profile update did NOT persist", { readBack: verify?.tier, error: verifyError?.message });
+    return { success: false, error: `Tier read-back mismatch: got ${verify?.tier}` };
+  }
+
+  logStep("Profile tier verified as member");
+  return { success: true };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -101,13 +133,20 @@ serve(async (req) => {
           .maybeSingle();
 
         if (!existingPurchase) {
-          await supabase.from("profiles").update({ tier: "member" }).eq("user_id", user.id);
+          const tierResult = await updateAndVerifyTier(supabase, user.id);
           await supabase.from("purchases").insert({
             user_id: user.id,
             tier: "member",
             amount: successfulPayment.amount,
             stripe_payment_id: successfulPayment.id,
           });
+
+          if (!tierResult.success) {
+            return new Response(JSON.stringify({ verified: true, tier_update_failed: true, error: tierResult.error }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 200,
+            });
+          }
         }
 
         return new Response(JSON.stringify({ verified: true }), {
@@ -165,6 +204,21 @@ serve(async (req) => {
 
     if (existingPurchase) {
       logStep("Purchase already recorded, skipping insert");
+
+      // Even if purchase exists, make sure tier is correct (auto-heal)
+      if (user) {
+        const { data: profileCheck } = await supabase
+          .from("profiles")
+          .select("tier")
+          .eq("user_id", user.id)
+          .single();
+
+        if (profileCheck && profileCheck.tier !== "member") {
+          logStep("Auto-healing tier on already-processed purchase");
+          await updateAndVerifyTier(supabase, user.id);
+        }
+      }
+
       return new Response(JSON.stringify({
         verified: true,
         already_processed: true,
@@ -188,6 +242,8 @@ serve(async (req) => {
     // Use quiz_goal from metadata (matches create-checkout)
     const goal = session.metadata?.quiz_goal || 'beginner';
     logStep("Creating user course", { goal });
+
+    let tierUpdateFailed = false;
 
     // Only do user-specific operations if we have a user
     if (user) {
@@ -217,16 +273,17 @@ serve(async (req) => {
         logStep("User course created successfully");
       }
 
-      // Update profile tier to member
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ tier: "member" })
-        .eq("user_id", user.id);
-
-      if (updateError) {
-        logStep("Error updating profile", { error: updateError.message });
-      } else {
-        logStep("Profile tier updated to member");
+      // Update profile tier with verification
+      const tierResult = await updateAndVerifyTier(supabase, user.id);
+      if (!tierResult.success) {
+        logStep("CRITICAL: Tier update failed after purchase", { error: tierResult.error });
+        // Retry once
+        logStep("Retrying tier update...");
+        const retryResult = await updateAndVerifyTier(supabase, user.id);
+        if (!retryResult.success) {
+          logStep("CRITICAL: Tier update retry also failed", { error: retryResult.error });
+          tierUpdateFailed = true;
+        }
       }
 
       // Record purchase
@@ -271,6 +328,7 @@ serve(async (req) => {
       verified: true,
       goal,
       email: session.customer_email,
+      tier_update_failed: tierUpdateFailed,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

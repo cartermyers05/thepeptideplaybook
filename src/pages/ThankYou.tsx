@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { CheckCircle, Loader2, AlertCircle, RefreshCw, ArrowRight } from "lucide-react";
@@ -12,6 +12,9 @@ import { useQueryClient } from "@tanstack/react-query";
 
 type VerificationState = "verifying" | "success" | "error" | "no_session" | "needs_password";
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
+
 export default function ThankYou() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -23,10 +26,11 @@ export default function ThankYou() {
   const [password, setPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const retryCount = useRef(0);
 
   const sessionId = searchParams.get("session_id");
 
-  const verifyPayment = async () => {
+  const verifyPayment = useCallback(async () => {
     if (!sessionId) {
       setVerificationState("no_session");
       return;
@@ -42,6 +46,13 @@ export default function ThankYou() {
 
       if (error) {
         console.error("Verification error:", error);
+        // Auto-retry on network/function errors
+        if (retryCount.current < MAX_RETRIES) {
+          retryCount.current += 1;
+          console.log(`Auto-retrying verification (${retryCount.current}/${MAX_RETRIES})...`);
+          setTimeout(verifyPayment, RETRY_DELAY_MS);
+          return;
+        }
         setVerificationState("error");
         setErrorMessage("Failed to verify payment. Please contact support.");
         return;
@@ -52,16 +63,27 @@ export default function ThankYou() {
         
         if (data.email) setStripeEmail(data.email);
 
+        // If tier update failed on backend, warn but still proceed
+        if (data.tier_update_failed) {
+          console.warn("Tier update failed on backend — check-subscription will auto-heal on dashboard load");
+        }
+
         if (user) {
-          // Logged in — show success + auto-redirect
           setVerificationState("success");
           setTimeout(() => navigate("/dashboard", { replace: true }), 5000);
         } else {
-          // Not logged in — need password to access dashboard
           setStripeEmail(data.email || "");
           setVerificationState("needs_password");
         }
       } else {
+        // Auto-retry for transient failures
+        if (retryCount.current < MAX_RETRIES && data.reason !== "user_mismatch") {
+          retryCount.current += 1;
+          console.log(`Auto-retrying verification (${retryCount.current}/${MAX_RETRIES}), reason: ${data.reason}`);
+          setTimeout(verifyPayment, RETRY_DELAY_MS);
+          return;
+        }
+
         const reasons: Record<string, string> = {
           not_paid: "Payment not completed. Please try again.",
           user_mismatch: "This payment session doesn't match your account.",
@@ -72,13 +94,17 @@ export default function ThankYou() {
       }
     } catch (err) {
       console.error("Verification failed:", err);
+      if (retryCount.current < MAX_RETRIES) {
+        retryCount.current += 1;
+        setTimeout(verifyPayment, RETRY_DELAY_MS);
+        return;
+      }
       setVerificationState("error");
       setErrorMessage("An unexpected error occurred.");
     }
-  };
+  }, [sessionId, user, navigate, queryClient]);
 
   useEffect(() => {
-    // Verify immediately — don't wait for auth since it's optional now
     if (sessionId) {
       verifyPayment();
     } else {
@@ -86,12 +112,11 @@ export default function ThankYou() {
     }
   }, [sessionId]);
 
-  // Re-verify when user logs in (e.g. after setting password)
+  // Re-verify WITH session_id when user logs in after setting password
   useEffect(() => {
-    if (user && verificationState === "needs_password") {
-      setVerificationState("success");
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      setTimeout(() => navigate("/dashboard", { replace: true }), 3000);
+    if (user && verificationState === "needs_password" && sessionId) {
+      retryCount.current = 0; // Reset retries for post-login verification
+      verifyPayment();
     }
   }, [user]);
 
@@ -101,22 +126,18 @@ export default function ThankYou() {
     setPasswordError("");
 
     try {
-      // Try signing in first (user may already have a password)
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: stripeEmail,
         password,
       });
 
       if (!signInError) {
-        // Signed in successfully — useAuth will pick up the session
-        return;
+        return; // useAuth will pick up session, useEffect above will re-verify
       }
 
-      // If sign-in failed, try updating password (for users created via admin API)
       const { error: updateError } = await supabase.auth.updateUser({ password });
       
       if (updateError) {
-        // Last resort: sign up with this email/password
         const { error: signUpError } = await supabase.auth.signUp({
           email: stripeEmail,
           password,
@@ -133,7 +154,11 @@ export default function ThankYou() {
     }
   };
 
-  // No session (direct visit)
+  const handleManualRetry = () => {
+    retryCount.current = 0;
+    verifyPayment();
+  };
+
   if (verificationState === "no_session") {
     return (
       <>
@@ -224,7 +249,7 @@ export default function ThankYou() {
               <h1 className="text-2xl font-bold">Verification Issue</h1>
               <p className="text-muted-foreground">{errorMessage}</p>
               <div className="space-y-3 pt-2">
-                <Button onClick={verifyPayment} className="w-full">
+                <Button onClick={handleManualRetry} className="w-full">
                   <RefreshCw className="w-4 h-4 mr-2" />Try Again
                 </Button>
                 <Button onClick={() => navigate("/dashboard")} variant="outline" className="w-full">Go to Dashboard</Button>
