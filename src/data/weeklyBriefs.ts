@@ -1,0 +1,638 @@
+export interface WeeklyBriefStat {
+  value: string;
+  label: string;
+}
+
+export interface WeeklyBrief {
+  title: string;
+  phase: number;
+  phaseName: string;
+  dose: string;
+  doseChange: boolean;
+  previousDose?: string;
+  newDose?: string;
+  doseAlertMessage?: string;
+  whatToExpect: string;
+  nutrition: string;
+  movement: string;
+  progressStats: WeeklyBriefStat[];
+  progressNote: string;
+  normalSymptoms: string[];
+  warningSymptoms: string[];
+}
+
+const DOSE_CHANGE_WEEKS = [5, 9, 13, 16] as const;
+
+export function isDoseChangeWeek(week: number): boolean {
+  return (DOSE_CHANGE_WEEKS as readonly number[]).includes(week);
+}
+
+export function getDoseForWeek(week: number): string {
+  if (week <= 4) return "0.25mg/week";
+  if (week <= 8) return "0.5mg/week";
+  if (week <= 12) return "1.0mg/week";
+  if (week <= 15) return "1.7mg/week";
+  return "2.4mg/week";
+}
+
+export function getPhaseForWeek(week: number): { phase: number; name: string } {
+  if (week <= 4) return { phase: 1, name: "Phase 1: Titration" };
+  if (week <= 8) return { phase: 2, name: "Phase 2: Building" };
+  if (week <= 16) return { phase: 3, name: "Phase 3: Acceleration" };
+  return { phase: 4, name: "Phase 4: Maintenance" };
+}
+
+export const weeklyBriefs: Record<number, WeeklyBrief> = {
+  1: {
+    title: "Your Body Is Adjusting",
+    phase: 1,
+    phaseName: "Phase 1: Titration",
+    dose: "0.25mg/week",
+    doseChange: false,
+    whatToExpect: "Most people feel pretty normal this week. The 0.25mg dose is intentionally low — your body is learning to respond to the medication. Some people notice a slight reduction in appetite. Some notice mild nausea within the first 24-48 hours after injection. Many notice nothing at all. All of these are normal.\n\nIf you feel nauseous, it typically peaks on injection day or the day after, then fades. Eating small, bland meals helps.",
+    nutrition: "Your appetite is probably still normal — use this window to build protein habits before it drops.\n\nDaily protein target: 1.2-1.5g per kg of bodyweight (roughly 110-135g for a 200 lb person). Eat protein first at every meal — before the bread, before the sides.\n\nSample day:\n• Breakfast: 3 eggs + Greek yogurt (~35g protein)\n• Lunch: Chicken or tuna over salad (~35g protein)\n• Dinner: Salmon or lean beef with rice and vegetables (~35g protein)\n• Snack: Protein shake, string cheese, or cottage cheese (~15g protein)\n\nInjection day: Stick with bland, easy foods — rice, toast, crackers, broth, ginger tea, bananas, plain chicken. Avoid greasy, fried, or spicy foods.",
+    movement: "Walk 20-30 minutes per day. That's it. Don't start a hardcore gym program the same week you start a new medication. If you're already active, maintain your current routine.\n\nWeek 3+: If you feel good, add one slightly more challenging session — a hill walk, a bike ride, or a beginner bodyweight routine (squats, pushups, planks).",
+    progressStats: [
+      { value: "1-2%", label: "expected weight loss" },
+      { value: "100g+", label: "daily protein target" },
+      { value: "20 min", label: "daily walking" },
+    ],
+    progressNote: "Weight change is minimal at this dose. The achievement of Phase 1 is tolerance — your body is ready for therapeutic doses.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  2: {
+    title: "Finding Your Rhythm",
+    phase: 1,
+    phaseName: "Phase 1: Titration",
+    dose: "0.25mg/week",
+    doseChange: false,
+    whatToExpect: "If you had mild nausea in Week 1, it's likely improving. Your body is adapting to GLP-1 receptor activation. Some people start to notice a subtle shift — the 'food noise' gets a little quieter. Cravings may feel slightly less urgent.\n\nDon't expect the scale to move much yet. Average weight change at 2 weeks is minimal. You're still on the starter dose.",
+    nutrition: "Your appetite is probably still normal — use this window to build protein habits before it drops.\n\nDaily protein target: 1.2-1.5g per kg of bodyweight (roughly 110-135g for a 200 lb person). Eat protein first at every meal — before the bread, before the sides.\n\nSample day:\n• Breakfast: 3 eggs + Greek yogurt (~35g protein)\n• Lunch: Chicken or tuna over salad (~35g protein)\n• Dinner: Salmon or lean beef with rice and vegetables (~35g protein)\n• Snack: Protein shake, string cheese, or cottage cheese (~15g protein)\n\nInjection day: Stick with bland, easy foods — rice, toast, crackers, broth, ginger tea, bananas, plain chicken. Avoid greasy, fried, or spicy foods.",
+    movement: "Walk 20-30 minutes per day. That's it. Don't start a hardcore gym program the same week you start a new medication. If you're already active, maintain your current routine.\n\nWeek 3+: If you feel good, add one slightly more challenging session — a hill walk, a bike ride, or a beginner bodyweight routine (squats, pushups, planks).",
+    progressStats: [
+      { value: "1-2%", label: "expected weight loss" },
+      { value: "100g+", label: "daily protein target" },
+      { value: "20 min", label: "daily walking" },
+    ],
+    progressNote: "Weight change is minimal at this dose. The achievement of Phase 1 is tolerance — your body is ready for therapeutic doses.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  3: {
+    title: "Building Confidence",
+    phase: 1,
+    phaseName: "Phase 1: Titration",
+    dose: "0.25mg/week",
+    doseChange: false,
+    whatToExpect: "Most early side effects have stabilized. Your body has adjusted to the baseline dose. You may notice portions are slightly smaller, or that you're satisfied sooner during meals. These changes are gradual and sometimes hard to notice until you look back.",
+    nutrition: "Your appetite is probably still normal — use this window to build protein habits before it drops.\n\nDaily protein target: 1.2-1.5g per kg of bodyweight (roughly 110-135g for a 200 lb person). Eat protein first at every meal — before the bread, before the sides.\n\nSample day:\n• Breakfast: 3 eggs + Greek yogurt (~35g protein)\n• Lunch: Chicken or tuna over salad (~35g protein)\n• Dinner: Salmon or lean beef with rice and vegetables (~35g protein)\n• Snack: Protein shake, string cheese, or cottage cheese (~15g protein)\n\nInjection day: Stick with bland, easy foods — rice, toast, crackers, broth, ginger tea, bananas, plain chicken. Avoid greasy, fried, or spicy foods.",
+    movement: "Walk 20-30 minutes per day. That's it. Don't start a hardcore gym program the same week you start a new medication. If you're already active, maintain your current routine.\n\nWeek 3+: If you feel good, add one slightly more challenging session — a hill walk, a bike ride, or a beginner bodyweight routine (squats, pushups, planks).",
+    progressStats: [
+      { value: "1-2%", label: "expected weight loss" },
+      { value: "100g+", label: "daily protein target" },
+      { value: "20 min", label: "daily walking" },
+    ],
+    progressNote: "Weight change is minimal at this dose. The achievement of Phase 1 is tolerance — your body is ready for therapeutic doses.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  4: {
+    title: "Preparing for Your First Increase",
+    phase: 1,
+    phaseName: "Phase 1: Titration",
+    dose: "0.25mg/week",
+    doseChange: false,
+    whatToExpect: "Nothing new at this dose — your body is fully adjusted to 0.25mg. This is your preparation week. Next week your dose doubles to 0.5mg, which is the most common point where nausea returns. Being prepared means you won't panic if it happens.",
+    nutrition: "Same protein-first approach. This is a good week to try high-protein, low-volume foods you'll lean on when appetite drops — protein shakes, bone broth with collagen, cottage cheese with berries. Find the ones you actually enjoy.\n\nProtein benchmark: By now you should consistently hit 100g+ protein per day. Once appetite drops at 0.5mg, hitting protein targets gets harder, not easier.",
+    movement: "Walk 20-30 minutes per day. That's it. Don't start a hardcore gym program the same week you start a new medication. If you're already active, maintain your current routine.\n\nWeek 3+: If you feel good, add one slightly more challenging session — a hill walk, a bike ride, or a beginner bodyweight routine (squats, pushups, planks).",
+    progressStats: [
+      { value: "1-2%", label: "expected weight loss" },
+      { value: "100g+", label: "daily protein target" },
+      { value: "20 min", label: "daily walking" },
+    ],
+    progressNote: "Weight change is minimal at this dose. The achievement of Phase 1 is tolerance — your body is ready for therapeutic doses.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  5: {
+    title: "The Shift Begins",
+    phase: 2,
+    phaseName: "Phase 2: Building",
+    dose: "0.5mg/week",
+    doseChange: true,
+    previousDose: "0.25mg",
+    newDose: "0.5mg",
+    doseAlertMessage: "Dose increase this week: 0.25mg → 0.5mg. GI side effects may briefly return. Follow your injection day protocol.",
+    whatToExpect: "This is where the medication starts working at a therapeutic level. Appetite reduction becomes noticeable — sometimes dramatically. People describe feeling satisfied after eating half of what they normally would. The constant background hum of thinking about food gets turned down.\n\nPossible side effects: nausea (most common), diarrhea, constipation, mild fatigue. These are dose-adjustment effects, not permanent. They typically peak in the first 2-3 days and resolve by day 5-7.",
+    nutrition: "Your appetite is dropping. Here's the danger: when you're not hungry, you don't eat enough. When you don't eat enough, you lose muscle — not just fat.\n\nRule #1: Eat even when you're not hungry. A protein shake counts. A handful of almonds counts.\nRule #2: Protein first, always. Target 25-30g per meal minimum.\n\nHigh-protein, low-volume foods for low appetite:\n• Greek yogurt with berries (15-20g/cup)\n• Protein shake with milk (25-30g)\n• Cottage cheese (14g per half cup)\n• Hard-boiled eggs (6g each — eat 3-4)\n• Bone broth with collagen powder (15-20g/mug)\n• Deli turkey roll-ups (15-20g)\n\nSet 3 phone alarms — breakfast, lunch, dinner. Eat something at each alarm even if you're not hungry.",
+    movement: "Resistance training is now non-negotiable. This is the signal that tells your body 'keep the muscle, burn the fat.'\n\nThis phase's minimum:\n• 2 resistance sessions per week (20-30 min each)\n• Bodyweight is fine: squats, pushups, rows, planks\n• Continue daily walks\n\nIf you've never lifted: bodyweight exercises count. The point is to load your muscles enough to signal preservation.",
+    progressStats: [
+      { value: "5-7%", label: "expected weight loss" },
+      { value: "2x/week", label: "resistance training" },
+      { value: "25-30g", label: "protein per meal" },
+    ],
+    progressNote: "If you're not seeing movement on the scale, don't adjust anything. The next dose increase often accelerates results.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  6: {
+    title: "The New Normal",
+    phase: 2,
+    phaseName: "Phase 2: Building",
+    dose: "0.5mg/week",
+    doseChange: false,
+    whatToExpect: "Nausea from the dose increase has usually resolved by now. Appetite suppression is consistent. You're likely eating 20-40% less than baseline without feeling deprived.\n\nSome people notice changes in food preferences — cravings for highly processed, sugary, or fatty foods may decrease. You might reach for simpler, lighter foods naturally.",
+    nutrition: "Your appetite is dropping. Here's the danger: when you're not hungry, you don't eat enough. When you don't eat enough, you lose muscle — not just fat.\n\nRule #1: Eat even when you're not hungry. A protein shake counts. A handful of almonds counts.\nRule #2: Protein first, always. Target 25-30g per meal minimum.\n\nHigh-protein, low-volume foods for low appetite:\n• Greek yogurt with berries (15-20g/cup)\n• Protein shake with milk (25-30g)\n• Cottage cheese (14g per half cup)\n• Hard-boiled eggs (6g each — eat 3-4)\n• Bone broth with collagen powder (15-20g/mug)\n• Deli turkey roll-ups (15-20g)\n\nSet 3 phone alarms — breakfast, lunch, dinner. Eat something at each alarm even if you're not hungry.",
+    movement: "Resistance training is now non-negotiable. This is the signal that tells your body 'keep the muscle, burn the fat.'\n\nThis phase's minimum:\n• 2 resistance sessions per week (20-30 min each)\n• Bodyweight is fine: squats, pushups, rows, planks\n• Continue daily walks\n\nIf you've never lifted: bodyweight exercises count. The point is to load your muscles enough to signal preservation.",
+    progressStats: [
+      { value: "5-7%", label: "expected weight loss" },
+      { value: "2x/week", label: "resistance training" },
+      { value: "25-30g", label: "protein per meal" },
+    ],
+    progressNote: "If you're not seeing movement on the scale, don't adjust anything. The next dose increase often accelerates results.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  7: {
+    title: "Protect What You're Building",
+    phase: 2,
+    phaseName: "Phase 2: Building",
+    dose: "0.5mg/week",
+    doseChange: false,
+    whatToExpect: "Steady state at 0.5mg. Most people are fully adjusted. Energy levels often start improving as initial weight comes off — carrying less weight means less effort for daily activities.",
+    nutrition: "Your appetite is dropping. Here's the danger: when you're not hungry, you don't eat enough. When you don't eat enough, you lose muscle — not just fat.\n\nRule #1: Eat even when you're not hungry. A protein shake counts. A handful of almonds counts.\nRule #2: Protein first, always. Target 25-30g per meal minimum.\n\nHigh-protein, low-volume foods for low appetite:\n• Greek yogurt with berries (15-20g/cup)\n• Protein shake with milk (25-30g)\n• Cottage cheese (14g per half cup)\n• Hard-boiled eggs (6g each — eat 3-4)\n• Bone broth with collagen powder (15-20g/mug)\n• Deli turkey roll-ups (15-20g)\n\nSet 3 phone alarms — breakfast, lunch, dinner. Eat something at each alarm even if you're not hungry.",
+    movement: "Resistance training is now non-negotiable. This is the signal that tells your body 'keep the muscle, burn the fat.'\n\nThis phase's minimum:\n• 2 resistance sessions per week (20-30 min each)\n• Bodyweight is fine: squats, pushups, rows, planks\n• Continue daily walks\n\nIf you've never lifted: bodyweight exercises count. The point is to load your muscles enough to signal preservation.",
+    progressStats: [
+      { value: "5-7%", label: "expected weight loss" },
+      { value: "2x/week", label: "resistance training" },
+      { value: "25-30g", label: "protein per meal" },
+    ],
+    progressNote: "If you're not seeing movement on the scale, don't adjust anything. The next dose increase often accelerates results.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  8: {
+    title: "Phase 2 Complete",
+    phase: 2,
+    phaseName: "Phase 2: Building",
+    dose: "0.5mg/week",
+    doseChange: false,
+    whatToExpect: "Final week at 0.5mg. Your body is ready for the next increase to 1.0mg. The GI adjustment from this increase is typically milder than the 0.25→0.5 jump because your GLP-1 receptors have 8 weeks of conditioning.",
+    nutrition: "Your appetite is dropping. Here's the danger: when you're not hungry, you don't eat enough. When you don't eat enough, you lose muscle — not just fat.\n\nRule #1: Eat even when you're not hungry. A protein shake counts. A handful of almonds counts.\nRule #2: Protein first, always. Target 25-30g per meal minimum.\n\nHigh-protein, low-volume foods for low appetite:\n• Greek yogurt with berries (15-20g/cup)\n• Protein shake with milk (25-30g)\n• Cottage cheese (14g per half cup)\n• Hard-boiled eggs (6g each — eat 3-4)\n• Bone broth with collagen powder (15-20g/mug)\n• Deli turkey roll-ups (15-20g)\n\nSet 3 phone alarms — breakfast, lunch, dinner. Eat something at each alarm even if you're not hungry.",
+    movement: "Resistance training is now non-negotiable. This is the signal that tells your body 'keep the muscle, burn the fat.'\n\nThis phase's minimum:\n• 2 resistance sessions per week (20-30 min each)\n• Bodyweight is fine: squats, pushups, rows, planks\n• Continue daily walks\n\nIf you've never lifted: bodyweight exercises count. The point is to load your muscles enough to signal preservation.",
+    progressStats: [
+      { value: "5-7%", label: "expected weight loss" },
+      { value: "2x/week", label: "resistance training" },
+      { value: "25-30g", label: "protein per meal" },
+    ],
+    progressNote: "If you're not seeing movement on the scale, don't adjust anything. The next dose increase often accelerates results.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  9: {
+    title: "Acceleration Begins",
+    phase: 3,
+    phaseName: "Phase 3: Acceleration",
+    dose: "1.0mg/week",
+    doseChange: true,
+    previousDose: "0.5mg",
+    newDose: "1.0mg",
+    doseAlertMessage: "Dose increase this week: 0.5mg → 1.0mg. GI side effects may briefly return. Follow your injection day protocol.",
+    whatToExpect: "At 1.0mg, you're entering the therapeutic range. Appetite suppression is strong. Most people describe a fundamental shift — not just 'less hungry' but a qualitative change in how they think about food. Cravings for processed, high-calorie foods often drop significantly.\n\nWeight loss accelerates from here. In the STEP 1 trial, the steepest weight loss curve occurred between weeks 8-20.",
+    nutrition: "Undereating is now your biggest risk. At 1.0mg, it's easy to accidentally eat 600-800 calories in a day. That triggers muscle wasting, hair loss, and fatigue.\n\nNon-negotiable minimums:\n• At least 3 eating occasions per day\n• At least 1,200 calories per day\n• At least 100g protein per day\n• At least 8 cups of water per day\n\nWhen food sounds disgusting (it happens):\n• Protein shake — liquid goes down easier than solid food\n• Bone broth with collagen — warm, savory, 15-20g protein per mug\n• Greek yogurt — even a few spoonfuls is 15g protein\n• Almonds + cheese stick — 12g protein, minimal chewing\n\nThe point is never zero. Something always goes in.",
+    movement: "2-3 resistance sessions per week. Your caloric deficit is significant — exercise is for body composition, not calorie burning. You're shaping what you'll look like at goal weight.\n\nFull-body routine (25-30 min):\n• Squats or lunges: 3 sets of 10-12\n• Pushups: 3 sets of 8-12\n• Rows (band or dumbbell): 3 sets of 10-12\n• Planks: 3 sets of 20-30 seconds\n• Rest 60-90 seconds between sets\n\nProgressive overload: add a small amount of weight or an extra set when exercises feel manageable.",
+    progressStats: [
+      { value: "8-10%", label: "expected weight loss" },
+      { value: "2-3x/week", label: "resistance training" },
+      { value: "100g+", label: "daily protein" },
+    ],
+    progressNote: "Weight loss isn't linear. Plateaus lasting 1-2 weeks are normal. Water retention, hormonal cycles, and muscle gain all cause temporary stalls.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  10: {
+    title: "Maintaining Momentum",
+    phase: 3,
+    phaseName: "Phase 3: Acceleration",
+    dose: "1.0mg/week",
+    doseChange: false,
+    whatToExpect: "You're adjusting to 1.0mg. Side effects from the increase should be resolving. Appetite suppression is strong and consistent.\n\nYou might hit a 1-2 week weight plateau. This is normal — water retention, hormonal cycles, and body recomposition all cause temporary stalls. Keep doing what you're doing.",
+    nutrition: "Undereating is now your biggest risk. At 1.0mg, it's easy to accidentally eat 600-800 calories in a day. That triggers muscle wasting, hair loss, and fatigue.\n\nNon-negotiable minimums:\n• At least 3 eating occasions per day\n• At least 1,200 calories per day\n• At least 100g protein per day\n• At least 8 cups of water per day\n\nWhen food sounds disgusting (it happens):\n• Protein shake — liquid goes down easier than solid food\n• Bone broth with collagen — warm, savory, 15-20g protein per mug\n• Greek yogurt — even a few spoonfuls is 15g protein\n• Almonds + cheese stick — 12g protein, minimal chewing\n\nThe point is never zero. Something always goes in.",
+    movement: "2-3 resistance sessions per week. Your caloric deficit is significant — exercise is for body composition, not calorie burning. You're shaping what you'll look like at goal weight.\n\nFull-body routine (25-30 min):\n• Squats or lunges: 3 sets of 10-12\n• Pushups: 3 sets of 8-12\n• Rows (band or dumbbell): 3 sets of 10-12\n• Planks: 3 sets of 20-30 seconds\n• Rest 60-90 seconds between sets\n\nProgressive overload: add a small amount of weight or an extra set when exercises feel manageable.",
+    progressStats: [
+      { value: "8-10%", label: "expected weight loss" },
+      { value: "2-3x/week", label: "resistance training" },
+      { value: "100g+", label: "daily protein" },
+    ],
+    progressNote: "Weight loss isn't linear. Plateaus lasting 1-2 weeks are normal. Water retention, hormonal cycles, and muscle gain all cause temporary stalls.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  11: {
+    title: "Body Composition Matters",
+    phase: 3,
+    phaseName: "Phase 3: Acceleration",
+    dose: "1.0mg/week",
+    doseChange: false,
+    whatToExpect: "Your weight is coming down and the quality of that weight loss is determined by what you're doing right now — specifically, whether you're training.\n\nIn the STEP 1 trial, approximately 40% of weight lost was lean mass in sedentary participants. Those who trained preserved significantly more muscle.",
+    nutrition: "Undereating is now your biggest risk. At 1.0mg, it's easy to accidentally eat 600-800 calories in a day. That triggers muscle wasting, hair loss, and fatigue.\n\nNon-negotiable minimums:\n• At least 3 eating occasions per day\n• At least 1,200 calories per day\n• At least 100g protein per day\n• At least 8 cups of water per day\n\nWhen food sounds disgusting (it happens):\n• Protein shake — liquid goes down easier than solid food\n• Bone broth with collagen — warm, savory, 15-20g protein per mug\n• Greek yogurt — even a few spoonfuls is 15g protein\n• Almonds + cheese stick — 12g protein, minimal chewing\n\nThe point is never zero. Something always goes in.",
+    movement: "2-3 resistance sessions per week. Your caloric deficit is significant — exercise is for body composition, not calorie burning. You're shaping what you'll look like at goal weight.\n\nFull-body routine (25-30 min):\n• Squats or lunges: 3 sets of 10-12\n• Pushups: 3 sets of 8-12\n• Rows (band or dumbbell): 3 sets of 10-12\n• Planks: 3 sets of 20-30 seconds\n• Rest 60-90 seconds between sets\n\nProgressive overload: add a small amount of weight or an extra set when exercises feel manageable.",
+    progressStats: [
+      { value: "8-10%", label: "expected weight loss" },
+      { value: "2-3x/week", label: "resistance training" },
+      { value: "100g+", label: "daily protein" },
+    ],
+    progressNote: "Weight loss isn't linear. Plateaus lasting 1-2 weeks are normal. Water retention, hormonal cycles, and muscle gain all cause temporary stalls.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  12: {
+    title: "Preparing for the Biggest Jump",
+    phase: 3,
+    phaseName: "Phase 3: Acceleration",
+    dose: "1.0mg/week",
+    doseChange: false,
+    whatToExpect: "Final week at 1.0mg. Next week's jump to 1.7mg is the largest single increase in the protocol (0.7mg vs. previous 0.5mg increases). Your GLP-1 receptors have 12 weeks of conditioning, so your body is better prepared than you think.",
+    nutrition: "Undereating is now your biggest risk. At 1.0mg, it's easy to accidentally eat 600-800 calories in a day. That triggers muscle wasting, hair loss, and fatigue.\n\nNon-negotiable minimums:\n• At least 3 eating occasions per day\n• At least 1,200 calories per day\n• At least 100g protein per day\n• At least 8 cups of water per day\n\nWhen food sounds disgusting (it happens):\n• Protein shake — liquid goes down easier than solid food\n• Bone broth with collagen — warm, savory, 15-20g protein per mug\n• Greek yogurt — even a few spoonfuls is 15g protein\n• Almonds + cheese stick — 12g protein, minimal chewing\n\nThe point is never zero. Something always goes in.",
+    movement: "2-3 resistance sessions per week. Your caloric deficit is significant — exercise is for body composition, not calorie burning. You're shaping what you'll look like at goal weight.\n\nFull-body routine (25-30 min):\n• Squats or lunges: 3 sets of 10-12\n• Pushups: 3 sets of 8-12\n• Rows (band or dumbbell): 3 sets of 10-12\n• Planks: 3 sets of 20-30 seconds\n• Rest 60-90 seconds between sets\n\nProgressive overload: add a small amount of weight or an extra set when exercises feel manageable.",
+    progressStats: [
+      { value: "8-10%", label: "expected weight loss" },
+      { value: "2-3x/week", label: "resistance training" },
+      { value: "100g+", label: "daily protein" },
+    ],
+    progressNote: "Weight loss isn't linear. Plateaus lasting 1-2 weeks are normal. Water retention, hormonal cycles, and muscle gain all cause temporary stalls.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  13: {
+    title: "The Big Jump",
+    phase: 3,
+    phaseName: "Phase 3: Acceleration",
+    dose: "1.7mg/week",
+    doseChange: true,
+    previousDose: "1.0mg",
+    newDose: "1.7mg",
+    doseAlertMessage: "Dose increase this week: 1.0mg → 1.7mg. GI side effects may briefly return. Follow your injection day protocol.",
+    whatToExpect: "The largest dose increase in the protocol. Appetite suppression at 1.7mg is strong — for many people, 'not hungry' becomes the default state. Food becomes functional. This is powerful for weight loss but creates real undereating risk.\n\nSet phone alarms for meals if you haven't already. You need external reminders to eat at this dose.",
+    nutrition: "Maximum appetite suppression means volume is the enemy. Switch to calorie-dense, protein-rich foods that deliver maximum nutrition in minimum bites.\n\nBest foods at this dose:\n• Nut butter on toast (protein + healthy fat in a few bites)\n• Full-fat Greek yogurt with granola\n• Cheese and crackers\n• Trail mix (high calories per handful)\n• Protein smoothie with banana, peanut butter, milk, and protein powder (300-400 cal, 30g+ protein)\n• Avocado on eggs\n\nConsider a daily multivitamin — iron, B12, and vitamin D are common deficiencies when caloric intake drops significantly.",
+    movement: "Maintain 2-3 resistance sessions + daily activity. Critical: fuel your workouts with at least a small protein-rich snack 1-2 hours before training. Working out completely fasted on GLP-1 medications can cause dizziness, nausea, and poor performance.\n\nIf you've been consistent since Week 5, you're 8+ weeks into strength training. You should be visibly stronger. Don't stop now — this is where the investment pays off.",
+    progressStats: [
+      { value: "10-12%", label: "expected weight loss" },
+      { value: "1,200+", label: "minimum daily calories" },
+      { value: "3x/week", label: "resistance training" },
+    ],
+    progressNote: "Weight loss isn't linear. Plateaus lasting 1-2 weeks are normal. Water retention, hormonal cycles, and muscle gain all cause temporary stalls.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  14: {
+    title: "Full Assessment",
+    phase: 3,
+    phaseName: "Phase 3: Acceleration",
+    dose: "1.7mg/week",
+    doseChange: false,
+    whatToExpect: "You're 14 weeks in — roughly 70% through titration. Time for an honest self-assessment. Check your weight, review your progress photos, assess energy and mood. If you're chronically fatigued or losing hair, you're likely undereating.",
+    nutrition: "Maximum appetite suppression means volume is the enemy. Switch to calorie-dense, protein-rich foods that deliver maximum nutrition in minimum bites.\n\nBest foods at this dose:\n• Nut butter on toast (protein + healthy fat in a few bites)\n• Full-fat Greek yogurt with granola\n• Cheese and crackers\n• Trail mix (high calories per handful)\n• Protein smoothie with banana, peanut butter, milk, and protein powder (300-400 cal, 30g+ protein)\n• Avocado on eggs\n\nConsider a daily multivitamin — iron, B12, and vitamin D are common deficiencies when caloric intake drops significantly.",
+    movement: "Maintain 2-3 resistance sessions + daily activity. Critical: fuel your workouts with at least a small protein-rich snack 1-2 hours before training. Working out completely fasted on GLP-1 medications can cause dizziness, nausea, and poor performance.\n\nIf you've been consistent since Week 5, you're 8+ weeks into strength training. You should be visibly stronger. Don't stop now — this is where the investment pays off.",
+    progressStats: [
+      { value: "10-12%", label: "expected weight loss" },
+      { value: "1,200+", label: "minimum daily calories" },
+      { value: "3x/week", label: "resistance training" },
+    ],
+    progressNote: "Weight loss isn't linear. Plateaus lasting 1-2 weeks are normal. Water retention, hormonal cycles, and muscle gain all cause temporary stalls.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  15: {
+    title: "Almost at Full Dose",
+    phase: 3,
+    phaseName: "Phase 3: Acceleration",
+    dose: "1.7mg/week",
+    doseChange: false,
+    whatToExpect: "One more increase to go. After next week's move to 2.4mg, no more escalation. You've done the hard part — four separate dose adjustments, each one requiring your body to recalibrate.",
+    nutrition: "Maximum appetite suppression means volume is the enemy. Switch to calorie-dense, protein-rich foods that deliver maximum nutrition in minimum bites.\n\nBest foods at this dose:\n• Nut butter on toast (protein + healthy fat in a few bites)\n• Full-fat Greek yogurt with granola\n• Cheese and crackers\n• Trail mix (high calories per handful)\n• Protein smoothie with banana, peanut butter, milk, and protein powder (300-400 cal, 30g+ protein)\n• Avocado on eggs\n\nConsider a daily multivitamin — iron, B12, and vitamin D are common deficiencies when caloric intake drops significantly.",
+    movement: "Maintain 2-3 resistance sessions + daily activity. Critical: fuel your workouts with at least a small protein-rich snack 1-2 hours before training. Working out completely fasted on GLP-1 medications can cause dizziness, nausea, and poor performance.\n\nIf you've been consistent since Week 5, you're 8+ weeks into strength training. You should be visibly stronger. Don't stop now — this is where the investment pays off.",
+    progressStats: [
+      { value: "10-12%", label: "expected weight loss" },
+      { value: "1,200+", label: "minimum daily calories" },
+      { value: "3x/week", label: "resistance training" },
+    ],
+    progressNote: "Weight loss isn't linear. Plateaus lasting 1-2 weeks are normal. Water retention, hormonal cycles, and muscle gain all cause temporary stalls.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  16: {
+    title: "You've Reached Therapeutic Dose",
+    phase: 3,
+    phaseName: "Phase 3: Acceleration",
+    dose: "2.4mg/week",
+    doseChange: true,
+    previousDose: "1.7mg",
+    newDose: "2.4mg",
+    doseAlertMessage: "Dose increase this week: 1.7mg → 2.4mg. GI side effects may briefly return. Follow your injection day protocol.",
+    whatToExpect: "This is it — 2.4mg, the same dose that produced the headline results in the STEP trials. Maximum appetite suppression. Maximum GLP-1 receptor activation. Weight loss continues — the steepest losses in the trials occurred during weeks 12-28.\n\nEvery calorie you eat needs to earn its place. Protein, healthy fats, fiber, micronutrients.",
+    nutrition: "Maximum appetite suppression means volume is the enemy. Switch to calorie-dense, protein-rich foods that deliver maximum nutrition in minimum bites.\n\nBest foods at this dose:\n• Nut butter on toast (protein + healthy fat in a few bites)\n• Full-fat Greek yogurt with granola\n• Cheese and crackers\n• Trail mix (high calories per handful)\n• Protein smoothie with banana, peanut butter, milk, and protein powder (300-400 cal, 30g+ protein)\n• Avocado on eggs\n\nConsider a daily multivitamin — iron, B12, and vitamin D are common deficiencies when caloric intake drops significantly.",
+    movement: "Maintain 2-3 resistance sessions + daily activity. Critical: fuel your workouts with at least a small protein-rich snack 1-2 hours before training. Working out completely fasted on GLP-1 medications can cause dizziness, nausea, and poor performance.\n\nIf you've been consistent since Week 5, you're 8+ weeks into strength training. You should be visibly stronger. Don't stop now — this is where the investment pays off.",
+    progressStats: [
+      { value: "10-12%", label: "expected weight loss" },
+      { value: "1,200+", label: "minimum daily calories" },
+      { value: "3x/week", label: "resistance training" },
+    ],
+    progressNote: "Weight loss isn't linear. Plateaus lasting 1-2 weeks are normal. Water retention, hormonal cycles, and muscle gain all cause temporary stalls.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  17: {
+    title: "The Long Game Begins",
+    phase: 4,
+    phaseName: "Phase 4: Maintenance",
+    dose: "2.4mg/week",
+    doseChange: false,
+    whatToExpect: "No more dose changes. Your body has fully adjusted. Weight loss will continue but the pace changes. Weeks 1-16 show the fastest losses. Weeks 17-40 show continued but slower progress. This is a marathon, not a sprint.",
+    nutrition: "Start building eating patterns you can maintain long-term. This means protein habits that are second nature, meal structures that work for your life, and not restrictive diets that collapse under stress.\n\nNew focus: prebiotic and probiotic foods. Gut health is increasingly important on long-term GLP-1 therapy. Add fermented foods (yogurt, kimchi, sauerkraut, kefir) and prebiotic fibers (garlic, onions, bananas, oats).",
+    movement: "Maintain your routine. If motivation is dipping, try new variations — swap exercises, try a class, change your walking route. Small novelty prevents burnout.\n\nStart thinking long-term: is this routine sustainable at month 6? Month 12? The best exercise is the one you'll actually do consistently. Find what you enjoy.",
+    progressStats: [
+      { value: "12-15%", label: "expected weight loss" },
+      { value: "sustained", label: "habit maintenance" },
+      { value: "long-term", label: "focus shift" },
+    ],
+    progressNote: "The pace slows, but progress continues. Most people reach their lowest weight between weeks 40-52. You're in the strongest phase now.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  18: {
+    title: "Trusting the Process",
+    phase: 4,
+    phaseName: "Phase 4: Maintenance",
+    dose: "2.4mg/week",
+    doseChange: false,
+    whatToExpect: "Weight loss at this stage often happens in a 'staircase' pattern — flat for a few days, then a sudden drop. Don't change anything during a plateau. The medication is still working. Your caloric deficit still exists.",
+    nutrition: "Start building eating patterns you can maintain long-term. This means protein habits that are second nature, meal structures that work for your life, and not restrictive diets that collapse under stress.\n\nNew focus: prebiotic and probiotic foods. Gut health is increasingly important on long-term GLP-1 therapy. Add fermented foods (yogurt, kimchi, sauerkraut, kefir) and prebiotic fibers (garlic, onions, bananas, oats).",
+    movement: "Maintain your routine. If motivation is dipping, try new variations — swap exercises, try a class, change your walking route. Small novelty prevents burnout.\n\nStart thinking long-term: is this routine sustainable at month 6? Month 12? The best exercise is the one you'll actually do consistently. Find what you enjoy.",
+    progressStats: [
+      { value: "12-15%", label: "expected weight loss" },
+      { value: "sustained", label: "habit maintenance" },
+      { value: "long-term", label: "focus shift" },
+    ],
+    progressNote: "The pace slows, but progress continues. Most people reach their lowest weight between weeks 40-52. You're in the strongest phase now.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  19: {
+    title: "Preparing for Independence",
+    phase: 4,
+    phaseName: "Phase 4: Maintenance",
+    dose: "2.4mg/week",
+    doseChange: false,
+    whatToExpect: "Next week is your final guided brief. But your protocol isn't over — it means you've graduated from guided to self-directed maintenance. You have every tool you need: you know what to eat, how to train, how to manage side effects.",
+    nutrition: "Start building eating patterns you can maintain long-term. This means protein habits that are second nature, meal structures that work for your life, and not restrictive diets that collapse under stress.\n\nNew focus: prebiotic and probiotic foods. Gut health is increasingly important on long-term GLP-1 therapy. Add fermented foods (yogurt, kimchi, sauerkraut, kefir) and prebiotic fibers (garlic, onions, bananas, oats).",
+    movement: "Maintain your routine. If motivation is dipping, try new variations — swap exercises, try a class, change your walking route. Small novelty prevents burnout.\n\nStart thinking long-term: is this routine sustainable at month 6? Month 12? The best exercise is the one you'll actually do consistently. Find what you enjoy.",
+    progressStats: [
+      { value: "12-15%", label: "expected weight loss" },
+      { value: "sustained", label: "habit maintenance" },
+      { value: "long-term", label: "focus shift" },
+    ],
+    progressNote: "The pace slows, but progress continues. Most people reach their lowest weight between weeks 40-52. You're in the strongest phase now.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+  20: {
+    title: "Graduation",
+    phase: 4,
+    phaseName: "Phase 4: Maintenance",
+    dose: "2.4mg/week",
+    doseChange: false,
+    whatToExpect: "Twenty weeks. You've completed full dose escalation, built protein habits, established a training routine, and navigated every side effect. Typical progress: 12-15% of starting body weight lost. The STEP 1 trial showed continued progress through week 68 — you're in the strongest phase now.",
+    nutrition: "Start building eating patterns you can maintain long-term. This means protein habits that are second nature, meal structures that work for your life, and not restrictive diets that collapse under stress.\n\nNew focus: prebiotic and probiotic foods. Gut health is increasingly important on long-term GLP-1 therapy. Add fermented foods (yogurt, kimchi, sauerkraut, kefir) and prebiotic fibers (garlic, onions, bananas, oats).",
+    movement: "Maintain your routine. If motivation is dipping, try new variations — swap exercises, try a class, change your walking route. Small novelty prevents burnout.\n\nStart thinking long-term: is this routine sustainable at month 6? Month 12? The best exercise is the one you'll actually do consistently. Find what you enjoy.",
+    progressStats: [
+      { value: "12-15%", label: "expected weight loss" },
+      { value: "sustained", label: "habit maintenance" },
+      { value: "long-term", label: "focus shift" },
+    ],
+    progressNote: "The pace slows, but progress continues. Most people reach their lowest weight between weeks 40-52. You're in the strongest phase now.",
+    normalSymptoms: [
+      "Mild nausea during dose changes",
+      "Reduced appetite",
+      "Slight fatigue in first 2-3 days of new dose",
+      "Minor injection site redness",
+    ],
+    warningSymptoms: [
+      "Vomiting lasting more than 24 hours",
+      "Severe or persistent abdominal pain",
+      "Signs of dehydration (dark urine, dizziness, racing heart)",
+      "Unable to keep fluids down",
+      "Symptoms significantly worse than previous increases",
+    ],
+  },
+};
