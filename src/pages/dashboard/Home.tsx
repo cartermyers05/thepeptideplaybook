@@ -1,67 +1,108 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, MessageCircle, ClipboardList, Shield } from "lucide-react";
+import { ArrowRight, MessageCircle, GitCompareArrows, Shield } from "lucide-react";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
+import { Progress } from "@/components/ui/progress";
+import { useActiveProtocolProgress } from "@/hooks/useActiveProtocolProgress";
 import { useQuizResponse } from "@/hooks/useQuizResponse";
-import { getGoalLabel, getPeptideMatch } from "@/lib/quizPersonalization";
-import { getPeptideDeepDive, type LegalStatus } from "@/lib/peptideDeepDive";
+import { getGoalLabel } from "@/lib/quizPersonalization";
 
-// Goal-specific starter prompts for quick action cards
-const goalChatPrompts: Record<string, string> = {
-  weight_loss: "What side effects should I expect with semaglutide?",
-  recovery: "Is BPC-157 safe with anti-inflammatory medications?",
-  longevity: "What's the evidence for GHK-Cu in skin rejuvenation?",
-  performance: "How does CJC-1295 affect natural growth hormone?",
-  general: "What's the most well-researched peptide right now?",
+// === CONTENT MAPS ===
+
+const weekTitles: Record<number, string> = {
+  1: "Your Body Is Adjusting",
+  2: "Finding Your Rhythm",
+  3: "Building Confidence",
+  4: "Preparing for Your First Increase",
+  5: "The Shift Begins",
+  6: "The New Normal",
+  7: "Protect What You're Building",
+  8: "Phase 2 Complete",
+  9: "Acceleration Begins",
+  10: "Maintaining Momentum",
+  11: "Body Composition Matters",
+  12: "Preparing for the Biggest Jump",
+  13: "The Big Jump",
+  14: "Full Assessment",
+  15: "Almost at Full Dose",
+  16: "You've Reached Therapeutic Dose",
+  17: "The Long Game Begins",
+  18: "Trusting the Process",
+  19: "Preparing for Independence",
+  20: "Graduation",
 };
 
-// Legal status display helper
-const legalStatusConfig: Record<LegalStatus, { label: string; color: string; bgColor: string }> = {
-  fda_approved: { label: "FDA Approved", color: "#10B981", bgColor: "rgba(16,185,129,0.1)" },
-  compounding: { label: "Compounding", color: "#F59E0B", bgColor: "rgba(245,158,11,0.1)" },
-  research_only: { label: "Research Only", color: "#EF4444", bgColor: "rgba(239,68,68,0.1)" },
+function getDose(week: number): string {
+  if (week <= 4) return "0.25mg/week";
+  if (week <= 8) return "0.5mg/week";
+  if (week <= 12) return "1.0mg/week";
+  if (week <= 15) return "1.7mg/week";
+  return "2.4mg/week";
+}
+
+const doseChangeWeeks = [5, 9, 13, 16];
+
+const whatToExpect: Record<number, string> = {
+  1: "Mild injection site reactions possible. Most feel nothing yet.",
+  2: "Body adjusting to the peptide. Subtle appetite changes may begin.",
+  3: "Some notice reduced cravings. Energy levels stabilizing.",
+  4: "Habits forming. Your body is ready for the next step.",
+  5: "Appetite reduction becomes noticeable. Brief nausea possible.",
+  6: "New dose settling in. Food noise significantly quieter.",
+  7: "Consistent effects. Weight trend becoming visible.",
+  8: "Phase 2 wrapping up. Body well-adapted to current dose.",
+  9: "Stronger appetite suppression. Monitor energy closely.",
+  10: "Steady state at 1.0mg. Most side effects have resolved.",
+  11: "Body composition shifting. Muscle preservation is key.",
+  12: "Preparing for the largest dose increase. Eat well this week.",
+  13: "Significant appetite suppression. Nausea possible for 2-3 days.",
+  14: "Assessing your response. Is this dose right for you?",
+  15: "Fine-tuning. Almost at the therapeutic target dose.",
+  16: "Full therapeutic dose reached. This is the maintenance level.",
+  17: "Focus shifts to sustainability. Building long-term habits.",
+  18: "Your body has adapted. Results should be consistent.",
+  19: "Planning your transition. What comes after the protocol?",
+  20: "Protocol complete. Review your journey and next steps.",
 };
 
-// Evidence circles component
-function EvidenceCircles({ rating, size = 12 }: { rating: number; size?: number }) {
-  return (
-    <span className="inline-flex items-center gap-1" aria-label={`${rating} out of 5 evidence rating`}>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span
-          key={i}
-          className="rounded-full inline-block"
-          style={{
-            width: size,
-            height: size,
-            backgroundColor: i < rating ? "#8B5CF6" : "#E5E7EB",
-          }}
-        />
-      ))}
-    </span>
-  );
+function getNutritionTip(week: number): string {
+  if (week <= 4) return "Protein first at every meal. Build the habit now.";
+  if (week <= 8) return "Appetite dropping — eat even when you're not hungry.";
+  if (week <= 12) return "Undereating is your biggest risk. 3 meals minimum.";
+  if (week <= 16) return "Calorie-dense, protein-rich. Every bite counts.";
+  return "Sustainability mode. Build patterns that last.";
 }
 
-// Legal badge component
-function LegalBadge({ status }: { status: LegalStatus }) {
-  const config = legalStatusConfig[status];
-  return (
-    <span
-      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-      style={{ backgroundColor: config.bgColor, color: config.color }}
-    >
-      {config.label}
-    </span>
-  );
+function getMovementTip(week: number): string {
+  if (week <= 4) return "Walk 20-30 min daily. Nothing more yet.";
+  if (week <= 8) return "Add resistance training 2x/week. Non-negotiable.";
+  if (week <= 12) return "2-3 resistance sessions. Progressive overload.";
+  if (week <= 16) return "Fuel your workouts. Don't train fasted.";
+  return "Maintain. Find what you enjoy long-term.";
 }
 
-// Popular guides
-const popularGuides = [
-  { title: "BPC-157: Complete Guide", category: "Recovery", readTime: "12 min", href: "/guides/bpc-157-complete-guide" },
-  { title: "Semaglutide Guide", category: "Weight Loss", readTime: "15 min", href: "/guides/semaglutide-complete-guide" },
-  { title: "BPC-157 vs TB-500", category: "Comparison", readTime: "9 min", href: "/guides/bpc-157-vs-tb-500" },
+function getProgressExpectation(week: number): string {
+  if (week <= 2) return "Focus on habits, not the scale.";
+  if (week <= 4) return "Expected: 1-2% body weight lost.";
+  if (week <= 8) return "Expected: 3-7% body weight lost.";
+  if (week <= 12) return "Expected: 8-10% body weight lost.";
+  if (week <= 16) return "Expected: 10-12% body weight lost.";
+  return "Expected: 12-15% body weight lost.";
+}
+
+function getPhase(week: number): string {
+  if (week <= 4) return "Titration";
+  if (week <= 8) return "Building";
+  if (week <= 16) return "Acceleration";
+  return "Maintenance";
+}
+
+const phases = [
+  { label: "Titration", range: "1-4" },
+  { label: "Building", range: "5-8" },
+  { label: "Acceleration", range: "9-16" },
+  { label: "Maintenance", range: "17-20" },
 ];
 
 const containerVariants = {
@@ -74,36 +115,93 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
+// === MINI CARD COMPONENT ===
+
+function MiniCard({ icon, label, text, onClick }: { icon: string; label: string; text: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="bg-white border border-[#E5E7EB] rounded-xl p-4 text-left hover:shadow-md transition-shadow w-full"
+    >
+      <span className="text-xl mb-1 block">{icon}</span>
+      <p className="text-[13px] font-medium" style={{ color: "#6B7280" }}>{label}</p>
+      <p className="text-sm mt-1" style={{ color: "#374151" }}>{text}</p>
+    </button>
+  );
+}
+
+// === MAIN COMPONENT ===
+
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { data: profile, isLoading } = useProfile();
+  const { progress, currentWeek, isLoading } = useActiveProtocolProgress();
   const { data: quizResponse } = useQuizResponse();
 
   const goalLabel = quizResponse ? getGoalLabel(quizResponse.primary_goal) : null;
-  const peptideMatch = quizResponse ? getPeptideMatch(quizResponse.primary_goal) : null;
-
-  // Get deep dive data for matched peptides
-  const primaryData = peptideMatch ? getPeptideDeepDive(peptideMatch.primary) : null;
-  const secondaryData = peptideMatch ? getPeptideDeepDive(peptideMatch.secondary) : null;
-
-  const chatPrompt = quizResponse ? (goalChatPrompts[quizResponse.primary_goal] || goalChatPrompts.general) : goalChatPrompts.general;
 
   if (isLoading) {
     return (
       <DashboardLayout>
         <div className="space-y-8 py-8">
           <Skeleton className="h-12 w-72 rounded-xl" />
-          <Skeleton className="h-64 w-full rounded-2xl" />
+          <Skeleton className="h-80 w-full rounded-2xl" />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Skeleton className="h-48 rounded-2xl" />
-            <Skeleton className="h-48 rounded-2xl" />
-            <Skeleton className="h-48 rounded-2xl" />
+            <Skeleton className="h-40 rounded-2xl" />
+            <Skeleton className="h-40 rounded-2xl" />
+            <Skeleton className="h-40 rounded-2xl" />
           </div>
         </div>
       </DashboardLayout>
     );
   }
+
+  // No active protocol
+  if (!progress || !currentWeek) {
+    return (
+      <DashboardLayout>
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="py-4 md:py-8 space-y-10"
+        >
+          <motion.div
+            variants={itemVariants}
+            className="rounded-2xl p-6 md:p-10"
+            style={{
+              backgroundColor: "#FFF7ED",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)",
+            }}
+          >
+            <h1 className="text-2xl md:text-[32px] font-bold tracking-tight" style={{ color: "#111827" }}>
+              Ready to Start Your Protocol?
+            </h1>
+            <p className="mt-3 text-[15px] md:text-base max-w-xl" style={{ color: "#6B7280" }}>
+              Set your start date and we'll guide you through each week — what to eat, how to move, what to expect, and when to check in.
+            </p>
+            <button
+              onClick={() => navigate("/dashboard/protocols")}
+              className="mt-6 px-8 py-3 rounded-full text-white font-semibold text-[15px] transition-all hover:opacity-90"
+              style={{ backgroundColor: "#F97316", minHeight: 48 }}
+            >
+              Set My Start Date <ArrowRight className="w-4 h-4 inline ml-1" />
+            </button>
+            <p className="mt-3 text-[13px]" style={{ color: "#9CA3AF" }}>
+              You can always change this later
+            </p>
+          </motion.div>
+        </motion.div>
+      </DashboardLayout>
+    );
+  }
+
+  // Active protocol — weekly command center
+  const week = currentWeek;
+  const title = weekTitles[week] || "Your Protocol";
+  const dose = getDose(week);
+  const isDoseChange = doseChangeWeeks.includes(week);
+  const currentPhase = getPhase(week);
+  const progressPercent = Math.round((week / 20) * 100);
 
   return (
     <DashboardLayout>
@@ -111,229 +209,177 @@ export default function Dashboard() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-10 py-4 md:py-8"
+        className="space-y-8 py-4 md:py-8"
       >
-        {/* Section 1: Welcome + Personalization */}
-        <motion.div variants={itemVariants}>
-          <h1 className="text-[28px] md:text-[36px] font-bold tracking-tight" style={{ color: "#111827" }}>
-            {goalLabel ? `Your ${goalLabel} Blueprint` : "Your Peptide Blueprint"}
-          </h1>
-          {quizResponse && (
-            <p className="text-sm font-mono mt-1" style={{ color: "#9CA3AF" }}>
-              Personalized for {goalLabel?.toLowerCase()} · {quizResponse.age_range || "All ages"} · {quizResponse.experience_level} · Updated Feb 2026
-            </p>
-          )}
-        </motion.div>
-
-        {/* Section 2: Your Match (Hero Card) */}
-        {peptideMatch && primaryData && (
-          <motion.div
-            variants={itemVariants}
-            className="rounded-2xl p-6 md:p-7"
-            style={{
-              backgroundColor: "#FFF7ED",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)",
-            }}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8">
-              {/* Primary Match - Left (60%) */}
-              <div className="md:col-span-3">
+        {/* Hero Weekly Brief Card */}
+        <motion.div
+          variants={itemVariants}
+          className="rounded-2xl p-5 md:p-7"
+          style={{
+            backgroundColor: "#FFF7ED",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)",
+          }}
+        >
+          {/* Top row: week label + dose badges */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <span
+                className="text-xs font-mono font-semibold uppercase"
+                style={{ color: "#F97316", letterSpacing: "0.05em" }}
+              >
+                WEEK {week} OF 20
+              </span>
+              <h1 className="text-[22px] md:text-[28px] font-bold mt-1" style={{ color: "#111827" }}>
+                {goalLabel ? `${goalLabel}: ` : ""}{title}
+              </h1>
+            </div>
+            <div className="flex flex-col items-start sm:items-end gap-2">
+              <span
+                className="inline-flex items-center px-3 py-1 rounded-full text-[13px] font-mono font-medium"
+                style={{
+                  backgroundColor: "rgba(16,185,129,0.08)",
+                  border: "1px solid rgba(16,185,129,0.25)",
+                  color: "#10B981",
+                }}
+              >
+                {dose}
+              </span>
+              {isDoseChange && (
                 <span
-                  className="text-[11px] font-mono uppercase tracking-[2px] font-semibold"
-                  style={{ color: "#F97316" }}
+                  className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                  style={{
+                    backgroundColor: "rgba(245,158,11,0.08)",
+                    border: "1px solid rgba(245,158,11,0.25)",
+                    color: "#F59E0B",
+                  }}
                 >
-                  PRIMARY MATCH
+                  ⚠️ Dose increase this week
                 </span>
-                <h2 className="text-[28px] font-bold mt-1" style={{ color: "#111827" }}>
-                  {primaryData.name}
-                </h2>
-                <p className="text-[15px] mt-1" style={{ color: "#6B7280" }}>
-                  {primaryData.summary}
-                </p>
-                <div className="flex items-center gap-3 mt-3 flex-wrap">
-                  <EvidenceCircles rating={primaryData.evidenceRating} />
-                  <span className="text-[13px]" style={{ color: "#6B7280" }}>
-                    Strong Evidence · {peptideMatch.studies} clinical trials
-                  </span>
-                </div>
-                <div className="mt-2">
-                  <LegalBadge status={primaryData.legalStatus} />
-                </div>
-              </div>
-
-              {/* Secondary Match - Right (40%) */}
-              {secondaryData && (
-                <div className="md:col-span-2 md:border-l md:border-[#E5E7EB] md:pl-6">
-                  <span
-                    className="text-[11px] font-mono uppercase tracking-[2px]"
-                    style={{ color: "#9CA3AF" }}
-                  >
-                    ALSO MATCHED
-                  </span>
-                  <h3 className="text-[20px] font-bold mt-1" style={{ color: "#111827" }}>
-                    {secondaryData.name}
-                  </h3>
-                  <p className="text-sm mt-1" style={{ color: "#6B7280" }}>
-                    {secondaryData.summary}
-                  </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <EvidenceCircles rating={secondaryData.evidenceRating} size={10} />
-                  </div>
-                  <div className="mt-2">
-                    <LegalBadge status={secondaryData.legalStatus} />
-                  </div>
-                </div>
               )}
             </div>
-
-            {/* CTA Button */}
-            <button
-              onClick={() => navigate("/dashboard/protocols")}
-              className="mt-6 w-full md:w-auto px-8 py-3 rounded-full text-white font-semibold text-[15px] transition-all hover:opacity-90"
-              style={{ backgroundColor: "#111827", minHeight: 48 }}
-            >
-              View Full Protocol <ArrowRight className="w-4 h-4 inline ml-1" />
-            </button>
-          </motion.div>
-        )}
-
-        {/* Fallback if no quiz data */}
-        {!peptideMatch && (
-          <motion.div
-            variants={itemVariants}
-            className="rounded-2xl p-6 bg-white"
-            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
-          >
-            <h2 className="text-xl font-bold mb-2" style={{ color: "#111827" }}>Get Your Personalized Blueprint</h2>
-            <p className="text-sm mb-4" style={{ color: "#6B7280" }}>Take the quiz to get matched with research-backed peptides for your goals.</p>
-            <button
-              onClick={() => navigate("/quiz")}
-              className="px-6 py-3 rounded-full text-white font-semibold text-sm transition-all hover:opacity-90"
-              style={{ backgroundColor: "#111827" }}
-            >
-              Take the Quiz <ArrowRight className="w-4 h-4 inline ml-1" />
-            </button>
-          </motion.div>
-        )}
-
-        {/* Section 3: Quick Action Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* AI Research Coach */}
-          <motion.button
-            variants={itemVariants}
-            whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}
-            onClick={() => navigate("/dashboard/chat")}
-            className="bg-white rounded-2xl text-left overflow-hidden transition-all"
-            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
-          >
-            <div className="h-1" style={{ backgroundColor: "#8B5CF6" }} />
-            <div className="p-5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: "rgba(139,92,246,0.1)" }}>
-                <MessageCircle className="w-5 h-5" style={{ color: "#8B5CF6" }} />
-              </div>
-              <h3 className="text-[18px] font-bold mb-1" style={{ color: "#111827" }}>Ask the AI Coach</h3>
-              <p className="text-sm mb-3" style={{ color: "#6B7280" }}>Every answer cites peer-reviewed research</p>
-              <div className="rounded-xl p-3" style={{ backgroundColor: "#F9FAFB" }}>
-                <p className="text-[13px] italic" style={{ color: "#9CA3AF" }}>
-                  "{chatPrompt}"
-                </p>
-              </div>
-            </div>
-          </motion.button>
-
-          {/* Doctor Script */}
-          <motion.button
-            variants={itemVariants}
-            whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}
-            onClick={() => navigate("/dashboard/protocols#doctor-script")}
-            className="bg-white rounded-2xl text-left overflow-hidden transition-all"
-            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
-          >
-            <div className="h-1" style={{ backgroundColor: "#8B5CF6" }} />
-            <div className="p-5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: "rgba(139,92,246,0.1)" }}>
-                <ClipboardList className="w-5 h-5" style={{ color: "#8B5CF6" }} />
-              </div>
-              <h3 className="text-[18px] font-bold mb-1" style={{ color: "#111827" }}>Doctor Conversation Script</h3>
-              <p className="text-sm mb-3" style={{ color: "#6B7280" }}>Word-for-word what to say at your appointment</p>
-              <div className="rounded-xl p-3" style={{ backgroundColor: "#F9FAFB" }}>
-                <p className="text-[13px] italic" style={{ color: "#9CA3AF" }}>
-                  "I've been researching {peptideMatch?.primary || "peptides"} for {goalLabel?.toLowerCase() || "wellness"}..."
-                </p>
-              </div>
-            </div>
-          </motion.button>
-
-          {/* Legal Guide */}
-          <motion.button
-            variants={itemVariants}
-            whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}
-            onClick={() => navigate("/dashboard/protocols#legal-status")}
-            className="bg-white rounded-2xl text-left overflow-hidden transition-all"
-            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
-          >
-            <div className="h-1" style={{ backgroundColor: "#F59E0B" }} />
-            <div className="p-5">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: "rgba(245,158,11,0.1)" }}>
-                <Shield className="w-5 h-5" style={{ color: "#F59E0B" }} />
-              </div>
-              <h3 className="text-[18px] font-bold mb-1" style={{ color: "#111827" }}>2026 Legal Status</h3>
-              <p className="text-sm mb-3" style={{ color: "#6B7280" }}>FDA status, prescriptions, availability</p>
-              <div className="rounded-xl p-3" style={{ backgroundColor: "#F9FAFB" }}>
-                {primaryData ? (
-                  <p className="text-[13px]" style={{ color: primaryData.legalStatus === "fda_approved" ? "#10B981" : "#F59E0B" }}>
-                    {primaryData.legalStatus === "fda_approved" ? "✓" : "⚠"} {primaryData.name} — {legalStatusConfig[primaryData.legalStatus].label}
-                  </p>
-                ) : (
-                  <p className="text-[13px] italic" style={{ color: "#9CA3AF" }}>
-                    Check legal status of any peptide
-                  </p>
-                )}
-              </div>
-            </div>
-          </motion.button>
-        </div>
-
-        {/* Section 4: Popular Guides */}
-        <motion.div variants={itemVariants}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>
-              Popular Guides
-            </h2>
-            <button
-              onClick={() => navigate("/guides")}
-              className="text-sm font-medium flex items-center gap-1 hover:opacity-70 transition-opacity"
-              style={{ color: "#6B7280" }}
-            >
-              View All <ArrowRight className="w-4 h-4" />
-            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {popularGuides.map((guide, index) => (
-              <motion.button
-                key={guide.href}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.1 }}
-                whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}
-                onClick={() => navigate(guide.href)}
-                className="bg-white rounded-2xl text-left overflow-hidden transition-all"
-                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+          {/* 2x2 mini-cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+            <MiniCard
+              icon="🎯"
+              label="What to Expect"
+              text={whatToExpect[week] || "Stay consistent with your protocol."}
+              onClick={() => navigate("/dashboard/protocols")}
+            />
+            <MiniCard
+              icon="🥗"
+              label="Nutrition This Week"
+              text={getNutritionTip(week)}
+              onClick={() => navigate("/dashboard/protocols")}
+            />
+            <MiniCard
+              icon="💪"
+              label="Movement This Week"
+              text={getMovementTip(week)}
+              onClick={() => navigate("/dashboard/protocols")}
+            />
+            <MiniCard
+              icon="📊"
+              label="Progress Check"
+              text={getProgressExpectation(week)}
+              onClick={() => navigate("/dashboard/protocols")}
+            />
+          </div>
+
+          {/* CTA */}
+          <button
+            onClick={() => navigate("/dashboard/protocols")}
+            className="mt-6 w-full px-8 py-3 rounded-full text-white font-semibold text-[15px] transition-all hover:opacity-90"
+            style={{ backgroundColor: "#111827", minHeight: 48 }}
+          >
+            Read Your Full Week {week} Brief <ArrowRight className="w-4 h-4 inline ml-1" />
+          </button>
+        </motion.div>
+
+        {/* Quick Access Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-2xl p-5"
+            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+          >
+            <div className="w-3 h-3 rounded-full mb-3" style={{ backgroundColor: "#8B5CF6" }} />
+            <h3 className="text-base font-bold" style={{ color: "#111827" }}>AI Research Coach</h3>
+            <p className="text-sm mt-1 mb-4" style={{ color: "#6B7280" }}>Ask anything about your protocol</p>
+            <button
+              onClick={() => navigate("/dashboard/chat")}
+              className="px-5 py-2 rounded-full text-sm font-medium transition-all hover:opacity-80"
+              style={{ color: "#8B5CF6", border: "1px solid rgba(139,92,246,0.25)" }}
+            >
+              Open Coach <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
+            </button>
+          </motion.div>
+
+          <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-2xl p-5"
+            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+          >
+            <div className="w-3 h-3 rounded-full mb-3" style={{ backgroundColor: "#F97316" }} />
+            <h3 className="text-base font-bold" style={{ color: "#111827" }}>Decision Matrix</h3>
+            <p className="text-sm mt-1 mb-4" style={{ color: "#6B7280" }}>Compare peptides side-by-side</p>
+            <button
+              onClick={() => navigate("/dashboard/protocols")}
+              className="px-5 py-2 rounded-full text-sm font-medium transition-all hover:opacity-80"
+              style={{ color: "#F97316", border: "1px solid rgba(249,115,22,0.25)" }}
+            >
+              Compare <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
+            </button>
+          </motion.div>
+
+          <motion.div
+            variants={itemVariants}
+            className="bg-white rounded-2xl p-5"
+            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+          >
+            <div className="w-3 h-3 rounded-full mb-3" style={{ backgroundColor: "#10B981" }} />
+            <h3 className="text-base font-bold" style={{ color: "#111827" }}>2026 Legal Guide</h3>
+            <p className="text-sm mt-1 mb-4" style={{ color: "#6B7280" }}>FDA status, state laws, access</p>
+            <button
+              onClick={() => navigate("/dashboard/protocols#legal-status")}
+              className="px-5 py-2 rounded-full text-sm font-medium transition-all hover:opacity-80"
+              style={{ color: "#10B981", border: "1px solid rgba(16,185,129,0.25)" }}
+            >
+              View Guide <ArrowRight className="w-3.5 h-3.5 inline ml-1" />
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Journey Progress Bar */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-white rounded-2xl p-5 md:p-6"
+          style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+        >
+          <h2 className="text-base font-bold mb-4" style={{ color: "#111827" }}>Your 20-Week Journey</h2>
+          <div className="w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: "#E5E7EB" }}>
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ backgroundColor: "#F97316", width: `${progressPercent}%` }}
+            />
+          </div>
+          <div className="flex justify-between mt-2">
+            <span className="text-[13px]" style={{ color: "#6B7280" }}>Week {week} of 20</span>
+            <span className="text-[13px]" style={{ color: "#6B7280" }}>{progressPercent}% complete</span>
+          </div>
+          <div className="flex justify-between mt-4">
+            {phases.map((phase) => (
+              <span
+                key={phase.label}
+                className="text-xs font-medium"
+                style={{
+                  color: currentPhase === phase.label ? "#F97316" : "#9CA3AF",
+                  fontWeight: currentPhase === phase.label ? 700 : 500,
+                }}
               >
-                <div className="p-5">
-                  <span
-                    className="text-xs font-medium px-2.5 py-1 rounded-full inline-block mb-3"
-                    style={{ backgroundColor: "rgba(16,185,129,0.1)", color: "#10B981" }}
-                  >
-                    {guide.category}
-                  </span>
-                  <p className="font-semibold mb-1" style={{ color: "#111827" }}>
-                    {guide.title}
-                  </p>
-                  <p className="text-xs" style={{ color: "#9CA3AF" }}>{guide.readTime} read</p>
-                </div>
-              </motion.button>
+                {phase.label}
+              </span>
             ))}
           </div>
         </motion.div>
