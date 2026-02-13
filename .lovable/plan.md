@@ -1,82 +1,81 @@
 
 
-# Redesign Dashboard Home as Weekly Command Center
+# Redesign Protocols Page as Weekly Journey Brief
 
 ## Overview
-Replace the current static dashboard home page with a personalized weekly command center that immediately tells users what week they're on, what to expect, and what to do next. The design matches the homepage's warm, light aesthetic exactly.
+Replace the current `/dashboard/protocols` page (Protocols.tsx) with a weekly journey brief system. Instead of showing protocol cards and peptide accordions, the page foregrounds the user's current week as a detailed, action-oriented brief with nutrition plans, movement guidance, progress benchmarks, and safety information.
 
-## Data Strategy
+## Data Architecture
 
-The user's protocol tracking state already exists in the `protocol_progress` table. Instead of adding a new column to profiles, we query `protocol_progress` for any row with `status = 'active'` for the current user. This gives us `start_date`, `peptide_slug`, and `goal_slug`.
+### New File: `src/data/weeklyBriefs.ts`
+A single TypeScript file containing all 20 weeks of structured content as a typed object. Each week entry includes:
+- `title`, `phase`, `phaseName`, `dose`
+- `doseChange`, `previousDose`, `newDose`, `doseAlertMessage`
+- `whatToExpect` (2-3 paragraphs)
+- `nutrition` (detailed with bullet lists)
+- `movement` (detailed with bullet lists)
+- `progressStats` (array of stat objects: value, label)
+- `progressNote` (reassurance paragraph)
+- `normalSymptoms` (array of strings)
+- `warningSymptoms` (array of strings)
 
-- **If active progress exists**: compute `currentWeek = Math.floor((today - startDate) / 7) + 1`, clamped 1-20, and show the full weekly command center
-- **If no active progress**: show the "Ready to Start Your Protocol?" hero card that navigates to `/dashboard/protocols` (where the existing StartTrackingCard lives)
+All content comes directly from the prompt (weeks 1-20 with full nutrition/movement/progress/safety text). Special nutrition override for Week 4.
 
-No database changes needed -- all required tables already exist.
+### No Database Changes
+Current week is computed from `protocol_progress.start_date` via the existing `useActiveProtocolProgress` hook. No new tables or migrations needed.
 
-## New Hook
+## Page Layout
 
-### `src/hooks/useActiveProtocolProgress.ts`
-A simple hook that queries `protocol_progress` for the user's active entry (any peptide/template):
+### When No Active Protocol
+Redirect to `/dashboard` where the "Ready to Start Your Protocol?" card already exists.
 
-```
-SELECT * FROM protocol_progress 
-WHERE user_id = auth.uid() AND status = 'active' 
-LIMIT 1
-```
+### When Protocol Is Active
 
-Returns the progress row or null. Reuses the existing `computeCurrentWeek` function from `useProtocolProgress`.
+**1. Week Navigation Bar (top)**
+- Horizontal scrollable row of 20 pills ("W1" through "W20")
+- Current week: orange (#F97316) background, white text
+- Completed weeks: light green background, green text, clickable
+- Future weeks: dimmed (#F5F5F5), not clickable
+- Dose change weeks (5, 9, 13, 16): tiny amber dot indicator
+- Auto-scrolls to center current week on mount
+- Clicking a past/current week scrolls to and expands that week's brief
 
-## Content Maps (inline in Home.tsx)
+**2. Current Week Brief Card (hero, expanded by default)**
+- Warm cream (#FFF7ED) background with subtle orange shadow
+- Header: "WEEK X" label in font-mono orange, phase name, week title (24-32px bold), dose badge (green pill), dose change amber badge if applicable
+- Dose change alert banner (#FEF3C7 amber background) when applicable
+- 5 content blocks separated by thin dividers:
+  - Block 1: "What to Expect This Week" -- multi-paragraph body text
+  - Block 2: "Your Nutrition This Week" -- bullet lists with orange bullets, food lists in inset #F9F9F9 containers
+  - Block 3: "Your Movement This Week" -- structured exercise guidance with bullet lists
+  - Block 4: "Progress Check" -- 2-3 stat boxes (value + label) in a row, plus reassurance note in italic
+  - Block 5: "When to Be Concerned" -- two-column layout (green "Normal" vs red "Contact your doctor")
 
-All week-specific content is stored as simple JavaScript objects -- no new database tables:
+**3. Previous Weeks Section**
+- "Previous Weeks" heading with divider
+- Collapsed cards for weeks (currentWeek-1) down to 1
+- Each shows: green check, "Week N: Title", dose badge
+- Accordion behavior: click to expand same 5-block structure on white background
+- Only one previous week expanded at a time
 
-- **Week titles**: 20 entries ("Your Body Is Adjusting" through "Graduation")
-- **Dose map**: week ranges to dose strings ("0.25mg/week" for weeks 1-4, etc.)
-- **Dose change weeks**: [5, 9, 13, 16]
-- **What to Expect**: 20 short summaries
-- **Nutrition tips**: 5 phase-based strings
-- **Movement tips**: 5 phase-based strings
-- **Progress expectations**: 6 range-based strings
+**4. Coming Up Section**
+- "Coming Up" heading
+- Next 2-3 upcoming weeks as dimmed, locked preview cards
+- Dashed border, lock icon, non-clickable
 
-## Page Layout (when protocol is active)
-
-### 1. Hero Weekly Brief Card
-- Warm cream background (#FFF7ED), subtle shadow
-- Top-left: "WEEK X OF 20" label in font-mono #F97316, week title in bold #111827
-- Top-right: dose badge (green pill), amber "Dose increase this week" badge on weeks 5/9/13/16
-- 2x2 grid of mini-cards (single column on mobile): What to Expect, Nutrition, Movement, Progress Check -- each white with subtle border, clickable to `/dashboard/protocols`
-- Full-width "Read Your Full Week X Brief" button at bottom
-
-### 2. Quick Access Row
-3 white cards (stacked on mobile):
-- AI Research Coach (purple accent) -- links to `/dashboard/chat`
-- Decision Matrix (orange accent) -- links to `/dashboard/protocols`
-- 2026 Legal Guide (green accent) -- links to `/dashboard/protocols#legal-status`
-
-### 3. Journey Progress Bar
-- White card with horizontal progress bar (#F97316 fill)
-- "Week X of 20" left, "X% complete" right
-- 4 phase markers: Titration, Building, Acceleration, Maintenance -- current phase bold + orange
-
-## Page Layout (no active protocol)
-
-Single hero card (#FFF7ED):
-- "Ready to Start Your Protocol?" heading
-- Descriptive subtext
-- "Set My Start Date" button (#F97316) that navigates to `/dashboard/protocols`
-- "You can always change this later" dim text
-
-## Files
+## Files Summary
 
 | File | Change |
 |------|--------|
-| `src/hooks/useActiveProtocolProgress.ts` | New -- fetches user's active protocol_progress row |
-| `src/pages/dashboard/Home.tsx` | Full rewrite -- weekly command center layout with all content maps |
+| `src/data/weeklyBriefs.ts` | New -- all 20 weeks of structured content (titles, nutrition, movement, progress, safety) |
+| `src/pages/dashboard/Protocols.tsx` | Full rewrite -- weekly journey brief with week navigation, hero brief card, previous weeks accordion, upcoming preview |
 
 ## What Does NOT Change
-- No database migrations or new tables
-- No changes to navigation, DashboardLayout, DashboardTopNav, MobileBottomNav
-- No changes to protocol detail view, check-in system, or accordion sections
-- No changes to any other pages, components, auth, or payment flows
-- No changes to EvidenceRating, WarningBox, QuoteBox, or StudyCard components
+- Dashboard home page (Home.tsx) -- untouched
+- AI chat page -- untouched
+- Navigation structure (DashboardLayout, sidebar, bottom nav) -- untouched
+- Protocol detail view, check-in system, progress tracking hooks -- untouched
+- All existing components not mentioned (WarningBox, StudyCard, etc.)
+- No backend, auth, or payment changes
+- No new database tables or migrations
+
