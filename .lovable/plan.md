@@ -1,104 +1,82 @@
 
 
-# Weekly Check-In System for Protocol Tracking
+# Redesign Dashboard Home as Weekly Command Center
 
 ## Overview
-Add a weekly check-in feature that appears below the "This Week" card when a user has an active protocol. Users can log weight, symptom severity, energy level, and notes each week. A progress chart and history table show trends over time.
+Replace the current static dashboard home page with a personalized weekly command center that immediately tells users what week they're on, what to expect, and what to do next. The design matches the homepage's warm, light aesthetic exactly.
 
-## Database Changes
+## Data Strategy
 
-### New Table: protocol_checkins
+The user's protocol tracking state already exists in the `protocol_progress` table. Instead of adding a new column to profiles, we query `protocol_progress` for any row with `status = 'active'` for the current user. This gives us `start_date`, `peptide_slug`, and `goal_slug`.
 
-| Column | Type | Details |
-|--------|------|---------|
-| id | uuid | PK, default gen_random_uuid() |
-| user_id | uuid | NOT NULL, references auth.users(id) |
-| protocol_progress_id | uuid | NOT NULL, references protocol_progress(id) |
-| week_number | integer | NOT NULL |
-| weight_lbs | decimal | nullable |
-| symptom_rating | integer | nullable, 1-5 |
-| energy_rating | integer | nullable, 1-5 |
-| notes | text | nullable |
-| created_at | timestamptz | default now() |
+- **If active progress exists**: compute `currentWeek = Math.floor((today - startDate) / 7) + 1`, clamped 1-20, and show the full weekly command center
+- **If no active progress**: show the "Ready to Start Your Protocol?" hero card that navigates to `/dashboard/protocols` (where the existing StartTrackingCard lives)
 
-- Unique constraint on (protocol_progress_id, week_number)
-- RLS: SELECT and INSERT for own rows (user_id = auth.uid())
-- UPDATE policy also needed for the "Edit this entry" feature
+No database changes needed -- all required tables already exist.
 
-## Code Changes
+## New Hook
 
-### 1. New Hook: `src/hooks/useProtocolCheckins.ts`
-
-React Query hooks for check-in CRUD:
-- `useCurrentWeekCheckin(progressId, weekNumber)` -- fetches the check-in for the current week if it exists
-- `useAllCheckins(progressId)` -- fetches all check-ins for the progress entry, ordered by week
-- `useSubmitCheckin()` -- mutation to upsert a check-in row (insert or update on conflict)
-- Returns loading states and the last logged weight for placeholder purposes
-
-### 2. New Component: `src/components/protocol/WeeklyCheckinCard.tsx`
-
-The main check-in card rendered below the ThisWeekCard.
-
-**Already-logged state:**
-- Shows "Week X logged" with a green checkmark
-- Displays logged values: weight, symptom emoji, energy emoji, notes
-- "Edit this entry" link that switches back to the form pre-filled with existing values
-
-**Form state (not yet logged or editing):**
-- Heading: "Week X Check-in" with "Quick update -- takes 30 seconds" subtext
-- Weight input: number field with JetBrains Mono font, placeholder shows last logged weight
-- Symptom rating: 5 emoji buttons (None/Mild/Moderate/Rough/Severe) with color-coded selected states
-- Energy rating: 5 emoji buttons (Great/Good/Okay/Low/Drained) with matching color-coded states
-- Notes: single-line text input
-- Submit button: "Log Check-in" green button, shows "Logged!" confirmation for 2 seconds after success
-- All buttons 56px tall with 12px border-radius, emoji 24px, labels 11px
-
-### 3. New Component: `src/components/protocol/CheckinHistory.tsx`
-
-Visible when user has 2+ check-ins.
-
-**Weight chart:**
-- Recharts LineChart: green line (#06D6A0), JetBrains Mono axis labels, 200px height
-- Custom tooltip with dark background showing "Week X: Y lbs"
-- Only plots weeks where weight was logged
-
-**Symptom dot row:**
-- Colored dots (green to red) for each logged week's symptom rating
-- Week numbers below dots
-- Gray dots for weeks without symptom data
-
-**Expandable history table:**
-- "See all entries" collapsible section using shadcn Collapsible
-- Table with columns: Week, Weight, Symptoms (emoji), Energy (emoji), Notes, Date
-- Alternating row backgrounds, horizontal scroll on mobile
-
-### 4. Updated: `src/components/protocol/ProtocolDetailView.tsx`
-
-Insert the new components into the active tracking section (lines 188-213), between the ThisWeekCard and the "Pause tracking" button:
+### `src/hooks/useActiveProtocolProgress.ts`
+A simple hook that queries `protocol_progress` for the user's active entry (any peptide/template):
 
 ```
-<ProtocolProgressHeader ... />
-<ThisWeekCard ... />
-<WeeklyCheckinCard progressId={progress.id} currentWeek={currentWeek} />
-<CheckinHistory progressId={progress.id} />
-<button>Pause tracking</button>
+SELECT * FROM protocol_progress 
+WHERE user_id = auth.uid() AND status = 'active' 
+LIMIT 1
 ```
 
-No changes to the header, accordion sections, or any other part of the view.
+Returns the progress row or null. Reuses the existing `computeCurrentWeek` function from `useProtocolProgress`.
 
-## Files Summary
+## Content Maps (inline in Home.tsx)
+
+All week-specific content is stored as simple JavaScript objects -- no new database tables:
+
+- **Week titles**: 20 entries ("Your Body Is Adjusting" through "Graduation")
+- **Dose map**: week ranges to dose strings ("0.25mg/week" for weeks 1-4, etc.)
+- **Dose change weeks**: [5, 9, 13, 16]
+- **What to Expect**: 20 short summaries
+- **Nutrition tips**: 5 phase-based strings
+- **Movement tips**: 5 phase-based strings
+- **Progress expectations**: 6 range-based strings
+
+## Page Layout (when protocol is active)
+
+### 1. Hero Weekly Brief Card
+- Warm cream background (#FFF7ED), subtle shadow
+- Top-left: "WEEK X OF 20" label in font-mono #F97316, week title in bold #111827
+- Top-right: dose badge (green pill), amber "Dose increase this week" badge on weeks 5/9/13/16
+- 2x2 grid of mini-cards (single column on mobile): What to Expect, Nutrition, Movement, Progress Check -- each white with subtle border, clickable to `/dashboard/protocols`
+- Full-width "Read Your Full Week X Brief" button at bottom
+
+### 2. Quick Access Row
+3 white cards (stacked on mobile):
+- AI Research Coach (purple accent) -- links to `/dashboard/chat`
+- Decision Matrix (orange accent) -- links to `/dashboard/protocols`
+- 2026 Legal Guide (green accent) -- links to `/dashboard/protocols#legal-status`
+
+### 3. Journey Progress Bar
+- White card with horizontal progress bar (#F97316 fill)
+- "Week X of 20" left, "X% complete" right
+- 4 phase markers: Titration, Building, Acceleration, Maintenance -- current phase bold + orange
+
+## Page Layout (no active protocol)
+
+Single hero card (#FFF7ED):
+- "Ready to Start Your Protocol?" heading
+- Descriptive subtext
+- "Set My Start Date" button (#F97316) that navigates to `/dashboard/protocols`
+- "You can always change this later" dim text
+
+## Files
 
 | File | Change |
 |------|--------|
-| Database migration | Create protocol_checkins table with RLS |
-| `src/hooks/useProtocolCheckins.ts` | New -- hooks for check-in CRUD and history |
-| `src/components/protocol/WeeklyCheckinCard.tsx` | New -- check-in form and logged state |
-| `src/components/protocol/CheckinHistory.tsx` | New -- weight chart, symptom dots, history table |
-| `src/components/protocol/ProtocolDetailView.tsx` | Updated -- render check-in components in active tracking section |
+| `src/hooks/useActiveProtocolProgress.ts` | New -- fetches user's active protocol_progress row |
+| `src/pages/dashboard/Home.tsx` | Full rewrite -- weekly command center layout with all content maps |
 
 ## What Does NOT Change
-- No changes to ProtocolProgressHeader, ThisWeekCard, StartTrackingCard, or accordion sections
+- No database migrations or new tables
+- No changes to navigation, DashboardLayout, DashboardTopNav, MobileBottomNav
+- No changes to protocol detail view, check-in system, or accordion sections
+- No changes to any other pages, components, auth, or payment flows
 - No changes to EvidenceRating, WarningBox, QuoteBox, or StudyCard components
-- No changes to navigation, sidebar, or other dashboard pages
-- No removal of any existing components or routes
-
