@@ -334,6 +334,33 @@ export type Database = {
           },
         ]
       }
+      coach_messages: {
+        Row: {
+          content: string
+          context_type: string | null
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          context_type?: string | null
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          context_type?: string | null
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       content_calendar: {
         Row: {
           article_id: string | null
@@ -434,6 +461,68 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      daily_logs: {
+        Row: {
+          actions_completed: Json | null
+          created_at: string
+          energy_rating: number | null
+          gi_issues: string | null
+          id: string
+          injection_site_reaction: string | null
+          log_date: string
+          measurements: Json | null
+          notes: string | null
+          other_symptoms: string | null
+          photo_front_url: string | null
+          photo_side_url: string | null
+          protocol_id: string | null
+          user_id: string
+          weight_lbs: number | null
+        }
+        Insert: {
+          actions_completed?: Json | null
+          created_at?: string
+          energy_rating?: number | null
+          gi_issues?: string | null
+          id?: string
+          injection_site_reaction?: string | null
+          log_date: string
+          measurements?: Json | null
+          notes?: string | null
+          other_symptoms?: string | null
+          photo_front_url?: string | null
+          photo_side_url?: string | null
+          protocol_id?: string | null
+          user_id: string
+          weight_lbs?: number | null
+        }
+        Update: {
+          actions_completed?: Json | null
+          created_at?: string
+          energy_rating?: number | null
+          gi_issues?: string | null
+          id?: string
+          injection_site_reaction?: string | null
+          log_date?: string
+          measurements?: Json | null
+          notes?: string | null
+          other_symptoms?: string | null
+          photo_front_url?: string | null
+          photo_side_url?: string | null
+          protocol_id?: string | null
+          user_id?: string
+          weight_lbs?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_logs_protocol_id_fkey"
+            columns: ["protocol_id"]
+            isOneToOne: false
+            referencedRelation: "user_protocols"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       leads: {
         Row: {
@@ -1439,6 +1528,123 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      user_profiles: {
+        Row: {
+          accepted_tos: boolean
+          accepted_tos_at: string | null
+          age: number | null
+          body_fat_estimate: string | null
+          budget_monthly: string | null
+          created_at: string
+          current_medications: string | null
+          diet_style: string | null
+          experience_level: string | null
+          goals: string[] | null
+          has_healthcare_provider: boolean
+          health_conditions: string[] | null
+          height_inches: number | null
+          id: string
+          onboarding_complete: boolean
+          peptide_history: string | null
+          training_frequency: string | null
+          user_id: string
+          weight_lbs: number | null
+        }
+        Insert: {
+          accepted_tos?: boolean
+          accepted_tos_at?: string | null
+          age?: number | null
+          body_fat_estimate?: string | null
+          budget_monthly?: string | null
+          created_at?: string
+          current_medications?: string | null
+          diet_style?: string | null
+          experience_level?: string | null
+          goals?: string[] | null
+          has_healthcare_provider?: boolean
+          health_conditions?: string[] | null
+          height_inches?: number | null
+          id?: string
+          onboarding_complete?: boolean
+          peptide_history?: string | null
+          training_frequency?: string | null
+          user_id: string
+          weight_lbs?: number | null
+        }
+        Update: {
+          accepted_tos?: boolean
+          accepted_tos_at?: string | null
+          age?: number | null
+          body_fat_estimate?: string | null
+          budget_monthly?: string | null
+          created_at?: string
+          current_medications?: string | null
+          diet_style?: string | null
+          experience_level?: string | null
+          goals?: string[] | null
+          has_healthcare_provider?: boolean
+          health_conditions?: string[] | null
+          height_inches?: number | null
+          id?: string
+          onboarding_complete?: boolean
+          peptide_history?: string | null
+          training_frequency?: string | null
+          user_id?: string
+          weight_lbs?: number | null
+        }
+        Relationships: []
+      }
+      user_protocols: {
+        Row: {
+          ai_generation_context: string | null
+          compounds: Json
+          created_at: string
+          cycle_length_weeks: number
+          cycle_number: number
+          end_date: string | null
+          id: string
+          protocol_name: string
+          risk_assessment: string | null
+          schedule: Json
+          start_date: string | null
+          status: string
+          user_id: string
+          weekly_expectations: Json | null
+        }
+        Insert: {
+          ai_generation_context?: string | null
+          compounds?: Json
+          created_at?: string
+          cycle_length_weeks: number
+          cycle_number?: number
+          end_date?: string | null
+          id?: string
+          protocol_name: string
+          risk_assessment?: string | null
+          schedule?: Json
+          start_date?: string | null
+          status?: string
+          user_id: string
+          weekly_expectations?: Json | null
+        }
+        Update: {
+          ai_generation_context?: string | null
+          compounds?: Json
+          created_at?: string
+          cycle_length_weeks?: number
+          cycle_number?: number
+          end_date?: string | null
+          id?: string
+          protocol_name?: string
+          risk_assessment?: string | null
+          schedule?: Json
+          start_date?: string | null
+          status?: string
+          user_id?: string
+          weekly_expectations?: Json | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.send-quiz-results-email]
 verify_jwt = false
+
+[functions.peptide-coach]
+verify_jwt = false
