@@ -5,13 +5,12 @@ interface RestDayCardProps {
 export function RestDayCard({ nextDay }: RestDayCardProps) {
   return (
     <div
-      className="rounded-2xl p-6 text-center"
-      style={{ border: "2px dashed #E5E7EB" }}
+      className="rounded-[14px] p-6 text-center"
+      style={{ border: "2px dashed #E8EAED" }}
     >
-      <p className="text-2xl mb-2">😌</p>
-      <p className="text-lg font-bold" style={{ color: "#111827" }}>Rest Day</p>
-      <p className="text-sm mt-1" style={{ color: "#6B7280" }}>
-        No injections scheduled. Your body recovers and adapts on rest days.
+      <p className="text-lg font-semibold" style={{ color: "#0A0A0A" }}>Rest Day</p>
+      <p className="text-sm mt-1" style={{ color: "#4B5563" }}>
+        No injections scheduled today.
       </p>
       {nextDay && (
         <p className="text-[13px] mt-2" style={{ color: "#9CA3AF" }}>

@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, MessageCircle, ClipboardList, TrendingUp, Clock } from "lucide-react";
+import { ArrowRight, MessageCircle, Layers, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
-import { ProgressRing } from "./ProgressRing";
 import { CompoundCard } from "./CompoundCard";
 import { CompletionBanner } from "./CompletionBanner";
 import { RestDayCard } from "./RestDayCard";
@@ -12,6 +11,8 @@ const itemVariants = {
   hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 };
+
+const mono = "JetBrains Mono, ui-monospace, monospace";
 
 interface ActiveProtocolStateProps {
   protocol: UserProtocol;
@@ -48,7 +49,6 @@ export function ActiveProtocolState({
 }: ActiveProtocolStateProps) {
   const navigate = useNavigate();
 
-  // Find next day with compounds for rest day card
   const getNextScheduledDay = () => {
     if (!protocol.schedule) return null;
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -66,74 +66,58 @@ export function ActiveProtocolState({
     <>
       {/* Protocol Header */}
       <motion.div variants={itemVariants} className="mb-6">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <p className="text-[15px] mb-1" style={{ color: "#6B7280" }}>
-              Hey {firstName} 👋
-            </p>
-            <h1 className="text-2xl font-bold tracking-tight mb-3" style={{ color: "#111827" }}>
-              {protocol.protocol_name}
-            </h1>
-            {/* Stat Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-              <span
-                className="inline-flex items-center px-3.5 py-1.5 rounded-full text-[13px] font-bold whitespace-nowrap"
-                style={{ color: "#F97316", backgroundColor: "#FFF7ED" }}
-              >
-                Week {currentWeek} of {protocol.cycle_length_weeks}
-              </span>
-              <span
-                className="inline-flex items-center px-3.5 py-1.5 rounded-full text-[13px] font-bold whitespace-nowrap"
-                style={{ color: "#8B5CF6", backgroundColor: "#F3E8FF" }}
-              >
-                Day {dayNumber}
-              </span>
-              <span
-                className="inline-flex items-center px-3.5 py-1.5 rounded-full text-[13px] font-bold whitespace-nowrap"
-                style={{ color: "#10B981", backgroundColor: "#ECFDF5" }}
-              >
-                {compliancePercent}% compliance
-              </span>
-            </div>
-          </div>
+        <p className="text-sm mb-0.5" style={{ color: "#9CA3AF" }}>
+          Hey {firstName}
+        </p>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: "#F97316" }} />
+          <h1
+            className="text-[28px] font-bold truncate"
+            style={{ color: "#0A0A0A", letterSpacing: "-0.02em" }}
+          >
+            {protocol.protocol_name}
+          </h1>
+        </div>
 
-          {/* Progress Ring - desktop only */}
-          <div className="hidden md:flex flex-col items-center ml-6">
-            <ProgressRing percent={progressPercent} size={80} strokeWidth={6} progressColor="#F97316" />
-            <span className="text-[11px] mt-1" style={{ color: "#9CA3AF" }}>of cycle</span>
-          </div>
+        {/* Stats row with dividers */}
+        <div className="flex items-center gap-0 overflow-x-auto scrollbar-hide">
+          <span className="text-sm font-semibold whitespace-nowrap" style={{ color: "#0A0A0A" }}>
+            Week <span style={{ fontFamily: mono }}>{currentWeek}</span> of <span style={{ fontFamily: mono }}>{protocol.cycle_length_weeks}</span>
+          </span>
+          <span className="mx-3 w-px h-4 flex-shrink-0" style={{ backgroundColor: "#E8EAED" }} />
+          <span className="text-sm whitespace-nowrap" style={{ color: "#4B5563" }}>
+            Day <span style={{ fontFamily: mono }}>{dayNumber}</span>
+          </span>
+          <span className="mx-3 w-px h-4 flex-shrink-0" style={{ backgroundColor: "#E8EAED" }} />
+          <span className="text-sm font-semibold whitespace-nowrap" style={{ color: "#22C55E" }}>
+            <span style={{ fontFamily: mono }}>{compliancePercent}%</span> compliance
+          </span>
         </div>
 
         {/* Progress Bar */}
-        <div className="mt-5">
-          <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "#E5E7EB" }}>
+        <div className="mt-4">
+          <div className="w-full h-1 rounded-full overflow-hidden" style={{ backgroundColor: "#E8EAED" }}>
             <div
               className="h-full rounded-full transition-all duration-700 ease-out"
-              style={{
-                background: "linear-gradient(90deg, #F97316, #F59E0B)",
-                width: `${progressPercent}%`,
-              }}
+              style={{ backgroundColor: "#F97316", width: `${progressPercent}%` }}
             />
           </div>
-          <p className="text-xs text-right mt-1.5" style={{ color: "#9CA3AF" }}>
-            {daysRemaining} days remaining
-          </p>
         </div>
       </motion.div>
 
       {/* Today's Protocol */}
-      <motion.div variants={itemVariants} className="mb-8">
+      <motion.div variants={itemVariants} className="mb-10">
         <div className="flex items-baseline justify-between mb-4">
-          <h2 className="text-xl font-bold" style={{ color: "#111827" }}>Today's Protocol</h2>
+          <h2 className="text-xl font-bold" style={{ color: "#0A0A0A" }}>Today</h2>
           <span className="text-sm" style={{ color: "#9CA3AF" }}>
-            {format(new Date(), "EEEE, MMM d")}
+            {format(new Date(), "EEE, MMM d")}
           </span>
         </div>
 
         {todayCompounds.length === 0 ? (
           <RestDayCard nextDay={getNextScheduledDay()} />
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {todayCompounds.map((compound) => (
               <CompoundCard
                 key={compound.name}
@@ -155,35 +139,37 @@ export function ActiveProtocolState({
 
       {/* Quick Access */}
       <motion.div variants={itemVariants} className="mb-8">
-        <h2 className="text-lg font-bold mb-4" style={{ color: "#111827" }}>Quick Access</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <h2 className="text-lg font-bold mb-3" style={{ color: "#0A0A0A" }}>Quick Access</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {[
-            { icon: MessageCircle, label: "Ask Coach", desc: "Get help with your protocol", color: "#F97316", to: "/dashboard/coach" },
-            { icon: ClipboardList, label: "My Protocol", desc: "View compounds & schedule", color: "#8B5CF6", to: "/dashboard/protocol" },
-            { icon: TrendingUp, label: "Progress", desc: "Check-ins & photos", color: "#10B981", to: "/dashboard/progress" },
+            { icon: MessageCircle, label: "AI Coach", desc: "Ask anything", to: "/dashboard/coach" },
+            { icon: Layers, label: "Protocol", desc: "Compounds & schedule", to: "/dashboard/protocol" },
+            { icon: TrendingUp, label: "Progress", desc: "Check-ins & photos", to: "/dashboard/progress" },
           ].map((card) => (
             <button
               key={card.label}
               onClick={() => navigate(card.to)}
-              className="bg-white rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] relative"
-              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)", minHeight: 100 }}
+              className="flex items-center gap-3 bg-white rounded-[14px] px-4 text-left transition-all duration-200 hover:border-[#9CA3AF] active:scale-[0.98] group"
+              style={{ border: "1px solid #E8EAED", height: 72 }}
             >
-              <ArrowRight className="absolute top-4 right-4 w-4 h-4" style={{ color: "#9CA3AF" }} />
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center mb-3"
-                style={{ backgroundColor: card.color }}
+                className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0 transition-colors duration-200 group-hover:bg-[#E8EAED]"
+                style={{ backgroundColor: "#F3F4F6" }}
               >
-                <card.icon className="w-5 h-5 text-white" />
+                <card.icon className="w-[18px] h-[18px]" style={{ color: "#4B5563" }} />
               </div>
-              <p className="font-bold text-base" style={{ color: "#111827" }}>{card.label}</p>
-              <p className="text-[13px] mt-0.5" style={{ color: "#6B7280" }}>{card.desc}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-[15px]" style={{ color: "#0A0A0A" }}>{card.label}</p>
+                <p className="text-xs" style={{ color: "#9CA3AF" }}>{card.desc}</p>
+              </div>
+              <ArrowRight className="w-3.5 h-3.5 flex-shrink-0 transition-colors duration-200 group-hover:text-[#4B5563]" style={{ color: "#D1D5DB" }} />
             </button>
           ))}
         </div>
       </motion.div>
 
       {/* Legal disclaimer */}
-      <div className="text-xs text-center py-4" style={{ color: "#9CA3AF", borderTop: "1px solid #E5E7EB" }}>
+      <div className="text-xs text-center py-4" style={{ color: "#9CA3AF", borderTop: "1px solid #E8EAED" }}>
         For educational purposes only. Not medical advice. Always consult a healthcare provider.
       </div>
     </>
