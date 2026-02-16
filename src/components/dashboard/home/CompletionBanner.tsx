@@ -17,7 +17,7 @@ export function CompletionBanner({ dayNumber }: CompletionBannerProps) {
     >
       <div
         className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-        style={{ backgroundColor: "#22C55E" }}
+        style={{ background: "linear-gradient(135deg, #34D399, #2DD4BF)" }}
       >
         <Check className="w-3.5 h-3.5 text-white" />
       </div>

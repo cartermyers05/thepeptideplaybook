@@ -38,7 +38,9 @@ export function FloatingChatButton({ onClick, shouldPulse = false }: FloatingCha
         className="w-[52px] h-[52px] rounded-full flex items-center justify-center transition-colors duration-200"
         style={{
           backgroundColor: hovered ? "#F97316" : "#111111",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          boxShadow: hovered
+            ? "0 4px 24px rgba(249,115,22,0.3), 0 8px 40px rgba(251,113,133,0.15)"
+            : "0 4px 20px rgba(249,115,22,0.2), 0 8px 32px rgba(251,113,133,0.1)",
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}

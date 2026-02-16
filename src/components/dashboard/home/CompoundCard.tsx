@@ -9,9 +9,9 @@ const categoryColors: Record<string, string> = {
   healing: "#3B82F6",
   performance: "#F97316",
   gh: "#F97316",
-  skin: "#6366F1",
+  skin: "#FB7185",
   longevity: "#3B82F6",
-  cognitive: "#EAB308",
+  cognitive: "#A78BFA",
 };
 
 function getCategoryColor(category?: string) {
