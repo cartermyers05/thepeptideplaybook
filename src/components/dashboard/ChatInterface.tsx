@@ -119,6 +119,8 @@ export default function ChatInterface({
   const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isOwnConversationRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const navigate = useNavigate();
   
   const { user } = useAuth();
@@ -140,9 +142,18 @@ export default function ChatInterface({
 
   useEffect(() => {
     if (initialConversationId !== conversationId) {
+      if (isOwnConversationRef.current) {
+        // We created this conversation ourselves — don't wipe messages
+        isOwnConversationRef.current = false;
+        setConversationId(initialConversationId);
+        return;
+      }
+      // Genuine navigation (e.g. from history) — abort any active stream and reset
+      abortControllerRef.current?.abort();
       setConversationId(initialConversationId);
       setHasLoadedHistory(false);
       setMessages([]);
+      setIsLoading(false);
     }
   }, [initialConversationId]);
 
@@ -198,8 +209,8 @@ export default function ChatInterface({
         const title = userMessageContent.slice(0, 50) + (userMessageContent.length > 50 ? "..." : "");
         const newConversation = await createConversation.mutateAsync(title);
         activeConversationId = newConversation.id;
+        isOwnConversationRef.current = true;
         setConversationId(newConversation.id);
-        onConversationChange?.(newConversation.id);
       } catch (error) {
         console.error("Failed to create conversation:", error);
       }
@@ -240,6 +251,9 @@ export default function ChatInterface({
 
       const allMessages = [...messages, userMessage];
 
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
         {
@@ -254,6 +268,7 @@ export default function ChatInterface({
               content: m.content,
             })),
           }),
+          signal: abortController.signal,
         }
       );
 
@@ -342,6 +357,11 @@ export default function ChatInterface({
             </Button>
           ),
         });
+      }
+
+      // Defer URL update until after streaming is complete
+      if (activeConversationId) {
+        onConversationChange?.(activeConversationId);
       }
 
       try {
