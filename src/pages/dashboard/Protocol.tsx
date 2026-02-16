@@ -212,15 +212,20 @@ function StatChip({ label, value, accent }: { label: string; value: string; acce
     <div
       className="px-3 py-1.5 rounded-full flex items-center gap-1.5"
       style={{
-        backgroundColor: accent ? "rgba(249,115,22,0.08)" : "#F3F4F6",
-        border: `1px solid ${accent ? "rgba(249,115,22,0.2)" : "#E8EAED"}`,
+        backgroundColor: accent
+          ? "linear-gradient(135deg, rgba(249,115,22,0.06), rgba(167,139,250,0.06))"
+          : "#F3F4F6",
+        background: accent
+          ? "linear-gradient(135deg, rgba(249,115,22,0.06), rgba(167,139,250,0.06))"
+          : undefined,
+        border: `1px solid ${accent ? "rgba(167,139,250,0.2)" : "#E8EAED"}`,
       }}
     >
       <span className="text-[10px] uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{label}</span>
       <span
         className="text-sm font-bold"
         style={{
-          color: accent ? "#F97316" : "#0A0A0A",
+          color: "#0A0A0A",
           fontFamily: "JetBrains Mono, monospace",
         }}
       >
@@ -287,9 +292,11 @@ function CompoundCard({ compound }: { compound: Compound }) {
         {compound.description && (
           <p className="text-sm mb-2" style={{ color: "#4B5563" }}>{compound.description}</p>
         )}
-        <p className="text-sm font-bold" style={{ color: "#F97316", fontFamily: "JetBrains Mono, monospace" }}>
-          {compound.dose} · {compound.frequency} · {compound.route}
-        </p>
+        <div className="mt-1 space-y-0.5">
+          <p className="text-sm font-bold" style={{ color: "#0A0A0A" }}>{compound.dose}</p>
+          <p className="text-xs" style={{ color: "#6B7280" }}>{compound.frequency}</p>
+          <span className="inline-block text-[11px] px-2 py-0.5 rounded-full mt-1" style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}>{compound.route}</span>
+        </div>
         {compound.timing && (
           <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>{compound.timing}</p>
         )}
@@ -359,7 +366,7 @@ function DoctorScriptSection({ script }: { script: DoctorScript }) {
         <button
           onClick={handleCopy}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors hover:opacity-80"
-          style={{ backgroundColor: "rgba(249,115,22,0.08)", color: "#F97316" }}
+          style={{ backgroundColor: "#F3F4F6", color: "#4B5563" }}
         >
           {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           {copied ? "Copied!" : "Copy Script"}
@@ -397,7 +404,7 @@ function DoctorScriptSection({ script }: { script: DoctorScript }) {
               <div key={i} className="flex gap-2 items-start">
                 <span
                   className="text-xs font-mono flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "rgba(249,115,22,0.1)", color: "#F97316" }}
+                  style={{ backgroundColor: "#F3F4F6", color: "#4B5563" }}
                 >
                   {i + 1}
                 </span>
@@ -427,13 +434,13 @@ function WeeklyScheduleGrid({ schedule }: { schedule: Record<string, string[]> }
             key={day}
             className="rounded-lg py-2 px-1 space-y-1"
             style={{
-              backgroundColor: isToday ? "rgba(249,115,22,0.06)" : "#FAFAFA",
-              border: isToday ? "1px solid rgba(249,115,22,0.2)" : "1px solid transparent",
+              backgroundColor: isToday ? "rgba(0,0,0,0.03)" : "#FAFAFA",
+              border: isToday ? "1px solid #E8EAED" : "1px solid transparent",
             }}
           >
             <p
               className="text-xs font-medium"
-              style={{ color: isToday ? "#F97316" : "#4B5563" }}
+              style={{ color: isToday ? "#0A0A0A" : "#4B5563", fontWeight: isToday ? 600 : 500 }}
             >
               {day.slice(0, 3)}
             </p>
@@ -443,8 +450,8 @@ function WeeklyScheduleGrid({ schedule }: { schedule: Record<string, string[]> }
                   key={name}
                   className="text-[8px] md:text-[9px] px-1 py-0.5 rounded-full truncate font-medium"
                   style={{
-                    backgroundColor: "rgba(249,115,22,0.08)",
-                    color: "#F97316",
+                    backgroundColor: "#F3F4F6",
+                    color: "#4B5563",
                   }}
                   title={name}
                 >
@@ -477,11 +484,12 @@ function WeeklyTimeline({ expectations, currentWeek }: {
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono flex-shrink-0"
                 style={{
-                  backgroundColor: isCurrent ? "#F97316" : isPast ? "#22C55E" : "transparent",
+                  background: isCurrent
+                    ? "linear-gradient(135deg, #F97316, #FB7185, #A78BFA)"
+                    : isPast ? "#22C55E" : "transparent",
                   border: `2px solid ${isCurrent ? "#F97316" : isPast ? "#22C55E" : "#E8EAED"}`,
                   color: isCurrent || isPast ? "white" : "#9CA3AF",
-                  boxShadow: isCurrent ? "0 0 12px rgba(249,115,22,0.25)" : "none",
-                  fontFamily: "JetBrains Mono, monospace",
+                  boxShadow: "none",
                 }}
               >
                 {isPast ? <Check className="w-3.5 h-3.5" /> : item.week}
