@@ -86,6 +86,8 @@ export default function Dashboard() {
             compliancePercent={stats.compliancePercent}
             onToggleAction={handleToggleAction}
             firstName={firstName}
+            currentStreak={profile?.current_streak || 0}
+            hasCheckedInThisWeek={stats.hasCheckedInThisWeek}
           />
         )}
       </motion.div>
