@@ -120,7 +120,7 @@ When a user explicitly asks you to "create", "build", "make", "set up", or "save
 **AFTER PROTOCOL CREATION - FORMATTED OUTPUT:**
 Once created successfully, present with: Protocol Name, Goal, Duration, Peptides (with purpose, dosage, frequency, timing, admin, rationale), Safety Info, and Getting Started steps.
 
-View and manage your protocol: [View Your Protocol →](/dashboard/protocols)
+View and manage your protocol: [View Your Protocol →](/dashboard/protocol)
 
 ═══════════════════════════════════════════════════════════
 CRITICAL REMINDER
@@ -290,6 +290,81 @@ async function handleToolCall(
       if (error) {
         console.error("Failed to create protocol:", error);
         return { success: false, message: `Failed to save protocol: ${error.message}` };
+      }
+
+      // === DUAL-WRITE: Also insert into user_protocols (the table the dashboard reads) ===
+      try {
+        const compounds = (args.peptides || []).map((p: any) => ({
+          name: p.name,
+          description: p.purpose || "",
+          dose: p.dosage || "",
+          frequency: p.frequency || "",
+          timing: p.timing || "",
+          route: p.site || "Subcutaneous",
+          category: args.goal || "general",
+          side_effects: "",
+          storage: "",
+          rationale: p.rationale || "",
+        }));
+
+        // Build schedule from frequency data
+        const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        const schedule: Record<string, string[]> = {};
+        dayNames.forEach(d => schedule[d] = []);
+
+        for (const compound of compounds) {
+          const freq = (compound.frequency || "").toLowerCase();
+          if (freq.includes("daily") || freq.includes("every day") || freq.includes("twice daily") || freq.includes("2x daily")) {
+            dayNames.forEach(d => schedule[d].push(compound.name));
+          } else if (freq.includes("3x") || freq.includes("three times") || freq.includes("3 times")) {
+            ["Monday", "Wednesday", "Friday"].forEach(d => schedule[d].push(compound.name));
+          } else if (freq.includes("twice weekly") || freq.includes("2x week") || freq.includes("2x per week")) {
+            ["Monday", "Thursday"].forEach(d => schedule[d].push(compound.name));
+          } else if (freq.includes("once weekly") || freq.includes("1x") || freq.includes("weekly")) {
+            schedule["Monday"].push(compound.name);
+          } else {
+            // Default: add to all days
+            dayNames.forEach(d => schedule[d].push(compound.name));
+          }
+        }
+
+        // Generate weekly expectations
+        const weeks = args.cycle_length_weeks || 8;
+        const weeklyExpectations = [];
+        for (let w = 1; w <= weeks; w++) {
+          if (w === 1) weeklyExpectations.push({ week: w, description: "Starting phase — begin at recommended doses. Monitor for any side effects." });
+          else if (w === 2) weeklyExpectations.push({ week: w, description: "Adjustment phase — your body is adapting. Minor side effects may appear and typically resolve." });
+          else if (w <= Math.floor(weeks / 2)) weeklyExpectations.push({ week: w, description: "Building phase — compounds reaching steady state. Early benefits may begin." });
+          else if (w <= weeks - 1) weeklyExpectations.push({ week: w, description: "Optimization phase — peak benefits expected. Monitor progress and adjust if needed." });
+          else weeklyExpectations.push({ week: w, description: "Final week — assess results, plan next steps with your healthcare provider." });
+        }
+
+        const today = new Date().toISOString().split("T")[0];
+
+        // Deactivate any existing active protocols
+        await supabaseServiceRole
+          .from("user_protocols")
+          .update({ status: "completed" })
+          .eq("user_id", userId)
+          .eq("status", "active");
+
+        await supabaseServiceRole
+          .from("user_protocols")
+          .insert({
+            user_id: userId,
+            protocol_name: args.protocol_name,
+            compounds,
+            schedule,
+            cycle_length_weeks: weeks,
+            status: "active",
+            start_date: today,
+            weekly_expectations: weeklyExpectations,
+            ai_generation_context: args.notes || args.goal || null,
+          });
+
+        console.log("Successfully dual-wrote protocol to user_protocols");
+      } catch (dualWriteErr) {
+        console.error("Dual-write to user_protocols failed (non-fatal):", dualWriteErr);
       }
 
       return { success: true, message: `Protocol "${args.protocol_name}" created successfully!`, protocolId: data.id };
