@@ -31,8 +31,7 @@ export function ProtocolCompoundCard({ compound, index }: Props) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 + index * 0.08, duration: 0.4 }}
-      className="rounded-2xl p-4 relative overflow-hidden"
-      style={{ backgroundColor: "#FFFFFF", border: "1px solid #E8EAED", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+      className="rounded-2xl p-4 relative overflow-hidden bg-card border border-border hover:shadow-xl hover:border-muted-foreground/30 transition-all duration-300"
     >
       {/* Left accent bar */}
       <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ backgroundColor: color }} />
@@ -40,7 +39,7 @@ export function ProtocolCompoundCard({ compound, index }: Props) {
       <div className="pl-3">
         {/* Header: name + badge */}
         <div className="flex items-center gap-2 mb-1.5">
-          <span className="font-semibold text-[15px]" style={{ color: "#0A0A0A", fontFamily: "Outfit, sans-serif" }}>
+          <span className="font-semibold text-[15px] text-foreground" style={{ fontFamily: "Outfit, sans-serif" }}>
             {compound.name}
           </span>
           <span
@@ -53,25 +52,25 @@ export function ProtocolCompoundCard({ compound, index }: Props) {
 
         {/* Description */}
         {compound.description && (
-          <p className="text-sm mb-2" style={{ color: "#4B5563" }}>{compound.description}</p>
+          <p className="text-sm mb-2 text-muted-foreground">{compound.description}</p>
         )}
 
         {/* Dose / Frequency / Route */}
         <div className="space-y-0.5">
-          <p className="text-sm font-bold" style={{ color: "#0A0A0A" }}>{compound.dose}</p>
-          <p className="text-xs" style={{ color: "#6B7280" }}>{compound.frequency}</p>
-          <span className="inline-block text-[11px] px-2 py-0.5 rounded-full mt-1" style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}>
+          <p className="text-sm font-bold text-foreground">{compound.dose}</p>
+          <p className="text-xs text-muted-foreground">{compound.frequency}</p>
+          <span className="inline-block text-[11px] px-2 py-0.5 rounded-full mt-1 bg-secondary text-muted-foreground">
             {compound.route}
           </span>
         </div>
 
         {compound.timing && (
-          <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>{compound.timing}</p>
+          <p className="text-xs mt-1 text-muted-foreground">{compound.timing}</p>
         )}
 
         {compound.rationale && (
-          <p className="text-sm mt-2 italic" style={{ color: "#6B7280" }}>
-            <strong style={{ color: "#0A0A0A", fontStyle: "normal" }}>Why chosen:</strong> {compound.rationale}
+          <p className="text-sm mt-2 italic text-muted-foreground">
+            <strong className="text-foreground not-italic">Why chosen:</strong> {compound.rationale}
           </p>
         )}
 
@@ -80,8 +79,7 @@ export function ProtocolCompoundCard({ compound, index }: Props) {
           <>
             <button
               onClick={() => setShowDetails(!showDetails)}
-              className="flex items-center gap-1 mt-3 text-xs font-medium transition-colors"
-              style={{ color: "#9CA3AF" }}
+              className="flex items-center gap-1 mt-3 text-xs font-medium transition-colors text-muted-foreground hover:text-foreground"
             >
               {showDetails ? "Hide details" : "More details"}
               <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", showDetails && "rotate-180")} />
@@ -95,27 +93,27 @@ export function ProtocolCompoundCard({ compound, index }: Props) {
                 className="mt-2 space-y-2"
               >
                 {compound.mechanism && (
-                  <div className="p-3 rounded-lg" style={{ backgroundColor: "rgba(59,130,246,0.05)", borderLeft: "3px solid #3B82F6" }}>
+                  <div className="p-3 rounded-lg bg-secondary/50 border-l-[3px]" style={{ borderLeftColor: "#3B82F6" }}>
                     <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: "#3B82F6" }}>
                       <Brain className="w-3.5 h-3.5" /> How it works
                     </p>
-                    <p className="text-sm" style={{ color: "#4B5563" }}>{compound.mechanism}</p>
+                    <p className="text-sm text-muted-foreground">{compound.mechanism}</p>
                   </div>
                 )}
                 {compound.side_effects && (
-                  <div className="p-3 rounded-lg" style={{ backgroundColor: "rgba(245,158,11,0.05)", borderLeft: "3px solid #F59E0B" }}>
+                  <div className="p-3 rounded-lg bg-secondary/50 border-l-[3px]" style={{ borderLeftColor: "#F59E0B" }}>
                     <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: "#D97706" }}>
                       <AlertTriangle className="w-3.5 h-3.5" /> Side effects
                     </p>
-                    <p className="text-sm" style={{ color: "#4B5563" }}>{compound.side_effects}</p>
+                    <p className="text-sm text-muted-foreground">{compound.side_effects}</p>
                   </div>
                 )}
                 {compound.storage && (
-                  <div className="p-3 rounded-lg" style={{ backgroundColor: "rgba(34,197,94,0.05)", borderLeft: "3px solid #22C55E" }}>
+                  <div className="p-3 rounded-lg bg-secondary/50 border-l-[3px]" style={{ borderLeftColor: "#22C55E" }}>
                     <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: "#16A34A" }}>
                       <Thermometer className="w-3.5 h-3.5" /> Storage & handling
                     </p>
-                    <p className="text-sm" style={{ color: "#4B5563" }}>{compound.storage}</p>
+                    <p className="text-sm text-muted-foreground">{compound.storage}</p>
                   </div>
                 )}
               </motion.div>
