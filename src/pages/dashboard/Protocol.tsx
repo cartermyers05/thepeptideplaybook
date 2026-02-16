@@ -19,8 +19,8 @@ export default function Protocol() {
     return (
       <DashboardLayout>
         <div className="space-y-6 py-6">
-          <Skeleton className="h-40 w-full rounded-2xl" style={{ backgroundColor: "#E8EAED" }} />
-          <Skeleton className="h-48 w-full rounded-2xl" style={{ backgroundColor: "#E8EAED" }} />
+          <Skeleton className="h-40 w-full rounded-2xl bg-secondary" />
+          <Skeleton className="h-48 w-full rounded-2xl bg-secondary" />
         </div>
       </DashboardLayout>
     );
@@ -30,15 +30,15 @@ export default function Protocol() {
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-          <FlaskConical className="w-16 h-16 mb-4" style={{ color: "#9CA3AF" }} />
-          <h1 className="text-2xl font-bold mb-2" style={{ color: "#0A0A0A", fontFamily: "Outfit, sans-serif" }}>No Active Protocol</h1>
-          <p className="mb-6 max-w-md" style={{ color: "#4B5563" }}>
+          <FlaskConical className="w-16 h-16 mb-4 text-muted-foreground" />
+          <h1 className="text-2xl font-bold mb-2 text-foreground" style={{ fontFamily: "Outfit, sans-serif" }}>No Active Protocol</h1>
+          <p className="mb-6 max-w-md text-muted-foreground">
             Chat with your AI coach to build a personalized protocol.
           </p>
           <button
             onClick={() => navigate("/dashboard/coach")}
-            className="px-8 py-3 rounded-full font-semibold transition-all hover:opacity-90"
-            style={{ backgroundColor: "#0A0A0A", color: "#FFFFFF", minHeight: 48 }}
+            className="px-8 py-3 rounded-full font-semibold transition-all hover:opacity-90 bg-foreground text-background"
+            style={{ minHeight: 48 }}
           >
             Build My Protocol <ArrowRight className="w-4 h-4 inline ml-1" />
           </button>
@@ -55,22 +55,15 @@ export default function Protocol() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="rounded-2xl p-5 md:p-6 relative overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, rgba(249,115,22,0.04), rgba(251,113,133,0.03), rgba(167,139,250,0.04))",
-            border: "1px solid #E8EAED",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-          }}
+          className="rounded-2xl p-5 md:p-6 relative overflow-hidden bg-card border border-border"
         >
           <div className="flex items-center gap-5">
-            {/* Progress Ring */}
             <ProtocolProgressRing
               percentage={progressPercent}
               currentWeek={currentWeek || 1}
               totalWeeks={protocol.cycle_length_weeks}
             />
 
-            {/* Protocol info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span
@@ -86,16 +79,15 @@ export default function Protocol() {
                   )}
                   {protocol.status === "active" ? "Active" : protocol.status}
                 </span>
-                <span className="text-xs" style={{ color: "#9CA3AF" }}>Cycle {protocol.cycle_number}</span>
+                <span className="text-xs text-muted-foreground">Cycle {protocol.cycle_number}</span>
               </div>
               <h1
-                className="text-lg md:text-xl font-bold tracking-tight truncate"
-                style={{ color: "#0A0A0A", fontFamily: "Outfit, sans-serif" }}
+                className="text-lg md:text-xl font-bold tracking-tight truncate text-foreground"
+                style={{ fontFamily: "Outfit, sans-serif" }}
               >
                 {protocol.protocol_name}
               </h1>
 
-              {/* Stat pills */}
               <div className="flex flex-wrap gap-1.5 mt-2.5">
                 <StatPill label="Day" value={String(daysElapsed)} />
                 <StatPill label="Left" value={`${daysRemaining}d`} />
@@ -119,11 +111,10 @@ export default function Protocol() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.25, duration: 0.5 }}
         >
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: "#0A0A0A", fontFamily: "Outfit, sans-serif" }}>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2 text-foreground" style={{ fontFamily: "Outfit, sans-serif" }}>
             <FlaskConical className="w-4 h-4" style={{ color: "#F97316" }} />
             Your Stack
           </h3>
-          {/* Synergy indicator */}
           {(protocol.compounds as Compound[]).length > 1 && (
             <SynergyBadge compounds={protocol.compounds as Compound[]} />
           )}
@@ -159,18 +150,18 @@ export default function Protocol() {
           className="space-y-3"
         >
           {protocol.risk_assessment && (
-            <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)" }}>
+            <div className="rounded-xl p-4 bg-card border border-border border-l-[3px]" style={{ borderLeftColor: "#F59E0B" }}>
               <p className="font-semibold text-sm mb-1.5 flex items-center gap-2" style={{ color: "#D97706" }}>
                 <AlertTriangle className="w-4 h-4" /> Risk Assessment
               </p>
-              <p className="text-sm" style={{ color: "#4B5563" }}>{protocol.risk_assessment}</p>
+              <p className="text-sm text-muted-foreground">{protocol.risk_assessment}</p>
             </div>
           )}
-          <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.12)" }}>
+          <div className="rounded-xl p-4 bg-card border border-border border-l-[3px]" style={{ borderLeftColor: "#EF4444" }}>
             <p className="font-semibold text-xs mb-1 flex items-center gap-1.5" style={{ color: "#DC2626" }}>
               <Shield className="w-3.5 h-3.5" /> When to stop
             </p>
-            <p className="text-xs" style={{ color: "#4B5563" }}>
+            <p className="text-xs text-muted-foreground">
               Stop all compounds and contact a healthcare provider if you experience: severe allergic reaction, chest pain, severe headache with vision changes, signs of infection at injection site, or any medical emergency.
             </p>
           </div>
@@ -185,15 +176,15 @@ export default function Protocol() {
         >
           <button
             onClick={() => navigate("/dashboard/coach")}
-            className="w-full px-8 py-3 rounded-full font-semibold text-[15px] transition-all hover:opacity-90"
-            style={{ backgroundColor: "#0A0A0A", color: "#FFFFFF", minHeight: 48 }}
+            className="w-full px-8 py-3 rounded-full font-semibold text-[15px] transition-all hover:opacity-90 bg-foreground text-background"
+            style={{ minHeight: 48 }}
           >
             Ask Coach About This Protocol
           </button>
           <button
             onClick={() => navigate("/dashboard")}
-            className="w-full px-8 py-3 rounded-full font-semibold text-[15px] transition-all hover:opacity-80"
-            style={{ border: "1px solid #E8EAED", color: "#4B5563", backgroundColor: "#FFFFFF", minHeight: 48 }}
+            className="w-full px-8 py-3 rounded-full font-semibold text-[15px] transition-all hover:opacity-80 bg-card border border-border text-muted-foreground"
+            style={{ minHeight: 48 }}
           >
             Back to Dashboard
           </button>
@@ -203,28 +194,23 @@ export default function Protocol() {
   );
 }
 
-// ── Stat Pill ──
 function StatPill({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div
-      className="px-2.5 py-1 rounded-full flex items-center gap-1"
-      style={{
-        background: accent ? "linear-gradient(135deg, rgba(249,115,22,0.06), rgba(167,139,250,0.06))" : undefined,
-        backgroundColor: accent ? undefined : "#F3F4F6",
-        border: `1px solid ${accent ? "rgba(167,139,250,0.2)" : "#E8EAED"}`,
-      }}
+      className={`px-2.5 py-1 rounded-full flex items-center gap-1 border ${
+        accent ? "border-border" : "border-border bg-secondary"
+      }`}
+      style={accent ? { background: "linear-gradient(135deg, rgba(249,115,22,0.06), rgba(167,139,250,0.06))" } : undefined}
     >
-      <span className="text-[10px] uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{label}</span>
-      <span className="text-xs font-bold" style={{ color: "#0A0A0A", fontFamily: "JetBrains Mono, monospace" }}>
+      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-xs font-bold text-foreground" style={{ fontFamily: "JetBrains Mono, monospace" }}>
         {value}
       </span>
     </div>
   );
 }
 
-// ── Synergy Badge ──
 function SynergyBadge({ compounds }: { compounds: Compound[] }) {
-  // Group compounds by category to find synergies
   const categories: Record<string, string[]> = {};
   for (const c of compounds) {
     const cat = c.category?.toLowerCase() || "general";
@@ -244,15 +230,13 @@ function SynergyBadge({ compounds }: { compounds: Compound[] }) {
   return (
     <div className="mb-3">
       {synergies.map(([group, names]) => (
-        <div
+        <span
           key={group}
-          className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-full mr-2 mb-1"
-          style={{ backgroundColor: "rgba(167,139,250,0.08)", color: "#7C3AED", border: "1px solid rgba(167,139,250,0.15)" }}
+          className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-full mr-2 mb-1 font-medium text-white"
+          style={{ background: "linear-gradient(135deg, #F97316, #FB7185, #A78BFA)" }}
         >
-          <span className="font-medium">{names.join(" + ")}</span>
-          <span style={{ color: "#9CA3AF" }}>=</span>
-          <span className="font-semibold">{group} Stack</span>
-        </div>
+          {names.join(" + ")} = {group} Stack
+        </span>
       ))}
     </div>
   );

@@ -21,14 +21,13 @@ export function CompactTimeline({ expectations, currentWeek }: Props) {
       transition={{ delay: 0.7, duration: 0.5 }}
     >
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold" style={{ color: "#0A0A0A", fontFamily: "Outfit, sans-serif" }}>
+        <h3 className="text-sm font-semibold text-foreground" style={{ fontFamily: "Outfit, sans-serif" }}>
           Timeline
         </h3>
         {expectations.length > 3 && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-xs flex items-center gap-1 font-medium transition-colors"
-            style={{ color: "#9CA3AF" }}
+            className="text-xs flex items-center gap-1 font-medium transition-colors text-muted-foreground hover:text-foreground"
           >
             {expanded ? "Show less" : "Show all"}
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
@@ -48,17 +47,16 @@ export function CompactTimeline({ expectations, currentWeek }: Props) {
                     background: isCurrent
                       ? "linear-gradient(135deg, #F97316, #FB7185, #A78BFA)"
                       : isPast ? "#22C55E" : "transparent",
-                    border: `2px solid ${isCurrent ? "transparent" : isPast ? "#22C55E" : "#E8EAED"}`,
-                    color: isCurrent || isPast ? "white" : "#9CA3AF",
+                    border: isCurrent ? "none" : `2px solid ${isPast ? "#22C55E" : "hsl(var(--border))"}`,
+                    color: isCurrent || isPast ? "white" : "hsl(var(--muted-foreground))",
                   }}
                 >
                   {isPast ? <Check className="w-3.5 h-3.5" /> : item.week}
                 </div>
-                <div className="w-0.5 flex-1 mt-1" style={{ backgroundColor: "#E8EAED" }} />
+                <div className="w-0.5 flex-1 mt-1 bg-border" />
               </div>
               <p
-                className="text-sm pb-3"
-                style={{ color: isCurrent ? "#0A0A0A" : "#4B5563", fontWeight: isCurrent ? 600 : 400 }}
+                className={`text-sm pb-3 ${isCurrent ? "text-foreground font-semibold" : "text-muted-foreground"}`}
               >
                 {item.description}
               </p>

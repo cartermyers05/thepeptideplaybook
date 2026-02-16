@@ -29,43 +29,41 @@ export function ProtocolThisWeekCard({ currentWeek, weeklyExpectations, todayCom
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2, duration: 0.5 }}
-      className="rounded-2xl p-5 relative overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, rgba(59,130,246,0.05), rgba(167,139,250,0.06))",
-        border: "1px solid #E8EAED",
-      }}
+      className="rounded-2xl p-5 relative overflow-hidden bg-card border border-border"
     >
       <div className="flex items-center gap-2 mb-2">
-        <Sparkles className="w-4 h-4" style={{ color: "#A78BFA" }} />
-        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#A78BFA" }}>
+        <Sparkles className="w-4 h-4 text-muted-foreground" />
+        <span
+          className="text-xs font-semibold uppercase tracking-wider bg-clip-text text-transparent"
+          style={{ backgroundImage: "linear-gradient(135deg, #F97316, #FB7185, #A78BFA)" }}
+        >
           This Week
         </span>
       </div>
 
       {weekData ? (
-        <p className="text-sm font-medium mb-3" style={{ color: "#0A0A0A" }}>
+        <p className="text-sm font-medium mb-3 text-foreground">
           {weekData.description}
         </p>
       ) : (
-        <p className="text-sm mb-3" style={{ color: "#4B5563" }}>
+        <p className="text-sm mb-3 text-muted-foreground">
           {nudge}
         </p>
       )}
 
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-xs font-medium" style={{ color: "#9CA3AF" }}>
+        <span className="text-xs font-medium text-muted-foreground">
           {todayName}:
         </span>
         {isRestDay ? (
-          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full" style={{ backgroundColor: "#F3F4F6", color: "#6B7280" }}>
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-secondary text-muted-foreground">
             <Moon className="w-3 h-3" /> Rest Day
           </span>
         ) : (
           todayCompounds.map((c) => (
             <span
               key={c.name}
-              className="text-xs px-2.5 py-1 rounded-full font-medium"
-              style={{ backgroundColor: "rgba(34,197,94,0.08)", color: "#16A34A", border: "1px solid rgba(34,197,94,0.15)" }}
+              className="text-xs px-2.5 py-1 rounded-full font-medium bg-secondary text-foreground"
             >
               {c.name}
             </span>
