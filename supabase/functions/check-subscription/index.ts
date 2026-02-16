@@ -2,6 +2,10 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -16,11 +20,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
-  );
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false },
+  });
 
   try {
     logStep("Function started");
@@ -29,21 +31,27 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader?.startsWith("Bearer ")) throw new Error("No authorization header provided");
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    
-    const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+
+    // Use getClaims to validate JWT locally (no HTTP call = no DNS issues)
+    const anonClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: claimsData, error: claimsError } = await anonClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) throw new Error(`Authentication error: ${claimsError?.message || "Invalid token"}`);
+
+    const userId = claimsData.claims.sub as string;
+    const email = claimsData.claims.email as string;
+    if (!userId || !email) throw new Error("User not authenticated or email not available");
+    logStep("User authenticated", { userId, email });
 
     // 1. Check profile tier first — one-time buyers have tier = "member" set by verify-payment
     const { data: profile } = await supabaseClient
       .from("profiles")
       .select("tier, stripe_customer_id, subscription_status")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .maybeSingle();
 
     const profileTier = profile?.tier;
@@ -56,7 +64,7 @@ serve(async (req) => {
       const { data: healPurchases } = await supabaseClient
         .from("purchases")
         .select("id, tier")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .limit(1);
 
       if (healPurchases && healPurchases.length > 0) {
@@ -65,7 +73,7 @@ serve(async (req) => {
         await supabaseClient
           .from("profiles")
           .update({ tier: healTier, subscription_status: "active" })
-          .eq("user_id", user.id);
+          .eq("user_id", userId);
 
         return new Response(JSON.stringify({
           subscribed: true,
@@ -85,7 +93,7 @@ serve(async (req) => {
       const { data: purchases } = await supabaseClient
         .from("purchases")
         .select("id")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .limit(1);
 
       if (purchases && purchases.length > 0) {
@@ -106,7 +114,7 @@ serve(async (req) => {
     // 2. Check Stripe for active subscriptions (future-proofing for recurring plans)
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({ email, limit: 1 });
     
     if (customers.data.length === 0) {
       logStep("No Stripe customer found");
@@ -145,7 +153,7 @@ serve(async (req) => {
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId
         })
-        .eq("user_id", user.id);
+        .eq("user_id", userId);
 
       return new Response(JSON.stringify({
         subscribed: true,
@@ -165,7 +173,7 @@ serve(async (req) => {
     const { data: purchases } = await supabaseClient
       .from("purchases")
       .select("id")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .limit(1);
 
     if (purchases && purchases.length > 0) {
@@ -174,7 +182,7 @@ serve(async (req) => {
       await supabaseClient
         .from("profiles")
         .update({ tier: "member", subscription_status: "active" })
-        .eq("user_id", user.id);
+        .eq("user_id", userId);
 
       return new Response(JSON.stringify({
         subscribed: true,
@@ -194,7 +202,7 @@ serve(async (req) => {
       await supabaseClient
         .from("profiles")
         .update({ subscription_status: "inactive" })
-        .eq("user_id", user.id);
+        .eq("user_id", userId);
     }
 
     return new Response(JSON.stringify({
