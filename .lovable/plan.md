@@ -1,70 +1,135 @@
 
 
-# Dashboard Home: Hero Redesign
+# Fix Protocol Flow: Chat-to-Protocol Sync + Streaming Animation
 
-## Problem
-The current no-protocol state is dominated by a large, flat black rectangle that feels generic and heavy. It lacks visual energy and doesn't feel like a premium fitness/biohacking product.
+## The Problems
 
-## Solution: Replace the monolithic dark card with a more dynamic, layered approach
+There are three interconnected issues:
 
-### NoProtocolState.tsx - Complete hero rethink
+### 1. Chat creates protocols that never show up
+The AI Chat saves protocols to the `protocols` table, but the Protocol page (`/dashboard/protocol`) reads from a completely different table called `user_protocols`. These tables have different schemas and are never synced. So when the AI builds your protocol, it goes into a black hole.
 
-**Instead of one big dark box, create a "glass-morphism gradient border" card:**
+### 2. Streaming text looks ugly (chunky, not smooth)
+The chat applies a character-by-character "typewriter" animation on top of the already-chunked streaming data. Each network chunk arrives (sometimes 5-50 characters at once), then the typewriter tries to animate each character individually. This creates a stuttering, jerky effect instead of smooth text flow.
 
-- Background: subtle gradient from rgba(249,115,22,0.04) to rgba(167,139,250,0.04) -- barely tinted, almost white
-- Border: 1px solid transparent with a gradient border effect using a wrapper div (background-clip trick: outer div has `background: linear-gradient(135deg, #F97316, #FB7185, #A78BFA)` with padding 1px, inner div has white/#FAFAFA background). This creates a thin gradient-colored border that references the logo colors
-- Border-radius: 20px
-- Padding: 32px
-- No more solid black background
+### 3. Protocols page is disconnected
+There are actually THREE protocol systems that don't talk to each other:
+- `/dashboard/protocol` -- reads from `user_protocols` table (AI-generated compound stacks)
+- `/dashboard/protocols` -- reads from `protocol_progress` table (hardcoded semaglutide weekly briefs)
+- Chat `create_protocol` tool -- writes to `protocols` table
 
-**Inside the card, add a decorative floating hex cluster:**
-- Position: absolute, right side, vertically centered (desktop only, hidden mobile)
-- 3 hexagon outlines of different sizes (80px, 56px, 40px), overlapping slightly, each a different logo color at low opacity (orange 12%, rose 10%, violet 8%)
-- Rotated at different angles (0deg, 15deg, -10deg)
-- This creates a molecular/crystalline visual that references the brand without being a literal logo
+## The Fix
 
-**Text content stays left-aligned (max-width 60% on desktop to leave room for hex art):**
-- "PROTOCOL ENGINE" label: keep orange monospace uppercase
-- Heading: "Get your exact peptide protocol" -- change to black (#0A0A0A) text, not white (since card is now light). 28px mobile / 32px desktop, font-weight 700, -0.02em tracking
-- Body text: #4B5563, 15px
-- CTA button: solid gradient background `linear-gradient(135deg, #F97316, #FB7185)` (the logo gradient!), white text, rounded-[12px], height 48px. Hover: shift gradient slightly + glow shadow. This is way more branded than a flat white or flat orange button.
-- Subtext: #9CA3AF 13px
+### Part 1: Connect Chat to Protocol Page
 
-**Feature preview cards** - keep the 3-card grid but make them more alive:
-- Add a very thin 2px top border to each card using its accent color (orange, rose, violet) -- similar to how Stripe dashboard cards have colored top accents
-- Remove the lock icons (they make the product feel restrictive, not aspirational)
-- Remove "Unlocks with your protocol" text (same reason)
-- Instead, add a subtle "Coming soon" badge in the top-right in var(--text-dim) if desired, or just leave them clean
+**Edge function change (`supabase/functions/chat/index.ts`)**:
+When the `create_protocol` tool runs, ALSO insert into the `user_protocols` table (the one that `/dashboard/protocol` actually reads from). Map the fields:
+- `protocol_name` stays the same
+- `peptides` array maps to `compounds` JSONB (adding `route` and `category` fields from the peptide data)
+- `cycle_length_weeks` stays the same
+- Build a `schedule` JSONB from frequency data (e.g., "twice daily" = every day, "once weekly" = one day)
+- Set `status: "active"`, `start_date: today`
+- Generate `weekly_expectations` from the peptide data
 
-**Trust strip** -- no changes needed, it's fine.
+**ChatInterface.tsx change**:
+When `protocolCreated` is true, also invalidate the `["user-protocol", user?.id]` query key so the Protocol page refreshes immediately. Add a more prominent success banner with a "View Protocol" link.
 
-### ActiveProtocolState.tsx - Minor color refinement only
+### Part 2: Fix Streaming Animation
 
-The active state is already decent. Only tweak:
-- The small orange dot before protocol name: make it a tiny gradient dot using the logo gradient (already done per plan)
-- No structural changes needed
+**TypewriterMessage.tsx change**:
+Remove the character-by-character typewriter effect for streaming messages. Instead, show the streamed content directly as it arrives (the SSE chunks already provide a natural "typing" feel). Keep a simple cursor animation at the end while streaming is active.
 
-### FloatingChatButton.tsx - No changes needed
+The current flow: SSE chunk arrives -> state updates -> typewriter animates each character (stuttery)
+The new flow: SSE chunk arrives -> state updates -> text renders immediately with blinking cursor (smooth)
 
-### Files changed
+**useTypewriter.ts**: Not deleted but the streaming path in TypewriterMessage won't use it. Keep it available for non-streaming use cases (like the quiz).
+
+### Part 3: Unify Protocol Navigation
+
+**Remove `/dashboard/protocols` route** (the hardcoded semaglutide weekly briefs page). This page is misleading -- it only works for one specific protocol template and doesn't connect to anything the chat creates.
+
+**Make `/dashboard/protocol` the single protocol destination**. Update any navigation references that point to `/dashboard/protocols` to point to `/dashboard/protocol` instead.
+
+Update the Protocol page's empty state to have a clearer CTA that links to the chat to build a protocol.
+
+## Files Changed
 
 | File | Change |
 |------|--------|
-| `NoProtocolState.tsx` | Replace dark hero card with gradient-border light card, add hex cluster decoration, gradient CTA button, remove lock icons from feature cards |
+| `supabase/functions/chat/index.ts` | Dual-write: insert into both `protocols` AND `user_protocols` when creating a protocol |
+| `src/components/dashboard/ChatInterface.tsx` | Invalidate `user-protocol` query key on protocol creation; remove typewriter from streaming; show "View Protocol" link |
+| `src/components/dashboard/TypewriterMessage.tsx` | Replace typewriter with direct text rendering + cursor for streaming messages |
+| `src/App.tsx` | Remove `/dashboard/protocols` route, redirect to `/dashboard/protocol` |
+| `src/components/dashboard/DashboardTopNav.tsx` | Update any "Protocols" nav link to point to `/dashboard/protocol` |
+| `src/components/dashboard/MobileBottomNav.tsx` | Update any nav link pointing to `/dashboard/protocols` |
+| `src/components/dashboard/home/ActiveProtocolState.tsx` | Update quick access link from `/dashboard/protocols` to `/dashboard/protocol` |
+| `src/components/dashboard/home/NoProtocolState.tsx` | Ensure CTA goes to quiz or chat, not protocols |
 
 ## Technical Details
 
-The gradient border effect uses this CSS pattern:
+### Dual-write in edge function
+
+When `create_protocol` succeeds, build a `user_protocols` row:
+
 ```text
-<div style="background: linear-gradient(135deg, #F97316, #FB7185, #A78BFA); padding: 1px; borderRadius: 20px;">
-  <div style="background: #FAFAFA; borderRadius: 19px; padding: 32px;">
-    ...content...
-  </div>
-</div>
+compounds JSONB = peptides.map(p => ({
+  name: p.name,
+  description: p.purpose,
+  dose: p.dosage,
+  frequency: p.frequency,
+  timing: p.timing,
+  route: p.site || "Subcutaneous",
+  category: inferCategory(p),  // map from goal
+  rationale: p.rationale
+}))
+
+schedule JSONB = buildScheduleFromFrequency(compounds)
+  e.g. "twice daily" -> all 7 days
+  e.g. "once weekly" -> ["Monday"]
+  e.g. "3x per week" -> ["Monday","Wednesday","Friday"]
+
+weekly_expectations = generateWeeklyExpectations(peptides, cycle_length_weeks)
 ```
 
-The hex cluster SVGs are simple polygon elements (same pattern already used in the current code) but with varied sizes and colors instead of two identical ones.
+### Streaming fix
 
-The gradient button uses inline styles with `background: linear-gradient(135deg, #F97316, #FB7185)` and hover intensification via brightness filter.
+Replace TypewriterMessage's streaming mode:
 
-All existing hooks, routing, and data connections remain untouched. Only visual changes to NoProtocolState.tsx.
+```text
+// Instead of character-by-character animation:
+if (isStreaming) {
+  return (
+    <div className="text-sm">
+      <ReactMarkdown>{content}</ReactMarkdown>
+      {content && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5" />}
+    </div>
+  );
+}
+```
+
+This means the text appears exactly as fast as the server sends it (which already feels like typing), without an additional animation layer creating stutter.
+
+### Schedule builder logic
+
+```text
+function buildSchedule(compounds):
+  schedule = { Monday: [], Tuesday: [], ... }
+  for each compound:
+    if frequency contains "daily" or "every day":
+      add to all 7 days
+    if frequency contains "twice weekly" or "2x":
+      add to Monday, Thursday
+    if frequency contains "3x" or "three times":
+      add to Monday, Wednesday, Friday
+    if frequency contains "once weekly" or "1x":
+      add to Monday
+  return schedule
+```
+
+## What Does NOT Change
+
+- No database schema changes needed (both tables already exist)
+- No changes to the quiz, homepage, guides, checkout, or login
+- The `/dashboard/protocol` page UI stays the same (it already renders compounds, schedules, and timelines nicely)
+- All existing hooks and data connections preserved
+- The chat's AI system prompt and tool definitions stay the same
