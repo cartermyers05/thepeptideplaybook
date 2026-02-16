@@ -286,9 +286,107 @@ export default function ChatInterface() {
   };
 
   const handleSuggestedQuestion = (question: string) => {
-    setInput(question);
+    if (!question.trim() || isLoading || !user || isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setSelectedCategory(null);
-    textareaRef.current?.focus();
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: question.trim(),
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    let assistantContent = "";
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, assistantMessage]);
+
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) throw new Error("Not authenticated");
+
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
+
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              messages: [{ role: "user", content: question.trim() }],
+            }),
+            signal: abortController.signal,
+          }
+        );
+
+        if (!response.ok) {
+          let errorMsg = "Failed to get response";
+          try { const errBody = await response.json(); errorMsg = errBody.error || errorMsg; } catch {}
+          toast({ title: "Error", description: errorMsg, variant: "destructive" });
+          throw new Error(errorMsg);
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let textBuffer = "";
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            textBuffer += decoder.decode(value, { stream: true });
+            let newlineIndex: number;
+            while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+              let line = textBuffer.slice(0, newlineIndex);
+              textBuffer = textBuffer.slice(newlineIndex + 1);
+              if (line.endsWith("\r")) line = line.slice(0, -1);
+              if (line.startsWith(":") || line.trim() === "") continue;
+              if (!line.startsWith("data: ")) continue;
+              const jsonStr = line.slice(6).trim();
+              if (jsonStr === "[DONE]") break;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  assistantContent += content;
+                  setMessages((prev) =>
+                    prev.map((m) => m.id === assistantMessage.id ? { ...m, content: assistantContent } : m)
+                  );
+                }
+              } catch {
+                textBuffer = line + "\n" + textBuffer;
+                break;
+              }
+            }
+          }
+        }
+
+        try { await incrementQuestions.mutateAsync(); } catch {}
+      } catch (error) {
+        console.error("Chat error:", error);
+        setMessages((prev) =>
+          prev.map((m) => m.id === assistantMessage.id ? { ...m, content: "Sorry, I encountered an error. Please try again." } : m)
+        );
+      } finally {
+        setIsLoading(false);
+        isSubmittingRef.current = false;
+      }
+    })();
   };
 
   return (

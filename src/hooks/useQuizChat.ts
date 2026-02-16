@@ -500,12 +500,24 @@ What's your experience level with peptides?`
       }
 
       // 3. Save to quiz_responses for analytics
+      // Map extracted values to DB-compatible constraint values
+      const goalMap: Record<string, string> = {
+        recovery: 'injury_recovery',
+        muscle: 'muscle_recovery',
+      };
+      const experienceMap: Record<string, string> = {
+        never: 'beginner',
+        researched: 'some_experience',
+      };
+      const dbGoal = goalMap[goal] || goal;
+      const dbExperience = experienceMap[experience] || experience;
+
       await supabase
         .from('quiz_responses')
         .insert({
           user_id: user.id,
-          primary_goal: goal,
-          experience_level: experience,
+          primary_goal: dbGoal,
+          experience_level: dbExperience,
           main_concerns: concern ? [concern] : [],
           timeline: readiness,
           completed_at: new Date().toISOString()
