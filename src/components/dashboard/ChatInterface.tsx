@@ -4,10 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Send,
-  ThumbsUp,
-  ThumbsDown,
-  BookmarkPlus,
-  Bookmark,
   AlertTriangle,
   Scale,
   Shield,
@@ -23,10 +19,7 @@ import { cn } from "@/lib/utils";
 import { TypewriterMessage } from "./TypewriterMessage";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useCreateConversation, useUpdateConversationTitle } from "@/hooks/useConversations";
-import { useSaveMessage, useUpdateMessage } from "@/hooks/useMessages";
 import { useIncrementQuestionsAsked, useProfile } from "@/hooks/useProfile";
-import { useConversationMessages } from "@/hooks/useConversationMessages";
 import { useToast } from "@/hooks/use-toast";
 import { AIDisclaimerModal } from "@/components/chat/AIDisclaimerModal";
 import { AnimatedLogo } from "@/components/brand/AnimatedLogo";
@@ -36,16 +29,9 @@ import { getGoalLabel } from "@/lib/quizPersonalization";
 
 interface Message {
   id: string;
-  dbId?: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
-  isSaved?: boolean;
-}
-
-interface ChatInterfaceProps {
-  initialConversationId?: string | null;
-  onConversationChange?: (conversationId: string | null) => void;
 }
 
 const questionCategories = [
@@ -107,19 +93,13 @@ function TypingIndicator() {
   );
 }
 
-export default function ChatInterface({ 
-  initialConversationId = null,
-  onConversationChange 
-}: ChatInterfaceProps) {
+export default function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(initialConversationId);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [hasLoadedHistory, setHasLoadedHistory] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const isOwnConversationRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isSubmittingRef = useRef(false);
   const navigate = useNavigate();
@@ -128,50 +108,12 @@ export default function ChatInterface({
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: quizResponse } = useQuizResponse();
   const queryClient = useQueryClient();
-  const createConversation = useCreateConversation();
-  const updateConversationTitle = useUpdateConversationTitle();
-  const saveMessage = useSaveMessage();
-  const updateMessage = useUpdateMessage();
   const incrementQuestions = useIncrementQuestionsAsked();
   const { toast } = useToast();
-
-  const { data: existingMessages, isLoading: messagesLoading } = useConversationMessages(conversationId);
 
   const starterPrompts = quizResponse
     ? (goalStarterPrompts[quizResponse.primary_goal] || goalStarterPrompts.general)
     : goalStarterPrompts.general;
-
-  useEffect(() => {
-    if (initialConversationId !== conversationId) {
-      if (isOwnConversationRef.current) {
-        // We created this conversation ourselves — don't wipe messages
-        isOwnConversationRef.current = false;
-        setConversationId(initialConversationId);
-        return;
-      }
-      // Genuine navigation (e.g. from history) — abort any active stream and reset
-      abortControllerRef.current?.abort();
-      setConversationId(initialConversationId);
-      setHasLoadedHistory(false);
-      setMessages([]);
-      setIsLoading(false);
-    }
-  }, [initialConversationId]);
-
-  useEffect(() => {
-    if (existingMessages && existingMessages.length > 0 && !hasLoadedHistory) {
-      const loadedMessages: Message[] = existingMessages.map((m) => ({
-        id: m.id,
-        dbId: m.id,
-        role: m.role as "user" | "assistant",
-        content: m.content,
-        timestamp: new Date(m.created_at),
-        isSaved: m.is_saved ?? false,
-      }));
-      setMessages(loadedMessages);
-      setHasLoadedHistory(true);
-    }
-  }, [existingMessages, hasLoadedHistory]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -181,10 +123,7 @@ export default function ChatInterface({
 
   const handleNewChat = () => {
     setMessages([]);
-    setConversationId(null);
-    setHasLoadedHistory(false);
     setSelectedCategory(null);
-    onConversationChange?.(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -203,37 +142,6 @@ export default function ChatInterface({
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
-
-    let activeConversationId = conversationId;
-
-    if (!activeConversationId) {
-      try {
-        const title = userMessageContent.slice(0, 50) + (userMessageContent.length > 50 ? "..." : "");
-        const newConversation = await createConversation.mutateAsync(title);
-        activeConversationId = newConversation.id;
-        isOwnConversationRef.current = true;
-        setConversationId(newConversation.id);
-      } catch (error) {
-        console.error("Failed to create conversation:", error);
-      }
-    }
-
-    let userDbId: string | undefined;
-    if (activeConversationId) {
-      try {
-        const savedUserMessage = await saveMessage.mutateAsync({
-          conversationId: activeConversationId,
-          role: "user",
-          content: userMessageContent,
-        });
-        userDbId = savedUserMessage.id;
-        setMessages((prev) =>
-          prev.map((m) => (m.id === userMessage.id ? { ...m, dbId: userDbId } : m))
-        );
-      } catch (error) {
-        console.error("Failed to save user message:", error);
-      }
-    }
 
     let assistantContent = "";
     const assistantMessage: Message = {
@@ -336,23 +244,6 @@ export default function ChatInterface({
         }
       }
 
-      if (activeConversationId && assistantContent) {
-        try {
-          const savedAssistantMessage = await saveMessage.mutateAsync({
-            conversationId: activeConversationId,
-            role: "assistant",
-            content: assistantContent,
-          });
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMessage.id ? { ...m, dbId: savedAssistantMessage.id } : m
-            )
-          );
-        } catch (error) {
-          console.error("Failed to save assistant message:", error);
-        }
-      }
-
       if (protocolCreated) {
         console.log("Protocol was created, invalidating queries");
         queryClient.invalidateQueries({ queryKey: ["protocol", user?.id] });
@@ -371,11 +262,6 @@ export default function ChatInterface({
             </Button>
           ),
         });
-      }
-
-      // Defer URL update until after streaming is complete
-      if (activeConversationId) {
-        onConversationChange?.(activeConversationId);
       }
 
       try {
@@ -405,61 +291,6 @@ export default function ChatInterface({
     textareaRef.current?.focus();
   };
 
-  const handleToggleSave = async (message: Message) => {
-    if (!message.dbId) return;
-    
-    const newSavedState = !message.isSaved;
-    try {
-      await updateMessage.mutateAsync({
-        messageId: message.dbId,
-        updates: { is_saved: newSavedState },
-      });
-      setMessages((prev) =>
-        prev.map((m) => (m.id === message.id ? { ...m, isSaved: newSavedState } : m))
-      );
-      toast({
-        title: newSavedState ? "Saved" : "Removed from saved",
-        description: newSavedState 
-          ? "Answer saved for quick access later." 
-          : "Answer removed from saved.",
-      });
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to save message.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleFeedback = async (message: Message, helpful: boolean) => {
-    if (!message.dbId) return;
-    
-    try {
-      await updateMessage.mutateAsync({
-        messageId: message.dbId,
-        updates: { helpful },
-      });
-      toast({
-        title: "Thanks for your feedback!",
-        description: "This helps us improve our responses.",
-      });
-    } catch {
-      // Silent fail for feedback
-    }
-  };
-
-  if (conversationId && messagesLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <AnimatedLogo size={48} animate={true} />
-          <p className="mt-4" style={{ color: "#6B7280" }}>Loading conversation...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* AI Disclaimer Modal */}
@@ -473,7 +304,7 @@ export default function ChatInterface({
           <div className="flex items-center gap-2">
             <Logo showText={false} size="sm" />
             <span className="text-sm font-medium" style={{ color: "#6B7280" }}>
-              {conversationId ? "Conversation" : "New Chat"}
+              New Chat
             </span>
           </div>
           <Button
@@ -617,43 +448,10 @@ export default function ChatInterface({
                           )}
                         </div>
                         {message.role === "assistant" && message.content && !isLoading && (
-                          <>
-                            <div className="flex items-start gap-1.5 text-xs mt-3 pt-2" style={{ borderTop: "1px solid #E5E7EB", color: "#6B7280" }}>
-                              <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />
-                              <p>This information is for educational purposes only. Most peptides are NOT FDA-approved for human use. Always consult a licensed healthcare provider.</p>
-                            </div>
-                            <div className="flex items-center gap-1 mt-2">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-7 px-2"
-                                onClick={() => handleFeedback(message, true)}
-                              >
-                                <ThumbsUp className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-7 px-2"
-                                onClick={() => handleFeedback(message, false)}
-                              >
-                                <ThumbsDown className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className={cn("h-7 px-2", message.isSaved && "text-[#F97316]")}
-                                onClick={() => handleToggleSave(message)}
-                                disabled={!message.dbId}
-                              >
-                                {message.isSaved ? (
-                                  <Bookmark className="w-3.5 h-3.5 fill-current" />
-                                ) : (
-                                  <BookmarkPlus className="w-3.5 h-3.5" />
-                                )}
-                              </Button>
-                            </div>
-                          </>
+                          <div className="flex items-start gap-1.5 text-xs mt-3 pt-2" style={{ borderTop: "1px solid #E5E7EB", color: "#6B7280" }}>
+                            <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />
+                            <p>This information is for educational purposes only. Most peptides are NOT FDA-approved for human use. Always consult a licensed healthcare provider.</p>
+                          </div>
                         )}
                       </div>
                     </motion.div>
