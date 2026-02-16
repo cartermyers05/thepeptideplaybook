@@ -1,80 +1,70 @@
 
 
-# Dashboard Color System Update: Logo-Matched Multi-Color Palette
+# Dashboard Home: Hero Redesign
 
-## Overview
+## Problem
+The current no-protocol state is dominated by a large, flat black rectangle that feels generic and heavy. It lacks visual energy and doesn't feel like a premium fitness/biohacking product.
 
-Update the color application across all dashboard home components to reflect the full hexagon logo palette (orange, coral, rose, violet) instead of the current single-orange accent system. No structural, layout, or logic changes -- purely color values and gradients.
+## Solution: Replace the monolithic dark card with a more dynamic, layered approach
 
-## Files Changed
+### NoProtocolState.tsx - Complete hero rethink
 
-| File | Changes |
-|------|---------|
-| `NoProtocolState.tsx` | Hero card: dual hexagon decoration (orange + violet), button hover glow (layered orange + rose), feature card icon colors (orange/rose/violet), trust strip alternating dot colors |
-| `ActiveProtocolState.tsx` | Protocol name hex icon gradient (orange to rose), stat chip colors (orange/rose/green), progress bar gradient (orange to rose to violet), quick access card hover tints per-card |
-| `CompoundCard.tsx` | Updated category colors: skin to #FB7185 (rose), cognitive to #A78BFA (violet) |
-| `CompletionBanner.tsx` | Checkmark circle gradient (green to teal: #34D399 to #2DD4BF) |
-| `FloatingChatButton.tsx` | Layered glow shadow (orange + rose), pulse ring keeps orange |
-| `RestDayCard.tsx` | No color changes needed |
-| `Home.tsx` | No changes needed |
+**Instead of one big dark box, create a "glass-morphism gradient border" card:**
 
-## Specific Color Changes
+- Background: subtle gradient from rgba(249,115,22,0.04) to rgba(167,139,250,0.04) -- barely tinted, almost white
+- Border: 1px solid transparent with a gradient border effect using a wrapper div (background-clip trick: outer div has `background: linear-gradient(135deg, #F97316, #FB7185, #A78BFA)` with padding 1px, inner div has white/#FAFAFA background). This creates a thin gradient-colored border that references the logo colors
+- Border-radius: 20px
+- Padding: 32px
+- No more solid black background
 
-### NoProtocolState.tsx
+**Inside the card, add a decorative floating hex cluster:**
+- Position: absolute, right side, vertically centered (desktop only, hidden mobile)
+- 3 hexagon outlines of different sizes (80px, 56px, 40px), overlapping slightly, each a different logo color at low opacity (orange 12%, rose 10%, violet 8%)
+- Rotated at different angles (0deg, 15deg, -10deg)
+- This creates a molecular/crystalline visual that references the brand without being a literal logo
 
-**Hero card decoration** (lines 41-53): Replace single dot grid with two overlapping SVG hexagon outlines positioned bottom-right, clipped by overflow:hidden. One hexagon in rgba(249,115,22,0.08) (orange), a second offset/rotated in rgba(167,139,250,0.06) (violet). Desktop only.
+**Text content stays left-aligned (max-width 60% on desktop to leave room for hex art):**
+- "PROTOCOL ENGINE" label: keep orange monospace uppercase
+- Heading: "Get your exact peptide protocol" -- change to black (#0A0A0A) text, not white (since card is now light). 28px mobile / 32px desktop, font-weight 700, -0.02em tracking
+- Body text: #4B5563, 15px
+- CTA button: solid gradient background `linear-gradient(135deg, #F97316, #FB7185)` (the logo gradient!), white text, rounded-[12px], height 48px. Hover: shift gradient slightly + glow shadow. This is way more branded than a flat white or flat orange button.
+- Subtext: #9CA3AF 13px
 
-**CTA button hover** (lines 84-91): Add layered box-shadow on hover: `0 0 24px rgba(249,115,22,0.2), 0 0 48px rgba(251,113,133,0.1)`.
+**Feature preview cards** - keep the 3-card grid but make them more alive:
+- Add a very thin 2px top border to each card using its accent color (orange, rose, violet) -- similar to how Stripe dashboard cards have colored top accents
+- Remove the lock icons (they make the product feel restrictive, not aspirational)
+- Remove "Unlocks with your protocol" text (same reason)
+- Instead, add a subtle "Coming soon" badge in the top-right in var(--text-dim) if desired, or just leave them clean
 
-**Feature preview card icons** (lines 104-133): Each card gets a distinct icon color instead of all #4B5563:
-- AI Coach: #F97316 at 60% opacity
-- Daily Actions: #FB7185 at 60% opacity  
-- Progress: #A78BFA at 60% opacity
+**Trust strip** -- no changes needed, it's fine.
 
-**Trust strip** (lines 137-141): Replace uniform dots with alternating colored separators -- first in rgba(249,115,22,0.4) (orange), second in rgba(167,139,250,0.4) (violet).
+### ActiveProtocolState.tsx - Minor color refinement only
 
-### ActiveProtocolState.tsx
+The active state is already decent. Only tweak:
+- The small orange dot before protocol name: make it a tiny gradient dot using the logo gradient (already done per plan)
+- No structural changes needed
 
-**Protocol name hex icon** (line 73): Change from solid `backgroundColor: "#F97316"` to `background: "linear-gradient(135deg, #F97316, #FB7185)"` (orange to rose).
+### FloatingChatButton.tsx - No changes needed
 
-**Stat row colors** (lines 83-95): 
-- Week number: #F97316 (orange) -- keep
-- Day number: #FB7185 (rose) -- changed from #4B5563
-- Compliance: #22C55E (green) -- keep
+### Files changed
 
-**Progress bar** (lines 98-105): Change fill from solid `#F97316` to `background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)"` (orange to rose to violet).
+| File | Change |
+|------|--------|
+| `NoProtocolState.tsx` | Replace dark hero card with gradient-border light card, add hex cluster decoration, gradient CTA button, remove lock icons from feature cards |
 
-**Quick access cards** (lines 140-168): Each card's icon container gets a unique hover background:
-- AI Coach: hover bg rgba(249,115,22,0.1)
-- Protocol: hover bg rgba(251,113,133,0.1)
-- Progress: hover bg rgba(167,139,250,0.1)
+## Technical Details
 
-Add hover color data to each card object and apply conditionally via group-hover or inline style.
+The gradient border effect uses this CSS pattern:
+```text
+<div style="background: linear-gradient(135deg, #F97316, #FB7185, #A78BFA); padding: 1px; borderRadius: 20px;">
+  <div style="background: #FAFAFA; borderRadius: 19px; padding: 32px;">
+    ...content...
+  </div>
+</div>
+```
 
-### CompoundCard.tsx
+The hex cluster SVGs are simple polygon elements (same pattern already used in the current code) but with varied sizes and colors instead of two identical ones.
 
-**Category colors** (lines 5-15): Two changes:
-- `skin`: "#6366F1" becomes "#FB7185" (rose, matches logo)
-- `cognitive`: "#EAB308" becomes "#A78BFA" (violet, matches logo)
+The gradient button uses inline styles with `background: linear-gradient(135deg, #F97316, #FB7185)` and hover intensification via brightness filter.
 
-All other categories unchanged.
-
-### CompletionBanner.tsx
-
-**Checkmark circle** (lines 19-21): Change from solid `backgroundColor: "#22C55E"` to `background: "linear-gradient(135deg, #34D399, #2DD4BF)"` (green to teal).
-
-### FloatingChatButton.tsx
-
-**Box shadow** (line 41): Change from `0 4px 12px rgba(0,0,0,0.15)` to `0 4px 20px rgba(249,115,22,0.2), 0 8px 32px rgba(251,113,133,0.1)` (layered orange + rose glow). Applied in both default and hover states, with hover intensifying slightly.
-
-## What Does NOT Change
-
-- All data hooks, database connections, routing
-- Component structure and props
-- Layout, spacing, typography
-- DashboardLayout, DashboardTopNav, MobileBottomNav
-- All other pages
-- RestDayCard (no logo colors relevant here)
-- Home.tsx (container unchanged)
-- Animation behavior and framer-motion config
-
+All existing hooks, routing, and data connections remain untouched. Only visual changes to NoProtocolState.tsx.
