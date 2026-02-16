@@ -1,57 +1,108 @@
 
 
-# Fix: Coach Chat Doesn't Save Protocols
+# Fix: Chat Reliability, Saving, Streaming, and Protocol Sync
 
-## Root Cause
+## Problems Found
 
-There are **two completely separate chat systems** in the app:
+### 1. Chat only responds half the time -- DUPLICATE REQUESTS
+The network logs show **two identical POST requests** fired at the exact same timestamp. This happens because the textarea has both an `onKeyDown` handler (Enter key) AND a form `onSubmit` handler -- both call `handleSubmit`. Since `handleSubmit` is async and state updates are deferred, the `isLoading` guard doesn't block the second call in time. This doubles API usage and can trigger rate limits (429 errors), causing one or both responses to fail silently.
 
-1. **Coach page** (`/dashboard/coach`) -- calls `peptide-coach` edge function. This is the one you're actually using. It has NO tool-calling capability. It just outputs text and tries to detect protocols by looking for the string "YOUR PROTOCOL:" in the response. Even when it "detects" a protocol, it only marks onboarding as complete -- it never saves any protocol data to the database.
+### 2. Protocol creation header is invisible to the browser
+The `chat` edge function sets `X-Protocol-Created: true` but does NOT include `Access-Control-Expose-Headers` in the CORS response. Browsers block reading custom headers unless explicitly exposed. So even when a protocol IS created, the frontend never detects it. (The `peptide-coach` function has this header -- the `chat` function is missing it.)
 
-2. **Chat page** (`/dashboard/chat`) -- calls the `chat` edge function. This one HAS the `create_protocol` tool and the dual-write logic we added. But you're not using this page.
+### 3. Every message makes TWO API calls (wasteful)
+The current flow for a normal (no-tool) message:
+1. Non-streaming call to check for tool calls (waits for full response)
+2. Throws away that response, makes a SECOND streaming call
 
-So the protocol creation code exists, but it's in the wrong edge function.
+This doubles latency and API usage. When rate limits are tight, the second call fails.
+
+### 4. Chat messages ARE being saved -- but only when streaming succeeds
+The save logic is correct. The issue is that when the duplicate request or rate limit kills the stream, `assistantContent` stays empty, and nothing gets saved.
 
 ## The Fix
 
-### Step 1: Add tool-calling to the `peptide-coach` edge function
+### File 1: `src/components/dashboard/ChatInterface.tsx`
 
-Port the `create_protocol` tool from `chat/index.ts` into `peptide-coach/index.ts`:
+**Fix A: Prevent duplicate submissions**
+Add a `isSubmittingRef` guard that gets set immediately (synchronously) before any async work. This prevents the second handler from getting through.
 
-- Add the same tool definition (name, parameters, required fields)
-- Add the same `handleToolCall` function with the dual-write logic (writes to both `protocols` and `user_protocols`)
-- Update the `callLovableAI` call to pass `tools` and `toolChoice: "auto"`
-- Add two-pass handling: if the AI returns tool calls, execute them, then make a follow-up streaming call with the tool results
-- Set the `X-Protocol-Created` header when a protocol is created
+```text
+const isSubmittingRef = useRef(false);
 
-### Step 2: Update Coach.tsx to handle protocol creation
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!input.trim() || isLoading || !user || isSubmittingRef.current) return;
+  isSubmittingRef.current = true;
+  // ... rest of logic
+  // In finally block:
+  isSubmittingRef.current = false;
+};
+```
 
-In the Coach page component:
+**Fix B: Better error surfacing**
+When the fetch response is not ok, parse the error body and show a toast instead of a generic "Sorry, I encountered an error."
 
-- Check for the `X-Protocol-Created` response header after streaming completes
-- When detected, invalidate `["user-protocol"]` query keys so the Protocol page updates
-- Show a toast notification with a "View Protocol" button that navigates to `/dashboard/protocol`
-- Remove the old string-matching detection (`"YOUR PROTOCOL:"`) since tool calls handle this properly now
+### File 2: `supabase/functions/chat/index.ts`
 
-### Step 3: Add the protocol intake questionnaire to the coach system prompt
+**Fix A: Add `Access-Control-Expose-Headers`**
+Add `"Access-Control-Expose-Headers": "X-Protocol-Created"` to BOTH the tool-call response (line 498) AND the normal streaming response (line 519). Without this, the browser silently ignores the header and protocols never sync.
 
-Add the same protocol creation instructions from the chat system prompt to the coach's `COACH_ADDITIONS`:
+**Fix B: Eliminate the redundant second API call**
+When the first (non-streaming) call returns content with no tool calls, convert that content into an SSE-formatted stream and return it directly instead of making a second API call. This cuts latency in half for normal messages and avoids rate limit issues.
 
-- The 4-part intake questionnaire (Goals, Health Status, Experience Level, Preferences)
-- The rule: do NOT call `create_protocol` until all 4 categories are gathered
-- The post-creation formatted output instructions
+```text
+// If no tool calls, check if the first response already has content
+if (assistantMessage?.content) {
+  // Convert to SSE format and return directly
+  const sseContent = `data: ${JSON.stringify({
+    choices: [{ delta: { content: assistantMessage.content } }]
+  })}\n\ndata: [DONE]\n\n`;
+
+  return new Response(sseContent, {
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "text/event-stream",
+      "Access-Control-Expose-Headers": "X-Protocol-Created",
+    },
+  });
+}
+// Fallback: only make a streaming call if the first response was empty
+```
+
+### File 3: `supabase/functions/_shared/ai-engine.ts`
+
+**Fix: Add `Access-Control-Expose-Headers` to the shared `corsHeaders`**
+This ensures ALL edge functions expose custom headers by default, preventing this class of bug from recurring.
+
+```text
+export const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, ...",
+  "Access-Control-Expose-Headers": "X-Protocol-Created",
+};
+```
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `supabase/functions/peptide-coach/index.ts` | Add `create_protocol` tool definition, handle tool calls with dual-write, two-pass streaming, X-Protocol-Created header |
-| `src/pages/dashboard/Coach.tsx` | Detect X-Protocol-Created header, invalidate user-protocol queries, show success toast with "View Protocol" link, remove string-matching detection |
+| `src/components/dashboard/ChatInterface.tsx` | Add `isSubmittingRef` guard to prevent duplicate submissions; improve error toast messages |
+| `supabase/functions/chat/index.ts` | Reuse first API response content instead of making a second call; add `Access-Control-Expose-Headers` |
+| `supabase/functions/_shared/ai-engine.ts` | Add `Access-Control-Expose-Headers` to shared `corsHeaders` |
 
-## What Stays the Same
+## Expected Results After Fix
 
-- The `chat` edge function is untouched (it already works for the Chat page)
-- No database schema changes
-- The Protocol page UI stays the same
-- All existing coach message history and persistence logic stays the same
+- **Reliability**: No more duplicate requests = no more rate limit failures = chat responds every time
+- **Speed**: Normal messages are ~2x faster (one API call instead of two)
+- **Protocol sync**: `X-Protocol-Created` header is now readable by the browser, so protocols created in chat will trigger the toast + cache invalidation and show up in the Protocol tab
+- **Saving**: With reliable responses, messages are consistently saved to the database
+
+## What Does NOT Change
+
+- No database changes
+- No changes to the Coach page (already working correctly)
+- No changes to the Protocol page UI
+- TypewriterMessage streaming animation stays as-is (already fixed)
+- The AI system prompt and tool definitions stay the same
 
