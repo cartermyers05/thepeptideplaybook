@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useActiveProtocolProgress } from "@/hooks/useActiveProtocolProgress";
+import { useStartTracking } from "@/hooks/useProtocolProgress";
 import { weeklyBriefs, isDoseChangeWeek } from "@/data/weeklyBriefs";
-import { Check, Lock, ChevronDown, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { Check, Lock, ChevronDown, AlertTriangle, CheckCircle2, XCircle, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 /* ───── Week Navigation Pills ───── */
 function WeekNav({ currentWeek, selectedWeek, onSelect }: {
@@ -323,8 +324,9 @@ function PreviousWeekCard({ week, isExpanded, onToggle }: {
 
 /* ───── Main Page ───── */
 export default function Protocols() {
-  const navigate = useNavigate();
   const { currentWeek, isLoading } = useActiveProtocolProgress();
+  const startTracking = useStartTracking();
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
   const [expandedPrev, setExpandedPrev] = useState<number | null>(null);
 
@@ -337,7 +339,6 @@ export default function Protocols() {
     setSelectedWeek(w);
     if (w < currentWeek) {
       setExpandedPrev(w);
-      // Scroll to previous weeks section
       setTimeout(() => {
         document.getElementById(`prev-week-${w}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
@@ -347,14 +348,22 @@ export default function Protocols() {
     }
   }, [currentWeek]);
 
-  // Redirect if no active protocol
-  useEffect(() => {
-    if (!isLoading && currentWeek === null) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [isLoading, currentWeek, navigate]);
+  const handleStartProtocol = () => {
+    startTracking.mutate(
+      {
+        protocol_template_id: "826b80bb-f9b8-4c5a-b47a-9833c58c1527",
+        peptide_slug: "semaglutide",
+        goal_slug: "weight-loss",
+        start_date: startDate,
+      },
+      {
+        onSuccess: () => toast.success("Protocol started! Welcome to Week 1."),
+        onError: () => toast.error("Something went wrong. Please try again."),
+      }
+    );
+  };
 
-  if (isLoading || currentWeek === null) {
+  if (isLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center py-20">
@@ -362,6 +371,48 @@ export default function Protocols() {
             <div className="h-10 rounded-full w-full" style={{ backgroundColor: "#E5E7EB" }} />
             <div className="h-64 rounded-2xl w-full" style={{ backgroundColor: "#E5E7EB" }} />
           </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (currentWeek === null) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-[560px] mx-auto py-12 px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl p-6 md:p-10 text-center"
+            style={{ backgroundColor: "#FFF7ED", boxShadow: "0 4px 12px rgba(249,115,22,0.08)" }}
+          >
+            <div className="mx-auto w-14 h-14 rounded-full flex items-center justify-center mb-5" style={{ backgroundColor: "rgba(249,115,22,0.1)" }}>
+              <CalendarDays className="w-7 h-7" style={{ color: "#F97316" }} />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#111827" }}>
+              Set Your Start Date
+            </h1>
+            <p className="text-[15px] mb-6" style={{ color: "#6B7280" }}>
+              Choose the date you took (or plan to take) your first injection. We'll build your personalized 20-week brief from there.
+            </p>
+            <div className="flex flex-col items-center gap-4">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full max-w-[240px] rounded-xl px-4 py-3 text-center font-medium text-[16px]"
+                style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E7EB", color: "#111827", minHeight: 48 }}
+              />
+              <button
+                onClick={handleStartProtocol}
+                disabled={startTracking.isPending}
+                className="w-full max-w-[240px] rounded-full py-3 font-semibold text-[15px] transition-opacity disabled:opacity-50"
+                style={{ backgroundColor: "#111827", color: "#FFFFFF", minHeight: 48 }}
+              >
+                {startTracking.isPending ? "Starting…" : "Start My Protocol"}
+              </button>
+            </div>
+          </motion.div>
         </div>
       </DashboardLayout>
     );
