@@ -1,48 +1,65 @@
 
 
-# Session-Only Chat: In-Memory Messages
+# Pre-Launch Bug Fixes: Full Flow Audit Results
 
-## What Changes
+## Testing Results Summary
 
-Right now, every chat message is saved to the database (conversations table + messages table). You want messages to persist only while the browser tab is open -- no database writes for chat history.
+Tested the complete flow: Landing Page -> Quiz -> Results -> Dashboard -> Chat -> Protocol. The app is 95% flawless. Found 2 issues to fix before launch.
 
-## Approach
+---
 
-Keep messages in React state (already happening) but **remove all database persistence calls**:
+## Issue 1: Quiz Analytics Data Lost (400 Error)
 
-### In `ChatInterface.tsx`:
-1. **Remove conversation creation** -- no more `createConversation.mutateAsync()` call when a new chat starts
-2. **Remove message saving** -- no more `saveMessage.mutateAsync()` for user or assistant messages
-3. **Remove loading from DB** -- remove the `useConversationMessages` hook usage and the effect that loads existing messages from the database
-4. **Remove conversation ID management** -- no more `conversationId` state, `onConversationChange` callbacks, or URL query param syncing
-5. **Keep everything else** -- streaming, feedback, save/bookmark, suggested questions, typing indicator, "New Chat" button (just clears state)
+**What happens:** After the quiz completes, the app tries to save the response to the `quiz_responses` table for analytics. It fails silently with a 400 error every time.
 
-### In `ChatPage.tsx`:
-1. Remove the `searchParams` / `useSearchParams` logic for `?conversation=` since there are no persistent conversation IDs
-2. Simplify to just render `ChatInterface` without conversation props
+**Root cause:** The quiz AI extracts experience level as `"never"` or `"researched"`, but the database only accepts `"beginner"`, `"some_experience"`, or `"experienced"`. The values don't match.
 
-### What stays working:
-- Real-time streaming from the AI edge function
-- The "New Chat" button (clears in-memory messages)
-- All UI/UX (typing indicator, markdown rendering, suggested prompts)
-- The AI disclaimer modal check
-- Rate limiting / question increment (keeps tracking usage)
+**Impact:** You're losing every quiz completion record. This means no analytics on who's taking the quiz and what they're interested in.
 
-### What goes away:
-- Loading old conversations from the database
-- The conversation loading spinner
-- Save/bookmark buttons (since messages have no `dbId`)
-- Thumbs up/down feedback (requires `dbId`)
-- History page will show nothing new (no new conversations created)
+**Fix:** Map the extracted values to DB-compatible values before inserting. In `src/hooks/useQuizChat.ts`, add a mapping when saving:
+- `"never"` maps to `"beginner"`
+- `"researched"` maps to `"some_experience"`  
+- `"experienced"` stays `"experienced"`
 
-## Files Modified
+Also map `primary_goal`: the quiz uses `"recovery"` but the DB constraint expects `"injury_recovery"`, and `"muscle"` needs to map to `"muscle_recovery"`.
 
-| File | Changes |
-|------|---------|
-| `src/components/dashboard/ChatInterface.tsx` | Remove DB persistence: drop `useConversationMessages`, `useSaveMessage`, `useCreateConversation`, `useUpdateConversationTitle` imports and usage. Remove `conversationId` state and all DB write calls. Keep streaming, UI, and state management. Remove save/feedback buttons since no dbId. |
-| `src/pages/dashboard/ChatPage.tsx` | Remove `useSearchParams` and conversation query param logic. Pass no conversation props to ChatInterface. |
+---
+
+## Issue 2: Suggested Questions Require Double Action
+
+**What happens:** On the Chat page, clicking a suggested question (e.g., "What are the most well-researched peptides right now?") fills the text input but doesn't send it. User has to click the send button separately.
+
+**Impact:** Small UX friction. Users expect clicking a suggestion to immediately ask the question.
+
+**Fix:** In `src/components/dashboard/ChatInterface.tsx`, update the suggested question click handler to directly call the send/submit logic instead of just populating the input field.
+
+---
+
+## What Passed (Everything Else)
+
+- Landing page loads clean, CTA works
+- Quiz conversational flow is smooth and personalized
+- Quiz results show correct protocol recommendation
+- Dashboard Home shows protocol with compliance tracking
+- Chat AI responds with rich, cited research answers
+- Protocol page renders with animated progress ring, gradient styling, compound cards, synergy badges
+- Quick Tools (Mixing Calculator, Injection Guide, Doctor Script) accessible
+- Weekly Schedule renders correctly with today highlighted
+- Timeline and Safety sections display properly
+- Mobile responsive on all pages (tested at 390px)
+- No JavaScript errors in console
+- All API calls returning 200 (except the quiz_responses 400)
+
+---
+
+## Files to Modify
+
+| File | Change |
+|------|--------|
+| `src/hooks/useQuizChat.ts` | Add value mapping before quiz_responses insert: map experience (`never` to `beginner`, `researched` to `some_experience`) and goal (`recovery` to `injury_recovery`, `muscle` to `muscle_recovery`) |
+| `src/components/dashboard/ChatInterface.tsx` | Make suggested question clicks auto-submit instead of just filling the input |
 
 ## No Database Changes
 
-No tables or schema changes needed -- we are simply not writing to them anymore.
+The DB constraints are correct as-is. The fix is mapping values on the frontend before insert.
 
