@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, MessageCircle, ListChecks, BarChart3, Lock } from "lucide-react";
+import { ArrowRight, MessageCircle, ListChecks, BarChart3 } from "lucide-react";
 
 const itemVariants = {
   hidden: { opacity: 0, y: 16 },
@@ -31,96 +31,107 @@ export function NoProtocolState({ firstName }: NoProtocolStateProps) {
         </p>
       </motion.div>
 
-      {/* Dark Hero CTA Card */}
+      {/* Gradient-border hero card */}
       <motion.div
         variants={itemVariants}
-        className="rounded-[20px] p-8 md:p-9 relative overflow-hidden"
-        style={{ backgroundColor: "#111111" }}
+        className="rounded-[20px] p-[1px]"
+        style={{ background: "linear-gradient(135deg, #F97316, #FB7185, #A78BFA)" }}
       >
-        {/* Dual hexagon decoration - desktop only */}
-        <div className="hidden md:block absolute pointer-events-none" style={{ bottom: -60, right: -40 }}>
-          <svg width={200} height={200} viewBox="0 0 200 200" style={{ transform: "rotate(15deg)" }}>
-            <polygon
-              points="100,0 200,50 200,150 100,200 0,150 0,50"
-              fill="none"
-              stroke="rgba(249,115,22,0.08)"
-              strokeWidth={1.5}
-            />
-          </svg>
+        <div
+          className="rounded-[19px] p-8 md:p-9 relative overflow-hidden"
+          style={{ background: "linear-gradient(135deg, rgba(249,115,22,0.04), rgba(167,139,250,0.04)), #FAFAFA" }}
+        >
+          {/* Floating hex cluster - desktop only */}
+          <div className="hidden md:block absolute pointer-events-none" style={{ right: 32, top: "50%", transform: "translateY(-50%)" }}>
+            {/* Large hex */}
+            <svg width={80} height={80} viewBox="0 0 100 100" style={{ position: "absolute", right: 0, top: -40 }}>
+              <polygon
+                points="50,0 100,25 100,75 50,100 0,75 0,25"
+                fill="none"
+                stroke="rgba(249,115,22,0.12)"
+                strokeWidth={1.5}
+              />
+            </svg>
+            {/* Medium hex */}
+            <svg width={56} height={56} viewBox="0 0 100 100" style={{ position: "absolute", right: 30, top: -10, transform: "rotate(15deg)" }}>
+              <polygon
+                points="50,0 100,25 100,75 50,100 0,75 0,25"
+                fill="none"
+                stroke="rgba(251,113,133,0.10)"
+                strokeWidth={1.5}
+              />
+            </svg>
+            {/* Small hex */}
+            <svg width={40} height={40} viewBox="0 0 100 100" style={{ position: "absolute", right: 10, top: 20, transform: "rotate(-10deg)" }}>
+              <polygon
+                points="50,0 100,25 100,75 50,100 0,75 0,25"
+                fill="none"
+                stroke="rgba(167,139,250,0.08)"
+                strokeWidth={1.5}
+              />
+            </svg>
+          </div>
+
+          <div className="relative z-10 md:max-w-[60%]">
+            <span
+              className="inline-block text-[11px] font-semibold uppercase mb-3"
+              style={{ color: "#F97316", letterSpacing: "0.08em", fontFamily: mono }}
+            >
+              AI-Powered Protocol Engine
+            </span>
+
+            <h2
+              className="text-[28px] md:text-[32px] font-bold mb-3"
+              style={{ color: "#0A0A0A", letterSpacing: "-0.02em", lineHeight: 1.15 }}
+            >
+              Get your exact peptide protocol
+            </h2>
+
+            <p
+              className="text-[15px] leading-relaxed mb-6 max-w-[520px]"
+              style={{ color: "#4B5563", lineHeight: 1.6 }}
+            >
+              Our AI asks about your goals, body, and experience, then builds a personalized protocol with exact compounds, doses, and daily schedule.
+            </p>
+
+            <button
+              onClick={() => navigate("/dashboard/coach")}
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-[12px] font-semibold text-base text-white transition-all duration-200 hover:scale-[1.02] hover:brightness-110"
+              style={{
+                background: "linear-gradient(135deg, #F97316, #FB7185)",
+                minHeight: 48,
+                boxShadow: "0 4px 16px rgba(249,115,22,0.15)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = "0 0 24px rgba(249,115,22,0.3), 0 0 48px rgba(251,113,133,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = "0 4px 16px rgba(249,115,22,0.15)";
+              }}
+            >
+              Build My Protocol
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <p className="mt-2.5 text-[13px]" style={{ color: "#9CA3AF" }}>
+              Takes about 3 minutes
+            </p>
+          </div>
         </div>
-        <div className="hidden md:block absolute pointer-events-none" style={{ bottom: -45, right: -55 }}>
-          <svg width={180} height={180} viewBox="0 0 200 200" style={{ transform: "rotate(30deg)" }}>
-            <polygon
-              points="100,0 200,50 200,150 100,200 0,150 0,50"
-              fill="none"
-              stroke="rgba(167,139,250,0.06)"
-              strokeWidth={1.5}
-            />
-          </svg>
-        </div>
-
-        <span
-          className="inline-block text-[11px] font-semibold uppercase mb-3"
-          style={{ color: "#F97316", letterSpacing: "0.08em", fontFamily: mono }}
-        >
-          AI-Powered Protocol Engine
-        </span>
-
-        <h2
-          className="text-[28px] md:text-[36px] font-bold mb-3"
-          style={{ color: "#FFFFFF", letterSpacing: "-0.02em", lineHeight: 1.15 }}
-        >
-          Get your exact peptide protocol
-        </h2>
-
-        <p
-          className="text-[15px] leading-relaxed mb-6 max-w-[520px]"
-          style={{ color: "#9CA3AF", lineHeight: 1.6 }}
-        >
-          Our AI asks about your goals, body, and experience, then builds a personalized protocol with exact compounds, doses, and daily schedule.
-        </p>
-
-        <button
-          onClick={() => navigate("/dashboard/coach")}
-          className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold text-base transition-all duration-200 hover:scale-[1.02]"
-          style={{
-            backgroundColor: "#FFFFFF",
-            color: "#111111",
-            minHeight: 48,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#F97316";
-            e.currentTarget.style.color = "#FFFFFF";
-            e.currentTarget.style.boxShadow = "0 0 24px rgba(249,115,22,0.2), 0 0 48px rgba(251,113,133,0.1)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#FFFFFF";
-            e.currentTarget.style.color = "#111111";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        >
-          Build My Protocol
-          <ArrowRight className="w-4 h-4" />
-        </button>
-
-        <p className="mt-2.5 text-[13px]" style={{ color: "#6B7280" }}>
-          Takes about 3 minutes
-        </p>
       </motion.div>
 
       {/* Feature Preview Cards */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-6">
         {[
-          { icon: MessageCircle, label: "AI Coach", desc: "Ask anything about peptides", iconColor: "rgba(249,115,22,0.6)" },
-          { icon: ListChecks, label: "Daily Actions", desc: "Exact doses and schedule", iconColor: "rgba(251,113,133,0.6)" },
-          { icon: BarChart3, label: "Progress", desc: "Weekly check-ins and tracking", iconColor: "rgba(167,139,250,0.6)" },
+          { icon: MessageCircle, label: "AI Coach", desc: "Ask anything about peptides", accentColor: "#F97316", iconColor: "rgba(249,115,22,0.6)" },
+          { icon: ListChecks, label: "Daily Actions", desc: "Exact doses and schedule", accentColor: "#FB7185", iconColor: "rgba(251,113,133,0.6)" },
+          { icon: BarChart3, label: "Progress", desc: "Weekly check-ins and tracking", accentColor: "#A78BFA", iconColor: "rgba(167,139,250,0.6)" },
         ].map((card) => (
           <div
             key={card.label}
             className="relative bg-white rounded-[14px] p-5 transition-all duration-200 hover:-translate-y-px hover:border-[#9CA3AF]"
-            style={{ border: "1px solid #E8EAED" }}
+            style={{ border: "1px solid #E8EAED", borderTop: `2px solid ${card.accentColor}` }}
           >
-            <Lock className="absolute top-4 right-4 w-3 h-3" style={{ color: "#D1D5DB" }} />
             <div
               className="w-9 h-9 rounded-[10px] flex items-center justify-center mb-3"
               style={{ backgroundColor: "#F3F4F6" }}
@@ -133,11 +144,6 @@ export function NoProtocolState({ firstName }: NoProtocolStateProps) {
             <p className="text-[13px]" style={{ color: "#9CA3AF" }}>
               {card.desc}
             </p>
-            <div className="mt-3 pt-3" style={{ borderTop: "1px solid #F3F4F6" }}>
-              <p className="text-[11px]" style={{ color: "#D1D5DB" }}>
-                Unlocks with your protocol
-              </p>
-            </div>
           </div>
         ))}
       </motion.div>
