@@ -1,364 +1,25 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import {
+  CORE_IDENTITY,
+  corsHeaders,
+  callLovableAI,
+  handleAIError,
+  errorResponse,
+  unauthorizedResponse,
+  getPeptideContext,
+  getQuizContext,
+  getUserPersonalContext,
+  formatUserPersonalContext,
+  formatPeptideDatabase,
+} from "../_shared/ai-engine.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+// ═══════════════════════════════════════════════════════════
+// CHAT-SPECIFIC SYSTEM PROMPT ADDITIONS
+// ═══════════════════════════════════════════════════════════
 
-// Function to fetch peptide context from database
-async function getPeptideContext(supabase: ReturnType<typeof createClient>) {
-  // Fetch all peptides with their study counts
-  const { data: peptides, error: peptideError } = await supabase
-    .from("peptides")
-    .select("name, category, primary_use, fda_status, research_status, mechanism, studies, safety, total_study_count, human_study_count")
-    .order("name");
-
-  if (peptideError) {
-    console.error("Error fetching peptides:", peptideError);
-    return null;
-  }
-
-  // Fetch landmark studies
-  const { data: landmarkStudies, error: studyError } = await supabase
-    .from("studies")
-    .select("title, journal, publication_year, study_type, species, sample_size, key_findings, dosing_info, peptide_names, evidence_level, pubmed_id")
-    .eq("is_landmark_study", true)
-    .order("publication_year", { ascending: false })
-    .limit(50);
-
-  if (studyError) {
-    console.error("Error fetching studies:", studyError);
-  }
-
-  return { peptides, landmarkStudies };
-}
-
-// Fetch user's personal context (course, check-ins, lessons)
-async function getUserPersonalContext(supabase: ReturnType<typeof createClient>, userId: string) {
-  try {
-    // Fetch active course
-    const { data: userCourse } = await supabase
-      .from("user_courses")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("status", "active")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    // Fetch active protocol
-    const { data: protocol } = await supabase
-      .from("protocols")
-      .select("*")
-      .eq("user_id", userId)
-      .in("status", ["active", "in_progress"])
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    // Fetch recent check-ins (last 7 days)
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
-    const { data: checkIns } = await supabase
-      .from("check_ins")
-      .select("*")
-      .eq("user_id", userId)
-      .gte("date", sevenDaysAgo.toISOString().split('T')[0])
-      .order("date", { ascending: false });
-
-    // Fetch lesson progress if there's a course
-    let lessonProgress = null;
-    if (userCourse?.id) {
-      const { data: lessons } = await supabase
-        .from("lesson_progress")
-        .select("*")
-        .eq("course_id", userCourse.id)
-        .eq("user_id", userId);
-      lessonProgress = lessons;
-    }
-
-    // Fetch profile for streak info
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("current_streak")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    return { userCourse, protocol, checkIns, lessonProgress, profile };
-  } catch (error) {
-    console.error("Error fetching user personal context:", error);
-    return null;
-  }
-}
-
-// Format user context for system prompt
-function formatUserPersonalContext(context: any): string {
-  if (!context) return "";
-
-  let output = `
-═══════════════════════════════════════════════════════════
-USER'S PERSONAL JOURNEY
-═══════════════════════════════════════════════════════════
-
-`;
-
-  // Course info
-  if (context.userCourse) {
-    const course = context.userCourse;
-    const currentWeek = Math.ceil((course.current_day || 1) / 7);
-    const totalWeeks = Math.ceil(course.duration_days / 7);
-    
-    output += `**ACTIVE COURSE:**
-- Title: ${course.title}
-- Goal: ${course.goal}
-- Progress: Day ${course.current_day || 1} of ${course.duration_days} (Week ${currentWeek} of ${totalWeeks})
-- Status: ${course.status}
-${course.supplies_status ? `- Supplies: ${course.supplies_status}` : ""}
-
-**Peptides in Course:**
-`;
-    const peptides = course.peptides || [];
-    peptides.forEach((p: any) => {
-      output += `- ${p.name}: ${p.purpose} (${p.dosing_research || p.dosage || "see course details"})\n`;
-    });
-    output += "\n";
-  }
-
-  // Protocol info
-  if (context.protocol) {
-    const p = context.protocol;
-    output += `**ACTIVE PROTOCOL:**
-- Name: ${p.protocol_name}
-- Goal: ${p.goal}
-- Week: ${p.current_week || 1} of ${p.cycle_length_weeks}
-- Status: ${p.status}
-${p.notes ? `- Notes: ${p.notes}` : ""}
-
-`;
-  }
-
-  // Check-in insights
-  if (context.checkIns && context.checkIns.length > 0) {
-    const checkIns = context.checkIns;
-    
-    // Calculate averages
-    const energyValues = checkIns.filter((c: any) => c.energy_level != null).map((c: any) => c.energy_level);
-    const moodValues = checkIns.filter((c: any) => c.mood != null).map((c: any) => c.mood);
-    const sleepValues = checkIns.filter((c: any) => c.sleep_quality != null).map((c: any) => c.sleep_quality);
-    
-    const avgEnergy = energyValues.length > 0 ? (energyValues.reduce((a: number, b: number) => a + b, 0) / energyValues.length).toFixed(1) : null;
-    const avgMood = moodValues.length > 0 ? (moodValues.reduce((a: number, b: number) => a + b, 0) / moodValues.length).toFixed(1) : null;
-    const avgSleep = sleepValues.length > 0 ? (sleepValues.reduce((a: number, b: number) => a + b, 0) / sleepValues.length).toFixed(1) : null;
-    
-    // Count side effects
-    const sideEffectCounts: Record<string, number> = {};
-    checkIns.forEach((c: any) => {
-      (c.side_effects || []).forEach((effect: string) => {
-        if (effect && effect !== "None") {
-          sideEffectCounts[effect] = (sideEffectCounts[effect] || 0) + 1;
-        }
-      });
-    });
-    
-    output += `**CHECK-IN INSIGHTS (Last 7 Days):**
-- Check-ins recorded: ${checkIns.length}
-- Average Energy: ${avgEnergy !== null ? `${avgEnergy}/10` : "No data"}
-- Average Mood: ${avgMood !== null ? `${avgMood}/10` : "No data"}
-- Average Sleep: ${avgSleep !== null ? `${avgSleep}/10` : "No data"}
-`;
-
-    const sideEffects = Object.entries(sideEffectCounts)
-      .sort((a, b) => (b[1] as number) - (a[1] as number))
-      .slice(0, 5);
-    
-    if (sideEffects.length > 0) {
-      output += `- Reported Side Effects: ${sideEffects.map(([effect, count]) => `${effect} (${count}x)`).join(", ")}\n`;
-    }
-
-    // Today's check-in
-    const today = new Date().toISOString().split('T')[0];
-    const todayCheckIn = checkIns.find((c: any) => c.date === today);
-    if (todayCheckIn) {
-      output += `\n**Today's Check-in:**
-- Energy: ${todayCheckIn.energy_level ?? "Not rated"}/10
-- Mood: ${todayCheckIn.mood ?? "Not rated"}/10
-- Sleep: ${todayCheckIn.sleep_quality ?? "Not rated"}/10
-- Injection: ${todayCheckIn.injection_done === "yes" ? "✅ Done" : todayCheckIn.injection_done === "skipped" ? "⏭️ Skipped" : "Not yet"}
-`;
-    } else {
-      output += `\n⚠️ No check-in recorded today.\n`;
-    }
-    output += "\n";
-  }
-
-  // Lesson progress
-  if (context.lessonProgress && context.lessonProgress.length > 0) {
-    const completed = context.lessonProgress.filter((l: any) => l.completed).length;
-    const total = context.userCourse?.duration_days || completed;
-    const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-    
-    output += `**LESSON PROGRESS:**
-- Lessons Completed: ${completed} of ${total} (${rate}%)
-`;
-  }
-
-  // Profile streak
-  if (context.profile?.current_streak) {
-    output += `\n**STREAK:** ${context.profile.current_streak} days in a row! 🔥\n`;
-  }
-
-  output += `
-═══════════════════════════════════════════════════════════
-USE THIS CONTEXT:
-- Reference their actual data when relevant
-- Personalize advice based on their check-in trends
-- Celebrate their progress and streaks
-- If they ask about "how am I doing", use their metrics
-═══════════════════════════════════════════════════════════
-`;
-
-  return output;
-}
-
-// Format peptide data for system prompt
-function formatPeptideDatabase(peptides: any[], landmarkStudies: any[] | null): string {
-  let output = `
-═══════════════════════════════════════════════════════════
-PEPTIDE DATABASE (${peptides.length} Peptides)
-═══════════════════════════════════════════════════════════
-
-`;
-
-  // Group by FDA status
-  const fdaApproved = peptides.filter(p => p.fda_status === "FDA Approved");
-  const research = peptides.filter(p => p.fda_status !== "FDA Approved");
-
-  if (fdaApproved.length > 0) {
-    output += "### FDA-APPROVED PEPTIDES\n\n";
-    fdaApproved.forEach(p => {
-      output += formatPeptide(p);
-    });
-  }
-
-  output += "\n### RESEARCH PEPTIDES (NOT FDA-APPROVED FOR HUMAN USE)\n\n";
-  research.forEach(p => {
-    output += formatPeptide(p);
-  });
-
-  // Add landmark studies section
-  if (landmarkStudies && landmarkStudies.length > 0) {
-    output += `
-═══════════════════════════════════════════════════════════
-LANDMARK STUDIES (${landmarkStudies.length} Key Citations)
-═══════════════════════════════════════════════════════════
-
-`;
-    landmarkStudies.forEach(s => {
-      const speciesStr = s.species?.join(", ") || "unknown";
-      const sampleStr = s.sample_size ? ` (n=${s.sample_size})` : "";
-      output += `**${s.title}**
-- Journal: ${s.journal} (${s.publication_year})
-- Type: ${s.study_type} | Species: ${speciesStr}${sampleStr}
-- Peptides: ${s.peptide_names?.join(", ")}
-- Key Findings: ${s.key_findings}
-${s.dosing_info ? `- Dosing: ${s.dosing_info}` : ""}
-${s.pubmed_id ? `- PubMed: ${s.pubmed_id}` : ""}
-
-`;
-    });
-  }
-
-  output += `
-═══════════════════════════════════════════════════════════
-RECONSTITUTION REFERENCE
-═══════════════════════════════════════════════════════════
-
-Standard reconstitution with bacteriostatic water (BAC water):
-
-**Basic Formula:**
-Peptide amount (mg) ÷ BAC water (mL) = concentration (mg/mL)
-
-**Common Examples:**
-- 5mg vial + 1mL BAC water = 5mg/mL (each 0.1mL = 500mcg)
-- 5mg vial + 2mL BAC water = 2.5mg/mL (each 0.1mL = 250mcg)
-- 10mg vial + 2mL BAC water = 5mg/mL (each 0.1mL = 500mcg)
-
-**Insulin Syringe Reference (100 unit = 1mL):**
-- 10 units = 0.1mL
-- 20 units = 0.2mL
-- 50 units = 0.5mL
-
-═══════════════════════════════════════════════════════════
-RESEARCH STATUS DEFINITIONS
-═══════════════════════════════════════════════════════════
-
-**Strong Evidence**: Multiple Phase 3 human clinical trials, FDA approval
-**Moderate Evidence**: Some human studies, ongoing clinical trials
-**Early Research**: Primarily animal studies, in vitro data
-**Limited Data**: Anecdotal reports, sparse published research
-`;
-
-  return output;
-}
-
-function formatPeptide(p: any): string {
-  const studyInfo = p.total_study_count > 0 
-    ? ` | ${p.total_study_count} studies${p.human_study_count > 0 ? ` (${p.human_study_count} human)` : ""}`
-    : "";
-  
-  return `**${p.name}**
-- Category: ${p.category}
-- Primary Use: ${p.primary_use}
-- FDA Status: ${p.fda_status === "FDA Approved" ? "✅ APPROVED" : "⚠️ RESEARCH ONLY"}
-- Research Status: ${p.research_status}${studyInfo}
-- Mechanism: ${p.mechanism}
-- Research Summary: ${p.studies}
-- Safety: ${p.safety}
-
-`;
-}
-
-// Fetch quiz context for personalization
-async function getQuizContext(supabase: ReturnType<typeof createClient>, userId: string): Promise<string> {
-  try {
-    const { data, error } = await supabase
-      .from("quiz_responses")
-      .select("primary_goal, main_concerns, experience_level, age_range")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error || !data) return "";
-
-    const concern = data.main_concerns?.length > 0 ? data.main_concerns[0] : "general";
-    return `
-═══════════════════════════════════════════════════════════
-USER QUIZ PROFILE
-═══════════════════════════════════════════════════════════
-
-The user took our quiz and reported: Goal = ${data.primary_goal}, Biggest Concern = ${concern}, Experience Level = ${data.experience_level}, Age Range = ${data.age_range || "not specified"}. Tailor your responses to their experience level and focus on their stated goal. If they're a beginner (experience = 'none' or 'researching'), explain concepts simply. If experienced, you can use more technical language.
-
-`;
-  } catch (e) {
-    console.error("Error fetching quiz context:", e);
-    return "";
-  }
-}
-
-function buildSystemPrompt(peptideDatabase: string): string {
-  return `You are the Peptide Playbook AI Research Coach — a specialized research assistant trained on 500+ peer-reviewed studies about peptides. You help users understand peptide research so they can have informed conversations with their healthcare providers.
-
-## YOUR PERSONALITY
-
-- You're a knowledgeable research assistant, not a doctor
-- You speak in clear, accessible language — not medical jargon
-- You're honest about what research supports and what it doesn't
-- You cite specific studies when making claims
-- You're warm but direct — no fluff, no filler
-- You proactively flag safety concerns and always recommend consulting a doctor
+function buildChatSystemPrompt(peptideDatabase: string): string {
+  return CORE_IDENTITY + `
 
 ## HOW TO RESPOND
 
@@ -371,7 +32,7 @@ function buildSystemPrompt(peptideDatabase: string): string {
    - "Multiple studies (Smith et al., 2022; Jones et al., 2023) show..."
    - Use real journal names: Journal of Clinical Endocrinology, Peptides, Growth Hormone & IGF Research, etc.
    - Include sample sizes when relevant
-   - Rate evidence strength: "Strong evidence (5+ large trials)" / "Moderate evidence (2-4 studies)" / "Preliminary evidence (limited research)"
+   - Rate evidence strength
 
 3. **Practical context** — what this means for the user:
    - Typical dosing ranges reported in literature (always add "as reported in clinical studies — your doctor should determine your specific dose")
@@ -381,40 +42,6 @@ function buildSystemPrompt(peptideDatabase: string): string {
 
 4. **Doctor talking point** — end with a specific question or talking point they can bring to their healthcare provider:
    - "When you talk to your doctor, you might ask: '[specific question]'"
-
-### EVIDENCE RATINGS (use these consistently):
-
-- ⭐⭐⭐⭐⭐ Strong: Multiple large RCTs, FDA consideration, consistent results
-- ⭐⭐⭐⭐ Good: Several clinical studies, consistent positive results
-- ⭐⭐⭐ Moderate: Limited clinical data, strong preclinical evidence
-- ⭐⭐ Preliminary: Mostly animal studies, limited human data
-- ⭐ Emerging: Very early research, mostly theoretical
-
-### SAFETY RULES:
-
-- ALWAYS recommend consulting a healthcare provider before starting any peptide
-- NEVER say a peptide is "safe" without qualification — say "research suggests it is well-tolerated in studies" and cite the specific study
-- ALWAYS mention known side effects, even minor ones
-- If asked about drug interactions, provide what's known but emphasize checking with a pharmacist
-- If someone describes symptoms or a medical condition, recommend they speak with their doctor — don't diagnose or prescribe
-- Be clear about the difference between FDA-approved peptides (semaglutide, tirzepatide) and research/compounding peptides (BPC-157, GHK-Cu, etc.)
-
-### LEGAL STATUS AWARENESS (2026):
-
-- Semaglutide: FDA-approved (Ozempic/Wegovy), available by prescription. Compounded versions face regulatory changes.
-- Tirzepatide: FDA-approved (Mounjaro/Zepbound), available by prescription.
-- BPC-157: NOT FDA-approved. FDA added to Import Alert list. Removed from compounding availability in 2024-2025. Research chemical only.
-- TB-500: NOT FDA-approved. Research chemical only.
-- GHK-Cu: Available as topical cosmetic ingredient. Injectable forms are research chemical only.
-- CJC-1295/Ipamorelin: NOT FDA-approved. Available through some compounding pharmacies, but regulatory landscape changing.
-
-### WHAT NOT TO DO:
-
-- Don't say "I'm just an AI" or apologize for limitations excessively — be confident in the research you present
-- Don't give vague answers — be specific with study names, dosages from literature, and timelines
-- Don't refuse to discuss dosing — cite what clinical studies used (with the doctor caveat)
-- Don't say "consult your doctor" as a way to avoid answering — give the research-backed answer AND recommend consulting their doctor
-- Don't use these words: "comprehensive," "cutting-edge," "unlock," "leverage," "utilize," "empower"
 
 ${peptideDatabase}
 
@@ -469,56 +96,15 @@ AESTHETICS & LOOKSMAXXING PROTOCOLS
 - What peptides CAN do: improve skin quality, reduce facial fat, enhance overall appearance
 
 ═══════════════════════════════════════════════════════════
-AESTHETICS TERMINOLOGY GLOSSARY
-═══════════════════════════════════════════════════════════
-
-Recognize these terms as aesthetics-related requests:
-• "Looksmaxxing" / "looksmax" = Optimizing physical appearance
-• "Mewing" = Jaw/facial posture (peptides don't help this)
-• "Hardmaxxing" = Serious interventions (surgery, etc) - peptides are "softmaxxing"
-• "Softmaxxing" = Non-surgical improvements
-• "Glow up" = General appearance improvement
-• "Recomp" = Body recomposition (lose fat, maintain/gain muscle)
-
-**AESTHETICS-SPECIFIC INTAKE:**
-When someone mentions looksmaxxing/appearance, ask:
-1. "What specific aspects are you focused on? Skin quality, hair, tan, body composition, or overall anti-aging?"
-2. "Any particular concerns like wrinkles, hair thinning, looking more defined?"
-3. "How do you feel about injections vs topical products?"
-4. "Are you open to peptides with stronger side effect profiles, or prefer lower-risk options?"
-
-**SET REALISTIC EXPECTATIONS:**
-- Skin changes: 4-8 weeks
-- Hair improvements: 8-12 weeks (often subtle)
-- Body composition: 8-12 weeks
-- Tanning (MT-2): 1-2 weeks but significant safety concerns
-
-═══════════════════════════════════════════════════════════
 PROTOCOL CREATION QUESTIONNAIRE
 ═══════════════════════════════════════════════════════════
 
-When a user asks to build, create, make, or set up a protocol, you MUST gather ALL of the following information BEFORE calling the create_protocol tool. Ask these as a natural conversation, not a clinical form.
+When a user asks to build, create, make, or set up a protocol, you MUST gather ALL of the following information BEFORE calling the create_protocol tool:
 
-**1. HEALTH GOALS (required)**
-- What is their primary goal in their own words?
-- Any secondary goals they want to achieve?
-- Specific outcomes they want? (e.g., "lose 15 lbs", "heal knee tendon", "look more defined")
-
-**2. CURRENT HEALTH STATUS (required)**
-- What's their age (or age range)?
-- Any existing conditions, medications, or injuries?
-- Any areas of concern?
-
-**3. EXPERIENCE LEVEL (required)**
-- Have they used peptides before?
-- If yes, which ones and for how long?
-- How comfortable are they with injections?
-
-**4. PREFERENCES & CONSTRAINTS (required)**
-- Preferred administration method (injection, oral, topical, intranasal)?
-- Budget considerations?
-- Time constraints or travel schedule that might affect routine?
-- Any peptides they specifically want to avoid?
+**1. HEALTH GOALS (required)** - Primary goal, secondary goals, specific outcomes
+**2. CURRENT HEALTH STATUS (required)** - Age, conditions, medications, injuries
+**3. EXPERIENCE LEVEL (required)** - Prior peptide use, injection comfort
+**4. PREFERENCES & CONSTRAINTS (required)** - Admin method, budget, schedule
 
 ⚠️ DO NOT call create_protocol until you have gathered information from ALL 4 categories above.
 
@@ -529,89 +115,12 @@ PROTOCOL CREATION - MAKE IT TRULY PERSONAL
 You have a tool called "create_protocol" that saves personalized protocols to the user's account.
 
 **WHEN TO USE THIS TOOL:**
-When a user explicitly asks you to "create", "build", "make", "set up", or "save" a protocol for them AND you have gathered all required information.
-
-**YOUR JOB IS TO BUILD SOMETHING SPECIFIC TO THEM, NOT A GENERIC TEMPLATE.**
-
-**WHEN CREATING THE PROTOCOL:**
-- Use their EXACT language for goals
-- Capture secondary goals they mentioned
-- Store their context — age, specific concerns, injury details
-- Record their constraints
-- Choose peptides that address THEIR specific situation
-- For each peptide, explain WHY you chose it for THEM in the rationale field
-- The "notes" field should contain personalized tips specific to their situation
+When a user explicitly asks you to "create", "build", "make", "set up", or "save" a protocol AND you have gathered all required information.
 
 **AFTER PROTOCOL CREATION - FORMATTED OUTPUT:**
-Once the protocol is created successfully, present it to the user in this format:
-
----
-
-## Your Protocol: [Protocol Name]
-
-**Goal**: [Primary goal in user's words]
-**Duration**: [X] weeks
-**Experience Level**: [Level]
-
-### Peptides
-
-#### 1. [Peptide Name]
-- **Purpose**: [How it addresses their goal]
-- **Dosage**: [Research dosage]
-- **Frequency**: [How often]
-- **Timing**: [When to take]
-- **Administration**: [Method and site]
-- **Why for you**: [Personalized rationale]
-
-[Repeat for each peptide...]
-
-### Safety Information
-- [Common side effects for included peptides]
-- [Drug interactions to be aware of]
-- [When to consult a healthcare provider]
-
-### Getting Started
-1. Obtain your peptides from a reputable source
-2. Gather supplies (BAC water, syringes, alcohol swabs)
-3. Follow the reconstitution guide
-4. Start with week 1 dosing
-
----
+Once created successfully, present with: Protocol Name, Goal, Duration, Peptides (with purpose, dosage, frequency, timing, admin, rationale), Safety Info, and Getting Started steps.
 
 View and manage your protocol: [View Your Protocol →](/dashboard/protocols)
-
-**DO NOT use this tool when the user is just:**
-- Asking general questions about protocols
-- Asking what peptides they should use (unless they explicitly say "build/create/make me a protocol")
-- Discussing protocols hypothetically
-
-═══════════════════════════════════════════════════════════
-PROGRESS REVIEW & FEEDBACK
-═══════════════════════════════════════════════════════════
-
-You have a tool called "get_user_progress" that retrieves the user's recent check-in data and protocol progress.
-
-**WHEN TO USE THIS TOOL:**
-When a user asks about their progress, how they're doing, or if they should change anything about their protocol.
-
-**HOW TO PROVIDE FEEDBACK:**
-1. Call get_user_progress to fetch their recent data (default: 14 days)
-2. Analyze the trends
-3. Provide specific, actionable feedback
-
-═══════════════════════════════════════════════════════════
-APPROVED LANGUAGE
-═══════════════════════════════════════════════════════════
-
-✅ USE: "Research has explored...", "Studies have used...", "Animal models show...", "Common research dosing includes...", "Your protocol could include..."
-❌ AVOID: "You should take...", "This is safe...", "I recommend..."
-
-LANGUAGE FRAMING:
-Never use direct instructional language like "Add 2mL" or "inject X." Always frame as:
-- "Research protocols typically use..."
-- "Published studies have examined doses of..."
-- "A common reconstitution method described in literature involves..."
-- "In clinical settings, researchers have administered..."
 
 ═══════════════════════════════════════════════════════════
 CRITICAL REMINDER
@@ -629,89 +138,43 @@ The disclaimer "Educational purposes only. Consult a healthcare provider." at th
 Be helpful. Be informative. Cite real studies. Be the best evidence-based peptide research AI in the world.`;
 }
 
-// Tool definitions for protocol creation and progress tracking
+// ═══════════════════════════════════════════════════════════
+// TOOL DEFINITIONS
+// ═══════════════════════════════════════════════════════════
+
 const tools = [
   {
     type: "function",
     function: {
       name: "create_protocol",
-      description: "Create and save a highly personalized peptide protocol based on the user's specific goals, context, and constraints. Use this when the user explicitly asks you to build, create, make, or set up a protocol for them AND you have gathered all required information from the questionnaire. This saves the protocol so they can view it in their Protocol Builder.",
+      description: "Create and save a highly personalized peptide protocol based on the user's specific goals, context, and constraints.",
       parameters: {
         type: "object",
         properties: {
-          goal: {
-            type: "string",
-            description: "The user's primary goal in their own words (e.g., 'look better and lose weight', 'recover from ACL surgery', 'get jacked for summer', 'improve cognitive performance')"
-          },
-          secondary_goals: {
-            type: "array",
-            items: { type: "string" },
-            description: "Additional goals the user mentioned (e.g., ['skin quality', 'hair growth', 'energy', 'better sleep'])"
-          },
-          user_context: {
-            type: "string",
-            description: "Relevant context about the user: age, current situation, specific concerns, injury details, medications, etc."
-          },
-          experience_level: {
-            type: "string",
-            enum: ["beginner", "intermediate", "advanced"],
-            description: "User's experience level with peptides"
-          },
-          constraints: {
-            type: "array",
-            items: { type: "string" },
-            description: "User's constraints or preferences (e.g., 'needle-phobic', 'budget-conscious', 'traveling frequently', 'prefers oral/topical')"
-          },
-          protocol_name: {
-            type: "string",
-            description: "A descriptive, personalized name for this protocol (e.g., 'Summer Shred Protocol', 'ACL Recovery Stack', 'Aesthetics & Recomp Starter')"
-          },
-          cycle_length_weeks: {
-            type: "number",
-            description: "Duration of the protocol in weeks (typically 4-12)"
-          },
+          goal: { type: "string", description: "The user's primary goal in their own words" },
+          secondary_goals: { type: "array", items: { type: "string" }, description: "Additional goals" },
+          user_context: { type: "string", description: "Relevant context: age, concerns, injuries, medications" },
+          experience_level: { type: "string", enum: ["beginner", "intermediate", "advanced"] },
+          constraints: { type: "array", items: { type: "string" }, description: "User's constraints or preferences" },
+          protocol_name: { type: "string", description: "A descriptive, personalized name for this protocol" },
+          cycle_length_weeks: { type: "number", description: "Duration in weeks (typically 4-12)" },
           peptides: {
             type: "array",
             items: {
               type: "object",
               properties: {
-                name: { 
-                  type: "string",
-                  description: "Name of the peptide (e.g., 'BPC-157', 'TB-500', 'Semaglutide', 'GHK-Cu')"
-                },
-                purpose: { 
-                  type: "string",
-                  description: "How this peptide addresses the user's specific goals"
-                },
-                dosage: { 
-                  type: "string",
-                  description: "Research-backed dosing (e.g., '250mcg', '2.5mg', 'Topical serum daily')"
-                },
-                frequency: { 
-                  type: "string",
-                  description: "How often to use (e.g., 'Twice daily', 'Once weekly')"
-                },
-                timing: { 
-                  type: "string",
-                  description: "When to use (e.g., 'Morning and evening', 'Same day each week')"
-                },
-                site: { 
-                  type: "string",
-                  description: "Administration site/method (e.g., 'Subcutaneous, abdomen', 'Intranasal', 'Topical application')"
-                },
-                rationale: {
-                  type: "string",
-                  description: "Why this peptide was chosen for THIS specific user's goals, context, and constraints"
-                }
+                name: { type: "string" },
+                purpose: { type: "string" },
+                dosage: { type: "string" },
+                frequency: { type: "string" },
+                timing: { type: "string" },
+                site: { type: "string" },
+                rationale: { type: "string" },
               },
               required: ["name", "purpose", "dosage", "frequency", "timing", "rationale"]
             },
-            description: "Array of peptides with their dosing details and rationale"
           },
-          notes: {
-            type: "string",
-            description: "Personalized notes, tips, or reasoning for this specific user's situation"
-          }
+          notes: { type: "string", description: "Personalized notes for this user" },
         },
         required: ["goal", "protocol_name", "peptides", "cycle_length_weeks", "experience_level"]
       }
@@ -721,54 +184,43 @@ const tools = [
     type: "function",
     function: {
       name: "get_user_progress",
-      description: "Retrieve the user's recent check-in data and protocol progress to provide personalized feedback and adjustment suggestions. Use this when the user asks about their progress, how they're doing, or if they should change anything.",
+      description: "Retrieve the user's recent check-in data and protocol progress for personalized feedback.",
       parameters: {
         type: "object",
         properties: {
-          days: {
-            type: "number",
-            description: "Number of days of history to retrieve (default 14, max 30)"
-          }
+          days: { type: "number", description: "Number of days of history (default 14, max 30)" }
         }
       }
     }
   }
 ];
 
-// Handle tool calls for protocol creation and progress tracking
+// ═══════════════════════════════════════════════════════════
+// TOOL HANDLERS
+// ═══════════════════════════════════════════════════════════
+
 async function handleToolCall(
   toolCall: { function: { name: string; arguments: string } },
   userId: string,
   supabaseServiceRole: ReturnType<typeof createClient>
 ): Promise<{ success: boolean; message: string; protocolId?: string; data?: any }> {
-  
+
   if (toolCall.function.name === "get_user_progress") {
     try {
       const args = JSON.parse(toolCall.function.arguments);
       const days = Math.min(args.days || 14, 30);
-      
-      console.log("Fetching user progress for:", userId, "days:", days);
-      
-      // Calculate the date range
       const endDate = new Date();
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
-      
-      // Fetch recent check-ins
-      const { data: checkIns, error: checkInError } = await supabaseServiceRole
+
+      const { data: checkIns } = await supabaseServiceRole
         .from("check_ins")
         .select("*")
         .eq("user_id", userId)
         .gte("date", startDate.toISOString().split('T')[0])
         .order("date", { ascending: false });
-      
-      if (checkInError) {
-        console.error("Error fetching check-ins:", checkInError);
-        return { success: false, message: "Failed to fetch check-in data" };
-      }
-      
-      // Fetch current active protocol
-      const { data: protocol, error: protocolError } = await supabaseServiceRole
+
+      const { data: protocol } = await supabaseServiceRole
         .from("protocols")
         .select("*")
         .eq("user_id", userId)
@@ -776,88 +228,45 @@ async function handleToolCall(
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      
-      if (protocolError) {
-        console.error("Error fetching protocol:", protocolError);
-      }
-      
-      // Calculate averages and patterns
+
       const energyLevels = checkIns?.filter(c => c.energy_level != null).map(c => c.energy_level) || [];
       const moodLevels = checkIns?.filter(c => c.mood != null).map(c => c.mood) || [];
       const sleepLevels = checkIns?.filter(c => c.sleep_quality != null).map(c => c.sleep_quality) || [];
-      
-      const avgEnergy = energyLevels.length > 0 ? (energyLevels.reduce((a, b) => a + b, 0) / energyLevels.length).toFixed(1) : null;
-      const avgMood = moodLevels.length > 0 ? (moodLevels.reduce((a, b) => a + b, 0) / moodLevels.length).toFixed(1) : null;
-      const avgSleep = sleepLevels.length > 0 ? (sleepLevels.reduce((a, b) => a + b, 0) / sleepLevels.length).toFixed(1) : null;
-      
-      // Calculate trend (first half vs second half)
-      const halfPoint = Math.floor(energyLevels.length / 2);
-      let energyTrend = "stable";
-      if (energyLevels.length >= 4) {
-        const firstHalf = energyLevels.slice(halfPoint).reduce((a, b) => a + b, 0) / (energyLevels.length - halfPoint);
-        const secondHalf = energyLevels.slice(0, halfPoint).reduce((a, b) => a + b, 0) / halfPoint;
-        if (secondHalf - firstHalf > 0.5) energyTrend = "improving";
-        else if (firstHalf - secondHalf > 0.5) energyTrend = "declining";
-      }
-      
-      // Count side effects
+
+      const avg = (arr: number[]) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : null;
+
       const sideEffectCounts: Record<string, number> = {};
       checkIns?.forEach(c => {
         (c.side_effects || []).forEach((effect: string) => {
-          if (effect && effect !== "None") {
-            sideEffectCounts[effect] = (sideEffectCounts[effect] || 0) + 1;
-          }
+          if (effect && effect !== "None") sideEffectCounts[effect] = (sideEffectCounts[effect] || 0) + 1;
         });
       });
-      
-      // Calculate adherence rate
+
       const adherenceYes = checkIns?.filter(c => c.adherence === "yes" || c.injection_done === "yes").length || 0;
       const totalCheckIns = checkIns?.length || 0;
-      const adherenceRate = totalCheckIns > 0 ? Math.round((adherenceYes / totalCheckIns) * 100) : null;
-      
-      const progressData = {
-        checkInCount: totalCheckIns,
-        daysAnalyzed: days,
-        averages: {
-          energy: avgEnergy,
-          mood: avgMood,
-          sleep: avgSleep,
-        },
-        trends: {
-          energy: energyTrend,
-        },
-        sideEffects: Object.entries(sideEffectCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([effect, count]) => ({ effect, count })),
-        adherenceRate,
-        currentProtocol: protocol ? {
-          name: protocol.protocol_name,
-          status: protocol.status,
-          currentWeek: protocol.current_week,
-          cycleLength: protocol.cycle_length_weeks,
-          peptides: protocol.peptides,
-        } : null,
-        recentNotes: checkIns?.filter(c => c.notes).slice(0, 3).map(c => c.notes) || [],
-      };
-      
+
       return {
         success: true,
         message: `Retrieved ${totalCheckIns} check-ins from the last ${days} days`,
-        data: progressData,
+        data: {
+          checkInCount: totalCheckIns,
+          daysAnalyzed: days,
+          averages: { energy: avg(energyLevels), mood: avg(moodLevels), sleep: avg(sleepLevels) },
+          sideEffects: Object.entries(sideEffectCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([effect, count]) => ({ effect, count })),
+          adherenceRate: totalCheckIns > 0 ? Math.round((adherenceYes / totalCheckIns) * 100) : null,
+          currentProtocol: protocol ? { name: protocol.protocol_name, status: protocol.status, currentWeek: protocol.current_week, cycleLength: protocol.cycle_length_weeks, peptides: protocol.peptides } : null,
+          recentNotes: checkIns?.filter(c => c.notes).slice(0, 3).map(c => c.notes) || [],
+        },
       };
     } catch (e) {
-      console.error("Error parsing get_user_progress arguments:", e);
-      return { success: false, message: "Failed to parse progress request" };
+      console.error("Error in get_user_progress:", e);
+      return { success: false, message: "Failed to fetch progress data" };
     }
   }
-  
+
   if (toolCall.function.name === "create_protocol") {
     try {
       const args = JSON.parse(toolCall.function.arguments);
-      
-      console.log("Creating protocol for user:", userId, "with args:", args);
-
       const { data, error } = await supabaseServiceRole
         .from("protocols")
         .insert({
@@ -880,29 +289,22 @@ async function handleToolCall(
 
       if (error) {
         console.error("Failed to create protocol:", error);
-        return { 
-          success: false, 
-          message: `Failed to save protocol: ${error.message}` 
-        };
+        return { success: false, message: `Failed to save protocol: ${error.message}` };
       }
 
-      console.log("Protocol created successfully:", data.id);
-      return { 
-        success: true, 
-        message: `Protocol "${args.protocol_name}" created successfully!`,
-        protocolId: data.id 
-      };
+      return { success: true, message: `Protocol "${args.protocol_name}" created successfully!`, protocolId: data.id };
     } catch (e) {
-      console.error("Error parsing tool arguments:", e);
-      return { 
-        success: false, 
-        message: "Failed to parse protocol data" 
-      };
+      console.error("Error in create_protocol:", e);
+      return { success: false, message: "Failed to parse protocol data" };
     }
   }
 
   return { success: false, message: "Unknown tool" };
 }
+
+// ═══════════════════════════════════════════════════════════
+// MAIN HANDLER
+// ═══════════════════════════════════════════════════════════
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -910,167 +312,82 @@ serve(async (req) => {
   }
 
   try {
-    // Validate authentication
+    // Validate auth
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized - No valid authorization header" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+    if (!authHeader?.startsWith("Bearer ")) {
+      return unauthorizedResponse("Missing authorization header");
     }
 
-    const token = authHeader.replace("Bearer ", "");
-    
-    // Create Supabase client with user's token for auth check
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    
+
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     });
 
-    // Service role client for writing protocols (bypasses RLS) and fetching studies
     const supabaseServiceRole = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-    // Verify user token
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    
     if (userError || !user) {
-      console.error("Auth error:", userError);
-      return new Response(
-        JSON.stringify({ error: "Unauthorized - Invalid token" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return unauthorizedResponse("Invalid token");
     }
 
     const userId = user.id;
 
-    // Check user tier - only paid users can use chat
-    const { data: profile, error: profileError } = await supabase
+    // Check tier
+    const { data: profile } = await supabase
       .from("profiles")
       .select("tier")
       .eq("user_id", userId)
       .single();
 
-    if (profileError || !profile) {
-      console.error("Profile error:", profileError);
-      return new Response(
-        JSON.stringify({ error: "User profile not found" }),
-        {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Check if user has paid tier
-    if (profile.tier === "free") {
-      return new Response(
-        JSON.stringify({ error: "Upgrade required - Chat is available for paid members only" }),
-        {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+    if (!profile || profile.tier === "free") {
+      return errorResponse("Upgrade required - Chat is available for paid members only", 402);
     }
 
     const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
 
-    console.log("Processing chat request with", messages?.length || 0, "messages");
-
-    // Fetch dynamic peptide context from database
-    const peptideContext = await getPeptideContext(supabaseServiceRole);
-    let peptideDatabase = "";
-    
-    if (peptideContext?.peptides) {
-      peptideDatabase = formatPeptideDatabase(peptideContext.peptides, peptideContext.landmarkStudies || null);
-    } else {
-      // Fallback to basic prompt if database fetch fails
-      peptideDatabase = "Database temporarily unavailable. Please provide general peptide information based on your training.";
-    }
-
-    // Fetch user's personal context and quiz data in parallel
-    const [userPersonalContext, quizContext] = await Promise.all([
+    // Fetch dynamic context in parallel
+    const [peptideContext, userPersonalContext, quizContext] = await Promise.all([
+      getPeptideContext(supabaseServiceRole),
       getUserPersonalContext(supabaseServiceRole, userId),
       getQuizContext(supabaseServiceRole, userId),
     ]);
-    const personalContextPrompt = formatUserPersonalContext(userPersonalContext);
 
-    // Combine quiz context + system prompt + peptide database + personal context
-    const SYSTEM_PROMPT = quizContext + buildSystemPrompt(peptideDatabase) + personalContextPrompt;
-
-    // First API call - may include tool calls
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...messages,
-        ],
-        tools: tools,
-        tool_choice: "auto",
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          {
-            status: 429,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Service temporarily unavailable. Please try again later." }),
-          {
-            status: 402,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-      
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      return new Response(
-        JSON.stringify({ error: "AI service temporarily unavailable" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+    let peptideDatabase = "";
+    if (peptideContext?.peptides) {
+      peptideDatabase = formatPeptideDatabase(peptideContext.peptides, peptideContext.landmarkStudies || null);
+    } else {
+      peptideDatabase = "Database temporarily unavailable. Please provide general peptide information based on your training.";
     }
 
-    // Parse the response to check for tool calls
+    const personalContextPrompt = formatUserPersonalContext(userPersonalContext);
+    const SYSTEM_PROMPT = quizContext + buildChatSystemPrompt(peptideDatabase) + personalContextPrompt;
+
+    // First API call - may include tool calls
+    const { response, ok } = await callLovableAI({
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...messages,
+      ],
+      tools,
+      toolChoice: "auto",
+    });
+
+    if (!ok) {
+      const errResp = handleAIError(response);
+      if (errResp) return errResp;
+      const errorText = await response.text();
+      console.error("AI gateway error:", response.status, errorText);
+      return errorResponse("AI service temporarily unavailable");
+    }
+
     const aiResponse = await response.json();
     const assistantMessage = aiResponse.choices?.[0]?.message;
-    
-    // Check if the AI wants to call a tool
+
+    // Handle tool calls
     if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
-      console.log("AI requested tool calls:", assistantMessage.tool_calls);
-      
-      // Process each tool call
       const toolResults = [];
       for (const toolCall of assistantMessage.tool_calls) {
         const result = await handleToolCall(toolCall, userId, supabaseServiceRole);
@@ -1081,7 +398,6 @@ serve(async (req) => {
         });
       }
 
-      // Make a follow-up request with the tool results
       const followUpMessages = [
         { role: "system", content: SYSTEM_PROMPT },
         ...messages,
@@ -1089,84 +405,40 @@ serve(async (req) => {
         ...toolResults,
       ];
 
-      const followUpResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: followUpMessages,
-          stream: true,
-          temperature: 0.7,
-          max_tokens: 2000,
-        }),
+      const { response: followUpResponse, ok: followUpOk } = await callLovableAI({
+        messages: followUpMessages,
+        stream: true,
       });
 
-      if (!followUpResponse.ok) {
+      if (!followUpOk) {
         const errorText = await followUpResponse.text();
-        console.error("Follow-up AI gateway error:", followUpResponse.status, errorText);
-        return new Response(
-          JSON.stringify({ error: "AI service temporarily unavailable" }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
+        console.error("Follow-up AI error:", followUpResponse.status, errorText);
+        return errorResponse("AI service temporarily unavailable");
       }
 
-      // Check if any tool created a protocol (for the frontend to know)
       const protocolCreated = toolResults.some(r => {
-        try {
-          const content = JSON.parse(r.content);
-          return content.success && content.protocolId;
-        } catch { return false; }
+        try { const c = JSON.parse(r.content); return c.success && c.protocolId; } catch { return false; }
       });
 
-      // Add custom header to indicate protocol was created
-      const responseHeaders = { 
-        ...corsHeaders, 
-        "Content-Type": "text/event-stream",
-      };
-      
-      if (protocolCreated) {
-        responseHeaders["X-Protocol-Created"] = "true";
-      }
+      const responseHeaders: Record<string, string> = { ...corsHeaders, "Content-Type": "text/event-stream" };
+      if (protocolCreated) responseHeaders["X-Protocol-Created"] = "true";
 
       return new Response(followUpResponse.body, { headers: responseHeaders });
     }
 
-    // No tool calls - stream the response directly
-    // We need to re-fetch with streaming since we consumed the response
-    const streamResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...messages,
-        ],
-        stream: true,
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
+    // No tool calls - stream directly
+    const { response: streamResponse, ok: streamOk } = await callLovableAI({
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        ...messages,
+      ],
+      stream: true,
     });
 
-    if (!streamResponse.ok) {
+    if (!streamOk) {
       const errorText = await streamResponse.text();
       console.error("AI gateway error:", streamResponse.status, errorText);
-      return new Response(
-        JSON.stringify({ error: "AI service temporarily unavailable" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return errorResponse("AI service temporarily unavailable");
     }
 
     return new Response(streamResponse.body, {
@@ -1174,12 +446,6 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Chat function error:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    return errorResponse(error instanceof Error ? error.message : "Unknown error");
   }
 });

@@ -4,13 +4,13 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useTier } from "@/hooks/useTier";
 import { UpgradePrompt } from "@/components/dashboard/UpgradePrompt";
 import { useCoachMessages, useSendCoachMessage } from "@/hooks/useCoachMessages";
-import { useUserProtocol } from "@/hooks/useUserProtocol";
-import { useRecentLogs } from "@/hooks/useDailyLog";
+import { useAIContext } from "@/hooks/useAIContext";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, ArrowUp, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useQueryClient } from "@tanstack/react-query";
+import { AIQualityBadge } from "@/components/dashboard/AIQualityBadge";
 
 const WELCOME_MESSAGE = `Hey — I'm your Peptide Playbook coach. I'll build you a personalized protocol based on your goals, body, and experience level.
 
@@ -23,11 +23,10 @@ export default function Coach() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const aiContext = useAIContext();
 
   const { data: messages = [], isLoading: loadingMessages } = useCoachMessages();
   const sendMessage = useSendCoachMessage();
-  const { protocol } = useUserProtocol();
-  const { data: recentLogs } = useRecentLogs(7);
 
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
@@ -81,39 +80,103 @@ export default function Coach() {
       const history = messages.slice(-20).map((m) => ({ role: m.role, content: m.content }));
       history.push({ role: "user", content: msg });
 
-      // Fetch user profile
-      let profile = null;
-      if (user) {
-        const { data } = await (supabase as any)
-          .from("user_profiles")
-          .select("*")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        profile = data;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Not authenticated");
+
+      // Stream via fetch + SSE
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/peptide-coach`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            message: msg,
+            history,
+            profile: aiContext.profile,
+            active_protocol: aiContext.activeProtocol,
+            recent_logs: aiContext.recentLogs,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(err.error || `Error ${response.status}`);
       }
 
-      const { data, error } = await supabase.functions.invoke("peptide-coach", {
-        body: {
-          message: msg,
-          history,
-          profile,
-          active_protocol: protocol || null,
-          recent_logs: recentLogs || [],
-        },
-      });
+      // Parse SSE stream
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let fullContent = "";
 
-      if (error) throw error;
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-      const responseText = data?.response || "I'm having trouble connecting right now. Try again in a moment.";
+          textBuffer += decoder.decode(value, { stream: true });
+
+          let newlineIndex: number;
+          while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+            let line = textBuffer.slice(0, newlineIndex);
+            textBuffer = textBuffer.slice(newlineIndex + 1);
+
+            if (line.endsWith("\r")) line = line.slice(0, -1);
+            if (line.startsWith(":") || line.trim() === "") continue;
+            if (!line.startsWith("data: ")) continue;
+
+            const jsonStr = line.slice(6).trim();
+            if (jsonStr === "[DONE]") break;
+
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                fullContent += content;
+                setStreamingContent(fullContent);
+              }
+            } catch {
+              textBuffer = line + "\n" + textBuffer;
+              break;
+            }
+          }
+        }
+      }
+
+      // Final flush
+      if (textBuffer.trim()) {
+        for (let raw of textBuffer.split("\n")) {
+          if (!raw) continue;
+          if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+          if (raw.startsWith(":") || raw.trim() === "") continue;
+          if (!raw.startsWith("data: ")) continue;
+          const jsonStr = raw.slice(6).trim();
+          if (jsonStr === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              fullContent += content;
+              setStreamingContent(fullContent);
+            }
+          } catch { /* ignore */ }
+        }
+      }
+
       setStreamingContent("");
       setIsStreaming(false);
+
+      const responseText = fullContent || "I'm having trouble connecting right now. Try again in a moment.";
 
       // Save assistant message
       sendMessage.mutate({ role: "assistant", content: responseText });
 
       // Protocol detection
       if (responseText.includes("YOUR PROTOCOL:") || responseText.startsWith("🎯")) {
-        // Set onboarding complete
         if (user) {
           await (supabase as any)
             .from("user_profiles")
@@ -125,6 +188,7 @@ export default function Coach() {
     } catch (err) {
       console.error("Coach error:", err);
       setIsStreaming(false);
+      setStreamingContent("");
       sendMessage.mutate({
         role: "assistant",
         content: "I'm having trouble connecting right now. Try again in a moment.",
@@ -235,8 +299,13 @@ function MessageBubble({ role, content }: { role: string; content: string }) {
         {isUser ? (
           <p style={{ whiteSpace: "pre-wrap" }}>{content}</p>
         ) : (
-          <div className="prose prose-sm max-w-none">
-            <ReactMarkdown>{content}</ReactMarkdown>
+          <div>
+            <div className="prose prose-sm max-w-none">
+              <ReactMarkdown>{content}</ReactMarkdown>
+            </div>
+            <div className="mt-2 flex justify-end">
+              <AIQualityBadge />
+            </div>
           </div>
         )}
       </div>

@@ -1,9 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+import { corsHeaders, callLovableAI, handleAIError } from "../_shared/ai-engine.ts";
 
 // Simple in-memory rate limiting (resets on function cold start)
 const rateLimitMap = new Map<string, number[]>();
@@ -13,21 +9,18 @@ const MAX_REQUESTS_PER_WINDOW = 3;
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
   const timestamps = rateLimitMap.get(ip) || [];
-  
-  // Filter out old timestamps
   const recentTimestamps = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
-  
+
   if (recentTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
     return true;
   }
-  
-  // Add current request
+
   recentTimestamps.push(now);
   rateLimitMap.set(ip, recentTimestamps);
   return false;
 }
 
-const SYSTEM_PROMPT = `You are the Peptide Playbook AI demo. Give BRIEF, summary-style answers.
+const DEMO_SYSTEM_PROMPT = `You are the Peptide Playbook AI demo. Give BRIEF, summary-style answers.
 
 ### RESPONSE RULES (STRICT)
 - **2-3 sentences MAX** - no lengthy explanations
@@ -49,77 +42,39 @@ serve(async (req) => {
   }
 
   try {
-    // Get client IP for rate limiting
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
-               req.headers.get("cf-connecting-ip") || 
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+               req.headers.get("cf-connecting-ip") ||
                "unknown";
 
-    // Check rate limit
     if (isRateLimited(ip)) {
       return new Response(
         JSON.stringify({ error: "You've asked too many questions. Please wait a moment and try again." }),
-        {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
 
     console.log("Demo chat request from IP:", ip);
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...messages,
-        ],
-        stream: true,
-        temperature: 0.7,
-        max_tokens: 300, // Very short for demo summaries
-      }),
+    const { response, ok } = await callLovableAI({
+      messages: [
+        { role: "system", content: DEMO_SYSTEM_PROMPT },
+        ...messages,
+      ],
+      stream: true,
+      maxTokens: 300,
     });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Our AI is busy. Please try again in a moment." }),
-          {
-            status: 429,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Demo temporarily unavailable. Please try again later." }),
-          {
-            status: 402,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      }
-      
+    if (!ok) {
+      const errResp = handleAIError(response);
+      if (errResp) return errResp;
+
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "AI service temporarily unavailable" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -130,10 +85,7 @@ serve(async (req) => {
     console.error("Demo chat error:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
