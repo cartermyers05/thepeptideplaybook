@@ -1,4 +1,3 @@
-import { useTypewriter } from "@/hooks/useTypewriter";
 import ReactMarkdown from "react-markdown";
 
 interface TypewriterMessageProps {
@@ -7,21 +6,12 @@ interface TypewriterMessageProps {
 }
 
 export function TypewriterMessage({ content, isStreaming }: TypewriterMessageProps) {
-  const { displayedText, isTyping } = useTypewriter(content, {
-    speed: 12,
-    enabled: isStreaming,
-  });
-
-  const textToShow = isStreaming ? displayedText : content;
-
   return (
     <div className="text-sm">
-      {textToShow ? (
+      {content ? (
         <>
-          <div className={isTyping ? "streaming-text" : ""}>
-            <ReactMarkdown>{textToShow}</ReactMarkdown>
-          </div>
-          {isTyping && (
+          <ReactMarkdown>{content}</ReactMarkdown>
+          {isStreaming && (
             <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle rounded-full" />
           )}
         </>

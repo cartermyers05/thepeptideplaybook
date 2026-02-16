@@ -16,7 +16,7 @@ import {
 const navItems = [
   { label: "Home", path: "/dashboard" },
   { label: "Chat", path: "/dashboard/chat" },
-  { label: "Protocols", path: "/dashboard/protocols" },
+  { label: "Protocol", path: "/dashboard/protocol" },
 ];
 
 export function DashboardTopNav() {

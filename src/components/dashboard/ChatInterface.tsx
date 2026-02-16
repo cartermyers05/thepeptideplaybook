@@ -325,11 +325,22 @@ export default function ChatInterface({
       }
 
       if (protocolCreated) {
-        console.log("Protocol was created, invalidating query");
+        console.log("Protocol was created, invalidating queries");
         queryClient.invalidateQueries({ queryKey: ["protocol", user?.id] });
+        queryClient.invalidateQueries({ queryKey: ["user-protocol", user?.id] });
         toast({
-          title: "Protocol Created",
-          description: "Your new protocol is ready in the Protocols tab.",
+          title: "✅ Protocol Created",
+          description: "Your personalized protocol is ready. View it now →",
+          action: (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/dashboard/protocol")}
+              className="whitespace-nowrap"
+            >
+              View Protocol
+            </Button>
+          ),
         });
       }
 
