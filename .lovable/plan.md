@@ -1,158 +1,84 @@
 
-# Unified AI Entity -- Site-Wide Intelligence Layer
+# Dashboard Home Redesign - Premium Health Tech Experience
 
 ## Overview
 
-This plan adds a unified AI "brain" across the entire Peptide Playbook product. Rather than having separate, disconnected AI functions with duplicated prompts, we create a single shared intelligence layer that powers every AI touchpoint consistently. The AI acts as a single entity -- the "Peptide Playbook Intelligence" -- ensuring content quality, user assistance, and scientific accuracy everywhere.
-
-## Architecture
-
-The core idea: one shared system prompt and context engine, multiple specialized edge functions that all call through a common utility module.
-
-```text
-Shared Layer (supabase/functions/_shared/ai-engine.ts)
-  |
-  |-- Core identity + safety rules + evidence standards
-  |-- Dynamic context loader (peptides DB, user profile, quiz data)
-  |-- Response quality validator
-  |
-  +-- peptide-coach (protocol building + coaching)
-  +-- chat (research assistant, streaming)
-  +-- chat-demo (public demo, rate-limited)
-  +-- quiz-chat (onboarding extraction)
-  +-- generate-article (content generation)
-  +-- ai-review (NEW: content quality checker)
-```
+Complete visual redesign of `src/pages/dashboard/Home.tsx` to transform it from a generic, empty-feeling dashboard into a premium health tech experience comparable to Whoop or Oura Ring. This only touches the dashboard home page. All existing data connections, hooks, and functionality are preserved.
 
 ## What Changes
 
-### 1. Create Shared AI Engine Module
+**Single file rewrite: `src/pages/dashboard/Home.tsx`**
 
-**File: `supabase/functions/_shared/ai-engine.ts`**
+No new files, no database changes, no hook changes. This is purely a visual/UX upgrade of the existing page using the same data sources (`useUserProtocol`, `useTodayLog`, `useUpsertDailyLog`, `useProfile`, `useAllLogs`, `useProgressStats`).
 
-A single shared module containing:
-- **CORE_IDENTITY**: The unified personality, safety rules, evidence rating system, legal status awareness, and banned words list -- currently duplicated across `chat/index.ts`, `coach/index.ts`, and `peptide-coach/index.ts`
-- **buildContextBlock()**: Reusable function that fetches user profile, quiz data, active protocol, and recent logs from the database
-- **callLovableAI()**: Wrapper around the Lovable AI Gateway call with standardized error handling for 429/402, consistent model selection, and logging
-- **validateResponse()**: Post-processing function that checks AI output for banned words ("comprehensive", "leverage", etc.), ensures safety disclaimers are present, and verifies evidence ratings are used
-- **formatPeptideDatabase()**: Moved from `chat/index.ts` -- reusable peptide context builder
+## Design Details
 
-This eliminates ~300 lines of duplicated prompt text across 3 edge functions.
+### No-Protocol State (New Users)
 
-### 2. Upgrade Peptide Coach (Protocol Builder)
+**Greeting**: "Hey [first name] (wave emoji)" pulled from `profiles.full_name` (split on space, take first word). Falls back to "Hey there" if no name. Below: "Ready to build your first protocol?" in muted text.
 
-**File: `supabase/functions/peptide-coach/index.ts`**
+**Hero Card**: Full-width with gradient from #FFF7ED to #FEF3C7. Contains:
+- "AI-POWERED" pill badge in orange
+- "Your Personal Peptide Protocol" heading
+- Description paragraph about how it works
+- Black pill button "Build My Protocol" (not full-width, content-sized)
+- "Takes about 3 minutes" subtext
+- Right side (desktop only, hidden on mobile): three overlapping rotated rounded rectangles in orange/purple/green at low opacity representing a "stack"
 
-- Import shared `CORE_IDENTITY`, `callLovableAI`, `buildContextBlock` from `_shared/ai-engine.ts`
-- Add streaming support (currently returns full response, not streamed)
-- Add response validation via `validateResponse()` before returning
-- Upgrade model to `google/gemini-2.5-flash` for better reasoning on protocol generation
-- Keep protocol-specific additions (YOUR PROTOCOL: marker, compound/schedule formatting)
+**Three Preview Cards**: AI Coach (orange), Daily Actions (purple), Progress Tracking (green). Each with colored circle icon, label, description. These are NOT clickable in no-protocol state, shown at 0.7 opacity with a lock icon and "Available after protocol" text.
 
-### 3. Upgrade Research Chat (Dashboard)
+**Trust Strip**: Centered row: "Built on 500+ studies" / "No bro science" / "Your data stays private" with Book, Shield, Lock icons in muted gray.
 
-**File: `supabase/functions/chat/index.ts`**
+### Active Protocol State (Returning Users)
 
-- Import shared module instead of maintaining its own 400+ line system prompt
-- Keep streaming (already works)
-- Add `validateResponse()` post-processing to check each streamed response chunk
-- Keep peptide database context fetching (already has it) but use shared helper
-- Keep protocol creation detection
+**Protocol Header**: Greeting + protocol name (e.g., "The Lean & Shred Stack"). Row of colored stat pills: "Week X of Y" (orange), "Day X" (purple), "X% compliance" (green). Desktop: circular ProgressRing on the right showing cycle percentage.
 
-### 4. Upgrade Coach Function (Legacy)
+**Progress Bar**: Full-width, 6px, gradient orange-to-amber fill. "X days remaining" right-aligned below.
 
-**File: `supabase/functions/coach/index.ts`**
+**Today's Protocol Section**: Date header. Compound action cards redesigned with:
+- 4px vertical color strip on the left edge (category color)
+- Category badge pill next to compound name
+- Dose highlighted in orange
+- 32px circular checkbox (not square). Check animation: scale 1 to 1.15 to 1 over 250ms. Checked compounds get strikethrough.
 
-- Import shared module
-- Deduplicate the CORE_RESEARCH_PROMPT (identical to chat's prompt)
-- Keep user context injection (check-ins, lessons, course progress)
+**Completion State**: When all done, cards get green tint. Animated completion card slides in with green gradient, celebration emoji, "Day X Complete", motivational subtext, and floating particle animation (small green circles rising and fading for 3 seconds).
 
-### 5. New: AI Content Review Function
+**Rest Day State**: Dashed-border card with relaxed emoji, "Rest Day" heading, explanation, and "Next scheduled" info showing the next day with compounds.
 
-**File: `supabase/functions/ai-review/index.ts`**
+**Quick Access Cards**: Three cards (row on desktop, stacked on mobile) with colored circle icons, labels, descriptions, and arrow indicators. Hover: translateY(-2px) + shadow lift. Links to /dashboard/coach, /dashboard/protocol, /dashboard/progress.
 
-A new edge function that reviews and improves content quality. This acts as the AI "quality layer" across the site:
+**Floating Action Button**: 56px orange circle, white chat icon, positioned above mobile bottom nav (bottom-24 on mobile). Pulse animation if no logs in 7 days.
 
-- **Input**: `{ content: string, content_type: "guide" | "article" | "coach_response" | "protocol", context?: any }`
-- **Action**: Uses `google/gemini-2.5-flash` to analyze content for:
-  - Scientific accuracy (are claims supported by evidence?)
-  - Safety compliance (are disclaimers present? no prescriptive language?)
-  - Tone consistency (matches the Peptide Playbook voice?)
-  - Evidence ratings (are star ratings used correctly?)
-  - Legal status accuracy (2026 FDA status correct?)
-  - Banned words check
-- **Output**: `{ score: number (0-100), issues: Array<{type, severity, description, suggestion}>, improved_content?: string }`
+### Global Polish
 
-This function can be called:
-- By the article generator to validate generated articles before saving
-- By the coach to validate protocol recommendations
-- By an admin dashboard to review existing guide content
+- Subtle CSS noise texture overlay on page background at 3-4% opacity
+- Warm shadows: rgba(0,0,0,0.06)
+- 200ms ease transitions on all interactive elements
+- Page max-width 800px centered (override DashboardLayout's 1080px)
+- Consistent 16px/24px/32px vertical rhythm
 
-### 6. Frontend: AI Quality Indicator
+### Mobile Specifics
 
-**File: `src/components/dashboard/AIQualityBadge.tsx`** (new)
+- Everything single column
+- Hero decorative SVG hidden below 768px
+- Stat pills horizontally scrollable (no wrap)
+- All tap targets 44px+, buttons 48px+
+- Quick access cards stacked with 12px gap
+- FAB positioned above bottom nav
 
-A small badge component shown on AI-generated content:
-- Green checkmark: "AI-verified" -- content passed quality checks
-- Shows on coach responses, protocol recommendations, and generated articles
-- Tapping shows a tooltip: "This response was checked for scientific accuracy and safety compliance"
+## Data Sources (all existing, no changes)
 
-### 7. Frontend: Smart Context on Every Page
-
-**File: `src/hooks/useAIContext.ts`** (new)
-
-A hook that builds the user's full context for any AI call:
-- Active protocol from `user_protocols`
-- Recent daily logs
-- User profile from `user_profiles`
-- Quiz responses
-- Current page/section (so the AI knows where the user is)
-
-This replaces the scattered context-building logic currently in `Coach.tsx`, `ChatInterface.tsx`, and the edge functions.
-
-### 8. Coach Page: Streaming Support
-
-**File: `src/pages/dashboard/Coach.tsx`**
-
-Currently the coach uses `supabase.functions.invoke()` which doesn't support streaming. Update to use `fetch()` with SSE parsing (same pattern as `ChatInterface.tsx`) so users see tokens appear in real-time instead of waiting for the full response.
-
-### 9. Update Config
-
-**File: `supabase/config.toml`**
-
-Add the new `ai-review` function:
-```toml
-[functions.ai-review]
-verify_jwt = false
-```
-
-## Files Summary
-
-| File | Action | Description |
-|------|--------|-------------|
-| `supabase/functions/_shared/ai-engine.ts` | New | Shared AI identity, context builder, API wrapper, response validator |
-| `supabase/functions/peptide-coach/index.ts` | Rewrite | Use shared module, add streaming, add validation |
-| `supabase/functions/chat/index.ts` | Refactor | Use shared module, keep streaming, add validation |
-| `supabase/functions/coach/index.ts` | Refactor | Use shared module, deduplicate prompt |
-| `supabase/functions/chat-demo/index.ts` | Refactor | Use shared identity for consistent voice |
-| `supabase/functions/ai-review/index.ts` | New | Content quality review endpoint |
-| `src/hooks/useAIContext.ts` | New | Unified context builder hook |
-| `src/components/dashboard/AIQualityBadge.tsx` | New | Quality verification badge |
-| `src/pages/dashboard/Coach.tsx` | Update | Add streaming support via fetch + SSE |
-| `supabase/config.toml` | Update | Add ai-review function config |
+- `useUserProtocol()` - protocol, currentWeek, daysRemaining, progressPercent, todayCompounds, daysElapsed, totalDays
+- `useTodayLog(protocol?.id)` - today's log for checkbox state
+- `useUpsertDailyLog()` - toggle compound completion
+- `useProfile()` - full_name for greeting
+- `useAllLogs(protocol?.id)` + `useProgressStats()` - compliance percentage
+- `useRecentLogs(7)` - for FAB pulse animation (check if any logs in last 7 days)
 
 ## What Does NOT Change
 
-- Database schema (no new tables needed)
-- Landing page, guides, blog, articles pages
-- Quiz flow
-- Navigation structure
-- Auth, payments, Stripe integration
-- Existing edge function APIs (all remain backward compatible)
-
-## Technical Notes
-
-- The `_shared/` directory is already used in the project (`supabase/functions/_shared/rateLimiter.ts`), so this pattern is established
-- All functions continue using `google/gemini-3-flash-preview` by default, with `google/gemini-2.5-flash` for the review function (needs more careful reasoning)
-- The quality badge is lightweight -- it doesn't block rendering, it shows after the response is complete
-- Streaming in Coach.tsx follows the exact same pattern already proven in ChatInterface.tsx
+- DashboardLayout, DashboardTopNav, MobileBottomNav
+- All hooks (useUserProtocol, useDailyLog, useProfile, useProgressData)
+- All other pages (homepage, quiz, guides, coach, protocol, progress, etc.)
+- Database schema, edge functions, routing
+- ProgressRing component (reused as-is)
