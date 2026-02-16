@@ -11,6 +11,7 @@ import { ArrowLeft, ArrowUp, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useQueryClient } from "@tanstack/react-query";
 import { AIQualityBadge } from "@/components/dashboard/AIQualityBadge";
+import { toast } from "sonner";
 
 const WELCOME_MESSAGE = `Hey — I'm your Peptide Playbook coach. I'll build you a personalized protocol based on your goals, body, and experience level.
 
@@ -107,6 +108,9 @@ export default function Coach() {
         throw new Error(err.error || `Error ${response.status}`);
       }
 
+      // Check for protocol creation header
+      const protocolCreated = response.headers.get("X-Protocol-Created") === "true";
+
       // Parse SSE stream
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
@@ -175,15 +179,16 @@ export default function Coach() {
       // Save assistant message
       sendMessage.mutate({ role: "assistant", content: responseText });
 
-      // Protocol detection
-      if (responseText.includes("YOUR PROTOCOL:") || responseText.startsWith("🎯")) {
-        if (user) {
-          await (supabase as any)
-            .from("user_profiles")
-            .update({ onboarding_complete: true })
-            .eq("user_id", user.id);
-        }
+      // Handle protocol creation
+      if (protocolCreated) {
         queryClient.invalidateQueries({ queryKey: ["user-protocol"] });
+        toast.success("Protocol created!", {
+          description: "Your personalized protocol has been saved.",
+          action: {
+            label: "View Protocol",
+            onClick: () => navigate("/dashboard/protocol"),
+          },
+        });
       }
     } catch (err) {
       console.error("Coach error:", err);
