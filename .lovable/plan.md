@@ -1,84 +1,67 @@
 
-# Dashboard Home Redesign - Premium Health Tech Experience
+# Dashboard Home Redesign: Modern Premium Tech Aesthetic
 
 ## Overview
 
-Complete visual redesign of `src/pages/dashboard/Home.tsx` to transform it from a generic, empty-feeling dashboard into a premium health tech experience comparable to Whoop or Oura Ring. This only touches the dashboard home page. All existing data connections, hooks, and functionality are preserved.
+Complete visual overhaul of the dashboard home page (`/dashboard`) from warm cream medical-portal styling to a dark-accented modern tech aesthetic inspired by Linear, Oura, and Arc. Only the dashboard home components change. All data connections, hooks, routing, and other pages remain untouched.
 
-## What Changes
+## Files Changed
 
-**Single file rewrite: `src/pages/dashboard/Home.tsx`**
+| File | Action | Description |
+|------|--------|-------------|
+| `src/pages/dashboard/Home.tsx` | Edit | Update max-width to 720px, remove noise texture, update background |
+| `src/components/dashboard/home/NoProtocolState.tsx` | Rewrite | Dark hero card, square icon containers, no-icon trust strip |
+| `src/components/dashboard/home/ActiveProtocolState.tsx` | Rewrite | Modern stat row with dividers, thin progress bar, square icon quick-access cards, no emojis |
+| `src/components/dashboard/home/CompoundCard.tsx` | Edit | Update colors (indigo for skin, green to #22C55E), 3px strip, 28px checkbox, opacity fade instead of strikethrough, border styling |
+| `src/components/dashboard/home/CompletionBanner.tsx` | Rewrite | Minimal green banner with checkmark circle, no particles, no emoji |
+| `src/components/dashboard/home/RestDayCard.tsx` | Edit | Remove emoji, clean text only |
+| `src/components/dashboard/home/FloatingChatButton.tsx` | Edit | Dark (#111111) background, 52px size, ring pulse animation instead of shadow pulse |
 
-No new files, no database changes, no hook changes. This is purely a visual/UX upgrade of the existing page using the same data sources (`useUserProtocol`, `useTodayLog`, `useUpsertDailyLog`, `useProfile`, `useAllLogs`, `useProgressStats`).
+## No-Protocol State Design
 
-## Design Details
+**Greeting**: 32px, font-weight 700, letter-spacing -0.02em, color #0A0A0A. Wave emoji kept per spec. Subtext in #4B5563.
 
-### No-Protocol State (New Users)
+**Hero CTA Card**: #111111 background, 20px radius, 36px padding. Single-column layout (no side-by-side even on desktop). Content:
+- "AI-POWERED PROTOCOL ENGINE" label in #F97316, 11px uppercase monospace, 0.08em tracking
+- "Get your exact peptide protocol" heading in white, 28px mobile / 36px desktop, -0.02em tracking
+- Body text in #9CA3AF, 15px
+- White pill button (#FFFFFF bg, #111111 text), hover transitions to #F97316 bg with white text
+- "Takes about 3 minutes" in #6B7280
+- Desktop only: subtle 6x6 dot grid in top-right corner (#333333, opacity 0.4, 4px dots, 16px spacing)
 
-**Greeting**: "Hey [first name] (wave emoji)" pulled from `profiles.full_name` (split on space, take first word). Falls back to "Hey there" if no name. Below: "Ready to build your first protocol?" in muted text.
+**Feature Preview Cards**: White bg with 1px #E8EAED border (not shadow-only). 36x36px square icon containers with 10px radius, #F3F4F6 bg, #4B5563 icon. Lock icon 12px #D1D5DB in top-right. Thin separator line at bottom + "Unlocks with your protocol" in #D1D5DB 11px. Hover: border-color to #9CA3AF, translateY(-1px).
 
-**Hero Card**: Full-width with gradient from #FFF7ED to #FEF3C7. Contains:
-- "AI-POWERED" pill badge in orange
-- "Your Personal Peptide Protocol" heading
-- Description paragraph about how it works
-- Black pill button "Build My Protocol" (not full-width, content-sized)
-- "Takes about 3 minutes" subtext
-- Right side (desktop only, hidden on mobile): three overlapping rotated rounded rectangles in orange/purple/green at low opacity representing a "stack"
+**Trust Strip**: Text only, no icons. Single centered line in #9CA3AF 13px with dot separators.
 
-**Three Preview Cards**: AI Coach (orange), Daily Actions (purple), Progress Tracking (green). Each with colored circle icon, label, description. These are NOT clickable in no-protocol state, shown at 0.7 opacity with a lock icon and "Available after protocol" text.
+## Active Protocol State Design
 
-**Trust Strip**: Centered row: "Built on 500+ studies" / "No bro science" / "Your data stays private" with Book, Shield, Lock icons in muted gray.
+**Header**: Small "Hey Carter" in #9CA3AF 14px (not the focus). Protocol name in #0A0A0A 28px bold -0.02em tracking. Small 8px orange dot before the name instead of emoji.
 
-### Active Protocol State (Returning Users)
+**Stats Row**: Inline text separated by thin vertical lines (1px #E8EAED, 20px height). "Week 3 of 8" in #0A0A0A 14px bold. "Day 18" in #4B5563 14px. Compliance in #22C55E 14px bold. Numbers in monospace font. No colored pill backgrounds. No ProgressRing (removed for cleaner look).
 
-**Protocol Header**: Greeting + protocol name (e.g., "The Lean & Shred Stack"). Row of colored stat pills: "Week X of Y" (orange), "Day X" (purple), "X% compliance" (green). Desktop: circular ProgressRing on the right showing cycle percentage.
+**Progress Bar**: 4px height, #E8EAED track, solid #F97316 fill (no gradient). No label below (stats above already communicate).
 
-**Progress Bar**: Full-width, 6px, gradient orange-to-amber fill. "X days remaining" right-aligned below.
+**Today Section**: "Today" 20px bold #0A0A0A left, "Mon, Feb 16" #9CA3AF 14px right.
 
-**Today's Protocol Section**: Date header. Compound action cards redesigned with:
-- 4px vertical color strip on the left edge (category color)
-- Category badge pill next to compound name
-- Dose highlighted in orange
-- 32px circular checkbox (not square). Check animation: scale 1 to 1.15 to 1 over 250ms. Checked compounds get strikethrough.
+**Compound Cards**: White bg, 1px #E8EAED border, 14px radius. 3px left color strip. Updated category colors: skin = #6366F1 (indigo), fat_loss = #22C55E. 28px circular checkbox. Checked state: #22C55E fill, scale 1 to 1.08 to 1 (200ms), compound name fades to opacity 0.5 (no strikethrough). Card spacing: 8px. Hover: border-color #9CA3AF.
 
-**Completion State**: When all done, cards get green tint. Animated completion card slides in with green gradient, celebration emoji, "Day X Complete", motivational subtext, and floating particle animation (small green circles rising and fading for 3 seconds).
+**Completion Banner**: #F0FDF4 bg, 1px #BBF7D0 border, 14px radius. Green checkmark circle (24px) + "Day X complete" #0A0A0A 16px bold + "Nice work. Back tomorrow." #4B5563 13px. No particles, no confetti, no emoji. Horizontal layout with flex-row.
 
-**Rest Day State**: Dashed-border card with relaxed emoji, "Rest Day" heading, explanation, and "Next scheduled" info showing the next day with compounds.
+**Rest Day Card**: Dashed border #E8EAED, 14px radius. "Rest Day" #0A0A0A 18px bold. "No injections scheduled today." #4B5563 14px. No emoji.
 
-**Quick Access Cards**: Three cards (row on desktop, stacked on mobile) with colored circle icons, labels, descriptions, and arrow indicators. Hover: translateY(-2px) + shadow lift. Links to /dashboard/coach, /dashboard/protocol, /dashboard/progress.
+**Quick Access Cards**: White bg, 1px #E8EAED border, 14px radius, 72px height, flex-row layout. 36x36px square icon containers (#F3F4F6 bg, 10px radius), small arrow in #D1D5DB right side. Hover: border-color #9CA3AF, icon bg darkens to #E8EAED, arrow to #4B5563.
 
-**Floating Action Button**: 56px orange circle, white chat icon, positioned above mobile bottom nav (bottom-24 on mobile). Pulse animation if no logs in 7 days.
+**Disclaimer**: Kept as-is, subtle bottom text.
 
-### Global Polish
+**FAB**: 52px circle, #111111 bg, white chat icon 20px. Shadow: rgba(0,0,0,0.15). Hover: bg transitions to #F97316. Pulse animation: expanding ring of #F97316 from 52px to 64px, fading, every 3 seconds (when no logs in 7 days).
 
-- Subtle CSS noise texture overlay on page background at 3-4% opacity
-- Warm shadows: rgba(0,0,0,0.06)
-- 200ms ease transitions on all interactive elements
-- Page max-width 800px centered (override DashboardLayout's 1080px)
-- Consistent 16px/24px/32px vertical rhythm
+## Technical Notes
 
-### Mobile Specifics
-
-- Everything single column
-- Hero decorative SVG hidden below 768px
-- Stat pills horizontally scrollable (no wrap)
-- All tap targets 44px+, buttons 48px+
-- Quick access cards stacked with 12px gap
-- FAB positioned above bottom nav
-
-## Data Sources (all existing, no changes)
-
-- `useUserProtocol()` - protocol, currentWeek, daysRemaining, progressPercent, todayCompounds, daysElapsed, totalDays
-- `useTodayLog(protocol?.id)` - today's log for checkbox state
-- `useUpsertDailyLog()` - toggle compound completion
-- `useProfile()` - full_name for greeting
-- `useAllLogs(protocol?.id)` + `useProgressStats()` - compliance percentage
-- `useRecentLogs(7)` - for FAB pulse animation (check if any logs in last 7 days)
-
-## What Does NOT Change
-
-- DashboardLayout, DashboardTopNav, MobileBottomNav
-- All hooks (useUserProtocol, useDailyLog, useProfile, useProgressData)
-- All other pages (homepage, quiz, guides, coach, protocol, progress, etc.)
-- Database schema, edge functions, routing
-- ProgressRing component (reused as-is)
+- All existing hooks preserved: `useUserProtocol`, `useTodayLog`, `useUpsertDailyLog`, `useProfile`, `useAllLogs`, `useRecentLogs`, `useProgressStats`
+- All existing routing preserved
+- No database changes
+- No changes to DashboardLayout, DashboardTopNav, or MobileBottomNav
+- `ProgressRing` component stays in codebase but is no longer imported in ActiveProtocolState
+- Monospace numbers use `fontFamily: "JetBrains Mono, ui-monospace, monospace"` (per project memory on dashboard typography standards)
+- Max-width reduced from 800px to 720px
+- Page background remains #FAFAFA from DashboardLayout (not worth changing the shared layout for one page)
