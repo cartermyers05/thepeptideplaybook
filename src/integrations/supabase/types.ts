@@ -1602,6 +1602,7 @@ export type Database = {
           created_at: string
           cycle_length_weeks: number
           cycle_number: number
+          doctor_script: Json | null
           end_date: string | null
           id: string
           protocol_name: string
@@ -1618,6 +1619,7 @@ export type Database = {
           created_at?: string
           cycle_length_weeks: number
           cycle_number?: number
+          doctor_script?: Json | null
           end_date?: string | null
           id?: string
           protocol_name: string
@@ -1634,6 +1636,7 @@ export type Database = {
           created_at?: string
           cycle_length_weeks?: number
           cycle_number?: number
+          doctor_script?: Json | null
           end_date?: string | null
           id?: string
           protocol_name?: string

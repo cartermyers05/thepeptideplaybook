@@ -59,7 +59,29 @@ When a user explicitly asks you to "create", "build", "make", "set up", or "save
 **AFTER PROTOCOL CREATION - FORMATTED OUTPUT:**
 Once created successfully, present with: Protocol Name, Goal, Duration, Peptides (with purpose, dosage, frequency, timing, admin, rationale), Safety Info, and Getting Started steps.
 
-View and manage your protocol: [View Your Protocol →](/dashboard/protocol)`;
+View and manage your protocol: [View Your Protocol →](/dashboard/protocol)
+
+═══════════════════════════════════════════════════════════
+PROTOCOL CREATION - RICH DATA REQUIREMENTS
+═══════════════════════════════════════════════════════════
+
+When calling create_protocol, you MUST populate ALL of the following with real, specific, personalized data:
+
+1. **risk_assessment**: A personalized safety summary that mentions the user's specific age, health conditions, medications, and how they interact with the selected compounds. NOT generic disclaimers.
+
+2. **doctor_script**: A complete doctor conversation kit:
+   - opening_line: A word-for-word sentence the user can say
+   - studies_to_reference: 2-4 real published studies with journal, year, and key finding
+   - questions_to_ask: 3-5 specific questions tailored to this protocol
+
+3. **weekly_expectations**: Every week must reference the ACTUAL compounds and expected physiological changes.
+
+4. **Per-peptide fields** (ALL required for every peptide):
+   - mechanism: Plain-English explanation of how this compound works biologically
+   - side_effects: Specific to this compound with onset/resolution timeline
+   - storage: Specific handling instructions with temperature and expiration
+
+⚠️ DO NOT leave side_effects, storage, or mechanism empty. Each must be specific to the actual compound.`;
 
 // ═══════════════════════════════════════════════════════════
 // TOOL DEFINITIONS
@@ -70,7 +92,7 @@ const tools = [
     type: "function",
     function: {
       name: "create_protocol",
-      description: "Create and save a highly personalized peptide protocol based on the user's specific goals, context, and constraints.",
+      description: "Create and save a highly personalized peptide protocol. You MUST populate ALL fields including risk_assessment, doctor_script, weekly_expectations with compound-specific details, and per-peptide side_effects/storage/mechanism.",
       parameters: {
         type: "object",
         properties: {
@@ -81,6 +103,46 @@ const tools = [
           constraints: { type: "array", items: { type: "string" }, description: "User's constraints or preferences" },
           protocol_name: { type: "string", description: "A descriptive, personalized name for this protocol" },
           cycle_length_weeks: { type: "number", description: "Duration in weeks (typically 4-12)" },
+          risk_assessment: { type: "string", description: "Personalized safety summary referencing the user's specific health context, conditions, medications, and compound interactions. Must be specific, not generic." },
+          doctor_script: {
+            type: "object",
+            description: "A word-for-word script the user can bring to their doctor",
+            properties: {
+              opening_line: { type: "string", description: "Exact opening sentence to say to the doctor" },
+              studies_to_reference: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    title: { type: "string" },
+                    journal: { type: "string" },
+                    year: { type: "string" },
+                    key_finding: { type: "string" },
+                  },
+                  required: ["title", "journal", "year", "key_finding"]
+                },
+                description: "2-4 real studies to mention"
+              },
+              questions_to_ask: {
+                type: "array",
+                items: { type: "string" },
+                description: "3-5 specific questions to ask the doctor"
+              },
+            },
+            required: ["opening_line", "studies_to_reference", "questions_to_ask"]
+          },
+          weekly_expectations: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                week: { type: "number" },
+                description: { type: "string", description: "Compound-specific expectation for this week referencing the actual peptides and their pharmacokinetics" },
+              },
+              required: ["week", "description"]
+            },
+            description: "Week-by-week expectations specific to the actual compounds selected."
+          },
           peptides: {
             type: "array",
             items: {
@@ -93,13 +155,16 @@ const tools = [
                 timing: { type: "string" },
                 site: { type: "string" },
                 rationale: { type: "string" },
+                mechanism: { type: "string", description: "Plain-English explanation of how this compound works at the biological level" },
+                side_effects: { type: "string", description: "Common side effects specific to this compound with typical onset/resolution timeline" },
+                storage: { type: "string", description: "Storage and handling instructions including temperature, reconstitution stability, and expiration" },
               },
-              required: ["name", "purpose", "dosage", "frequency", "timing", "rationale"]
+              required: ["name", "purpose", "dosage", "frequency", "timing", "rationale", "mechanism", "side_effects", "storage"]
             },
           },
           notes: { type: "string", description: "Personalized notes for this user" },
         },
-        required: ["goal", "protocol_name", "peptides", "cycle_length_weeks", "experience_level"]
+        required: ["goal", "protocol_name", "peptides", "cycle_length_weeks", "experience_level", "risk_assessment", "doctor_script", "weekly_expectations"]
       }
     }
   }
@@ -157,9 +222,10 @@ async function handleToolCall(
         timing: p.timing || "",
         route: p.site || "Subcutaneous",
         category: args.goal || "general",
-        side_effects: "",
-        storage: "",
+        side_effects: p.side_effects || "",
+        storage: p.storage || "",
         rationale: p.rationale || "",
+        mechanism: p.mechanism || "",
       }));
 
       const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -182,14 +248,9 @@ async function handleToolCall(
       }
 
       const weeks = args.cycle_length_weeks || 8;
-      const weeklyExpectations = [];
-      for (let w = 1; w <= weeks; w++) {
-        if (w === 1) weeklyExpectations.push({ week: w, description: "Starting phase — begin at recommended doses. Monitor for any side effects." });
-        else if (w === 2) weeklyExpectations.push({ week: w, description: "Adjustment phase — your body is adapting. Minor side effects may appear and typically resolve." });
-        else if (w <= Math.floor(weeks / 2)) weeklyExpectations.push({ week: w, description: "Building phase — compounds reaching steady state. Early benefits may begin." });
-        else if (w <= weeks - 1) weeklyExpectations.push({ week: w, description: "Optimization phase — peak benefits expected. Monitor progress and adjust if needed." });
-        else weeklyExpectations.push({ week: w, description: "Final week — assess results, plan next steps with your healthcare provider." });
-      }
+      const weeklyExpectations = args.weekly_expectations && args.weekly_expectations.length > 0
+        ? args.weekly_expectations
+        : Array.from({ length: weeks }, (_, i) => ({ week: i + 1, description: `Week ${i + 1}` }));
 
       const today = new Date().toISOString().split("T")[0];
 
@@ -211,6 +272,8 @@ async function handleToolCall(
           status: "active",
           start_date: today,
           weekly_expectations: weeklyExpectations,
+          risk_assessment: args.risk_assessment || null,
+          doctor_script: args.doctor_script || null,
           ai_generation_context: args.notes || args.goal || null,
         });
 
