@@ -121,6 +121,7 @@ export default function ChatInterface({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isOwnConversationRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isSubmittingRef = useRef(false);
   const navigate = useNavigate();
   
   const { user } = useAuth();
@@ -188,7 +189,8 @@ export default function ChatInterface({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading || !user) return;
+    if (!input.trim() || isLoading || !user || isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
 
     const userMessageContent = input.trim();
     const userMessage: Message = {
@@ -273,7 +275,19 @@ export default function ChatInterface({
       );
 
       if (!response.ok) {
-        throw new Error("Failed to get response");
+        let errorMsg = "Failed to get response";
+        try {
+          const errBody = await response.json();
+          errorMsg = errBody.error || errorMsg;
+        } catch {}
+        if (response.status === 429) {
+          toast({ title: "Rate limited", description: "Too many requests. Please wait a moment and try again.", variant: "destructive" });
+        } else if (response.status === 402) {
+          toast({ title: "Upgrade required", description: errorMsg, variant: "destructive" });
+        } else {
+          toast({ title: "Error", description: errorMsg, variant: "destructive" });
+        }
+        throw new Error(errorMsg);
       }
 
       const protocolCreated = response.headers.get("X-Protocol-Created") === "true";
@@ -381,6 +395,7 @@ export default function ChatInterface({
       );
     } finally {
       setIsLoading(false);
+      isSubmittingRef.current = false;
     }
   };
 
