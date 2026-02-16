@@ -1,50 +1,57 @@
 
-# Fix: Chat Not Showing AI Responses
+
+# Fix: Coach Chat Doesn't Save Protocols
 
 ## Root Cause
 
-When you send the first message in a new chat, here's what happens:
+There are **two completely separate chat systems** in the app:
 
-1. Your message gets added to the screen
-2. A new conversation is created in the database
-3. `setConversationId` updates the conversation ID
-4. This triggers a `useEffect` that **wipes all messages from the screen** (lines 141-147) because the conversation ID changed
-5. The AI response streams in, but it's trying to update a message that was already wiped -- so nothing shows up
+1. **Coach page** (`/dashboard/coach`) -- calls `peptide-coach` edge function. This is the one you're actually using. It has NO tool-calling capability. It just outputs text and tries to detect protocols by looking for the string "YOUR PROTOCOL:" in the response. Even when it "detects" a protocol, it only marks onboarding as complete -- it never saves any protocol data to the database.
 
-Essentially, creating the conversation resets the chat mid-stream.
+2. **Chat page** (`/dashboard/chat`) -- calls the `chat` edge function. This one HAS the `create_protocol` tool and the dual-write logic we added. But you're not using this page.
+
+So the protocol creation code exists, but it's in the wrong edge function.
 
 ## The Fix
 
-### ChatInterface.tsx -- Prevent the reset from killing active streams
+### Step 1: Add tool-calling to the `peptide-coach` edge function
 
-**Change 1**: The useEffect that watches `initialConversationId` (lines 141-147) should NOT reset messages if we're currently loading/streaming. Add a guard so it only resets when navigating to a genuinely different conversation (e.g., from the history page), not when we just created one ourselves.
+Port the `create_protocol` tool from `chat/index.ts` into `peptide-coach/index.ts`:
 
-Add a ref like `isOwnConversationRef` that gets set to `true` right before `setConversationId` is called during new conversation creation (line 201). The useEffect checks this ref -- if true, it skips the reset and just updates the ID.
+- Add the same tool definition (name, parameters, required fields)
+- Add the same `handleToolCall` function with the dual-write logic (writes to both `protocols` and `user_protocols`)
+- Update the `callLovableAI` call to pass `tools` and `toolChoice: "auto"`
+- Add two-pass handling: if the AI returns tool calls, execute them, then make a follow-up streaming call with the tool results
+- Set the `X-Protocol-Created` header when a protocol is created
 
-**Change 2**: Move `onConversationChange` call (line 202) to AFTER the streaming is complete, not immediately after conversation creation. This prevents the URL update from triggering a parent re-render mid-stream.
+### Step 2: Update Coach.tsx to handle protocol creation
 
-**Change 3**: Add an `AbortController` to the fetch call so that if a genuine navigation happens (user clicks "New Chat" while streaming), the old stream gets properly cancelled instead of silently failing.
+In the Coach page component:
 
-### Summary of changes
+- Check for the `X-Protocol-Created` response header after streaming completes
+- When detected, invalidate `["user-protocol"]` query keys so the Protocol page updates
+- Show a toast notification with a "View Protocol" button that navigates to `/dashboard/protocol`
+- Remove the old string-matching detection (`"YOUR PROTOCOL:"`) since tool calls handle this properly now
 
-| File | What changes |
-|------|-------------|
-| `ChatInterface.tsx` | Add `isOwnConversation` ref guard to prevent message wipe during streaming; defer URL update until after stream completes; add AbortController for fetch cleanup |
+### Step 3: Add the protocol intake questionnaire to the coach system prompt
 
-### Technical detail
+Add the same protocol creation instructions from the chat system prompt to the coach's `COACH_ADDITIONS`:
 
-```text
-// Before creating conversation:
-isOwnConversationRef.current = true;
+- The 4-part intake questionnaire (Goals, Health Status, Experience Level, Preferences)
+- The rule: do NOT call `create_protocol` until all 4 categories are gathered
+- The post-creation formatted output instructions
 
-// In the useEffect watching initialConversationId:
-if (isOwnConversationRef.current) {
-  isOwnConversationRef.current = false;
-  return; // Skip the reset -- we created this conversation ourselves
-}
+## Files Changed
 
-// After streaming completes successfully:
-onConversationChange?.(activeConversationId);
-```
+| File | Change |
+|------|--------|
+| `supabase/functions/peptide-coach/index.ts` | Add `create_protocol` tool definition, handle tool calls with dual-write, two-pass streaming, X-Protocol-Created header |
+| `src/pages/dashboard/Coach.tsx` | Detect X-Protocol-Created header, invalidate user-protocol queries, show success toast with "View Protocol" link, remove string-matching detection |
 
-No backend changes needed. No database changes. The edge function is working correctly -- it's purely a client-side state management race condition.
+## What Stays the Same
+
+- The `chat` edge function is untouched (it already works for the Chat page)
+- No database schema changes
+- The Protocol page UI stays the same
+- All existing coach message history and persistence logic stays the same
+
