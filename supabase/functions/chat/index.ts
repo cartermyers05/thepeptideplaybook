@@ -501,7 +501,19 @@ serve(async (req) => {
       return new Response(followUpResponse.body, { headers: responseHeaders });
     }
 
-    // No tool calls - stream directly
+    // No tool calls - reuse the first response content as a synthetic SSE stream
+    // This eliminates the redundant second API call
+    if (assistantMessage?.content) {
+      const sseContent = `data: ${JSON.stringify({
+        choices: [{ delta: { content: assistantMessage.content } }]
+      })}\n\ndata: [DONE]\n\n`;
+
+      return new Response(sseContent, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      });
+    }
+
+    // Fallback: only make a streaming call if the first response was empty
     const { response: streamResponse, ok: streamOk } = await callLovableAI({
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
