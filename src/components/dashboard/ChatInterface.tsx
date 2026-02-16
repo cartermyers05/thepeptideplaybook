@@ -502,8 +502,8 @@ export default function ChatInterface({
                 {/* Minimal header */}
                 <div className="mb-8">
                   <span
-                    className="text-[11px] font-mono uppercase tracking-[2px] font-semibold"
-                    style={{ color: "#8B5CF6" }}
+                    className="text-[11px] font-mono uppercase tracking-[2px] font-semibold bg-clip-text text-transparent"
+                    style={{ backgroundImage: "linear-gradient(135deg, #F97316, #FB7185, #A78BFA)" }}
                   >
                     AI RESEARCH COACH
                   </span>
