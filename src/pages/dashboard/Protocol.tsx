@@ -10,16 +10,29 @@ import { ReconCalculator } from "@/components/protocol/ReconCalculator";
 import { InjectionSiteGuide } from "@/components/protocol/InjectionSiteGuide";
 import { toast } from "sonner";
 
+// ── Category normalization ──
+function normalizeCategoryLabel(raw?: string): { label: string; color: string } {
+  if (!raw) return { label: "General", color: "hsl(0 0% 55%)" };
+  const t = raw.toLowerCase();
+  if (t.includes("weight") || t.includes("fat") || t.includes("metabolic")) return { label: "Weight Loss", color: "hsl(25 95% 53%)" };
+  if (t.includes("skin") || t.includes("acne") || t.includes("collagen") || t.includes("aesthetic")) return { label: "Skin", color: "hsl(350 96% 72%)" };
+  if (t.includes("recovery") || t.includes("healing") || t.includes("injury") || t.includes("tendon")) return { label: "Recovery", color: "hsl(263 70% 73%)" };
+  if (t.includes("muscle") || t.includes("performance") || t.includes("growth hormone") || t.includes("gh")) return { label: "Performance", color: "hsl(142 71% 45%)" };
+  if (t.includes("longevity") || t.includes("aging") || t.includes("anti-aging")) return { label: "Longevity", color: "hsl(217 91% 60%)" };
+  if (t.includes("cognitive") || t.includes("brain")) return { label: "Cognitive", color: "hsl(187 86% 53%)" };
+  return { label: "General", color: "hsl(0 0% 55%)" };
+}
+
 export default function Protocol() {
   const navigate = useNavigate();
-  const { protocol, isLoading, currentWeek } = useUserProtocol();
+  const { protocol, isLoading, currentWeek, daysElapsed, daysRemaining, progressPercent } = useUserProtocol();
 
   if (isLoading) {
     return (
       <DashboardLayout>
         <div className="space-y-6 py-6">
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-48 w-full rounded-2xl" />
+          <Skeleton className="h-40 w-full rounded-2xl" style={{ backgroundColor: "hsl(230 15% 10%)" }} />
+          <Skeleton className="h-48 w-full rounded-2xl" style={{ backgroundColor: "hsl(230 15% 10%)" }} />
         </div>
       </DashboardLayout>
     );
@@ -29,15 +42,19 @@ export default function Protocol() {
     return (
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-          <FlaskConical className="w-16 h-16 mb-4" style={{ color: "#9CA3AF" }} />
-          <h1 className="text-2xl font-bold mb-2" style={{ color: "#111827" }}>No Active Protocol</h1>
-          <p className="mb-6 max-w-md" style={{ color: "#6B7280" }}>
+          <FlaskConical className="w-16 h-16 mb-4" style={{ color: "hsl(0 0% 40%)" }} />
+          <h1 className="text-2xl font-bold mb-2" style={{ color: "hsl(0 0% 95%)", fontFamily: "Outfit, sans-serif" }}>No Active Protocol</h1>
+          <p className="mb-6 max-w-md" style={{ color: "hsl(215 16% 57%)" }}>
             Chat with your AI coach to build a personalized protocol.
           </p>
           <button
             onClick={() => navigate("/dashboard/coach")}
-            className="px-8 py-3 rounded-full text-white font-semibold transition-all hover:opacity-90"
-            style={{ backgroundColor: "#F97316", minHeight: 48 }}
+            className="px-8 py-3 rounded-full font-semibold transition-all hover:opacity-90"
+            style={{
+              background: "linear-gradient(135deg, hsl(25 95% 53%), hsl(350 96% 72%))",
+              color: "white",
+              minHeight: 48,
+            }}
           >
             Build My Protocol <ArrowRight className="w-4 h-4 inline ml-1" />
           </button>
@@ -49,27 +66,58 @@ export default function Protocol() {
   return (
     <DashboardLayout>
       <div className="py-4 md:py-6 space-y-5">
-        {/* Header */}
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold" style={{ color: "#111827" }}>
-            🎯 {protocol.protocol_name}
-          </h1>
-          <p className="text-sm font-mono mt-1" style={{ color: "#6B7280" }}>
-            Cycle {protocol.cycle_number} — Week {currentWeek} of {protocol.cycle_length_weeks}
-          </p>
-          <span
-            className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium"
+        {/* ── Hero Header ── */}
+        <div
+          className="rounded-2xl p-5 md:p-6 relative overflow-hidden"
+          style={{
+            background: "linear-gradient(135deg, hsl(222 47% 11%), hsl(217 33% 17%))",
+            border: "1px solid hsl(215 28% 17%)",
+          }}
+        >
+          {/* Radial glow */}
+          <div
+            className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundColor: protocol.status === "active" ? "rgba(16,185,129,0.1)" : "rgba(245,158,11,0.1)",
-              color: protocol.status === "active" ? "#10B981" : "#F59E0B",
-              border: `1px solid ${protocol.status === "active" ? "rgba(16,185,129,0.25)" : "rgba(245,158,11,0.25)"}`,
+              background: "radial-gradient(ellipse at 70% 20%, hsla(25, 95%, 53%, 0.08), transparent 60%), radial-gradient(ellipse at 20% 80%, hsla(263, 70%, 73%, 0.06), transparent 50%)",
             }}
-          >
-            {protocol.status === "active" ? "Active" : protocol.status}
-          </span>
+          />
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-3">
+              <span
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+                style={{
+                  backgroundColor: protocol.status === "active" ? "hsla(142, 71%, 45%, 0.15)" : "hsla(38, 92%, 50%, 0.15)",
+                  color: protocol.status === "active" ? "hsl(142 71% 45%)" : "hsl(38 92% 50%)",
+                  border: `1px solid ${protocol.status === "active" ? "hsla(142, 71%, 45%, 0.25)" : "hsla(38, 92%, 50%, 0.25)"}`,
+                }}
+              >
+                {protocol.status === "active" && (
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: "hsl(142 71% 45%)" }} />
+                )}
+                {protocol.status === "active" ? "Active" : protocol.status}
+              </span>
+            </div>
+            <h1
+              className="text-xl md:text-2xl font-bold tracking-tight"
+              style={{ color: "hsl(210 40% 96%)", fontFamily: "Outfit, sans-serif" }}
+            >
+              {protocol.protocol_name}
+            </h1>
+            <p className="text-sm mt-1" style={{ color: "hsl(215 16% 57%)" }}>
+              Cycle {protocol.cycle_number}
+            </p>
+
+            {/* Stat chips */}
+            <div className="flex flex-wrap gap-2 mt-4">
+              <StatChip label="Week" value={`${currentWeek || 1}/${protocol.cycle_length_weeks}`} />
+              <StatChip label="Day" value={`${daysElapsed}`} />
+              <StatChip label="Remaining" value={`${daysRemaining}d`} />
+              <StatChip label="Progress" value={`${progressPercent}%`} accent />
+            </div>
+          </div>
         </div>
 
-        {/* Section 1: Your Stack (always expanded) */}
+        {/* ── Section 1: Your Stack ── */}
         <Section title="Your Stack" icon={<FlaskConical className="w-5 h-5" />} defaultOpen>
           <div className="space-y-3">
             {(protocol.compounds as Compound[]).map((compound, i) => (
@@ -78,29 +126,29 @@ export default function Protocol() {
           </div>
         </Section>
 
-        {/* Section 2: Weekly Schedule */}
+        {/* ── Section 2: Weekly Schedule ── */}
         <Section title="Weekly Schedule" icon={<Calendar className="w-5 h-5" />}>
           <WeeklyScheduleGrid schedule={protocol.schedule as Record<string, string[]>} />
         </Section>
 
-        {/* Section 3: Doctor Conversation Script */}
+        {/* ── Section 3: Doctor Conversation Script ── */}
         {protocol.doctor_script && (
           <Section title="Doctor Conversation Script" icon={<Stethoscope className="w-5 h-5" />}>
             <DoctorScriptSection script={protocol.doctor_script as DoctorScript} />
           </Section>
         )}
 
-        {/* Section 4: Mixing Calculator */}
+        {/* ── Section 4: Mixing Calculator ── */}
         <Section title="Mixing Calculator" icon={<Beaker className="w-5 h-5" />}>
           <ReconCalculator compounds={protocol.compounds as Compound[]} />
         </Section>
 
-        {/* Section 5: Injection Guide */}
+        {/* ── Section 5: Injection Guide ── */}
         <Section title="Injection Guide" icon={<Syringe className="w-5 h-5" />}>
           <InjectionSiteGuide />
         </Section>
 
-        {/* Section 6: Week-by-Week Timeline */}
+        {/* ── Section 6: Week-by-Week Timeline ── */}
         {protocol.weekly_expectations && (
           <Section title="Week-by-Week Timeline" icon={<TrendingUp className="w-5 h-5" />}>
             <WeeklyTimeline
@@ -110,24 +158,21 @@ export default function Protocol() {
           </Section>
         )}
 
-        {/* Section 7: Safety & Monitoring */}
+        {/* ── Section 7: Safety & Monitoring ── */}
         <Section title="Safety & Monitoring" icon={<Shield className="w-5 h-5" />}>
           {protocol.risk_assessment && (
-            <div className="rounded-xl p-4 mb-4" style={{ backgroundColor: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)" }}>
-              <p className="font-semibold text-sm mb-2 flex items-center gap-2" style={{ color: "#F59E0B" }}>
+            <div className="rounded-xl p-4 mb-4" style={{ backgroundColor: "hsla(38, 92%, 50%, 0.08)", border: "1px solid hsla(38, 92%, 50%, 0.2)" }}>
+              <p className="font-semibold text-sm mb-2 flex items-center gap-2" style={{ color: "hsl(38 92% 50%)" }}>
                 <AlertTriangle className="w-4 h-4" /> Personalized Risk Assessment
               </p>
-              <p className="text-sm" style={{ color: "#374151" }}>{protocol.risk_assessment}</p>
+              <p className="text-sm" style={{ color: "hsl(215 20% 75%)" }}>{protocol.risk_assessment}</p>
             </div>
           )}
-          <div
-            className="rounded-xl p-4"
-            style={{ backgroundColor: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)" }}
-          >
-            <p className="font-semibold text-sm mb-2" style={{ color: "#EF4444" }}>
+          <div className="rounded-xl p-4" style={{ backgroundColor: "hsla(0, 84%, 60%, 0.08)", border: "1px solid hsla(0, 84%, 60%, 0.2)" }}>
+            <p className="font-semibold text-sm mb-2" style={{ color: "hsl(0 84% 60%)" }}>
               When to stop and seek medical attention
             </p>
-            <p className="text-sm" style={{ color: "#374151" }}>
+            <p className="text-sm" style={{ color: "hsl(215 20% 75%)" }}>
               Stop all compounds and contact a healthcare provider or call 911 if you experience:
               severe allergic reaction (swelling, difficulty breathing, hives), chest pain or heart palpitations,
               severe headache with vision changes, signs of infection at injection site (spreading redness, warmth, pus, fever),
@@ -136,19 +181,28 @@ export default function Protocol() {
           </div>
         </Section>
 
-        {/* Bottom CTAs */}
+        {/* ── Bottom CTAs ── */}
         <div className="space-y-3 pt-2">
           <button
             onClick={() => navigate("/dashboard/coach")}
             className="w-full px-8 py-3 rounded-full font-semibold text-[15px] transition-all hover:opacity-90"
-            style={{ backgroundColor: "#F97316", color: "white", minHeight: 48 }}
+            style={{
+              background: "linear-gradient(135deg, hsl(25 95% 53%), hsl(350 96% 72%))",
+              color: "white",
+              minHeight: 48,
+            }}
           >
             Ask Coach About This Protocol
           </button>
           <button
             onClick={() => navigate("/dashboard")}
-            className="w-full px-8 py-3 rounded-full font-semibold text-[15px] border transition-all hover:bg-secondary"
-            style={{ borderColor: "#E5E7EB", color: "#374151", minHeight: 48 }}
+            className="w-full px-8 py-3 rounded-full font-semibold text-[15px] transition-all hover:opacity-80"
+            style={{
+              border: "1px solid hsl(215 28% 17%)",
+              color: "hsl(215 20% 75%)",
+              backgroundColor: "transparent",
+              minHeight: 48,
+            }}
           >
             Back to Dashboard
           </button>
@@ -158,6 +212,32 @@ export default function Protocol() {
   );
 }
 
+// ── Stat Chip ──
+function StatChip({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div
+      className="px-3 py-1.5 rounded-full flex items-center gap-1.5"
+      style={{
+        backgroundColor: accent ? "hsla(25, 95%, 53%, 0.12)" : "hsla(215, 28%, 17%, 0.6)",
+        border: `1px solid ${accent ? "hsla(25, 95%, 53%, 0.25)" : "hsla(215, 28%, 25%, 0.5)"}`,
+        backdropFilter: "blur(8px)",
+      }}
+    >
+      <span className="text-[10px] uppercase tracking-wider" style={{ color: "hsl(215 16% 57%)" }}>{label}</span>
+      <span
+        className="text-sm font-bold"
+        style={{
+          color: accent ? "hsl(25 95% 53%)" : "hsl(210 40% 96%)",
+          fontFamily: "JetBrains Mono, monospace",
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+// ── Section ──
 function Section({ title, icon, children, defaultOpen = false }: {
   title: string; icon: React.ReactNode; children: React.ReactNode; defaultOpen?: boolean;
 }) {
@@ -165,18 +245,18 @@ function Section({ title, icon, children, defaultOpen = false }: {
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+      <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: "hsl(240 6% 8%)", border: "1px solid hsl(215 28% 17%)" }}>
         <CollapsibleTrigger asChild>
-          <button className="w-full flex items-center justify-between p-4 md:p-5 hover:bg-secondary/30 transition-colors">
+          <button className="w-full flex items-center justify-between p-4 md:p-5 transition-colors hover:bg-white/[0.03]">
             <div className="flex items-center gap-3">
-              <div style={{ color: "#F97316" }}>{icon}</div>
-              <span className="font-semibold text-[15px] md:text-base" style={{ color: "#111827" }}>{title}</span>
+              <div style={{ color: "hsl(25 95% 53%)" }}>{icon}</div>
+              <span className="font-semibold text-[15px] md:text-base" style={{ color: "hsl(210 40% 96%)", fontFamily: "Outfit, sans-serif" }}>{title}</span>
             </div>
-            <ChevronDown className={cn("w-5 h-5 transition-transform", open && "rotate-180")} style={{ color: "#9CA3AF" }} />
+            <ChevronDown className={cn("w-5 h-5 transition-transform", open && "rotate-180")} style={{ color: "hsl(215 20% 47%)" }} />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="px-4 md:px-5 pb-4 md:pb-5">
+          <div className="px-4 md:px-5 pb-4 md:pb-5" style={{ backgroundColor: "hsl(240 5% 10%)" }}>
             {children}
           </div>
         </CollapsibleContent>
@@ -185,72 +265,76 @@ function Section({ title, icon, children, defaultOpen = false }: {
   );
 }
 
+// ── Compound Card ──
 function CompoundCard({ compound }: { compound: Compound }) {
-  const categoryColors: Record<string, string> = {
-    "weight-loss": "#F97316",
-    recovery: "#8B5CF6",
-    performance: "#10B981",
-    longevity: "#3B82F6",
-  };
-  const color = categoryColors[compound.category || ""] || "#6B7280";
+  const { label, color } = normalizeCategoryLabel(compound.category || compound.description);
 
   return (
-    <div className="rounded-xl border p-4" style={{ borderColor: "#E5E7EB" }}>
-      <div className="flex items-center gap-2 mb-1">
-        <span className="font-semibold" style={{ color: "#111827" }}>{compound.name}</span>
-        {compound.category && (
+    <div
+      className="rounded-xl p-4 relative overflow-hidden"
+      style={{ backgroundColor: "hsl(240 5% 10%)", border: "1px solid hsl(215 28% 17%)" }}
+    >
+      {/* Left accent bar */}
+      <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: color }} />
+
+      <div className="pl-3">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="font-semibold" style={{ color: "hsl(210 40% 96%)", fontFamily: "Outfit, sans-serif" }}>
+            {compound.name}
+          </span>
           <span
             className="text-xs px-2 py-0.5 rounded-full font-medium"
-            style={{ backgroundColor: `${color}15`, color }}
+            style={{ backgroundColor: `${color}20`, color, border: `1px solid ${color}30` }}
           >
-            {compound.category}
+            {label}
           </span>
+        </div>
+        {compound.description && (
+          <p className="text-sm mb-2" style={{ color: "hsl(215 16% 57%)" }}>{compound.description}</p>
+        )}
+        <p className="text-sm font-bold" style={{ color: "hsl(25 95% 53%)", fontFamily: "JetBrains Mono, monospace" }}>
+          {compound.dose} · {compound.frequency} · {compound.route}
+        </p>
+        {compound.timing && (
+          <p className="text-xs mt-1" style={{ color: "hsl(215 20% 47%)" }}>{compound.timing}</p>
+        )}
+        {compound.rationale && (
+          <p className="text-sm mt-2 italic" style={{ color: "hsl(215 20% 65%)" }}>
+            <strong style={{ color: "hsl(210 40% 96%)", fontStyle: "normal" }}>Why chosen:</strong> {compound.rationale}
+          </p>
+        )}
+
+        {/* Rich data blocks */}
+        {compound.mechanism && (
+          <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: "hsla(217, 91%, 60%, 0.06)", borderLeft: "3px solid hsl(217 91% 60%)" }}>
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: "hsl(217 91% 60%)" }}>
+              <Brain className="w-3.5 h-3.5" /> How it works
+            </p>
+            <p className="text-sm" style={{ color: "hsl(215 20% 75%)" }}>{compound.mechanism}</p>
+          </div>
+        )}
+        {compound.side_effects && (
+          <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: "hsla(38, 92%, 50%, 0.06)", borderLeft: "3px solid hsl(38 92% 50%)" }}>
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: "hsl(38 92% 50%)" }}>
+              <AlertTriangle className="w-3.5 h-3.5" /> Side effects
+            </p>
+            <p className="text-sm" style={{ color: "hsl(215 20% 75%)" }}>{compound.side_effects}</p>
+          </div>
+        )}
+        {compound.storage && (
+          <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: "hsla(142, 71%, 45%, 0.06)", borderLeft: "3px solid hsl(142 71% 45%)" }}>
+            <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: "hsl(142 71% 45%)" }}>
+              <Thermometer className="w-3.5 h-3.5" /> Storage & handling
+            </p>
+            <p className="text-sm" style={{ color: "hsl(215 20% 75%)" }}>{compound.storage}</p>
+          </div>
         )}
       </div>
-      {compound.description && (
-        <p className="text-sm mb-2" style={{ color: "#6B7280" }}>{compound.description}</p>
-      )}
-      <p className="text-sm font-mono" style={{ color: "#374151" }}>
-        {compound.dose} · {compound.frequency} · {compound.route}
-      </p>
-      {compound.timing && (
-        <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>{compound.timing}</p>
-      )}
-      {compound.rationale && (
-        <p className="text-sm mt-2" style={{ color: "#374151" }}>
-          <strong>Why chosen:</strong> {compound.rationale}
-        </p>
-      )}
-
-      {/* Rich data fields */}
-      {compound.mechanism && (
-        <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)" }}>
-          <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: "#3B82F6" }}>
-            <Brain className="w-3.5 h-3.5" /> How it works
-          </p>
-          <p className="text-sm" style={{ color: "#374151" }}>{compound.mechanism}</p>
-        </div>
-      )}
-      {compound.side_effects && (
-        <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.15)" }}>
-          <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: "#F59E0B" }}>
-            <AlertTriangle className="w-3.5 h-3.5" /> Side effects
-          </p>
-          <p className="text-sm" style={{ color: "#374151" }}>{compound.side_effects}</p>
-        </div>
-      )}
-      {compound.storage && (
-        <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.15)" }}>
-          <p className="text-xs font-semibold mb-1 flex items-center gap-1.5" style={{ color: "#10B981" }}>
-            <Thermometer className="w-3.5 h-3.5" /> Storage & handling
-          </p>
-          <p className="text-sm" style={{ color: "#374151" }}>{compound.storage}</p>
-        </div>
-      )}
     </div>
   );
 }
 
+// ── Doctor Script ──
 function DoctorScriptSection({ script }: { script: DoctorScript }) {
   const [copied, setCopied] = useState(false);
 
@@ -274,13 +358,13 @@ function DoctorScriptSection({ script }: { script: DoctorScript }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm" style={{ color: "#6B7280" }}>
+        <p className="text-sm" style={{ color: "hsl(215 16% 57%)" }}>
           A personalized script to bring to your healthcare provider
         </p>
         <button
           onClick={handleCopy}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors hover:opacity-80"
-          style={{ backgroundColor: "rgba(249,115,22,0.1)", color: "#F97316" }}
+          style={{ backgroundColor: "hsla(25, 95%, 53%, 0.12)", color: "hsl(25 95% 53%)" }}
         >
           {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
           {copied ? "Copied!" : "Copy Script"}
@@ -288,21 +372,21 @@ function DoctorScriptSection({ script }: { script: DoctorScript }) {
       </div>
 
       {/* Opening line */}
-      <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.15)" }}>
-        <p className="text-xs font-semibold mb-1" style={{ color: "#3B82F6" }}>Opening Line</p>
-        <p className="text-sm italic" style={{ color: "#374151" }}>"{script.opening_line}"</p>
+      <div className="rounded-xl p-4" style={{ backgroundColor: "hsla(217, 91%, 60%, 0.06)", border: "1px solid hsla(217, 91%, 60%, 0.15)" }}>
+        <p className="text-xs font-semibold mb-1" style={{ color: "hsl(217 91% 60%)" }}>Opening Line</p>
+        <p className="text-sm italic" style={{ color: "hsl(215 20% 75%)" }}>"{script.opening_line}"</p>
       </div>
 
       {/* Studies */}
       {script.studies_to_reference?.length > 0 && (
         <div>
-          <p className="text-xs font-semibold mb-2" style={{ color: "#6B7280" }}>Studies to Reference</p>
+          <p className="text-xs font-semibold mb-2" style={{ color: "hsl(215 16% 57%)" }}>Studies to Reference</p>
           <div className="space-y-2">
             {script.studies_to_reference.map((study, i) => (
-              <div key={i} className="rounded-lg p-3 border" style={{ borderColor: "#E5E7EB" }}>
-                <p className="text-sm font-medium" style={{ color: "#111827" }}>{study.title}</p>
-                <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{study.journal}, {study.year}</p>
-                <p className="text-sm mt-1" style={{ color: "#374151" }}>{study.key_finding}</p>
+              <div key={i} className="rounded-lg p-3" style={{ backgroundColor: "hsl(240 5% 10%)", border: "1px solid hsl(215 28% 17%)" }}>
+                <p className="text-sm font-medium" style={{ color: "hsl(210 40% 96%)" }}>{study.title}</p>
+                <p className="text-xs mt-0.5" style={{ color: "hsl(215 20% 47%)" }}>{study.journal}, {study.year}</p>
+                <p className="text-sm mt-1" style={{ color: "hsl(215 20% 75%)" }}>{study.key_finding}</p>
               </div>
             ))}
           </div>
@@ -312,14 +396,17 @@ function DoctorScriptSection({ script }: { script: DoctorScript }) {
       {/* Questions */}
       {script.questions_to_ask?.length > 0 && (
         <div>
-          <p className="text-xs font-semibold mb-2" style={{ color: "#6B7280" }}>Questions to Ask</p>
+          <p className="text-xs font-semibold mb-2" style={{ color: "hsl(215 16% 57%)" }}>Questions to Ask</p>
           <div className="space-y-1.5">
             {script.questions_to_ask.map((q, i) => (
               <div key={i} className="flex gap-2 items-start">
-                <span className="text-xs font-mono flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(249,115,22,0.1)", color: "#F97316" }}>
+                <span
+                  className="text-xs font-mono flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "hsla(25, 95%, 53%, 0.12)", color: "hsl(25 95% 53%)" }}
+                >
                   {i + 1}
                 </span>
-                <p className="text-sm" style={{ color: "#374151" }}>{q}</p>
+                <p className="text-sm" style={{ color: "hsl(215 20% 75%)" }}>{q}</p>
               </div>
             ))}
           </div>
@@ -329,24 +416,48 @@ function DoctorScriptSection({ script }: { script: DoctorScript }) {
   );
 }
 
+// ── Weekly Schedule Grid ──
 function WeeklyScheduleGrid({ schedule }: { schedule: Record<string, string[]> }) {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const todayName = dayNames[new Date().getDay()];
 
   return (
     <div className="grid grid-cols-7 gap-1 text-center">
       {days.map((day) => {
         const compounds = schedule[day] || [];
+        const isToday = day === todayName;
         return (
-          <div key={day} className="space-y-1">
-            <p className="text-xs font-medium" style={{ color: "#6B7280" }}>
+          <div
+            key={day}
+            className="rounded-lg py-2 px-1 space-y-1"
+            style={{
+              backgroundColor: isToday ? "hsla(25, 95%, 53%, 0.08)" : "transparent",
+              border: isToday ? "1px solid hsla(25, 95%, 53%, 0.2)" : "1px solid transparent",
+            }}
+          >
+            <p
+              className="text-xs font-medium"
+              style={{ color: isToday ? "hsl(25 95% 53%)" : "hsl(215 16% 57%)" }}
+            >
               {day.slice(0, 3)}
             </p>
             {compounds.length > 0 ? (
               compounds.map((name) => (
-                <div key={name} className="w-2 h-2 rounded-full mx-auto" style={{ backgroundColor: "#F97316" }} title={name} />
+                <div
+                  key={name}
+                  className="text-[8px] md:text-[9px] px-1 py-0.5 rounded-full truncate font-medium"
+                  style={{
+                    backgroundColor: "hsla(25, 95%, 53%, 0.12)",
+                    color: "hsl(25 95% 53%)",
+                  }}
+                  title={name}
+                >
+                  {name.length > 6 ? name.slice(0, 5) + "…" : name}
+                </div>
               ))
             ) : (
-              <p className="text-[10px]" style={{ color: "#D1D5DB" }}>—</p>
+              <p className="text-[10px]" style={{ color: "hsl(215 20% 30%)" }}>—</p>
             )}
           </div>
         );
@@ -355,6 +466,7 @@ function WeeklyScheduleGrid({ schedule }: { schedule: Record<string, string[]> }
   );
 }
 
+// ── Weekly Timeline ──
 function WeeklyTimeline({ expectations, currentWeek }: {
   expectations: { week: number; description: string }[];
   currentWeek: number;
@@ -363,22 +475,31 @@ function WeeklyTimeline({ expectations, currentWeek }: {
     <div className="space-y-3">
       {expectations.map((item) => {
         const isCurrent = item.week === currentWeek;
+        const isPast = item.week < currentWeek;
         return (
           <div key={item.week} className="flex gap-3">
             <div className="flex flex-col items-center">
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono flex-shrink-0"
                 style={{
-                  backgroundColor: isCurrent ? "#F97316" : "transparent",
-                  border: `2px solid ${isCurrent ? "#F97316" : "#E5E7EB"}`,
-                  color: isCurrent ? "white" : "#9CA3AF",
+                  backgroundColor: isCurrent ? "hsl(25 95% 53%)" : isPast ? "hsl(142 71% 45%)" : "transparent",
+                  border: `2px solid ${isCurrent ? "hsl(25 95% 53%)" : isPast ? "hsl(142 71% 45%)" : "hsl(215 28% 17%)"}`,
+                  color: isCurrent || isPast ? "white" : "hsl(215 20% 47%)",
+                  boxShadow: isCurrent ? "0 0 12px hsla(25, 95%, 53%, 0.3)" : "none",
+                  fontFamily: "JetBrains Mono, monospace",
                 }}
               >
-                {item.week}
+                {isPast ? <Check className="w-3.5 h-3.5" /> : item.week}
               </div>
-              <div className="w-0.5 flex-1 mt-1" style={{ backgroundColor: "#E5E7EB" }} />
+              <div className="w-0.5 flex-1 mt-1" style={{ backgroundColor: "hsl(215 28% 17%)" }} />
             </div>
-            <p className="text-sm pb-3" style={{ color: isCurrent ? "#111827" : "#6B7280", fontWeight: isCurrent ? 600 : 400 }}>
+            <p
+              className="text-sm pb-3"
+              style={{
+                color: isCurrent ? "hsl(210 40% 96%)" : "hsl(215 16% 57%)",
+                fontWeight: isCurrent ? 600 : 400,
+              }}
+            >
               {item.description}
             </p>
           </div>
