@@ -26,12 +26,12 @@ export function InjectionSiteGuide() {
       <div className="relative mx-auto" style={{ maxWidth: 280 }}>
         <svg viewBox="0 0 100 100" className="w-full">
           {/* Simple body silhouette */}
-          <ellipse cx="50" cy="14" rx="8" ry="10" fill="none" stroke="hsl(215, 28%, 25%)" strokeWidth="1.5" />
-          <line x1="50" y1="24" x2="50" y2="55" stroke="hsl(215, 28%, 25%)" strokeWidth="1.5" />
-          <line x1="50" y1="30" x2="28" y2="38" stroke="hsl(215, 28%, 25%)" strokeWidth="1.5" />
-          <line x1="50" y1="30" x2="72" y2="38" stroke="hsl(215, 28%, 25%)" strokeWidth="1.5" />
-          <line x1="50" y1="55" x2="38" y2="85" stroke="hsl(215, 28%, 25%)" strokeWidth="1.5" />
-          <line x1="50" y1="55" x2="62" y2="85" stroke="hsl(215, 28%, 25%)" strokeWidth="1.5" />
+          <ellipse cx="50" cy="14" rx="8" ry="10" fill="none" stroke="#4B5563" strokeWidth="1.5" />
+          <line x1="50" y1="24" x2="50" y2="55" stroke="#4B5563" strokeWidth="1.5" />
+          <line x1="50" y1="30" x2="28" y2="38" stroke="#4B5563" strokeWidth="1.5" />
+          <line x1="50" y1="30" x2="72" y2="38" stroke="#4B5563" strokeWidth="1.5" />
+          <line x1="50" y1="55" x2="38" y2="85" stroke="#4B5563" strokeWidth="1.5" />
+          <line x1="50" y1="55" x2="62" y2="85" stroke="#4B5563" strokeWidth="1.5" />
 
           {/* Hotspots */}
           {SITES.map((site) => (
@@ -40,8 +40,8 @@ export function InjectionSiteGuide() {
               cx={site.cx}
               cy={site.cy}
               r="4"
-              fill={selected === site.id ? "hsla(25, 95%, 53%, 0.3)" : "transparent"}
-              stroke="hsl(25, 95%, 53%)"
+              fill={selected === site.id ? "rgba(249,115,22,0.2)" : "transparent"}
+              stroke="#F97316"
               strokeWidth="1.5"
               className="cursor-pointer"
               onClick={() => setSelected(selected === site.id ? null : site.id)}
@@ -52,24 +52,32 @@ export function InjectionSiteGuide() {
 
       {/* Instructions */}
       {selectedSite ? (
-        <div className="rounded-xl p-4" style={{ backgroundColor: "hsl(240 5% 10%)", border: "1px solid hsl(215 28% 17%)" }}>
-          <p className="font-semibold text-[15px] mb-2" style={{ color: "hsl(210 40% 96%)", fontFamily: "Outfit, sans-serif" }}>
+        <div className="rounded-xl p-4" style={{ backgroundColor: "#FAFAFA", border: "1px solid #E8EAED" }}>
+          <p className="font-semibold text-[15px] mb-2" style={{ color: "#0A0A0A", fontFamily: "Outfit, sans-serif" }}>
             {selectedSite.label}
           </p>
-          <p className="text-sm mb-3" style={{ color: "hsl(215 16% 57%)" }}>
+          <p className="text-sm mb-3" style={{ color: "#4B5563" }}>
             {selectedSite.instructions}
           </p>
-          <ol className="space-y-1.5 text-sm" style={{ color: "hsl(215 20% 75%)" }}>
+          <ol className="space-y-1.5 text-sm" style={{ color: "#4B5563" }}>
             {INJECTION_STEPS.map((step, i) => (
-              <li key={i}>{i + 1}. {step}</li>
+              <li key={i} className="flex gap-2 items-start">
+                <span
+                  className="text-xs font-mono flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5"
+                  style={{ backgroundColor: "rgba(249,115,22,0.1)", color: "#F97316" }}
+                >
+                  {i + 1}
+                </span>
+                <span>{step}</span>
+              </li>
             ))}
           </ol>
-          <p className="text-xs italic mt-3" style={{ color: "hsl(215 20% 47%)" }}>
+          <p className="text-xs italic mt-3" style={{ color: "#9CA3AF" }}>
             Rotate injection sites to avoid tissue buildup. Don't use the same spot within 7 days.
           </p>
         </div>
       ) : (
-        <p className="text-center text-sm" style={{ color: "hsl(215 20% 47%)" }}>
+        <p className="text-center text-sm" style={{ color: "#9CA3AF" }}>
           Tap a site to see injection instructions
         </p>
       )}
