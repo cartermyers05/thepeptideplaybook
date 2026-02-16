@@ -1,108 +1,78 @@
 
 
-# Fix: Chat Reliability, Saving, Streaming, and Protocol Sync
+# Maximize Protocol Value: Rich Data at Creation Time
 
-## Problems Found
+## The Problem
 
-### 1. Chat only responds half the time -- DUPLICATE REQUESTS
-The network logs show **two identical POST requests** fired at the exact same timestamp. This happens because the textarea has both an `onKeyDown` handler (Enter key) AND a form `onSubmit` handler -- both call `handleSubmit`. Since `handleSubmit` is async and state updates are deferred, the `isLoading` guard doesn't block the second call in time. This doubles API usage and can trigger rate limits (429 errors), causing one or both responses to fail silently.
+Right now when a protocol is created, the user gets:
+- Compound names, doses, and schedules (good)
+- Generic weekly expectations like "Building phase -- compounds reaching steady state" (low value)
+- No risk assessment (field exists but is always null)
+- No doctor conversation script (not stored at all)
+- No mechanism of action explanations (not stored)
+- No storage/handling instructions (empty strings)
+- No side effect warnings per compound (empty strings)
 
-### 2. Protocol creation header is invisible to the browser
-The `chat` edge function sets `X-Protocol-Created: true` but does NOT include `Access-Control-Expose-Headers` in the CORS response. Browsers block reading custom headers unless explicitly exposed. So even when a protocol IS created, the frontend never detects it. (The `peptide-coach` function has this header -- the `chat` function is missing it.)
+The `user_protocols` table already has `risk_assessment`, `weekly_expectations`, and `ai_generation_context` columns. The `compounds` JSONB already supports `side_effects` and `storage` fields. They're just never populated with real data.
 
-### 3. Every message makes TWO API calls (wasteful)
-The current flow for a normal (no-tool) message:
-1. Non-streaming call to check for tool calls (waits for full response)
-2. Throws away that response, makes a SECOND streaming call
+## The Fix: Make the AI Generate Rich Data
 
-This doubles latency and API usage. When rate limits are tight, the second call fails.
+### Step 1: Expand the `create_protocol` tool definition
 
-### 4. Chat messages ARE being saved -- but only when streaming succeeds
-The save logic is correct. The issue is that when the duplicate request or rate limit kills the stream, `assistantContent` stays empty, and nothing gets saved.
+Add new parameters to the tool so the AI generates richer data at creation time:
 
-## The Fix
+| New Parameter | Type | What It Contains |
+|---|---|---|
+| `risk_assessment` | string | Personalized safety summary based on compounds + user health |
+| `doctor_script` | object | Opening line, studies to reference, questions to ask |
+| `weekly_expectations` | array | Week-by-week descriptions specific to the actual compounds |
+| Per-peptide `side_effects` | string | Common side effects for that specific compound |
+| Per-peptide `storage` | string | Storage and handling instructions |
+| Per-peptide `mechanism` | string | Plain-English explanation of how the compound works |
 
-### File 1: `src/components/dashboard/ChatInterface.tsx`
+### Step 2: Update the tool handler to save rich data
 
-**Fix A: Prevent duplicate submissions**
-Add a `isSubmittingRef` guard that gets set immediately (synchronously) before any async work. This prevents the second handler from getting through.
+Instead of generating generic weekly expectations in code (the current `if w === 1... "Starting phase"` logic), pass through the AI-generated weekly expectations. Also save `risk_assessment` and `doctor_script` to the database.
 
-```text
-const isSubmittingRef = useRef(false);
+This requires adding a `doctor_script` JSONB column to `user_protocols` to store the doctor conversation data.
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!input.trim() || isLoading || !user || isSubmittingRef.current) return;
-  isSubmittingRef.current = true;
-  // ... rest of logic
-  // In finally block:
-  isSubmittingRef.current = false;
-};
-```
+### Step 3: Update the system prompt to mandate rich output
 
-**Fix B: Better error surfacing**
-When the fetch response is not ok, parse the error body and show a toast instead of a generic "Sorry, I encountered an error."
+Add explicit instructions telling the AI that when calling `create_protocol`, it MUST populate:
+- A personalized `risk_assessment` mentioning the user's specific health context
+- `weekly_expectations` that reference the actual compounds and expected timelines (e.g., "Week 2: GHK-Cu begins stimulating collagen -- you may notice skin texture changes")
+- `side_effects` and `storage` for every peptide
+- A `doctor_script` with a word-for-word opening line and specific studies
 
-### File 2: `supabase/functions/chat/index.ts`
+### Step 4: Update the Protocol page UI to display the new data
 
-**Fix A: Add `Access-Control-Expose-Headers`**
-Add `"Access-Control-Expose-Headers": "X-Protocol-Created"` to BOTH the tool-call response (line 498) AND the normal streaming response (line 519). Without this, the browser silently ignores the header and protocols never sync.
+- **Doctor Script section**: New collapsible section with copy-to-clipboard functionality
+- **Compound cards**: Show mechanism, side effects, and storage info
+- **Weekly timeline**: Display the AI-specific descriptions instead of generic phases
+- **Risk assessment**: Already has a display section -- just needs real data
 
-**Fix B: Eliminate the redundant second API call**
-When the first (non-streaming) call returns content with no tool calls, convert that content into an SSE-formatted stream and return it directly instead of making a second API call. This cuts latency in half for normal messages and avoids rate limit issues.
+## Database Migration
 
-```text
-// If no tool calls, check if the first response already has content
-if (assistantMessage?.content) {
-  // Convert to SSE format and return directly
-  const sseContent = `data: ${JSON.stringify({
-    choices: [{ delta: { content: assistantMessage.content } }]
-  })}\n\ndata: [DONE]\n\n`;
+Add one column to `user_protocols`:
 
-  return new Response(sseContent, {
-    headers: {
-      ...corsHeaders,
-      "Content-Type": "text/event-stream",
-      "Access-Control-Expose-Headers": "X-Protocol-Created",
-    },
-  });
-}
-// Fallback: only make a streaming call if the first response was empty
-```
-
-### File 3: `supabase/functions/_shared/ai-engine.ts`
-
-**Fix: Add `Access-Control-Expose-Headers` to the shared `corsHeaders`**
-This ensures ALL edge functions expose custom headers by default, preventing this class of bug from recurring.
-
-```text
-export const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, ...",
-  "Access-Control-Expose-Headers": "X-Protocol-Created",
-};
+```sql
+ALTER TABLE user_protocols ADD COLUMN doctor_script jsonb DEFAULT null;
 ```
 
 ## Files Changed
 
-| File | Change |
-|------|--------|
-| `src/components/dashboard/ChatInterface.tsx` | Add `isSubmittingRef` guard to prevent duplicate submissions; improve error toast messages |
-| `supabase/functions/chat/index.ts` | Reuse first API response content instead of making a second call; add `Access-Control-Expose-Headers` |
-| `supabase/functions/_shared/ai-engine.ts` | Add `Access-Control-Expose-Headers` to shared `corsHeaders` |
+| File | What Changes |
+|---|---|
+| `supabase/functions/chat/index.ts` | Expand tool parameters (risk_assessment, doctor_script, weekly_expectations, per-peptide side_effects/storage/mechanism); update handler to pass AI data through instead of generating generic text; update system prompt with rich output instructions |
+| `supabase/functions/peptide-coach/index.ts` | Same tool parameter and handler updates (mirror chat changes) |
+| `src/pages/dashboard/Protocol.tsx` | Add Doctor Script section with copy button; enhance CompoundCard to show mechanism, side effects, storage; use AI weekly expectations when available |
+| `src/hooks/useUserProtocol.ts` | Add `doctor_script` to the TypeScript interface |
+| Database migration | Add `doctor_script` column to `user_protocols` |
 
-## Expected Results After Fix
+## What This Means for the User
 
-- **Reliability**: No more duplicate requests = no more rate limit failures = chat responds every time
-- **Speed**: Normal messages are ~2x faster (one API call instead of two)
-- **Protocol sync**: `X-Protocol-Created` header is now readable by the browser, so protocols created in chat will trigger the toast + cache invalidation and show up in the Protocol tab
-- **Saving**: With reliable responses, messages are consistently saved to the database
+Before: "Here's your protocol. BPC-157, 250mcg, daily."
 
-## What Does NOT Change
+After: "Here's your protocol. BPC-157 works by upregulating growth hormone receptors and accelerating angiogenesis in damaged tissue. Take 250mcg daily, morning on empty stomach. Common side effects: mild nausea, dizziness (typically resolves week 2). Store reconstituted vial at 36-46 degrees F, use within 28 days. Week 3: expect reduced inflammation markers and improved recovery time. When talking to your doctor, open with: 'I've been researching BPC-157 for tendon recovery -- a 2018 study in the Journal of Orthopaedic Research showed accelerated healing in animal models...'"
 
-- No database changes
-- No changes to the Coach page (already working correctly)
-- No changes to the Protocol page UI
-- TypewriterMessage streaming animation stays as-is (already fixed)
-- The AI system prompt and tool definitions stay the same
-
+No new tables. No new edge functions. Just making the AI do the work it should have been doing from the start.
