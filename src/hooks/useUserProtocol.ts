@@ -13,6 +13,13 @@ export interface Compound {
   side_effects?: string;
   storage?: string;
   rationale?: string;
+  mechanism?: string;
+}
+
+export interface DoctorScript {
+  opening_line: string;
+  studies_to_reference: { title: string; journal: string; year: string; key_finding: string }[];
+  questions_to_ask: string[];
 }
 
 export interface UserProtocol {
@@ -30,6 +37,7 @@ export interface UserProtocol {
   risk_assessment: string | null;
   weekly_expectations: { week: number; description: string }[] | null;
   ai_generation_context: string | null;
+  doctor_script: DoctorScript | null;
 }
 
 export function useUserProtocol() {

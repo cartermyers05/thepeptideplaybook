@@ -1,0 +1,1 @@
+ALTER TABLE user_protocols ADD COLUMN doctor_script jsonb DEFAULT null;
