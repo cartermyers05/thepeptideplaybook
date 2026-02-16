@@ -1,135 +1,50 @@
 
+# Fix: Chat Not Showing AI Responses
 
-# Fix Protocol Flow: Chat-to-Protocol Sync + Streaming Animation
+## Root Cause
 
-## The Problems
+When you send the first message in a new chat, here's what happens:
 
-There are three interconnected issues:
+1. Your message gets added to the screen
+2. A new conversation is created in the database
+3. `setConversationId` updates the conversation ID
+4. This triggers a `useEffect` that **wipes all messages from the screen** (lines 141-147) because the conversation ID changed
+5. The AI response streams in, but it's trying to update a message that was already wiped -- so nothing shows up
 
-### 1. Chat creates protocols that never show up
-The AI Chat saves protocols to the `protocols` table, but the Protocol page (`/dashboard/protocol`) reads from a completely different table called `user_protocols`. These tables have different schemas and are never synced. So when the AI builds your protocol, it goes into a black hole.
-
-### 2. Streaming text looks ugly (chunky, not smooth)
-The chat applies a character-by-character "typewriter" animation on top of the already-chunked streaming data. Each network chunk arrives (sometimes 5-50 characters at once), then the typewriter tries to animate each character individually. This creates a stuttering, jerky effect instead of smooth text flow.
-
-### 3. Protocols page is disconnected
-There are actually THREE protocol systems that don't talk to each other:
-- `/dashboard/protocol` -- reads from `user_protocols` table (AI-generated compound stacks)
-- `/dashboard/protocols` -- reads from `protocol_progress` table (hardcoded semaglutide weekly briefs)
-- Chat `create_protocol` tool -- writes to `protocols` table
+Essentially, creating the conversation resets the chat mid-stream.
 
 ## The Fix
 
-### Part 1: Connect Chat to Protocol Page
+### ChatInterface.tsx -- Prevent the reset from killing active streams
 
-**Edge function change (`supabase/functions/chat/index.ts`)**:
-When the `create_protocol` tool runs, ALSO insert into the `user_protocols` table (the one that `/dashboard/protocol` actually reads from). Map the fields:
-- `protocol_name` stays the same
-- `peptides` array maps to `compounds` JSONB (adding `route` and `category` fields from the peptide data)
-- `cycle_length_weeks` stays the same
-- Build a `schedule` JSONB from frequency data (e.g., "twice daily" = every day, "once weekly" = one day)
-- Set `status: "active"`, `start_date: today`
-- Generate `weekly_expectations` from the peptide data
+**Change 1**: The useEffect that watches `initialConversationId` (lines 141-147) should NOT reset messages if we're currently loading/streaming. Add a guard so it only resets when navigating to a genuinely different conversation (e.g., from the history page), not when we just created one ourselves.
 
-**ChatInterface.tsx change**:
-When `protocolCreated` is true, also invalidate the `["user-protocol", user?.id]` query key so the Protocol page refreshes immediately. Add a more prominent success banner with a "View Protocol" link.
+Add a ref like `isOwnConversationRef` that gets set to `true` right before `setConversationId` is called during new conversation creation (line 201). The useEffect checks this ref -- if true, it skips the reset and just updates the ID.
 
-### Part 2: Fix Streaming Animation
+**Change 2**: Move `onConversationChange` call (line 202) to AFTER the streaming is complete, not immediately after conversation creation. This prevents the URL update from triggering a parent re-render mid-stream.
 
-**TypewriterMessage.tsx change**:
-Remove the character-by-character typewriter effect for streaming messages. Instead, show the streamed content directly as it arrives (the SSE chunks already provide a natural "typing" feel). Keep a simple cursor animation at the end while streaming is active.
+**Change 3**: Add an `AbortController` to the fetch call so that if a genuine navigation happens (user clicks "New Chat" while streaming), the old stream gets properly cancelled instead of silently failing.
 
-The current flow: SSE chunk arrives -> state updates -> typewriter animates each character (stuttery)
-The new flow: SSE chunk arrives -> state updates -> text renders immediately with blinking cursor (smooth)
+### Summary of changes
 
-**useTypewriter.ts**: Not deleted but the streaming path in TypewriterMessage won't use it. Keep it available for non-streaming use cases (like the quiz).
+| File | What changes |
+|------|-------------|
+| `ChatInterface.tsx` | Add `isOwnConversation` ref guard to prevent message wipe during streaming; defer URL update until after stream completes; add AbortController for fetch cleanup |
 
-### Part 3: Unify Protocol Navigation
-
-**Remove `/dashboard/protocols` route** (the hardcoded semaglutide weekly briefs page). This page is misleading -- it only works for one specific protocol template and doesn't connect to anything the chat creates.
-
-**Make `/dashboard/protocol` the single protocol destination**. Update any navigation references that point to `/dashboard/protocols` to point to `/dashboard/protocol` instead.
-
-Update the Protocol page's empty state to have a clearer CTA that links to the chat to build a protocol.
-
-## Files Changed
-
-| File | Change |
-|------|--------|
-| `supabase/functions/chat/index.ts` | Dual-write: insert into both `protocols` AND `user_protocols` when creating a protocol |
-| `src/components/dashboard/ChatInterface.tsx` | Invalidate `user-protocol` query key on protocol creation; remove typewriter from streaming; show "View Protocol" link |
-| `src/components/dashboard/TypewriterMessage.tsx` | Replace typewriter with direct text rendering + cursor for streaming messages |
-| `src/App.tsx` | Remove `/dashboard/protocols` route, redirect to `/dashboard/protocol` |
-| `src/components/dashboard/DashboardTopNav.tsx` | Update any "Protocols" nav link to point to `/dashboard/protocol` |
-| `src/components/dashboard/MobileBottomNav.tsx` | Update any nav link pointing to `/dashboard/protocols` |
-| `src/components/dashboard/home/ActiveProtocolState.tsx` | Update quick access link from `/dashboard/protocols` to `/dashboard/protocol` |
-| `src/components/dashboard/home/NoProtocolState.tsx` | Ensure CTA goes to quiz or chat, not protocols |
-
-## Technical Details
-
-### Dual-write in edge function
-
-When `create_protocol` succeeds, build a `user_protocols` row:
+### Technical detail
 
 ```text
-compounds JSONB = peptides.map(p => ({
-  name: p.name,
-  description: p.purpose,
-  dose: p.dosage,
-  frequency: p.frequency,
-  timing: p.timing,
-  route: p.site || "Subcutaneous",
-  category: inferCategory(p),  // map from goal
-  rationale: p.rationale
-}))
+// Before creating conversation:
+isOwnConversationRef.current = true;
 
-schedule JSONB = buildScheduleFromFrequency(compounds)
-  e.g. "twice daily" -> all 7 days
-  e.g. "once weekly" -> ["Monday"]
-  e.g. "3x per week" -> ["Monday","Wednesday","Friday"]
-
-weekly_expectations = generateWeeklyExpectations(peptides, cycle_length_weeks)
-```
-
-### Streaming fix
-
-Replace TypewriterMessage's streaming mode:
-
-```text
-// Instead of character-by-character animation:
-if (isStreaming) {
-  return (
-    <div className="text-sm">
-      <ReactMarkdown>{content}</ReactMarkdown>
-      {content && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5" />}
-    </div>
-  );
+// In the useEffect watching initialConversationId:
+if (isOwnConversationRef.current) {
+  isOwnConversationRef.current = false;
+  return; // Skip the reset -- we created this conversation ourselves
 }
+
+// After streaming completes successfully:
+onConversationChange?.(activeConversationId);
 ```
 
-This means the text appears exactly as fast as the server sends it (which already feels like typing), without an additional animation layer creating stutter.
-
-### Schedule builder logic
-
-```text
-function buildSchedule(compounds):
-  schedule = { Monday: [], Tuesday: [], ... }
-  for each compound:
-    if frequency contains "daily" or "every day":
-      add to all 7 days
-    if frequency contains "twice weekly" or "2x":
-      add to Monday, Thursday
-    if frequency contains "3x" or "three times":
-      add to Monday, Wednesday, Friday
-    if frequency contains "once weekly" or "1x":
-      add to Monday
-  return schedule
-```
-
-## What Does NOT Change
-
-- No database schema changes needed (both tables already exist)
-- No changes to the quiz, homepage, guides, checkout, or login
-- The `/dashboard/protocol` page UI stays the same (it already renders compounds, schedules, and timelines nicely)
-- All existing hooks and data connections preserved
-- The chat's AI system prompt and tool definitions stay the same
+No backend changes needed. No database changes. The edge function is working correctly -- it's purely a client-side state management race condition.
