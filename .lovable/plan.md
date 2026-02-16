@@ -1,81 +1,72 @@
 
 
-# Redesign Protocols Page as Weekly Journey Brief
+# Fix: Circular Navigation and Missing "Set Start Date" Flow
 
-## Overview
-Replace the current `/dashboard/protocols` page (Protocols.tsx) with a weekly journey brief system. Instead of showing protocol cards and peptide accordions, the page foregrounds the user's current week as a detailed, action-oriented brief with nutrition plans, movement guidance, progress benchmarks, and safety information.
+## Problem
+When a user has no active protocol:
+1. Dashboard Home shows "Ready to Start Your Protocol?" with a "Set My Start Date" button that navigates to `/dashboard/protocols`
+2. The Protocols page detects no active protocol and immediately redirects back to `/dashboard`
+3. The user is stuck in a loop and can never start tracking
 
-## Data Architecture
+## Solution
+Fix the Protocols page to handle the "no active protocol" state by showing a start-date picker instead of redirecting. This way when users click "Set My Start Date" from the dashboard, they land on a page that actually lets them set their start date and create an active `protocol_progress` record.
 
-### New File: `src/data/weeklyBriefs.ts`
-A single TypeScript file containing all 20 weeks of structured content as a typed object. Each week entry includes:
-- `title`, `phase`, `phaseName`, `dose`
-- `doseChange`, `previousDose`, `newDose`, `doseAlertMessage`
-- `whatToExpect` (2-3 paragraphs)
-- `nutrition` (detailed with bullet lists)
-- `movement` (detailed with bullet lists)
-- `progressStats` (array of stat objects: value, label)
-- `progressNote` (reassurance paragraph)
-- `normalSymptoms` (array of strings)
-- `warningSymptoms` (array of strings)
+## Changes
 
-All content comes directly from the prompt (weeks 1-20 with full nutrition/movement/progress/safety text). Special nutrition override for Week 4.
+### 1. Update `src/pages/dashboard/Protocols.tsx`
 
-### No Database Changes
-Current week is computed from `protocol_progress.start_date` via the existing `useActiveProtocolProgress` hook. No new tables or migrations needed.
+Remove the redirect-to-dashboard logic. Instead, when `currentWeek === null` (no active protocol), show an inline "Set Your Start Date" card with:
+- A date picker (simple HTML date input styled to match the design system)
+- A "Start My Protocol" button that inserts a row into `protocol_progress` with:
+  - `user_id`: current user
+  - `peptide_slug`: "semaglutide" (default)
+  - `goal_slug`: user's quiz goal or "weight-loss" default
+  - `start_date`: selected date
+  - `status`: "active"
+  - `protocol_template_id`: a default/placeholder UUID
+- After successful insert, invalidate queries so the page re-renders with the weekly brief
 
-## Page Layout
+### 2. Update `src/pages/dashboard/Home.tsx`
 
-### When No Active Protocol
-Redirect to `/dashboard` where the "Ready to Start Your Protocol?" card already exists.
+No logic change needed -- the "Set My Start Date" button already navigates to `/dashboard/protocols`, which will now correctly handle it.
 
-### When Protocol Is Active
+### 3. Add start protocol mutation
 
-**1. Week Navigation Bar (top)**
-- Horizontal scrollable row of 20 pills ("W1" through "W20")
-- Current week: orange (#F97316) background, white text
-- Completed weeks: light green background, green text, clickable
-- Future weeks: dimmed (#F5F5F5), not clickable
-- Dose change weeks (5, 9, 13, 16): tiny amber dot indicator
-- Auto-scrolls to center current week on mount
-- Clicking a past/current week scrolls to and expands that week's brief
+Add a `useCreateProtocolProgress` mutation (either in `useProtocolProgress.ts` or inline in Protocols.tsx) that:
+- Inserts into `protocol_progress`
+- Invalidates `["active-protocol-progress"]` query key on success
+- Returns the created record
 
-**2. Current Week Brief Card (hero, expanded by default)**
-- Warm cream (#FFF7ED) background with subtle orange shadow
-- Header: "WEEK X" label in font-mono orange, phase name, week title (24-32px bold), dose badge (green pill), dose change amber badge if applicable
-- Dose change alert banner (#FEF3C7 amber background) when applicable
-- 5 content blocks separated by thin dividers:
-  - Block 1: "What to Expect This Week" -- multi-paragraph body text
-  - Block 2: "Your Nutrition This Week" -- bullet lists with orange bullets, food lists in inset #F9F9F9 containers
-  - Block 3: "Your Movement This Week" -- structured exercise guidance with bullet lists
-  - Block 4: "Progress Check" -- 2-3 stat boxes (value + label) in a row, plus reassurance note in italic
-  - Block 5: "When to Be Concerned" -- two-column layout (green "Normal" vs red "Contact your doctor")
+## Technical Details
 
-**3. Previous Weeks Section**
-- "Previous Weeks" heading with divider
-- Collapsed cards for weeks (currentWeek-1) down to 1
-- Each shows: green check, "Week N: Title", dose badge
-- Accordion behavior: click to expand same 5-block structure on white background
-- Only one previous week expanded at a time
+```text
+Flow after fix:
+  /dashboard (no protocol) 
+    -> Click "Set My Start Date"
+    -> /dashboard/protocols (no protocol)
+    -> Shows date picker card instead of redirecting
+    -> User picks date, clicks "Start My Protocol"
+    -> INSERT into protocol_progress
+    -> Page re-renders with Week 1 brief
+    -> /dashboard also shows the weekly command center
+```
 
-**4. Coming Up Section**
-- "Coming Up" heading
-- Next 2-3 upcoming weeks as dimmed, locked preview cards
-- Dashed border, lock icon, non-clickable
+### RLS Check
+The `protocol_progress` table needs an INSERT policy for the user. Let me verify this exists -- if not, we add one via migration.
 
-## Files Summary
+### Files Modified
 
 | File | Change |
 |------|--------|
-| `src/data/weeklyBriefs.ts` | New -- all 20 weeks of structured content (titles, nutrition, movement, progress, safety) |
-| `src/pages/dashboard/Protocols.tsx` | Full rewrite -- weekly journey brief with week navigation, hero brief card, previous weeks accordion, upcoming preview |
+| `src/pages/dashboard/Protocols.tsx` | Replace redirect with start-date picker UI for no-protocol state |
+| `src/hooks/useProtocolProgress.ts` | Potentially reuse existing `useStartTracking` mutation (already exists!) |
 
-## What Does NOT Change
-- Dashboard home page (Home.tsx) -- untouched
-- AI chat page -- untouched
-- Navigation structure (DashboardLayout, sidebar, bottom nav) -- untouched
-- Protocol detail view, check-in system, progress tracking hooks -- untouched
-- All existing components not mentioned (WarningBox, StudyCard, etc.)
-- No backend, auth, or payment changes
-- No new database tables or migrations
+The existing `useStartTracking` mutation in `useProtocolProgress.ts` already handles inserting a protocol_progress record. We just need to wire it up in the Protocols page with a date picker UI.
+
+### What Does NOT Change
+- Dashboard Home page layout or content
+- Navigation structure
+- Weekly briefs data
+- Check-in system
+- Any other pages or components
 
