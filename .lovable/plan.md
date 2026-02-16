@@ -1,65 +1,80 @@
 
 
-# Pre-Launch Bug Fixes: Full Flow Audit Results
+# Dashboard Home Redesign
 
-## Testing Results Summary
+## Current State
 
-Tested the complete flow: Landing Page -> Quiz -> Results -> Dashboard -> Chat -> Protocol. The app is 95% flawless. Found 2 issues to fix before launch.
+The dashboard is a simple flat list: greeting, protocol name, stats text, compound checklist cards, 3 quick-access buttons, and a disclaimer. It works but feels like a to-do app, not a premium health platform.
 
----
+## New Design: "Command Center"
 
-## Issue 1: Quiz Analytics Data Lost (400 Error)
-
-**What happens:** After the quiz completes, the app tries to save the response to the `quiz_responses` table for analytics. It fails silently with a 400 error every time.
-
-**Root cause:** The quiz AI extracts experience level as `"never"` or `"researched"`, but the database only accepts `"beginner"`, `"some_experience"`, or `"experienced"`. The values don't match.
-
-**Impact:** You're losing every quiz completion record. This means no analytics on who's taking the quiz and what they're interested in.
-
-**Fix:** Map the extracted values to DB-compatible values before inserting. In `src/hooks/useQuizChat.ts`, add a mapping when saving:
-- `"never"` maps to `"beginner"`
-- `"researched"` maps to `"some_experience"`  
-- `"experienced"` stays `"experienced"`
-
-Also map `primary_goal`: the quiz uses `"recovery"` but the DB constraint expects `"injury_recovery"`, and `"muscle"` needs to map to `"muscle_recovery"`.
+The redesigned home becomes a single-scroll daily command center with 5 distinct sections, using your signature orange-pink-violet gradient system and a more visual, data-rich layout.
 
 ---
 
-## Issue 2: Suggested Questions Require Double Action
+### Section 1: Hero Status Card (replaces greeting + stats row)
 
-**What happens:** On the Chat page, clicking a suggested question (e.g., "What are the most well-researched peptides right now?") fills the text input but doesn't send it. User has to click the send button separately.
+A single elevated card with a gradient top border containing:
+- Left side: Greeting ("Hey Carter"), protocol name, and a "Week 3 of 12" label
+- Right side: An animated circular progress ring (reusing the existing `ProgressRing` component) showing overall protocol completion percentage
+- Below: A row of 3 mini stat pills -- Day number, Compliance %, and Days Remaining -- using the monospace font for numbers
+- Gradient progress bar at the bottom of the card (keep existing)
 
-**Impact:** Small UX friction. Users expect clicking a suggestion to immediately ask the question.
+### Section 2: Today's Actions (refined checklist)
 
-**Fix:** In `src/components/dashboard/ChatInterface.tsx`, update the suggested question click handler to directly call the send/submit logic instead of just populating the input field.
+- Section header: "Today's Protocol" with date on the right (keep existing pattern)
+- Compound cards stay as-is -- they're already well designed with color strips, dosing, timing, and circular checkboxes
+- Completion banner stays as-is
+- Rest day card stays as-is
+- No changes to this section, it already works great
+
+### Section 3: Weekly Insight Card (NEW)
+
+A new card that shows context for where you are in the protocol:
+- If `weekly_expectations` data exists on the protocol, show the current week's expectation text (e.g., "Week 3: You may start noticing improved recovery times and sleep quality")
+- Styled as a subtle card with a left gradient accent bar
+- If no weekly expectations data, this section is hidden (no empty state needed)
+
+### Section 4: Streak + Check-in Nudge (NEW)
+
+A horizontal row with two mini cards:
+- **Streak card**: Shows the user's `current_streak` from their profile with a flame icon. "3-day streak" etc.
+- **Check-in nudge**: If `hasCheckedInThisWeek` is false (from `useProgressStats`), show a gentle nudge card: "Weekly check-in due" with a link to /dashboard/progress. If already checked in, show a green checkmark "Checked in this week"
+
+### Section 5: Quick Access (refined)
+
+Keep the existing 3-button grid (AI Coach, Protocol, Progress) but upgrade the styling:
+- Add the gradient top accent bar (2px) to each card, using orange/pink/violet respectively
+- This matches the pattern already used in the NoProtocolState feature preview cards
+
+### Footer
+
+Keep the existing legal disclaimer as-is.
 
 ---
 
-## What Passed (Everything Else)
+## Technical Details
 
-- Landing page loads clean, CTA works
-- Quiz conversational flow is smooth and personalized
-- Quiz results show correct protocol recommendation
-- Dashboard Home shows protocol with compliance tracking
-- Chat AI responds with rich, cited research answers
-- Protocol page renders with animated progress ring, gradient styling, compound cards, synergy badges
-- Quick Tools (Mixing Calculator, Injection Guide, Doctor Script) accessible
-- Weekly Schedule renders correctly with today highlighted
-- Timeline and Safety sections display properly
-- Mobile responsive on all pages (tested at 390px)
-- No JavaScript errors in console
-- All API calls returning 200 (except the quiz_responses 400)
+### Files Modified
 
----
+| File | Changes |
+|------|---------|
+| `src/components/dashboard/home/ActiveProtocolState.tsx` | Major rewrite: wrap header in a card, add ProgressRing, add stat pills, add weekly insight section, add streak/check-in row, upgrade quick access styling |
+| `src/pages/dashboard/Home.tsx` | Pass additional data to ActiveProtocolState: `profile` (for streak), `hasCheckedInThisWeek` (from stats) |
 
-## Files to Modify
+### Files Created
 
-| File | Change |
-|------|--------|
-| `src/hooks/useQuizChat.ts` | Add value mapping before quiz_responses insert: map experience (`never` to `beginner`, `researched` to `some_experience`) and goal (`recovery` to `injury_recovery`, `muscle` to `muscle_recovery`) |
-| `src/components/dashboard/ChatInterface.tsx` | Make suggested question clicks auto-submit instead of just filling the input |
+None -- all changes fit within existing components.
 
-## No Database Changes
+### Data Sources (all already available, no new queries)
 
-The DB constraints are correct as-is. The fix is mapping values on the frontend before insert.
+- `useUserProtocol()` -- protocol name, week, day, compounds, weekly_expectations, progress
+- `useProgressStats()` -- compliance %, hasCheckedInThisWeek
+- `useProfile()` -- current_streak, full_name
+- `useTodayLog()` -- today's check completion state
+- `ProgressRing` component -- already exists at `src/components/dashboard/home/ProgressRing.tsx`
+
+### No database changes needed
+
+All data is already being fetched. This is purely a UI/layout upgrade.
 
