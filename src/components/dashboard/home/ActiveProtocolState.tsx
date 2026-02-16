@@ -70,7 +70,7 @@ export function ActiveProtocolState({
           Hey {firstName}
         </p>
         <div className="flex items-center gap-2 mb-3">
-          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: "#F97316" }} />
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: "linear-gradient(135deg, #F97316, #FB7185)" }} />
           <h1
             className="text-[28px] font-bold truncate"
             style={{ color: "#0A0A0A", letterSpacing: "-0.02em" }}
@@ -86,7 +86,7 @@ export function ActiveProtocolState({
           </span>
           <span className="mx-3 w-px h-4 flex-shrink-0" style={{ backgroundColor: "#E8EAED" }} />
           <span className="text-sm whitespace-nowrap" style={{ color: "#4B5563" }}>
-            Day <span style={{ fontFamily: mono }}>{dayNumber}</span>
+            Day <span style={{ fontFamily: mono, color: "#FB7185" }}>{dayNumber}</span>
           </span>
           <span className="mx-3 w-px h-4 flex-shrink-0" style={{ backgroundColor: "#E8EAED" }} />
           <span className="text-sm font-semibold whitespace-nowrap" style={{ color: "#22C55E" }}>
@@ -99,7 +99,7 @@ export function ActiveProtocolState({
           <div className="w-full h-1 rounded-full overflow-hidden" style={{ backgroundColor: "#E8EAED" }}>
             <div
               className="h-full rounded-full transition-all duration-700 ease-out"
-              style={{ backgroundColor: "#F97316", width: `${progressPercent}%` }}
+              style={{ background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)", width: `${progressPercent}%` }}
             />
           </div>
         </div>
@@ -142,9 +142,9 @@ export function ActiveProtocolState({
         <h2 className="text-lg font-bold mb-3" style={{ color: "#0A0A0A" }}>Quick Access</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           {[
-            { icon: MessageCircle, label: "AI Coach", desc: "Ask anything", to: "/dashboard/coach" },
-            { icon: Layers, label: "Protocol", desc: "Compounds & schedule", to: "/dashboard/protocol" },
-            { icon: TrendingUp, label: "Progress", desc: "Check-ins & photos", to: "/dashboard/progress" },
+            { icon: MessageCircle, label: "AI Coach", desc: "Ask anything", to: "/dashboard/coach", hoverBg: "rgba(249,115,22,0.1)" },
+            { icon: Layers, label: "Protocol", desc: "Compounds & schedule", to: "/dashboard/protocol", hoverBg: "rgba(251,113,133,0.1)" },
+            { icon: TrendingUp, label: "Progress", desc: "Check-ins & photos", to: "/dashboard/progress", hoverBg: "rgba(167,139,250,0.1)" },
           ].map((card) => (
             <button
               key={card.label}
@@ -153,8 +153,10 @@ export function ActiveProtocolState({
               style={{ border: "1px solid #E8EAED", height: 72 }}
             >
               <div
-                className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0 transition-colors duration-200 group-hover:bg-[#E8EAED]"
+                className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0 transition-colors duration-200"
                 style={{ backgroundColor: "#F3F4F6" }}
+                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = card.hoverBg; }}
+                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#F3F4F6"; }}
               >
                 <card.icon className="w-[18px] h-[18px]" style={{ color: "#4B5563" }} />
               </div>
