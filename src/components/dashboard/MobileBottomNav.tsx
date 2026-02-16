@@ -1,10 +1,11 @@
-import { Home, MessageCircle, FlaskConical } from "lucide-react";
+import { Home, MessageCircle, ClipboardList, TrendingUp } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/dashboard" },
-  { icon: MessageCircle, label: "Chat", path: "/dashboard/chat" },
-  { icon: FlaskConical, label: "Protocols", path: "/dashboard/protocols" },
+  { icon: MessageCircle, label: "Coach", path: "/dashboard/coach" },
+  { icon: ClipboardList, label: "Protocol", path: "/dashboard/protocol" },
+  { icon: TrendingUp, label: "Progress", path: "/dashboard/progress" },
 ];
 
 export function MobileBottomNav() {
