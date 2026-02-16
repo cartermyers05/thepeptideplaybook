@@ -35,9 +35,9 @@ export function ReconCalculator({ compounds = [] }: Props) {
   const drawUnits = concentration > 0 ? Math.round((effectiveDose / concentration) * 100 * 10) / 10 : 0;
 
   const selectStyles: React.CSSProperties = {
-    backgroundColor: "hsl(240 5% 10%)",
-    borderColor: "hsl(215 28% 17%)",
-    color: "hsl(210 40% 96%)",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E8EAED",
+    color: "#0A0A0A",
     minHeight: 48,
   };
 
@@ -45,7 +45,7 @@ export function ReconCalculator({ compounds = [] }: Props) {
     <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="text-xs font-medium mb-1.5 block" style={{ color: "hsl(215 16% 57%)" }}>Vial Size</label>
+          <label className="text-xs font-medium mb-1.5 block" style={{ color: "#9CA3AF" }}>Vial Size</label>
           <select
             value={vialMg}
             onChange={(e) => setVialMg(Number(e.target.value))}
@@ -59,7 +59,7 @@ export function ReconCalculator({ compounds = [] }: Props) {
         </div>
 
         <div>
-          <label className="text-xs font-medium mb-1.5 block" style={{ color: "hsl(215 16% 57%)" }}>BAC Water to Add</label>
+          <label className="text-xs font-medium mb-1.5 block" style={{ color: "#9CA3AF" }}>BAC Water to Add</label>
           <select
             value={bacWaterMl}
             onChange={(e) => setBacWaterMl(Number(e.target.value))}
@@ -73,7 +73,7 @@ export function ReconCalculator({ compounds = [] }: Props) {
         </div>
 
         <div>
-          <label className="text-xs font-medium mb-1.5 block" style={{ color: "hsl(215 16% 57%)" }}>Your Dose</label>
+          <label className="text-xs font-medium mb-1.5 block" style={{ color: "#9CA3AF" }}>Your Dose</label>
           <select
             value={doseMcg}
             onChange={(e) => setDoseMcg(Number(e.target.value))}
@@ -91,43 +91,55 @@ export function ReconCalculator({ compounds = [] }: Props) {
               onChange={(e) => setCustomDose(e.target.value)}
               placeholder="Enter mcg"
               className="w-full mt-2 rounded-xl border px-4 py-3 text-[16px] focus:outline-none focus:ring-2 focus:ring-ring"
-              style={{ ...selectStyles, borderColor: "hsl(215 28% 17%)" }}
+              style={selectStyles}
             />
           )}
         </div>
       </div>
 
       {/* Results */}
-      <div className="rounded-xl p-4" style={{ backgroundColor: "hsla(25, 95%, 53%, 0.06)", border: "1px solid hsla(25, 95%, 53%, 0.15)" }}>
+      <div className="rounded-xl p-4" style={{ backgroundColor: "rgba(249,115,22,0.05)", border: "1px solid rgba(249,115,22,0.15)" }}>
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-xs" style={{ color: "hsl(215 16% 57%)" }}>Concentration</p>
-            <p className="text-lg font-bold" style={{ color: "hsl(210 40% 96%)", fontFamily: "JetBrains Mono, monospace" }}>
+            <p className="text-xs" style={{ color: "#9CA3AF" }}>Concentration</p>
+            <p className="text-lg font-bold" style={{ color: "#0A0A0A", fontFamily: "JetBrains Mono, monospace" }}>
               {concentration.toLocaleString()} mcg/mL
             </p>
           </div>
           <div className="text-right">
-            <p className="text-xs" style={{ color: "hsl(215 16% 57%)" }}>Draw to</p>
-            <p className="text-lg font-bold" style={{ color: "hsl(25 95% 53%)", fontFamily: "JetBrains Mono, monospace" }}>
+            <p className="text-xs" style={{ color: "#9CA3AF" }}>Draw to</p>
+            <p className="text-lg font-bold" style={{ color: "#F97316", fontFamily: "JetBrains Mono, monospace" }}>
               {drawUnits} units
             </p>
           </div>
         </div>
-        <p className="text-xs mt-2" style={{ color: "hsl(215 20% 47%)" }}>
+        <p className="text-xs mt-2" style={{ color: "#9CA3AF" }}>
           on a standard 1mL / 100-unit insulin syringe
         </p>
       </div>
 
       {/* Steps */}
       <div>
-        <h4 className="text-sm font-semibold mb-2" style={{ color: "hsl(210 40% 96%)", fontFamily: "Outfit, sans-serif" }}>Steps</h4>
-        <ol className="space-y-2 text-sm" style={{ color: "hsl(215 20% 75%)" }}>
-          <li>1. Clean both vial tops with an alcohol swab.</li>
-          <li>2. Draw {bacWaterMl}mL of bacteriostatic water into your syringe.</li>
-          <li>3. Insert the needle into the peptide vial at an angle.</li>
-          <li>4. Push the water slowly down the SIDE of the vial — never spray directly onto the powder.</li>
-          <li>5. Remove the needle. Let the vial sit for 5 minutes to dissolve. Swirl gently — never shake.</li>
-          <li>6. Label the vial with today's date and the concentration. Store in refrigerator.</li>
+        <h4 className="text-sm font-semibold mb-2" style={{ color: "#0A0A0A", fontFamily: "Outfit, sans-serif" }}>Steps</h4>
+        <ol className="space-y-2 text-sm" style={{ color: "#4B5563" }}>
+          {[
+            `Clean both vial tops with an alcohol swab.`,
+            `Draw ${bacWaterMl}mL of bacteriostatic water into your syringe.`,
+            `Insert the needle into the peptide vial at an angle.`,
+            `Push the water slowly down the SIDE of the vial — never spray directly onto the powder.`,
+            `Remove the needle. Let the vial sit for 5 minutes to dissolve. Swirl gently — never shake.`,
+            `Label the vial with today's date and the concentration. Store in refrigerator.`,
+          ].map((step, i) => (
+            <li key={i} className="flex gap-2 items-start">
+              <span
+                className="text-xs font-mono flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5"
+                style={{ backgroundColor: "rgba(249,115,22,0.1)", color: "#F97316" }}
+              >
+                {i + 1}
+              </span>
+              <span>{step}</span>
+            </li>
+          ))}
         </ol>
       </div>
     </div>
