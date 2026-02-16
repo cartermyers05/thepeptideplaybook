@@ -1,78 +1,67 @@
 
 
-# Maximize Protocol Value: Rich Data at Creation Time
+# Protocol Page Visual Redesign
 
-## The Problem
+## What's Wrong
 
-Right now when a protocol is created, the user gets:
-- Compound names, doses, and schedules (good)
-- Generic weekly expectations like "Building phase -- compounds reaching steady state" (low value)
-- No risk assessment (field exists but is always null)
-- No doctor conversation script (not stored at all)
-- No mechanism of action explanations (not stored)
-- No storage/handling instructions (empty strings)
-- No side effect warnings per compound (empty strings)
+The Protocol page is the weakest screen in the app. It uses white cards on a light background, has raw goal text as category labels (e.g., "Target stubborn belly fat and improve acne/skin quality" instead of "Weight Loss"), an emoji in the title, and no visual depth. It completely breaks from the dark "Molecular Precision" aesthetic used across the rest of the dashboard.
 
-The `user_protocols` table already has `risk_assessment`, `weekly_expectations`, and `ai_generation_context` columns. The `compounds` JSONB already supports `side_effects` and `storage` fields. They're just never populated with real data.
+## The Redesign
 
-## The Fix: Make the AI Generate Rich Data
+### 1. Gradient Hero Header
+Replace the plain text + emoji header with a dark gradient card:
+- Background: #111827 to #1E293B with subtle radial glow (Orange/Rose/Violet at 10% opacity)
+- Protocol name in white Outfit font, no emoji
+- Stat chips (Week X/Y, Compliance %) as frosted-glass pills with JetBrains Mono numbers
+- Pulsing green dot for active status
 
-### Step 1: Expand the `create_protocol` tool definition
+### 2. Dark Collapsible Sections
+- Card background: #141418 with border #1E293B
+- Content area: #1A1A1F
+- Section icons in gradient colors instead of flat orange
+- Light text (#F1F5F9) for titles
 
-Add new parameters to the tool so the AI generates richer data at creation time:
+### 3. Category Normalization
+Add a helper that maps raw goal text to clean labels + colors:
+- "fat" / "weight" -> "Weight Loss" (orange)
+- "skin" / "acne" -> "Skin" (rose)
+- "recovery" / "healing" -> "Recovery" (violet)
+- "muscle" / "performance" -> "Performance" (green)
+- "longevity" -> "Longevity" (blue)
+- Fallback: "General" (gray)
 
-| New Parameter | Type | What It Contains |
-|---|---|---|
-| `risk_assessment` | string | Personalized safety summary based on compounds + user health |
-| `doctor_script` | object | Opening line, studies to reference, questions to ask |
-| `weekly_expectations` | array | Week-by-week descriptions specific to the actual compounds |
-| Per-peptide `side_effects` | string | Common side effects for that specific compound |
-| Per-peptide `storage` | string | Storage and handling instructions |
-| Per-peptide `mechanism` | string | Plain-English explanation of how the compound works |
+### 4. Redesigned Compound Cards
+- Dark card (#1A1A1F) with 4px left accent bar in category color
+- Normalized category badge
+- Dose in orange JetBrains Mono
+- Mechanism/side effects/storage as dark inset panels with colored left borders
 
-### Step 2: Update the tool handler to save rich data
+### 5. Enhanced Weekly Schedule
+- Dark columns instead of white
+- Today highlighted with orange glow
+- Compound names as small colored pills instead of anonymous dots
 
-Instead of generating generic weekly expectations in code (the current `if w === 1... "Starting phase"` logic), pass through the AI-generated weekly expectations. Also save `risk_assessment` and `doctor_script` to the database.
+### 6. Polished Timeline
+- Dark nodes on vertical line
+- Current week glows orange
+- Past weeks filled, future weeks muted outline
 
-This requires adding a `doctor_script` JSONB column to `user_protocols` to store the doctor conversation data.
+### 7. Dark Doctor Script, Safety, Calculator, Injection Guide
+All sub-components get matching dark treatment with proper contrast.
 
-### Step 3: Update the system prompt to mandate rich output
-
-Add explicit instructions telling the AI that when calling `create_protocol`, it MUST populate:
-- A personalized `risk_assessment` mentioning the user's specific health context
-- `weekly_expectations` that reference the actual compounds and expected timelines (e.g., "Week 2: GHK-Cu begins stimulating collagen -- you may notice skin texture changes")
-- `side_effects` and `storage` for every peptide
-- A `doctor_script` with a word-for-word opening line and specific studies
-
-### Step 4: Update the Protocol page UI to display the new data
-
-- **Doctor Script section**: New collapsible section with copy-to-clipboard functionality
-- **Compound cards**: Show mechanism, side effects, and storage info
-- **Weekly timeline**: Display the AI-specific descriptions instead of generic phases
-- **Risk assessment**: Already has a display section -- just needs real data
-
-## Database Migration
-
-Add one column to `user_protocols`:
-
-```sql
-ALTER TABLE user_protocols ADD COLUMN doctor_script jsonb DEFAULT null;
-```
+### 8. Bottom CTAs
+- Primary: gradient button (Orange to Rose)
+- Secondary: dark outlined button
 
 ## Files Changed
 
-| File | What Changes |
-|---|---|
-| `supabase/functions/chat/index.ts` | Expand tool parameters (risk_assessment, doctor_script, weekly_expectations, per-peptide side_effects/storage/mechanism); update handler to pass AI data through instead of generating generic text; update system prompt with rich output instructions |
-| `supabase/functions/peptide-coach/index.ts` | Same tool parameter and handler updates (mirror chat changes) |
-| `src/pages/dashboard/Protocol.tsx` | Add Doctor Script section with copy button; enhance CompoundCard to show mechanism, side effects, storage; use AI weekly expectations when available |
-| `src/hooks/useUserProtocol.ts` | Add `doctor_script` to the TypeScript interface |
-| Database migration | Add `doctor_script` column to `user_protocols` |
+| File | Changes |
+|------|---------|
+| `src/pages/dashboard/Protocol.tsx` | Full visual overhaul: dark theme, gradient hero, category normalization, redesigned cards, enhanced schedule/timeline |
+| `src/components/protocol/ReconCalculator.tsx` | Dark theme for dropdowns, results card, steps |
+| `src/components/protocol/InjectionSiteGuide.tsx` | Dark theme for SVG and instruction cards |
 
-## What This Means for the User
+## No Database Changes
 
-Before: "Here's your protocol. BPC-157, 250mcg, daily."
+All changes are purely visual. Data structure stays the same.
 
-After: "Here's your protocol. BPC-157 works by upregulating growth hormone receptors and accelerating angiogenesis in damaged tissue. Take 250mcg daily, morning on empty stomach. Common side effects: mild nausea, dizziness (typically resolves week 2). Store reconstituted vial at 36-46 degrees F, use within 28 days. Week 3: expect reduced inflammation markers and improved recovery time. When talking to your doctor, open with: 'I've been researching BPC-157 for tendon recovery -- a 2018 study in the Journal of Orthopaedic Research showed accelerated healing in animal models...'"
-
-No new tables. No new edge functions. Just making the AI do the work it should have been doing from the start.
