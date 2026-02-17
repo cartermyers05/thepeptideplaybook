@@ -1,81 +1,44 @@
 
+# Fix Chat Streaming Animation
 
-# Make the AI Coach Update the Dashboard Automatically
+## Problem
 
-## What This Does
+When you send a message in the AI Research Chat (`/dashboard/chat`), the entire response appears instantly instead of streaming in word-by-word. It looks like the AI just dumps a wall of text.
 
-Right now, the AI Coach can create and update protocols, but it can't log your daily activity. When you tell the coach "I took my CJC and Ipamorelin today, energy is great," it just responds conversationally -- nothing on the dashboard changes.
+The root cause: the `chat` edge function has a "streaming optimization" (lines 566-576) that sends the entire AI response as a **single SSE chunk** instead of streaming it token by token. The frontend parses this one chunk and renders the full message immediately -- no animation.
 
-After this change, the coach becomes the central nervous system. Tell it what you did, how you feel, and it writes that data directly to your daily log. The dashboard updates instantly when you go back to it.
+The AI Coach (`/dashboard/coach`) does NOT have this problem because it already makes a proper streaming API call.
 
-## Examples of What Works After This
+## Fix
 
-- "I did all three compounds today" -- marks all compounds as completed
-- "Just took my CJC and Ipa, skipping GHK-Cu today" -- checks off CJC and Ipamorelin, leaves GHK-Cu unchecked
-- "Feeling really good energy today, maybe 8 out of 10" -- logs energy_rating = 8
-- "Had some mild redness at injection site" -- logs injection_site_reaction
-- "I weighed in at 182 this morning" -- logs weight
-- "Stomach felt a little off after my shot" -- logs GI issues
-- Any combination of the above in a single message
+### 1. `supabase/functions/chat/index.ts` -- Remove the synthetic single-chunk SSE
 
-## Technical Changes
+Replace the "no tool calls" block (lines 566-576) that sends everything in one shot. Instead, make a real streaming API call (same as the coach does), so tokens arrive gradually and the frontend renders them as they come in.
 
-### 1. New Tool: `log_daily_update` (in peptide-coach edge function)
+The change: when there are no tool calls, instead of packaging `assistantMessage.content` as a fake single-chunk SSE, make a second `callLovableAI` call with `stream: true`. This is the same pattern already used in the fallback block (lines 579-595) and in the peptide-coach function.
 
-Add a third tool alongside `create_protocol` and `update_protocol`:
+This does add one extra API call for non-tool-call messages, but the streaming UX is worth it. The latency increase is minimal since the model already generated the response -- the gateway just needs to re-stream it.
 
-```
-log_daily_update({
-  compounds_taken: ["CJC-1295 (No DAC)", "Ipamorelin"],  // optional
-  compounds_skipped: ["GHK-Cu"],                           // optional
-  energy_rating: 8,                                        // optional, 1-10
-  injection_site_reaction: "mild redness, resolved quickly",// optional
-  gi_issues: "slight nausea",                              // optional
-  other_symptoms: "headache",                              // optional
-  notes: "felt great overall",                             // optional
-  weight_lbs: 182,                                         // optional
-})
-```
+**Alternative (faster, no extra API call):** Split the existing `assistantMessage.content` into word-sized chunks and emit them as individual SSE events with small delays using a ReadableStream. This simulates streaming without an extra API call.
 
-The tool handler will:
-- Get the user's active protocol to find the protocol_id
-- Get the list of all compounds from the protocol
-- Build an `actions_completed` map: compounds in `compounds_taken` = true, compounds in `compounds_skipped` = false, unmentioned compounds = keep existing value (or null)
-- Upsert into `daily_logs` for today's date (merge with existing if a log already exists)
-- Return a confirmation message the AI uses in its response
+The word-chunking approach is better because:
+- No extra API call = no extra latency or rate limit risk
+- Same visual effect as real streaming
+- Chunks of ~3-5 words at ~30ms intervals feel natural
 
-### 2. System prompt addition
+### 2. No frontend changes needed
 
-Add instructions to the coach prompt telling it when to call `log_daily_update`:
-
-- When user mentions taking/doing/completing a dose or compound
-- When user reports how they feel (energy, mood, symptoms)
-- When user mentions weight
-- When user reports side effects or reactions
-- Always confirm what was logged in the response
-- Never ask "should I log that?" -- just do it when the intent is clear
-
-### 3. Frontend: Invalidate dashboard queries after coach response
-
-In `Coach.tsx`, after receiving a streamed response, add a new header check (`X-Daily-Log-Updated`) that triggers cache invalidation for daily log queries, so the dashboard shows the new data when the user navigates back.
-
-### 4. Expose the new header
-
-Update `corsHeaders` in the shared AI engine to expose `X-Daily-Log-Updated` alongside the existing protocol headers.
+The `ChatInterface.tsx` already has proper SSE parsing and `TypewriterMessage` already shows a blinking cursor during streaming. The issue is purely server-side -- the tokens just need to arrive gradually instead of all at once.
 
 ## Files Modified
 
 | File | Change |
 |------|--------|
-| `supabase/functions/peptide-coach/index.ts` | Add `log_daily_update` tool definition, handler function, and system prompt instructions |
-| `supabase/functions/_shared/ai-engine.ts` | Add `X-Daily-Log-Updated` to `Access-Control-Expose-Headers` |
-| `src/pages/dashboard/Coach.tsx` | Detect `X-Daily-Log-Updated` header and invalidate daily log + progress queries |
+| `supabase/functions/chat/index.ts` | Replace synthetic single-chunk SSE with word-chunked simulated stream (lines 566-576) |
 
 ## What Does NOT Change
 
-- No database schema changes (uses existing `daily_logs` table as-is)
-- No changes to the dashboard home page components
-- No changes to how checkboxes work on the dashboard
-- The existing manual check-in flow stays exactly the same
-- Chat page and other AI endpoints unchanged
-
+- No frontend component changes
+- No coach function changes (already streams properly)
+- No other edge functions affected
+- No database changes
