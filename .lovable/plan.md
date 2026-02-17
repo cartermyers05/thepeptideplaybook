@@ -1,110 +1,102 @@
 
 
-# Kill the Orange Mono-Color -- Make Everything Colorful
+# Homepage Redesign: Reorder Sections + Animation Upgrade
 
-## The Problem
+## Section Reorder
 
-Almost every accent in the dashboard is orange (#F97316). The stat card gradient bars, the sparkline fill, the ambient orbs, the progress bars, the flame glow, the insight panel background -- all orange. The Quick Access cards at the bottom are the only section that feels alive because each one has its own color identity (orange, rose, violet).
+Current order vs. proposed new order:
 
-## The Fix
+| Current Position | Section | New Position | Rationale |
+|---|---|---|---|
+| 1 | Hero | 1 | Stays -- it's the entry point |
+| 2 | GuidedDemo ("Try It Yourself") | 4 | Move down -- let users understand the product before trying it |
+| 3 | WhatsInside (6 feature cards) | 3 | Move up one slot -- show what they get right after social proof |
+| 4 | WhoThisIsFor (4 persona cards) | 6 | Move down -- less urgent than pricing |
+| 5 | HowItWorks (3 steps) | 2 | Move UP -- immediately show how simple it is after the hero |
+| 6 | PricingCTA | 5 | Move up -- price anchoring earlier increases conversions |
+| 7 | FAQ | 7 | Stays |
+| 8 | FinalCTA | 8 | Stays |
 
-Give every section its own color from a diverse palette. No single dominant color. Each stat card, each section accent, each visual element gets a unique hue.
+**New flow:** Hero --> How It Works --> What's Inside --> Try It Yourself --> Pricing --> Who This Is For --> FAQ --> Final CTA
 
-### 1. Stat Cards -- Each Gets Its Own Color
+This puts the "3 easy steps" right after the hook, then features, then the interactive demo as proof, then the price before objections/FAQ.
 
-Current: All four gradient top bars lean orange.
-New color assignments:
+## Animation Upgrades
 
-| Card | Gradient Top Bar | Sparkline/Visual Color |
-|------|-----------------|----------------------|
-| Progress | Blue to Indigo (`#60A5FA` to `#818CF8`) | Blue arc |
-| Day | Emerald to Teal (`#34D399` to `#2DD4BF`) | Teal week badge |
-| Compliance | Rose to Pink (`#FB7185` to `#F472B6`) | Rose sparkline bars |
-| Streak | Amber to Orange (`#F59E0B` to `#F97316`) | Orange flame (keeps thematic sense) |
+### 1. Hero Section -- Staggered Text Reveal + Floating Cards
 
-### 2. Ambient Orbs -- Multi-Color
+- Each word in the headline animates in individually with a slight Y offset and blur, creating a "typewriter meets fade" effect
+- The product preview cards on the right get a subtle continuous float animation (gentle Y oscillation, 3-4px, 6s loop)
+- Trust bar items slide in from the left one by one with spring physics
+- Add a subtle gradient orb behind the hero text that slowly drifts
 
-Current: Both orbs are orange-tinted.
-New:
-- Top-right orb: Blue-violet tint (`rgba(99,102,241,0.06)` to `rgba(167,139,250,0.04)`)
-- Bottom-left orb: Emerald-teal tint (`rgba(52,211,153,0.05)` to `rgba(45,212,191,0.03)`)
+### 2. HowItWorks -- Connected Timeline Animation
 
-### 3. Today's Stack Left Border -- Rainbow Gradient
+- The 3 steps animate in sequence with a visible "connecting line" that draws itself between them (SVG path animation)
+- Each step number badge scales up with a spring bounce when it enters the viewport
+- The icons inside each step do a subtle rotate-in (15 degrees to 0)
+- Add a pulsing glow on each step badge that fades once the next step appears
 
-Current: Orange to rose to violet.
-New: Full spectrum -- blue, emerald, rose, violet -- so it reads as "colorful" not "orange-first."
-`linear-gradient(180deg, #60A5FA, #34D399, #FB7185, #A78BFA)`
+### 3. WhatsInside -- Card Cascade with Hover Tilt
 
-### 4. Progress Bars -- Matching Rainbow
+- Cards stagger in with a 3D perspective tilt (start rotated 5 degrees on Y axis, animate to 0)
+- On hover, cards tilt slightly toward the mouse direction (CSS perspective transform)
+- The gradient top bar on each card does a shimmer sweep animation on first appearance
+- The icon in each card does a gentle bounce animation
 
-The completion progress bar in Today's Stack and the mini progress arc both currently use orange starts.
-New: Blue to emerald to rose to violet gradient for the progress bar.
-Mini arc: Use a blue-to-violet gradient instead of orange-to-violet.
+### 4. GuidedDemo -- Attention-Grabbing Entrance
 
-### 5. Daily Briefing Card -- Cooler Gradient
+- The question cards fan out from the center like a card deck spread
+- When an answer is showing, the chat bubbles slide in with elastic easing
+- Add a subtle "typing indicator" animation before the AI answer appears (3 bouncing dots)
 
-Current: Orange-heavy background tint.
-New: A balanced multi-color tint using blue, emerald, and violet at low opacities.
-Background: `linear-gradient(135deg, rgba(99,102,241,0.08), rgba(52,211,153,0.06), rgba(167,139,250,0.08))`
-Icon glow: Shift from orange to indigo.
+### 5. PricingCTA -- Dramatic Reveal
 
-### 6. Sparkline Bars -- Rose Instead of Orange
+- The price number ($67) counts up from $0 with an animated counter
+- Feature checkmarks cascade in one by one with a satisfying "pop" scale animation
+- The comparison table rows slide in from the left with staggered delays
+- The glow pulse behind the pricing card becomes more pronounced
 
-The compliance sparkline currently colors high-compliance bars orange and mid-range bars rose.
-New: High compliance = emerald (#34D399), mid = blue (#60A5FA), zero = gray (unchanged).
+### 6. WhoThisIsFor -- Slide-In Cards
 
-### 7. Phase Indicator -- Multi-Color Segments
+- Cards alternate sliding in from left and right instead of all fading up together
+- Icons do a gentle spin-in animation (180 degrees to 0) when entering viewport
 
-Current: All filled segments use the same orange-rose-violet gradient.
-New: Each segment gets its own color:
-- Starting: Blue
-- Building: Emerald
-- Optimization: Rose
-- Final: Violet
+### 7. FAQ -- Smooth Accordion Upgrade
 
-### 8. Decorative Rings -- Violet-to-Teal
+- Questions slide in from the right with staggered timing
+- The heading on the left gets a text gradient animation that slowly shifts colors
+- Plus/minus icons rotate smoothly instead of swapping
 
-Current: Orange-to-violet gradient on concentric rings.
-New: Indigo-to-teal for a cooler, more modern feel.
+### 8. Global -- Scroll Progress + Parallax
 
-### 9. Quick Access Cards -- Keep As-Is
-
-These already have distinct colors (orange, rose, violet) and are the design the user likes. No changes needed.
-
----
+- Add a thin gradient progress bar at the very top of the page (below navbar) showing scroll progress
+- Section backgrounds get subtle parallax movement (background moves at 0.3x scroll speed)
+- Add smooth scroll-snap behavior between major sections on desktop
 
 ## Technical Details
 
-### Single File Modified
+### Files Modified
 
-`src/components/dashboard/home/ActiveProtocolState.tsx` -- all color changes are in this one file.
+| File | Changes |
+|---|---|
+| `src/pages/Index.tsx` | Reorder section components, add scroll progress bar, wrap sections with parallax |
+| `src/components/landing/HeroSection.tsx` | Word-by-word headline animation, floating card oscillation, gradient orb background |
+| `src/components/landing/HowItWorksSection.tsx` | SVG connecting line draw animation, spring bounce on step badges, icon rotate-in |
+| `src/components/landing/WhatsInsideSection.tsx` | 3D perspective card entrance, shimmer on gradient bars, icon bounce |
+| `src/components/landing/GuidedDemo.tsx` | Card fan-out animation, elastic chat bubble entrance |
+| `src/components/landing/PricingCTA.tsx` | Animated price counter, cascading checkmarks, comparison row slide-in |
+| `src/components/landing/WhoThisIsForNew.tsx` | Alternating left/right slide-in, icon spin animation |
+| `src/components/landing/FAQ.tsx` | Staggered question slide-in, smooth icon rotation, heading gradient |
+| `src/components/landing/FinalCTA.tsx` | Scale-up entrance with glow pulse |
 
-### Specific Code Changes
+### No New Dependencies
 
-**statGradients array** (line 195-200): Replace with per-card unique colors:
-- `["linear-gradient(90deg, #60A5FA, #818CF8)", "linear-gradient(90deg, #34D399, #2DD4BF)", "linear-gradient(90deg, #FB7185, #F472B6)", "linear-gradient(90deg, #F59E0B, #F97316)"]`
+All animations use existing `framer-motion` and CSS transforms/transitions.
 
-**AmbientOrbs** (line 68-87): Change the radial gradient colors from orange to blue-violet (top) and emerald-teal (bottom).
+### Performance Considerations
 
-**ComplianceSparkline** (line 111-134): Change fill colors from `#F97316`/`#FB7185` to `#34D399`/`#60A5FA`.
-
-**MiniProgressArc** (line 137-161): Change the linearGradient stops from `#F97316`/`#A78BFA` to `#60A5FA`/`#A78BFA`.
-
-**DailyBriefingCard background reference**: The briefing card component itself already has its own file -- the fallback insight's shimmer and icon coloring are in `DailyBriefingCard.tsx`, which will also need the orange references updated to use indigo/violet.
-
-**Today's Stack left accent** (line 381): Change gradient to `linear-gradient(180deg, #60A5FA, #34D399, #FB7185, #A78BFA)`.
-
-**Today's Stack progress bar** (line 398): Change gradient to `linear-gradient(90deg, #60A5FA, #34D399, #FB7185, #A78BFA)` with a blue glow instead of orange.
-
-**Phase indicator segments** (line 554-568): Each segment gets its own solid color instead of the shared gradient: blue, emerald, rose, violet.
-
-**Decorative concentric rings** (line 510-520): Change gradient from `#F97316`/`#A78BFA` to `#6366F1`/`#2DD4BF`.
-
-### Also Modified
-
-`src/components/dashboard/home/DailyBriefingCard.tsx` -- Update the icon gradient, background tint, and glow from orange-dominant to indigo/violet/emerald mix.
-
-### No Layout Changes
-
-Structure, spacing, shadows, typography, animations -- all stay exactly the same. This is purely a color palette shift from mono-orange to distributed rainbow.
-
+- All `whileInView` animations use `viewport: { once: true }` so they only play once
+- Continuous animations (floating cards, gradient shifts) use CSS animations instead of JS-driven framer-motion to reduce repaints
+- Parallax uses `transform: translateY()` for GPU acceleration
+- Scroll progress bar uses a passive scroll listener with `requestAnimationFrame`
