@@ -1,120 +1,75 @@
 
 
-# Dashboard Upgrades: Background Animations, Charts & FDA Timeline
+# AI Coach Protocol Updates via Conversation
 
-## Overview
+## What This Does
 
-Three additions to the dashboard home page: animated background effects, a data visualization chart, and a live FDA regulatory timeline that auto-updates from your news feed.
+Right now, the AI Coach can **create** protocols but can't **update** them. When a user says "I got my supplies" or "starting today," the coach just responds with text but nothing actually changes in their dashboard.
 
-## 1. Animated Dashboard Background
+This upgrade gives the coach a new tool so it can update the user's active protocol in real-time based on what they say in conversation. No buttons needed -- just tell the coach what's happening and your journey updates automatically.
 
-The dashboard currently has a flat `#FAFAFA` background. We'll add subtle ambient animations to the `DashboardLayout` wrapper without overwhelming the content cards.
+## Examples of What Works After This
 
-**What gets added:**
-- Slow-drifting gradient orbs (indigo, emerald, violet) at very low opacity behind all content
-- Micro-particle field (20-30 tiny dots floating gently) for depth
-- A soft breathing glow pulse centered behind the stat cards area
-- All animations use CSS `will-change: transform` for GPU acceleration and are `pointer-events-none`
-
-**Implementation:** New `DashboardBackground` component rendered inside `DashboardLayout.tsx`, positioned absolutely behind the `{children}` content.
-
-## 2. Compliance & Energy Trend Chart
-
-A new Recharts-powered card placed between the Weekly Review and Today's Stack sections, showing the user's last 14 days of data at a glance.
-
-**What it shows:**
-- Dual-axis line chart: compliance rate (left axis, %) and energy level (right axis, 1-10)
-- Gradient-filled area under each line (blue for compliance, emerald for energy)
-- Animated draw-in on first render
-- Compact card style matching the existing dashboard aesthetic
-
-**Implementation:** New `TrendMiniChart` component using Recharts (already installed). Data sourced from the `allLogs` prop already passed through to `ActiveProtocolState`.
-
-## 3. FDA Regulatory Timeline
-
-An interactive timeline card showing key peptide regulatory events and upcoming expected dates. This auto-updates by pulling from two sources:
-
-**Data sources:**
-- A new `fda_timeline_events` database table storing structured events (date, peptide, event type, status)
-- Regulatory news articles from the existing `news_articles` table (category = "regulatory")
-
-**What the user sees:**
-- A vertical timeline with color-coded nodes:
-  - Green = Approved/positive
-  - Red = Banned/Category 2
-  - Amber = Under review/pending
-  - Blue = Upcoming expected date
-- Each node shows: date, peptide name, short description
-- "Upcoming" events have a pulsing animation to indicate they're projected
-- A "Latest News" badge links to relevant regulatory articles when one exists
-- Scrollable within a fixed-height card
-
-**Auto-updating mechanism:**
-- The `fda_timeline_events` table stores both historical facts and projected future dates
-- When new regulatory news articles are published (via existing news pipeline), an admin can add corresponding timeline events
-- A backend function `update-fda-timeline` can be called to use AI to extract timeline-relevant info from recent regulatory news and suggest new events
-
-### Database: `fda_timeline_events` table
-
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | Primary key |
-| peptide_name | text | e.g. "BPC-157", "Semaglutide" |
-| event_date | date | When it happened/expected |
-| event_type | text | "approved", "banned", "under_review", "hearing", "expected_decision" |
-| title | text | Short headline |
-| description | text | 1-2 sentence detail |
-| status | text | "confirmed" or "projected" |
-| source_url | text | Link to source (nullable) |
-| news_article_id | uuid | FK to news_articles (nullable) |
-| created_at | timestamptz | Auto |
-
-RLS: Public read access (this is regulatory reference data, not user-specific). Insert/update restricted to service role.
-
-**Seed data includes:**
-- 2023: FDA places BPC-157, TB-500, AOD-9604 on Category 2
-- Sep 2024: CJC-1295 and Ipamorelin removed from Category 2 (but NOT added to Category 1)
-- 2025: FDA guidance updates on compounding
-- 2026 projected: PCAC review hearings, potential reclassification decisions
-
-### Backend Function: `update-fda-timeline`
-
-An edge function that:
-1. Fetches recent regulatory news articles (last 30 days)
-2. Sends them to Gemini Flash with a structured prompt to extract timeline events
-3. Returns suggested new events for admin review
-4. Optionally auto-inserts confirmed events
+- "I got my supplies today" --> Coach marks supplies as ready, updates dashboard
+- "I'm starting my protocol tomorrow" --> Coach sets the start date, status changes to "active"
+- "I need to pause for a week" --> Coach pauses the protocol
+- "I'm back, resuming now" --> Coach reactivates and adjusts the timeline
+- "I want to extend my cycle by 2 weeks" --> Coach updates cycle length
 
 ## Technical Details
 
-### Files Created
+### 1. Database Change
 
-| File | Purpose |
-|------|---------|
-| `src/components/dashboard/home/DashboardBackground.tsx` | Animated gradient orbs, particles, and breathing pulse for dashboard bg |
-| `src/components/dashboard/home/TrendMiniChart.tsx` | Recharts dual-axis line chart for compliance + energy trends |
-| `src/components/dashboard/home/FDATimelineCard.tsx` | Interactive FDA regulatory timeline with color-coded nodes |
-| `src/hooks/useFDATimeline.ts` | Hook to fetch timeline events from database |
-| `supabase/functions/update-fda-timeline/index.ts` | AI-powered extraction of timeline events from regulatory news |
+Add a `supplies_status` column to `user_protocols`:
+
+| Column | Type | Default | Purpose |
+|--------|------|---------|---------|
+| supplies_status | text | 'not_ordered' | Tracks: not_ordered, ordered, received, ready |
+
+### 2. New AI Tool: `update_protocol`
+
+Added to the `peptide-coach` edge function alongside the existing `create_protocol` tool. The AI decides when to call it based on conversational context.
+
+**Fields the tool can update:**
+- `status` (not_started, active, paused, completed)
+- `supplies_status` (not_ordered, ordered, received, ready)
+- `start_date` (when user says they're starting)
+- `cycle_length_weeks` (if user wants to extend/shorten)
+- `end_date` (auto-calculated from start_date + cycle_length)
+
+### 3. Updated System Prompt
+
+New instructions tell the coach when to use `update_protocol`:
+
+- User mentions having supplies --> update supplies_status to "received" or "ready"
+- User says they're starting --> set status to "active", start_date to today (or specified date)
+- User asks to pause --> set status to "paused"
+- User resumes --> set status back to "active", optionally adjust start_date
+- User wants to change duration --> update cycle_length_weeks
+
+The coach confirms the change conversationally ("Got it, I've marked your supplies as received and updated your timeline").
+
+### 4. Frontend: Protocol Refresh on Update
+
+The Coach page already handles `X-Protocol-Created` header to refresh protocol data. We add an `X-Protocol-Updated` header so the same refresh logic triggers on updates too.
+
+### 5. Dashboard Reflection
+
+The existing dashboard components (`ActiveProtocolState`, `ProtocolHeader`, etc.) already read from `user_protocols`. Once the coach updates the record, the dashboard automatically reflects changes on next visit. The `supplies_status` field will show in the protocol detail view.
 
 ### Files Modified
 
 | File | Change |
 |------|--------|
-| `src/components/dashboard/DashboardLayout.tsx` | Add `DashboardBackground` component behind content |
-| `src/components/dashboard/home/ActiveProtocolState.tsx` | Add `TrendMiniChart` and `FDATimelineCard` as new dashboard sections |
+| `supabase/functions/peptide-coach/index.ts` | Add `update_protocol` tool definition, handler, and system prompt instructions |
+| `src/pages/dashboard/Coach.tsx` | Handle `X-Protocol-Updated` header to refresh protocol query |
+| `src/hooks/useUserProtocol.ts` | Export `supplies_status` from protocol data |
+| `src/components/dashboard/home/ActiveProtocolState.tsx` | Show supplies status indicator |
 
-### Animation Performance
+### Migration
 
-- Background orbs use CSS keyframe animations (not framer-motion driven) for zero JS overhead
-- Particle count capped at 25 with `will-change: transform`
-- Chart uses Recharts built-in animation (single render, no continuous repaints)
-- Timeline pulsing dots use CSS `@keyframes` only
-
-### Chart Data Processing
-
-The `TrendMiniChart` processes `allLogs` to compute:
-- Daily compliance: `completed_actions / total_actions * 100`
-- Energy: pulled from `energy_level` field in each log
-- Missing days show as gaps (no interpolation to keep it honest)
+```sql
+ALTER TABLE public.user_protocols 
+ADD COLUMN supplies_status text NOT NULL DEFAULT 'not_ordered';
+```
 
