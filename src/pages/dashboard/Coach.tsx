@@ -108,9 +108,10 @@ export default function Coach() {
         throw new Error(err.error || `Error ${response.status}`);
       }
 
-      // Check for protocol creation/update headers
+      // Check for protocol creation/update/daily-log headers
       const protocolCreated = response.headers.get("X-Protocol-Created") === "true";
       const protocolUpdated = response.headers.get("X-Protocol-Updated") === "true";
+      const dailyLogUpdated = response.headers.get("X-Daily-Log-Updated") === "true";
 
       // Parse SSE stream
       const reader = response.body?.getReader();
@@ -197,6 +198,18 @@ export default function Coach() {
         queryClient.invalidateQueries({ queryKey: ["user-protocol"] });
         toast.success("Protocol updated!", {
           description: "Your journey has been updated.",
+        });
+      }
+
+      // Handle daily log update
+      if (dailyLogUpdated) {
+        queryClient.invalidateQueries({ queryKey: ["daily-log"] });
+        queryClient.invalidateQueries({ queryKey: ["daily-logs"] });
+        queryClient.invalidateQueries({ queryKey: ["progress-data"] });
+        queryClient.invalidateQueries({ queryKey: ["check-ins"] });
+        queryClient.invalidateQueries({ queryKey: ["active-protocol-progress"] });
+        toast.success("Daily log updated!", {
+          description: "Your dashboard will reflect the changes.",
         });
       }
     } catch (err) {
