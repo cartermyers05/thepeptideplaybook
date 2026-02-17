@@ -69,7 +69,7 @@ export default function Dashboard() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-[680px] mx-auto py-6 md:py-8 px-0 relative z-10"
+        className="max-w-[1080px] mx-auto py-6 md:py-8 px-0 relative z-10"
       >
         {!protocol ? (
           <NoProtocolState firstName={firstName} />
@@ -91,6 +91,7 @@ export default function Dashboard() {
             firstName={firstName}
             currentStreak={profile?.current_streak || 0}
             hasCheckedInThisWeek={stats.hasCheckedInThisWeek}
+            allLogs={allLogs}
           />
         )}
       </motion.div>
