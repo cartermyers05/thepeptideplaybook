@@ -1,4 +1,5 @@
 import { Home, MessageCircle, ClipboardList, TrendingUp } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
 
 const navItems = [
@@ -9,19 +10,30 @@ const navItems = [
 ];
 
 export function MobileBottomNav() {
+  const location = useLocation();
+  const isDark = location.pathname.startsWith("/dashboard");
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#E5E7EB] md:hidden safe-area-pb">
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden safe-area-pb"
+      style={{
+        backgroundColor: isDark ? "#08080A" : "white",
+        borderTop: isDark ? "1px solid rgba(255,255,255,0.05)" : "1px solid #E5E7EB",
+      }}
+    >
       <div className="flex items-center justify-around h-16">
         {navItems.map((item) => {
           const Icon = item.icon;
-          
+
           return (
             <NavLink
               key={item.path}
               to={item.path}
               end={item.path === "/dashboard"}
-              className="flex flex-col items-center justify-center gap-1 px-3 py-2 min-w-[60px] text-[#9CA3AF] transition-colors"
-              activeClassName="!text-[#111827]"
+              className={`flex flex-col items-center justify-center gap-1 px-3 py-2 min-w-[60px] transition-colors ${
+                isDark ? "text-[#4A4A5A]" : "text-[#9CA3AF]"
+              }`}
+              activeClassName={isDark ? "!text-[#EBEBF0]" : "!text-[#111827]"}
             >
               <Icon className="w-5 h-5" />
               <span className="text-[10px] font-medium">{item.label}</span>
