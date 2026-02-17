@@ -563,14 +563,32 @@ serve(async (req) => {
       return new Response(followUpResponse.body, { headers: responseHeaders });
     }
 
-    // No tool calls - reuse the first response content as a synthetic SSE stream
-    // This eliminates the redundant second API call
+    // No tool calls - simulate streaming by chunking the response into words
     if (assistantMessage?.content) {
-      const sseContent = `data: ${JSON.stringify({
-        choices: [{ delta: { content: assistantMessage.content } }]
-      })}\n\ndata: [DONE]\n\n`;
+      const fullText = assistantMessage.content;
+      const words = fullText.split(/(\s+)/); // preserve whitespace
+      const CHUNK_SIZE = 4; // words per SSE event
+      const DELAY_MS = 30;
 
-      return new Response(sseContent, {
+      const stream = new ReadableStream({
+        async start(controller) {
+          const encoder = new TextEncoder();
+          for (let i = 0; i < words.length; i += CHUNK_SIZE) {
+            const chunk = words.slice(i, i + CHUNK_SIZE).join("");
+            const sseEvent = `data: ${JSON.stringify({
+              choices: [{ delta: { content: chunk } }]
+            })}\n\n`;
+            controller.enqueue(encoder.encode(sseEvent));
+            if (i + CHUNK_SIZE < words.length) {
+              await new Promise(r => setTimeout(r, DELAY_MS));
+            }
+          }
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        },
+      });
+
+      return new Response(stream, {
         headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });
     }
