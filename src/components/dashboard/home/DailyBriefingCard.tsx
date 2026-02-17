@@ -38,7 +38,7 @@ export function DailyBriefingCard({ protocolId, todayCompounds, weekNumber, cycl
     <div
       className="rounded-[20px] overflow-hidden relative flex flex-col"
       style={{
-        background: "linear-gradient(135deg, rgba(249,115,22,0.08), rgba(251,113,133,0.06), rgba(167,139,250,0.08))",
+        background: "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(52,211,153,0.06), rgba(167,139,250,0.08))",
         backdropFilter: "blur(20px)",
         border: "1px solid rgba(255,255,255,0.6)",
         boxShadow: "0 1px 4px rgba(0,0,0,0.02)",
@@ -63,22 +63,22 @@ export function DailyBriefingCard({ protocolId, todayCompounds, weekNumber, cycl
           className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
           style={{
             background: hasAIBriefing
-              ? "linear-gradient(135deg, rgba(249,115,22,0.2), rgba(167,139,250,0.2))"
-              : "linear-gradient(135deg, rgba(249,115,22,0.15), rgba(167,139,250,0.15))",
-            boxShadow: "0 0 20px rgba(249,115,22,0.1)",
+              ? "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(167,139,250,0.2))"
+              : "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(167,139,250,0.15))",
+            boxShadow: "0 0 20px rgba(99,102,241,0.1)",
           }}
           animate={{ scale: [1, 1.06, 1] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         >
           {hasAIBriefing ? (
-            <Sparkles className="w-5 h-5" style={{ color: "#F97316" }} />
+            <Sparkles className="w-5 h-5" style={{ color: "#6366F1" }} />
           ) : (
             <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
               <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" stroke="url(#insightHex2)" strokeWidth="2" fill="none" />
               <defs>
                 <linearGradient id="insightHex2" x1="0" y1="0" x2="32" y2="32">
-                  <stop offset="0%" stopColor="#F97316" />
-                  <stop offset="100%" stopColor="#A78BFA" />
+                  <stop offset="0%" stopColor="#6366F1" />
+                  <stop offset="100%" stopColor="#2DD4BF" />
                 </linearGradient>
               </defs>
             </svg>
