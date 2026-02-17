@@ -1,44 +1,34 @@
 
-# Fix Chat Streaming Animation
+
+# Fix Auto-Scroll During Chat Streaming
 
 ## Problem
 
-When you send a message in the AI Research Chat (`/dashboard/chat`), the entire response appears instantly instead of streaming in word-by-word. It looks like the AI just dumps a wall of text.
+The chat doesn't scroll down as the AI types. Two issues:
 
-The root cause: the `chat` edge function has a "streaming optimization" (lines 566-576) that sends the entire AI response as a **single SSE chunk** instead of streaming it token by token. The frontend parses this one chunk and renders the full message immediately -- no animation.
-
-The AI Coach (`/dashboard/coach`) does NOT have this problem because it already makes a proper streaming API call.
+1. **Wrong scroll target**: `scrollRef` is attached to the `ScrollArea` root, but the actual scrollable element is the internal `Viewport` div. Setting `scrollTop` on the root does nothing.
+2. **Scroll only triggers on new messages**: The `useEffect` depends on `[messages]`, which only fires when the array reference changes (new message added), NOT when the streaming content of the last message updates character by character.
 
 ## Fix
 
-### 1. `supabase/functions/chat/index.ts` -- Remove the synthetic single-chunk SSE
+### `src/components/dashboard/ChatInterface.tsx`
 
-Replace the "no tool calls" block (lines 566-576) that sends everything in one shot. Instead, make a real streaming API call (same as the coach does), so tokens arrive gradually and the frontend renders them as they come in.
+1. Replace the `scrollRef` approach with a **bottom anchor div** (`messagesEndRef`) placed after the last message. Call `messagesEndRef.current.scrollIntoView()` to scroll.
 
-The change: when there are no tool calls, instead of packaging `assistantMessage.content` as a fake single-chunk SSE, make a second `callLovableAI` call with `stream: true`. This is the same pattern already used in the fallback block (lines 579-595) and in the peptide-coach function.
+2. Add the last message's content to the scroll `useEffect` dependency so it fires on every streaming chunk, not just new messages.
 
-This does add one extra API call for non-tool-call messages, but the streaming UX is worth it. The latency increase is minimal since the model already generated the response -- the gateway just needs to re-stream it.
+Specifically:
+- Add a `messagesEndRef = useRef<HTMLDivElement>(null)` 
+- Place `<div ref={messagesEndRef} />` after the messages list (inside the ScrollArea viewport)
+- Update the `useEffect` to call `messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })` 
+- Add `messages[messages.length - 1]?.content` to the dependency array so it scrolls on every chunk
 
-**Alternative (faster, no extra API call):** Split the existing `assistantMessage.content` into word-sized chunks and emit them as individual SSE events with small delays using a ReadableStream. This simulates streaming without an extra API call.
-
-The word-chunking approach is better because:
-- No extra API call = no extra latency or rate limit risk
-- Same visual effect as real streaming
-- Chunks of ~3-5 words at ~30ms intervals feel natural
-
-### 2. No frontend changes needed
-
-The `ChatInterface.tsx` already has proper SSE parsing and `TypewriterMessage` already shows a blinking cursor during streaming. The issue is purely server-side -- the tokens just need to arrive gradually instead of all at once.
-
-## Files Modified
-
-| File | Change |
-|------|--------|
-| `supabase/functions/chat/index.ts` | Replace synthetic single-chunk SSE with word-chunked simulated stream (lines 566-576) |
+This is the same pattern already used in `ChatWidget.tsx` (line 56-58) which works correctly.
 
 ## What Does NOT Change
 
-- No frontend component changes
-- No coach function changes (already streams properly)
-- No other edge functions affected
-- No database changes
+- No edge function changes
+- No other components affected
+- No streaming logic changes
+- Scroll behavior for initial load and new messages still works
+
