@@ -24,25 +24,6 @@ const personas = [
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" as const },
-  },
-};
-
 export function WhoThisIsForNew() {
   return (
     <section className="py-20 md:py-28">
@@ -58,24 +39,27 @@ export function WhoThisIsForNew() {
           </h2>
         </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto"
-        >
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {personas.map((persona, index) => (
             <motion.div
               key={index}
-              variants={itemVariants}
+              initial={{ opacity: 0, x: index % 2 === 0 ? -40 : 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.12, duration: 0.5, ease: "easeOut" }}
               className="group"
             >
               <div className="bg-card border border-border rounded-2xl p-6 h-full hover:border-muted-foreground/30 transition-all duration-300 hover:shadow-lg">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <motion.div
+                    className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0"
+                    initial={{ rotate: 180, opacity: 0 }}
+                    whileInView={{ rotate: 0, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.12 + 0.2, type: "spring", stiffness: 200, damping: 15 }}
+                  >
                     <persona.icon className="w-6 h-6 text-primary" />
-                  </div>
+                  </motion.div>
                   <div>
                     <h3 className="text-lg font-bold mb-2">{persona.title}</h3>
                     <p className="text-muted-foreground leading-relaxed">
@@ -86,7 +70,7 @@ export function WhoThisIsForNew() {
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

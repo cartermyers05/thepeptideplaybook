@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { MessageCircle, Database, Target, Calendar, Stethoscope, BookOpen } from "lucide-react";
 import { PillButton } from "./PillButton";
+import { useRef, useState } from "react";
 
 const features = [
   {
@@ -42,24 +43,45 @@ const features = [
   },
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
+function TiltCard({ children, gradient }: { children: React.ReactNode; gradient: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [transform, setTransform] = useState("");
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: "easeOut" as const },
-  },
-};
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setTransform(`perspective(600px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg)`);
+  };
+
+  const handleMouseLeave = () => setTransform("");
+
+  return (
+    <div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative bg-card rounded-2xl overflow-hidden border border-border hover:border-muted-foreground/30 transition-all duration-300 hover:shadow-xl h-full"
+      style={{ transform, transition: transform ? "transform 0.1s ease" : "transform 0.4s ease" }}
+    >
+      {/* Gradient bar with shimmer */}
+      <div className="h-2 relative overflow-hidden" style={{ background: gradient }}>
+        <motion.div
+          className="absolute inset-0"
+          style={{
+            background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)",
+          }}
+          initial={{ x: "-100%" }}
+          whileInView={{ x: "100%" }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.3, ease: "easeInOut" }}
+        />
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export function WhatsInsideSection() {
   return (
@@ -80,32 +102,26 @@ export function WhatsInsideSection() {
           </p>
         </motion.div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-        >
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              variants={itemVariants}
-              className="group relative"
+              initial={{ opacity: 0, rotateY: 5, y: 30 }}
+              whileInView={{ opacity: 1, rotateY: 0, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: index * 0.1, duration: 0.5, ease: "easeOut" }}
+              style={{ perspective: 800 }}
+              className="group"
             >
-              {/* Card with gradient top bar */}
-              <div className="relative bg-card rounded-2xl overflow-hidden border border-border hover:border-muted-foreground/30 transition-all duration-300 hover:shadow-xl h-full">
-                {/* Gradient bar at top */}
-                <div 
-                  className="h-2"
-                  style={{ background: feature.gradient }}
-                />
-                
-                {/* Content */}
+              <TiltCard gradient={feature.gradient}>
                 <div className="p-8">
-                  <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4">
+                  <motion.div
+                    className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                  >
                     <feature.icon className="w-6 h-6 text-foreground" />
-                  </div>
+                  </motion.div>
                   <h3 className="text-xl font-bold mb-3 group-hover:text-foreground transition-colors">
                     {feature.title}
                   </h3>
@@ -113,10 +129,10 @@ export function WhatsInsideSection() {
                     {feature.description}
                   </p>
                 </div>
-              </div>
+              </TiltCard>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
 
         {/* CTA */}
         <motion.div

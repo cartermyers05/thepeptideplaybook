@@ -4,12 +4,25 @@ import { PillButton } from "./PillButton";
 
 export function FinalCTA() {
   return (
-    <section className="py-20 md:py-28 bg-secondary/30">
-      <div className="container px-4">
+    <section className="py-20 md:py-28 bg-secondary/30 relative overflow-hidden">
+      {/* Background glow */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        animate={{
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        style={{
+          background: "radial-gradient(ellipse at center, hsl(var(--primary) / 0.08) 0%, transparent 60%)",
+        }}
+      />
+
+      <div className="container px-4 relative">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="max-w-3xl mx-auto text-center"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
