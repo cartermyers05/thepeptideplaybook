@@ -1,11 +1,13 @@
 import { format, addDays, startOfWeek, getDay, isSameDay, parseISO, differenceInDays, isAfter } from "date-fns";
 import { Check, Syringe } from "lucide-react";
-import { cn } from "@/lib/utils";
+
+const mono = "'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace";
 
 interface WeekCalendarStripProps {
   currentDay: number;
   courseStartDate?: string | null;
-  injectionDayOfWeek?: number; // 0 = Sunday
+  injectionDays?: string[];
+  schedule?: Record<string, string[]>;
 }
 
 interface DayInfo {
@@ -14,98 +16,92 @@ interface DayInfo {
   dayNumber: string;
   isToday: boolean;
   isCompleted: boolean;
-  isInjectionDay: boolean;
-  lessonDay: number | null;
+  hasInjection: boolean;
   isFuture: boolean;
-  isPast: boolean;
 }
 
-function getWeekDays(courseStartDate: string | null | undefined, currentDay: number, injectionDayOfWeek: number = 0): DayInfo[] {
+function getWeekDays(
+  courseStartDate: string | null | undefined,
+  currentDay: number,
+  schedule?: Record<string, string[]>
+): DayInfo[] {
   const today = new Date();
-  const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Start on Monday
-  
+  const weekStart = startOfWeek(today, { weekStartsOn: 1 });
   const courseStart = courseStartDate ? parseISO(courseStartDate) : null;
-  
+  const dayNamesFull = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
   return Array.from({ length: 7 }, (_, i) => {
     const date = addDays(weekStart, i);
     const dayOfWeek = getDay(date);
-    
-    // Calculate what lesson day this calendar day corresponds to
+    const dayNameFull = dayNamesFull[dayOfWeek];
+
     let lessonDay: number | null = null;
     if (courseStart) {
       const diff = differenceInDays(date, courseStart);
       lessonDay = diff >= 0 ? diff : null;
     }
-    
-    // A day is completed if we have a course start date and this date's lesson day is less than current day
+
     const isCompleted = lessonDay !== null && lessonDay < currentDay && !isSameDay(date, today);
-    
+    const hasInjection = schedule ? (schedule[dayNameFull]?.length || 0) > 0 : false;
+
     return {
-      dateKey: format(date, 'yyyy-MM-dd'),
-      dayName: format(date, 'EEE'),
-      dayNumber: format(date, 'd'),
+      dateKey: format(date, "yyyy-MM-dd"),
+      dayName: format(date, "EEE"),
+      dayNumber: format(date, "d"),
       isToday: isSameDay(date, today),
       isCompleted,
-      isInjectionDay: dayOfWeek === injectionDayOfWeek,
-      lessonDay,
+      hasInjection,
       isFuture: isAfter(date, today),
-      isPast: !isSameDay(date, today) && !isAfter(date, today),
     };
   });
 }
 
-export function WeekCalendarStrip({ 
-  currentDay, 
-  courseStartDate,
-  injectionDayOfWeek = 0 
-}: WeekCalendarStripProps) {
-  const weekDays = getWeekDays(courseStartDate, currentDay, injectionDayOfWeek);
+export function WeekCalendarStrip({ currentDay, courseStartDate, schedule }: WeekCalendarStripProps) {
+  const weekDays = getWeekDays(courseStartDate, currentDay, schedule);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
-        This Week
-      </h3>
-      
-      <div className="grid grid-cols-7 gap-2">
-        {weekDays.map((day) => (
-          <div 
-            key={day.dateKey}
-            className={cn(
-              "text-center p-3 rounded-xl transition-all",
-              day.isToday 
-                ? "bg-black text-white" 
-                : day.isCompleted 
-                  ? "bg-green-50 border border-green-200" 
-                  : "bg-gray-50"
-            )}
+    <div className="grid grid-cols-7 gap-1.5">
+      {weekDays.map((day) => (
+        <div
+          key={day.dateKey}
+          className="text-center rounded-[12px] py-2.5 px-1 transition-all relative"
+          style={{
+            backgroundColor: day.isToday ? "#19191E" : "transparent",
+            border: day.isToday
+              ? "1.5px solid transparent"
+              : "1.5px solid transparent",
+            backgroundImage: day.isToday
+              ? "linear-gradient(#19191E, #19191E), linear-gradient(135deg, #F97316, #FB7185, #A78BFA)"
+              : "none",
+            backgroundOrigin: "border-box",
+            backgroundClip: day.isToday ? "padding-box, border-box" : "padding-box",
+          }}
+        >
+          <p className="text-[10px] font-medium mb-1" style={{ color: "#4A4A5A", fontFamily: mono }}>
+            {day.dayName}
+          </p>
+          <p
+            className="text-base font-bold"
+            style={{
+              color: day.isToday ? "#EBEBF0" : day.isFuture ? "#4A4A5A" : "#8A8A9A",
+              fontFamily: mono,
+            }}
           >
-            <p className={cn(
-              "text-xs font-medium mb-1",
-              day.isToday ? "text-gray-400" : "text-gray-400"
-            )}>
-              {day.dayName}
-            </p>
-            <p className={cn(
-              "text-lg font-bold",
-              day.isToday ? "text-white" : "text-black"
-            )}>
-              {day.dayNumber}
-            </p>
-            <div className="h-5 flex items-center justify-center gap-1">
-              {day.isCompleted && !day.isToday && (
-                <Check className="w-4 h-4 text-green-500" />
-              )}
-              {day.isInjectionDay && (
-                <Syringe className={cn(
-                  "w-3.5 h-3.5",
-                  day.isToday ? "text-rose-300" : "text-rose-400"
-                )} />
-              )}
-            </div>
+            {day.dayNumber}
+          </p>
+          <div className="h-4 flex items-center justify-center gap-0.5 mt-0.5">
+            {day.isCompleted && !day.isToday && (
+              <Check className="w-3 h-3" style={{ color: "#34D399" }} />
+            )}
+            {day.hasInjection && (
+              <Syringe
+                className="w-3 h-3"
+                style={{ color: day.isToday ? "#FB7185" : "rgba(251,113,133,0.4)" }}
+              />
+            )}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
