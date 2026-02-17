@@ -67,7 +67,7 @@ export default function Checkout() {
             title: "VIP Access Activated!",
             description: "Let's build your personalized blueprint...",
           });
-          setTimeout(() => navigate("/quiz"), 1500);
+          setTimeout(() => navigate("/welcome/onboarding"), 1500);
         } else {
           toast({
             title: "Error",
@@ -143,7 +143,7 @@ export default function Checkout() {
           </div>
           <h2 className="text-xl font-semibold mb-2">VIP Access Activated!</h2>
           <p className="text-muted-foreground mb-6">Let's personalize your blueprint...</p>
-          <Button onClick={() => navigate("/quiz")} className="w-full">
+          <Button onClick={() => navigate("/welcome/onboarding")} className="w-full">
             Build My Blueprint
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>

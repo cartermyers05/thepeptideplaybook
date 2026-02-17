@@ -92,9 +92,9 @@ export function SolutionSection() {
           </div>
 
           <motion.div variants={itemVariants}>
-            <Link to="/quiz">
+            <Link to="/signup">
               <Button size="lg" className="btn-primary-clean h-12 px-8 text-base">
-                Take the Free Quiz
+                Get Your Blueprint
               </Button>
             </Link>
           </motion.div>

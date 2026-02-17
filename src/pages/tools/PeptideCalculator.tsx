@@ -337,9 +337,9 @@ export default function PeptideCalculator() {
           Get a personalized Peptide Blueprint with built-in dosing calculator, step-by-step guides, and AI coaching.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link to="/quiz">
+          <Link to="/signup">
             <Button className="btn-primary-clean gap-2">
-              Take the Free Quiz
+              Get Your Blueprint
               <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>

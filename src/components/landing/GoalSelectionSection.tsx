@@ -110,7 +110,7 @@ export function GoalSelectionSection() {
           {goals.map((goal) => (
             <motion.div key={goal.id} variants={itemVariants}>
               <Link
-                to={`/quiz?goal=${goal.id}`}
+                to={`/signup?goal=${goal.id}`}
                 className="block group"
               >
                 <div className="relative overflow-hidden rounded-2xl border border-border bg-card hover:border-transparent transition-all duration-300 hover:shadow-2xl">

@@ -64,13 +64,13 @@ export function HeroSection() {
               transition={{ delay: 1.1, duration: 0.6 }}
               className="mt-8 flex flex-wrap gap-4"
             >
-              <Link to="/quiz">
+              <Link to="/signup">
                 <PillButton 
                   variant="dark" 
                   size="lg"
                   icon={<span>→</span>}
                 >
-                  Take the Free Quiz
+                  Get Started — $67
                 </PillButton>
               </Link>
               <a

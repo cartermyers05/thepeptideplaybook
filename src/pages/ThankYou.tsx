@@ -72,7 +72,7 @@ export default function ThankYou() {
 
         if (user) {
           setVerificationState("success");
-          setTimeout(() => navigate("/dashboard", { replace: true }), 5000);
+          setTimeout(() => navigate("/welcome/onboarding", { replace: true }), 5000);
         } else {
           setStripeEmail(data.email || "");
           setVerificationState("needs_password");
@@ -199,8 +199,8 @@ export default function ThankYou() {
               </motion.div>
               <h1 className="text-2xl font-bold">Welcome to Peptide Playbook!</h1>
               <p className="text-muted-foreground">Your personalized blueprint is ready.</p>
-              <Button onClick={() => navigate("/dashboard", { replace: true })} className="w-full">
-                Go to My Dashboard <ArrowRight className="w-4 h-4 ml-2" />
+              <Button onClick={() => navigate("/welcome/onboarding", { replace: true })} className="w-full">
+                Set Up My Blueprint <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
               <p className="text-sm text-muted-foreground">Redirecting automatically...</p>
               <Loader2 className="w-5 h-5 mx-auto text-muted-foreground animate-spin" />

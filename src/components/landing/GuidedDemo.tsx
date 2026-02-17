@@ -271,7 +271,7 @@ export function GuidedDemo() {
                   <p className="text-muted-foreground mb-4">
                     This is real. Try it yourself.
                   </p>
-                  <Link to="/quiz">
+                  <Link to="/signup">
                     <PillButton variant="dark" size="lg" icon={<ArrowRight className="w-4 h-4" />}>
                       Get Your Full Blueprint — $67
                     </PillButton>
