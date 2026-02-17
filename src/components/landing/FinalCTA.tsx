@@ -26,13 +26,11 @@ export function FinalCTA() {
           className="max-w-3xl mx-auto text-center"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
-            You've Already Been Researching.
-            <br />
-            <span className="text-muted-foreground">Let This Do the Heavy Lifting.</span>
+            Stop Guessing. Start Knowing.
           </h2>
           
           <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            Research-backed answers. Personalized protocols. One payment. Lifetime access.
+            Your personalized peptide protocol is 60 seconds away.
           </p>
 
           <Link to="/quiz">
@@ -42,12 +40,12 @@ export function FinalCTA() {
               className="h-14 px-10 text-lg"
               icon={<span>→</span>}
             >
-              Get Your Full Blueprint — $67
+              Take the Free Quiz
             </PillButton>
           </Link>
           
           <p className="mt-6 text-sm text-muted-foreground">
-            30-day money-back guarantee · Lifetime access · No subscription
+            For educational purposes only. Not medical advice. Always consult a healthcare provider.
           </p>
         </motion.div>
       </div>

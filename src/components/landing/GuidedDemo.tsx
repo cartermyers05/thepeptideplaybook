@@ -9,7 +9,7 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 const demoQuestions = [
   {
     id: "weight-loss",
-    question: "What's the best peptide for weight loss?",
+    question: "What's the best peptide protocol for fat loss?",
     answer: `The two most researched options are **Semaglutide** (Ozempic/Wegovy) and **Tirzepatide** (Mounjaro/Zepbound). Both are FDA-approved.
 
 Here's what the studies show:
@@ -25,7 +25,7 @@ For non-prescription options, **AOD-9604** targets fat-specific metabolism witho
   },
   {
     id: "bpc-157-safety",
-    question: "Is BPC-157 safe?",
+    question: "Is BPC-157 safe? What are the side effects?",
     answer: `Here's what we know from the research:
 
 **What studies show:**
@@ -46,7 +46,7 @@ For non-prescription options, **AOD-9604** targets fat-specific metabolism witho
   },
   {
     id: "reconstitution",
-    question: "How do I reconstitute peptides?",
+    question: "How do I reconstitute a 5mg vial?",
     answer: `It's simpler than it sounds. Here's the quick version:
 
 **What you need:** Bacteriostatic water, insulin syringe, alcohol swabs, peptide vial
@@ -66,7 +66,7 @@ Want 1mg? Draw 0.4mL (40 units on your syringe)
   },
   {
     id: "muscle-growth",
-    question: "What peptides help with muscle growth?",
+    question: "What peptides improve skin quality?",
     answer: `The most researched options for muscle and body composition:
 
 | Peptide | How It Works | Research Level |
@@ -85,7 +85,7 @@ Want 1mg? Draw 0.4mL (40 units on your syringe)
   },
   {
     id: "legality",
-    question: "Are peptides legal in 2026?",
+    question: "Can I stack CJC-1295 with Ipamorelin?",
     answer: `It depends on the peptide:
 
 **✅ FDA-Approved (legal with prescription):**
@@ -105,7 +105,7 @@ Want 1mg? Draw 0.4mL (40 units on your syringe)
   },
   {
     id: "tb500-vs-bpc157",
-    question: "What's the difference between TB-500 and BPC-157?",
+    question: "What should I eat to maximize my peptide results?",
     answer: `They're the two most popular recovery peptides, but they work completely differently:
 
 | | TB-500 | BPC-157 |
@@ -209,10 +209,10 @@ export function GuidedDemo() {
           className="max-w-4xl mx-auto"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-center mb-4">
-            Try It Yourself
+            See It In Action
           </h2>
           <p className="text-lg text-muted-foreground text-center mb-8">
-            Ask any peptide question. Get research-backed answers with real citations.
+            Pick a question. Watch the AI answer it in real time.
           </p>
 
           <AnimatePresence mode="wait">
@@ -269,15 +269,15 @@ export function GuidedDemo() {
                 {/* CTA section */}
                 <div className="text-center pt-6 border-t border-border mt-8">
                   <p className="text-muted-foreground mb-4">
-                    This is real. Try it yourself.
+                    This is 1 of 10,000+ questions Peptide Playbook can answer.
                   </p>
-                  <Link to="/signup">
+                  <Link to="/quiz">
                     <PillButton variant="dark" size="lg" icon={<ArrowRight className="w-4 h-4" />}>
-                      Get Your Full Blueprint — $67
+                      Take the Free Quiz
                     </PillButton>
                   </Link>
                   <p className="text-sm text-muted-foreground mt-3">
-                    30-day money-back guarantee
+                    Free. Takes 60 seconds. No account needed.
                   </p>
                   
                   {availableQuestions.length > 0 && (

@@ -5,22 +5,22 @@ const personas = [
   {
     icon: Beaker,
     title: "New to Peptides",
-    description: "You've heard about BPC-157 or Semaglutide but don't know where to start.",
+    description: "You've heard about BPC-157 or Semaglutide but don't know where to start. No prior knowledge needed.",
   },
   {
     icon: Search,
-    title: "Deep in the Rabbit Hole",
-    description: "You've spent hours on Reddit and YouTube and still don't feel confident.",
+    title: "Deep in the Reddit Rabbit Hole",
+    description: "You've spent hours reading forums and watching YouTube. Still confused. Still guessing.",
   },
   {
     icon: Dumbbell,
-    title: "Athletes & Recovery-Focused",
-    description: "You want to recover faster and perform better with science behind your decisions.",
+    title: "Trying to Get Lean or Build Muscle",
+    description: "You want to optimize body composition and recovery with compounds that actually have research behind them.",
   },
   {
     icon: Clock,
-    title: "Anti-Aging & Longevity",
-    description: "You're exploring peptides like Epithalon and GHK-Cu and want to separate hype from evidence.",
+    title: "Skin, Hair & Anti-Aging",
+    description: "You're looking at GHK-Cu, Epithalon, or collagen peptides and want to know what actually works.",
   },
 ];
 
@@ -35,7 +35,7 @@ export function WhoThisIsForNew() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-            Built For People Who Want Real Answers
+            Built For Guys Who Want Real Answers
           </h2>
         </motion.div>
 
