@@ -30,8 +30,8 @@ export interface MilestoneDefinition {
 export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
   {
     id: "first_checkin",
-    title: "First Check-In",
-    description: "Completed your first daily check-in",
+    title: "Protocol Activated",
+    description: "Your personalized stack was generated",
     icon: "Target",
     targetDay: 0,
     celebration: "simple",
@@ -40,8 +40,8 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
   },
   {
     id: "supplies_ready",
-    title: "Supplies Ready",
-    description: "Confirmed all supplies are ready",
+    title: "Supplies Confirmed",
+    description: "Peptides and supplies sourced",
     icon: "Package",
     targetDay: 2,
     celebration: "simple",
@@ -50,8 +50,8 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
   },
   {
     id: "reconstitution_complete",
-    title: "Reconstitution Complete",
-    description: "Successfully reconstituted your first vial",
+    title: "First Reconstitution",
+    description: "Peptides mixed and ready for use",
     icon: "FlaskConical",
     targetDay: 4,
     celebration: "medium",
@@ -60,7 +60,7 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
   },
   {
     id: "first_injection",
-    title: "First Injection 💉",
+    title: "First Administration 💉",
     description: "Completed your very first injection",
     icon: "Syringe",
     targetDay: 5,
@@ -70,8 +70,8 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
   },
   {
     id: "week_1_complete",
-    title: "Week 1 Complete",
-    description: "Finished your first full week",
+    title: "One Week Complete",
+    description: "Receptor adaptation checkpoint",
     icon: "Calendar",
     targetDay: 7,
     celebration: "medium",
@@ -100,8 +100,8 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
   },
   {
     id: "one_month",
-    title: "One Month Complete 🎉",
-    description: "A full month of commitment",
+    title: "30-Day Mark 🎉",
+    description: "First major assessment window",
     icon: "Award",
     targetDay: 28,
     celebration: "major",
@@ -140,8 +140,8 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
   },
   {
     id: "course_complete",
-    title: "Course Complete! 🏆",
-    description: "Finished your entire course",
+    title: "Protocol Complete! 🏆",
+    description: "Full cycle finished — assess results",
     icon: "Trophy",
     targetDay: 56,
     celebration: "major",

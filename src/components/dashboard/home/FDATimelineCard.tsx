@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { ExternalLink, AlertTriangle, CheckCircle2, Clock, Calendar } from "lucide-react";
+import { useState } from "react";
+import { ExternalLink, AlertTriangle, CheckCircle2, Clock, Calendar, Info } from "lucide-react";
 import { format, parseISO, isPast } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFDATimeline, type FDATimelineEvent } from "@/hooks/useFDATimeline";
@@ -140,9 +141,17 @@ export function FDATimelineCard() {
       }}
     >
       <div className="px-5 pt-4 pb-2 flex items-baseline justify-between">
-        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" style={{ fontFamily: mono }}>
-          FDA Regulatory Timeline
-        </h2>
+        <div className="flex items-center gap-1.5 group relative">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" style={{ fontFamily: mono }}>
+            FDA Regulatory Timeline
+          </h2>
+          <div className="relative">
+            <Info className="w-3 h-3 text-muted-foreground cursor-help" />
+            <div className="absolute left-1/2 -translate-x-1/2 top-5 z-50 w-56 p-2.5 rounded-xl bg-white text-[11px] text-muted-foreground leading-relaxed opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity shadow-lg border border-gray-100" style={{ fontFamily: mono }}>
+              We track FDA, PCAC, and regulatory developments that may affect your protocol compounds. Updated monthly.
+            </div>
+          </div>
+        </div>
         {upcoming.length > 0 && (
           <span
             className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"

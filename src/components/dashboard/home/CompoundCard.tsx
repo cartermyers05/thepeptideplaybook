@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Check, Clock } from "lucide-react";
 import type { Compound } from "@/hooks/useUserProtocol";
+import { getCompoundWhy } from "@/lib/dashboardIntelligence";
 
 const mono = "'JetBrains Mono', ui-monospace, monospace";
 const heading = "'Outfit', sans-serif";
@@ -41,6 +42,7 @@ interface CompoundCardProps {
 
 export function CompoundCard({ compound, checked, onToggle, index = 0 }: CompoundCardProps) {
   const catColor = getCategoryColor(compound.category);
+  const whyLine = getCompoundWhy(compound.name);
 
   return (
     <motion.button
@@ -77,6 +79,14 @@ export function CompoundCard({ compound, checked, onToggle, index = 0 }: Compoun
             <Clock className="w-3 h-3" />
             {compound.timing}
           </p>
+          {whyLine && (
+            <p
+              className="text-[12px] italic mt-1 text-muted-foreground leading-snug line-clamp-1 md:line-clamp-2"
+              style={{ fontFamily: heading }}
+            >
+              {whyLine}
+            </p>
+          )}
         </div>
 
         {/* Circular checkbox */}

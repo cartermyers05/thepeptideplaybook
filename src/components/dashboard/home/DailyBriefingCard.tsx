@@ -41,6 +41,7 @@ export function DailyBriefingCard({ protocolId, todayCompounds, weekNumber, cycl
         background: "linear-gradient(135deg, rgba(99,102,241,0.08), rgba(52,211,153,0.06), rgba(167,139,250,0.08))",
         backdropFilter: "blur(20px)",
         border: "1px solid rgba(255,255,255,0.6)",
+        borderLeft: "3px solid rgba(99,102,241,0.35)",
         boxShadow: "0 1px 4px rgba(0,0,0,0.02)",
       }}
     >
