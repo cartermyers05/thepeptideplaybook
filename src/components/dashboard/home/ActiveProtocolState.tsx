@@ -9,6 +9,9 @@ import { RestDayCard } from "./RestDayCard";
 import { ProgressRing } from "./ProgressRing";
 import { WeekCalendarStrip } from "./WeekCalendarStrip";
 import { MilestonesTimeline } from "./MilestonesTimeline";
+import { WeeklyReviewCard } from "./WeeklyReviewCard";
+import { DailyBriefingCard } from "./DailyBriefingCard";
+import { SymptomAlerts } from "./SymptomAlerts";
 import type { UserProtocol, Compound } from "@/hooks/useUserProtocol";
 import type { DailyLog } from "@/hooks/useDailyLog";
 
@@ -341,43 +344,25 @@ export function ActiveProtocolState({
         ))}
       </motion.div>
 
-      {/* ─── SMART INSIGHT — Glass Panel ─── */}
+      {/* ─── SYMPTOM ALERTS ─── */}
+      <motion.div variants={itemVariants} className="mb-3">
+        <SymptomAlerts allLogs={allLogs} />
+      </motion.div>
+
+      {/* ─── DAILY BRIEFING — Glass Panel (replaces static insight) ─── */}
       <motion.div variants={itemVariants} className="mb-5">
-        <div
-          className="rounded-[20px] overflow-hidden relative flex"
-          style={{
-            background: "linear-gradient(135deg, rgba(249,115,22,0.08), rgba(251,113,133,0.06), rgba(167,139,250,0.08))",
-            backdropFilter: "blur(20px)",
-            border: "1px solid rgba(255,255,255,0.6)",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.02)",
-          }}
-        >
-          <ShimmerOverlay />
-          <div className="p-4 flex items-start gap-3">
-            <motion.div
-              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-              style={{
-                background: "linear-gradient(135deg, rgba(249,115,22,0.15), rgba(167,139,250,0.15))",
-                boxShadow: "0 0 20px rgba(249,115,22,0.1)",
-              }}
-              animate={{ scale: [1, 1.06, 1] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
-                <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" stroke="url(#insightHex)" strokeWidth="2" fill="none" />
-                <defs>
-                  <linearGradient id="insightHex" x1="0" y1="0" x2="32" y2="32">
-                    <stop offset="0%" stopColor="#F97316" />
-                    <stop offset="100%" stopColor="#A78BFA" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </motion.div>
-            <p className="text-[15px] text-foreground leading-relaxed font-medium" style={{ fontFamily: heading }}>
-              {insight.text}
-            </p>
-          </div>
-        </div>
+        <DailyBriefingCard
+          protocolId={protocol.id}
+          todayCompounds={todayCompounds}
+          weekNumber={currentWeek}
+          cycleLengthWeeks={protocol.cycle_length_weeks}
+          fallbackInsight={insight.text}
+        />
+      </motion.div>
+
+      {/* ─── WEEKLY REVIEW ─── */}
+      <motion.div variants={itemVariants} className="mb-5">
+        <WeeklyReviewCard protocolId={protocol.id} weekNumber={currentWeek} />
       </motion.div>
 
       {/* ─── ROW 2: TODAY'S STACK + THIS WEEK ─── */}
