@@ -4,28 +4,36 @@ import { Plus, Minus } from "lucide-react";
 
 const faqs = [
   {
-    question: "How is this different from ChatGPT?",
-    answer: "ChatGPT gives general answers and sometimes makes things up. Our AI is built specifically on peptide research. It cites real studies, tracks FDA status, and tells you when evidence is weak instead of guessing.",
-  },
-  {
     question: "Is this medical advice?",
-    answer: "No. The Peptide Playbook is an educational research tool. We help you understand the science so you can have informed conversations with your healthcare provider. We include doctor conversation scripts for exactly this reason.",
+    answer: "No. Peptide Playbook is an educational research tool. All information comes from published, peer-reviewed studies. We present what the research shows — we don't prescribe, diagnose, or replace your doctor. Think of it as the most well-researched friend you've ever had.",
   },
   {
-    question: "What if I'm a complete beginner?",
-    answer: "Perfect. The quiz personalizes everything to your experience level. The AI adapts its explanations to where you are. No jargon, no assumptions. We start from the basics and build up.",
+    question: "How is this different from free information on Reddit or TikTok?",
+    answer: "Two things: it's personalized to YOUR goals (not generic), and every answer cites actual published research (not 'trust me bro'). Our AI is trained on 500+ peer-reviewed studies. It also gives you dose, timing, diet, exercise, and side effect management — not just 'take BPC-157.'",
+  },
+  {
+    question: "What peptides does this cover?",
+    answer: "45+ peptides including BPC-157, TB-500, GHK-Cu, CJC-1295, Ipamorelin, Semaglutide, AOD-9604, Tesamorelin, Epitalon, PT-141, MK-677, Sermorelin, and more. The database is updated monthly with new research.",
+  },
+  {
+    question: "Is this a subscription?",
+    answer: "No. $67 one-time payment. Lifetime access. No monthly fees, no upsells, no 'premium tier.' You get everything.",
   },
   {
     question: "What if it's not for me?",
-    answer: "You're covered by our 30-day money-back guarantee. If the Playbook doesn't help you, email us and we'll refund you. No questions asked.",
+    answer: "30-day money-back guarantee. No questions asked. If you don't find it valuable, you get a full refund.",
   },
   {
-    question: "Do you sell peptides?",
-    answer: "No. We don't sell peptides, we don't have affiliate deals with suppliers, and we have no financial incentive to recommend one peptide over another. This is pure education and research.",
+    question: "How fast do I get access?",
+    answer: "Instantly. Complete checkout, create your account, and your personalized protocol is ready in under 2 minutes.",
   },
   {
-    question: "Is my information secure?",
-    answer: "Yes. We use 256-bit SSL encryption and Stripe for payments. We never share your data with third parties. Your research journey stays private.",
+    question: "I'm completely new to peptides. Is this for me?",
+    answer: "Especially for you. The AI adapts to your experience level. If you're brand new, it explains everything from scratch — what peptides are, how they work, how to reconstitute, where to inject, what to expect. No prior knowledge needed.",
+  },
+  {
+    question: "Is this legal?",
+    answer: "Peptide Playbook is an educational tool — 100% legal. As for the peptides themselves: some are FDA-approved (semaglutide, tesamorelin), others are sold as research compounds. The product includes a full 2026 legal status breakdown for every peptide covered.",
   },
 ];
 

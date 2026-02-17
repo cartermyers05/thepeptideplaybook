@@ -6,39 +6,39 @@ import { useRef, useState } from "react";
 
 const features = [
   {
-    icon: MessageCircle,
-    title: "AI Research Coach",
-    description: "Ask any peptide question and get research-backed answers with study citations. Available 24/7.",
+    icon: Target,
+    title: "Your Personalized Protocol",
+    description: "Not a generic PDF. An AI-built protocol matched to your specific goals, body, and experience level. Exact compounds, doses, and schedule.",
     gradient: "linear-gradient(135deg, hsl(173 55% 50%) 0%, hsl(180 60% 40%) 100%)",
   },
   {
-    icon: Database,
-    title: "45+ Peptide Database",
-    description: "Every peptide with mechanisms, dosing research, safety profiles, and live FDA status.",
+    icon: MessageCircle,
+    title: "AI Coach — 24/7",
+    description: "'Can I take BPC-157 and GHK-Cu together?' 'What should I eat before my injection?' 'Is this side effect normal?' Answers in seconds, cited from real research.",
     gradient: "linear-gradient(145deg, hsl(200 50% 50%) 0%, hsl(220 55% 45%) 100%)",
   },
   {
-    icon: Target,
-    title: "Custom Protocols",
-    description: "Tell the AI your goals and experience. Get a personalized protocol built in 60 seconds.",
+    icon: Calendar,
+    title: "Daily Compound Tracker",
+    description: "Check off your daily doses. Track your streak. See your compliance. Know exactly what to take each day without thinking.",
     gradient: "linear-gradient(155deg, hsl(260 45% 55%) 0%, hsl(280 50% 45%) 100%)",
   },
   {
-    icon: Calendar,
-    title: "Daily Plan & Tracking",
-    description: "See exactly what to take today, mark doses complete, and track your progress week by week.",
+    icon: Stethoscope,
+    title: "Diet & Training Optimization",
+    description: "Personalized nutrition and exercise guidance based on your exact peptides. What to eat, when to train, and how to maximize results.",
     gradient: "linear-gradient(165deg, hsl(340 45% 55%) 0%, hsl(320 50% 45%) 100%)",
   },
   {
-    icon: Stethoscope,
-    title: "Doctor Scripts",
-    description: "Pre-written conversation guides so you can talk to your provider about peptides confidently.",
+    icon: Database,
+    title: "Week-by-Week Timeline",
+    description: "'Day 3: sleep may improve.' 'Week 2: recovery between workouts gets noticeably better.' No more wondering if it's working.",
     gradient: "linear-gradient(135deg, hsl(30 60% 50%) 0%, hsl(15 55% 45%) 100%)",
   },
   {
     icon: BookOpen,
-    title: "30+ Research Guides",
-    description: "In-depth breakdowns of peptide science in plain English. Beginner to advanced.",
+    title: "FDA Regulatory Tracker",
+    description: "Live updates on which peptides are under review, reclassification, or legal changes. Nobody else offers this.",
     gradient: "linear-gradient(145deg, hsl(142 50% 45%) 0%, hsl(160 55% 40%) 100%)",
   },
 ];
@@ -95,10 +95,10 @@ export function WhatsInsideSection() {
           className="mb-16 text-center"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-            Everything Inside The Peptide Playbook
+            Everything You Need. Nothing You Don't.
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            All of this. One payment. Lifetime access.
+            One payment. Lifetime access. Here's what's included.
           </p>
         </motion.div>
 
@@ -142,9 +142,9 @@ export function WhatsInsideSection() {
           transition={{ delay: 0.4 }}
           className="text-center mt-12"
         >
-          <Link to="/signup">
+          <Link to="/quiz">
             <PillButton variant="dark" size="lg" icon={<span>→</span>}>
-              Get Your Full Blueprint — $67
+              Build My Protocol — Free Quiz
             </PillButton>
           </Link>
         </motion.div>

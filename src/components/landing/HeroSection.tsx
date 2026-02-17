@@ -5,13 +5,12 @@ import { ChatPreviewCard, CoursePreviewCard, DigestPreviewCard } from "./HeroPro
 import { Check } from "lucide-react";
 
 const trustItems = [
-  "500+ Studies",
-  "45+ Peptides",
-  "FDA Status Tracked",
-  "30-Day Money Back",
+  "500+ Studies Analyzed",
+  "45+ Peptides Covered",
+  "Updated February 2026",
 ];
 
-const headlineWords = ["Your", "Personal", "Peptide", "Research", "Assistant"];
+const headlineWords = ["Your", "Exact", "Peptide", "Protocol", "in", "60", "Seconds"];
 
 export function HeroSection() {
   return (
@@ -55,7 +54,7 @@ export function HeroSection() {
               transition={{ delay: 0.9, duration: 0.6 }}
               className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed"
             >
-              An AI-powered platform that answers your peptide questions with real research. Not Reddit threads, not bro-science. 500+ studies. 45+ peptides. Protocols built for your goals.
+              Answer a few questions about your goals. Our AI — trained on 500+ studies — builds your personalized protocol with exact compounds, doses, timing, and safety info.
             </motion.p>
 
             <motion.div
@@ -64,13 +63,13 @@ export function HeroSection() {
               transition={{ delay: 1.1, duration: 0.6 }}
               className="mt-8 flex flex-wrap gap-4"
             >
-              <Link to="/signup">
+              <Link to="/quiz">
                 <PillButton 
                   variant="dark" 
                   size="lg"
                   icon={<span>→</span>}
                 >
-                  Get Started — $67
+                  Take the Free Quiz
                 </PillButton>
               </Link>
               <a
@@ -87,6 +86,15 @@ export function HeroSection() {
                 </PillButton>
               </a>
             </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.25, duration: 0.5 }}
+              className="mt-4 text-sm text-muted-foreground"
+            >
+              Free. Takes 60 seconds. No account needed.
+            </motion.p>
 
             {/* Trust Bar - spring stagger */}
             <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">

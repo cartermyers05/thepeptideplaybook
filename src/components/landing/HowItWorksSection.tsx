@@ -7,20 +7,20 @@ const steps = [
   {
     number: "01",
     icon: ClipboardList,
-    title: "Take a 2-Minute Quiz",
-    description: "Tell us your goals, experience level, and what you're curious about.",
+    title: "Take the 60-Second Quiz",
+    description: "Tell us your goal, experience level, and any concerns. No account needed.",
   },
   {
     number: "02",
     icon: Sparkles,
-    title: "Get Your Protocol",
-    description: "Our AI builds a personalized peptide protocol based on your answers and 500+ research studies.",
+    title: "Get Your Personalized Protocol",
+    description: "Our AI matches you with the right compounds, doses, timing, and schedule — all backed by published research.",
   },
   {
     number: "03",
     icon: MessageCircle,
-    title: "Ask Anything",
-    description: "Have questions? The AI coach is available 24/7 to answer with real citations, not generic advice.",
+    title: "Follow Your Blueprint",
+    description: "Daily compound tracker, AI coach for questions, diet and training tips personalized to your stack, and week-by-week timeline of what to expect.",
   },
 ];
 
@@ -35,7 +35,7 @@ export function HowItWorksSection() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-            3 Steps. That's It.
+            How It Works
           </h2>
         </motion.div>
 

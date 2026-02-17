@@ -5,20 +5,20 @@ import { PillButton } from "./PillButton";
 import { useRef, useEffect, useState } from "react";
 
 const features = [
-  "AI Research Coach with 500+ studies",
-  "45+ peptide database with FDA status",
-  "Personalized protocol builder",
-  "Daily plan and progress tracking",
-  "Doctor conversation scripts",
-  "30+ research guides",
-  "Lifetime access to all updates",
+  "Personalized AI-built protocol",
+  "24/7 AI research coach",
+  "Daily compound tracker with streaks",
+  "Diet & training optimization",
+  "Week-by-week timeline",
+  "FDA regulatory tracker",
+  "Lifetime access + all future updates",
 ];
 
 const comparisons = [
-  { item: "Peptide clinic consultation", price: "$200-500" },
-  { item: "Medical provider peptide program", price: "$499-3,000" },
-  { item: "Hours of Reddit research", price: "Free but unreliable" },
-  { item: "Peptide Playbook", price: "$67 for everything", highlight: true },
+  { item: "Clinic consultations", price: "$300-500" },
+  { item: "Trial and error with wrong peptides", price: "$200-400" },
+  { item: "Hours of Reddit rabbit holes", price: "Priceless (in a bad way)" },
+  { item: "Peptide Playbook", price: "$67 once. Forever.", highlight: true },
 ];
 
 function AnimatedPrice() {
@@ -88,7 +88,7 @@ export function PricingCTA() {
             
             {/* Price comparison box */}
             <div className="bg-card border border-border rounded-2xl p-6 mt-8 overflow-hidden">
-              <h3 className="font-semibold mb-4 text-foreground">What you'd pay elsewhere:</h3>
+              <h3 className="font-semibold mb-4 text-foreground">What you'd spend figuring this out on your own:</h3>
               <ul className="space-y-3">
                 {comparisons.map((item, index) => (
                   <motion.li
@@ -156,14 +156,14 @@ export function PricingCTA() {
               </ul>
 
               {/* CTA */}
-              <Link to="/signup" className="block">
+              <Link to="/quiz" className="block">
                 <PillButton 
                   variant="dark" 
                   size="lg" 
                   className="w-full justify-center"
                   icon={<span>→</span>}
                 >
-                  Get Your Full Blueprint — $67
+                  Take the Free Quiz — It's Free
                 </PillButton>
               </Link>
               
@@ -175,15 +175,15 @@ export function PricingCTA() {
               <div className="flex flex-wrap justify-center gap-4 mt-6 pt-6 border-t border-border">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Lock className="w-3.5 h-3.5" />
-                  <span>256-bit SSL</span>
+                  <span>Secure checkout</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Shield className="w-3.5 h-3.5" />
-                  <span>Powered by Stripe</span>
+                  <span>30-day money-back guarantee</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span>30-day refund</span>
+                  <span>Instant access</span>
                 </div>
               </div>
             </div>
