@@ -10,7 +10,7 @@ const trustItems = [
   "Updated February 2026",
 ];
 
-const headlineWords = ["Your", "Exact", "Peptide", "Protocol", "in", "60", "Seconds"];
+const headlineWords = ["Your", "Personalized", "Peptide", "Protocol"];
 
 export function HeroSection() {
   return (
@@ -54,7 +54,7 @@ export function HeroSection() {
               transition={{ delay: 0.9, duration: 0.6 }}
               className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed"
             >
-              Answer a few questions about your goals. Our AI — trained on 500+ studies — builds your personalized protocol with exact compounds, doses, timing, and safety info.
+              Our AI — trained on 500+ studies — builds your personalized protocol with exact compounds, doses, timing, and safety info.
             </motion.p>
 
             <motion.div
@@ -63,13 +63,13 @@ export function HeroSection() {
               transition={{ delay: 1.1, duration: 0.6 }}
               className="mt-8 flex flex-wrap gap-4"
             >
-              <Link to="/quiz">
+              <Link to="/signup">
                 <PillButton 
                   variant="dark" 
                   size="lg"
                   icon={<span>→</span>}
                 >
-                  Take the Free Quiz
+                  Get Started
                 </PillButton>
               </Link>
               <a
@@ -87,14 +87,7 @@ export function HeroSection() {
               </a>
             </motion.div>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.25, duration: 0.5 }}
-              className="mt-4 text-sm text-muted-foreground"
-            >
-              Free. Takes 60 seconds. No account needed.
-            </motion.p>
+            
 
             {/* Trust Bar - spring stagger */}
             <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">

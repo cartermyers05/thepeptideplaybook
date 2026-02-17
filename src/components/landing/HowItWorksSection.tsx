@@ -7,8 +7,8 @@ const steps = [
   {
     number: "01",
     icon: ClipboardList,
-    title: "Take the 60-Second Quiz",
-    description: "Tell us your goal, experience level, and any concerns. No account needed.",
+    title: "Create Your Free Account",
+    description: "Sign up in seconds. Tell us your goal, experience level, and any concerns.",
   },
   {
     number: "02",
@@ -121,9 +121,9 @@ export function HowItWorksSection() {
           transition={{ delay: 0.6 }}
           className="text-center mt-12"
         >
-          <Link to="/quiz">
+          <Link to="/signup">
             <PillButton variant="dark" size="lg" icon={<span>→</span>}>
-              Take the Free Quiz
+              Get Started
             </PillButton>
           </Link>
         </motion.div>

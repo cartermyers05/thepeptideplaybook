@@ -142,9 +142,9 @@ export function WhatsInsideSection() {
           transition={{ delay: 0.4 }}
           className="text-center mt-12"
         >
-          <Link to="/quiz">
+          <Link to="/signup">
             <PillButton variant="dark" size="lg" icon={<span>→</span>}>
-              Build My Protocol — Free Quiz
+              Get Your Full Blueprint
             </PillButton>
           </Link>
         </motion.div>
