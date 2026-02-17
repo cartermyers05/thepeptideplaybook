@@ -16,6 +16,16 @@ import { TrendMiniChart } from "./TrendMiniChart";
 import { FDATimelineCard } from "./FDATimelineCard";
 import type { UserProtocol, Compound } from "@/hooks/useUserProtocol";
 import type { DailyLog } from "@/hooks/useDailyLog";
+import {
+  getWeekPhaseLabel,
+  getProgressSubtitle,
+  getDayCardInsight,
+  getStreakSubtitle,
+  getWeeklyBriefing,
+  getThisWeekGuidance,
+  getProtocolCategory,
+} from "@/lib/dashboardIntelligence";
+import { MILESTONE_DEFINITIONS } from "@/lib/milestoneDefinitions";
 
 /* ── Animation variants ── */
 const containerVariants = {
@@ -254,6 +264,7 @@ export function ActiveProtocolState({
   };
 
   const phase = getPhaseInfo();
+  const fallbackBriefing = getWeeklyBriefing(currentWeek, todayCompounds);
   const insight = getSmartInsight(currentWeek, compliancePercent, currentStreak, currentWeekExpectation?.description || null);
   const completedCount = todayCompounds.filter((c) => actionsCompleted[c.name]).length;
 
@@ -274,6 +285,11 @@ export function ActiveProtocolState({
         <p className="text-sm font-semibold text-foreground" style={{ fontFamily: heading }}>
           {protocol.protocol_name}
         </p>
+        {currentWeek && (
+          <p className="text-[13px] mt-1 text-muted-foreground" style={{ fontFamily: mono }}>
+            {getWeekPhaseLabel(currentWeek)}
+          </p>
+        )}
       </motion.div>
 
       {/* ─── ROW 1: ELEVATED STAT CARDS with gradient top accent ─── */}
@@ -281,12 +297,13 @@ export function ActiveProtocolState({
         {[
           {
             label: "Progress", value: progressPercent, suffix: "%",
-            detail: `${dayNumber} of ${totalDays} days`,
+            detail: getProgressSubtitle(progressPercent, dayNumber, totalDays),
             visual: <MiniProgressArc percent={progressPercent} />,
           },
           {
             label: "Day", value: dayNumber, suffix: "",
             detail: `Week ${currentWeek || 1}`,
+            detail2: getDayCardInsight(currentWeek, todayCompounds),
             visual: (
               <span className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-md mt-1 text-muted-foreground" style={{ fontFamily: mono, backgroundColor: "rgba(0,0,0,0.03)" }}>
                 Week {currentWeek}
@@ -300,7 +317,7 @@ export function ActiveProtocolState({
           },
           {
             label: "Streak", value: currentStreak, suffix: "",
-            detail: currentStreak > 0 ? "Keep it going!" : "Start today",
+            detail: getStreakSubtitle(currentStreak),
             visual: (
               <div className="flex items-center gap-1">
                 <motion.div
@@ -341,6 +358,11 @@ export function ActiveProtocolState({
               <p className="text-[11px] text-muted-foreground mt-1.5" style={{ fontFamily: mono }}>
                 {card.detail}
               </p>
+              {(card as any).detail2 && (
+                <p className="text-[10px] text-muted-foreground mt-0.5" style={{ fontFamily: mono }}>
+                  {(card as any).detail2}
+                </p>
+              )}
             </div>
           </motion.div>
         ))}
@@ -358,7 +380,7 @@ export function ActiveProtocolState({
           todayCompounds={todayCompounds}
           weekNumber={currentWeek}
           cycleLengthWeeks={protocol.cycle_length_weeks}
-          fallbackInsight={insight.text}
+          fallbackInsight={fallbackBriefing}
         />
       </motion.div>
 
@@ -460,17 +482,15 @@ export function ActiveProtocolState({
             </h2>
           </div>
           <div className="p-4">
-            {currentWeekExpectation && (
-              <motion.p
-                className="text-sm text-foreground leading-relaxed mb-4"
-                style={{ fontFamily: heading }}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                {currentWeekExpectation.description}
-              </motion.p>
-            )}
+            <motion.p
+              className="text-sm text-foreground leading-relaxed mb-4"
+              style={{ fontFamily: heading }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              {currentWeekExpectation?.description || getThisWeekGuidance(currentWeek)}
+            </motion.p>
             <WeekCalendarStrip
               currentDay={dayNumber}
               courseStartDate={protocol.start_date}
@@ -544,6 +564,11 @@ export function ActiveProtocolState({
                 { label: "Compounds", value: `${protocol.compounds?.length || 0}` },
                 { label: "Cycle", value: `${protocol.cycle_length_weeks} weeks` },
                 { label: "Remaining", value: `${daysRemaining} days` },
+                { label: "Category", value: getProtocolCategory(protocol.compounds || []) },
+                { label: "Next milestone", value: (() => {
+                  const next = MILESTONE_DEFINITIONS.find((m) => m.targetDay > dayNumber && m.targetDay <= totalDays);
+                  return next ? next.title : "—";
+                })() },
               ].map((row, i) => (
                 <div
                   key={row.label}
@@ -611,9 +636,9 @@ export function ActiveProtocolState({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { icon: MessageSquare, label: "AI Coach", desc: "Ask anything about your blueprint", to: "/dashboard/coach", gradient: "linear-gradient(135deg, #F97316, #FB923C)", bgTint: "rgba(249,115,22,0.05)" },
-            { icon: Layers, label: "My Protocol", desc: "Compounds, schedule & guides", to: "/dashboard/protocol", gradient: "linear-gradient(135deg, #FB7185, #FDA4AF)", bgTint: "rgba(251,113,133,0.05)" },
-            { icon: BarChart3, label: "Progress", desc: "Track your results over time", to: "/dashboard/progress", gradient: "linear-gradient(135deg, #A78BFA, #C4B5FD)", bgTint: "rgba(167,139,250,0.05)" },
+            { icon: MessageSquare, label: "AI Coach", desc: "Ask about your stack, timing, or interactions", to: "/dashboard/coach", gradient: "linear-gradient(135deg, #F97316, #FB923C)", bgTint: "rgba(249,115,22,0.05)" },
+            { icon: Layers, label: "My Protocol", desc: "Doses, schedule, reconstitution guides", to: "/dashboard/protocol", gradient: "linear-gradient(135deg, #FB7185, #FDA4AF)", bgTint: "rgba(251,113,133,0.05)" },
+            { icon: BarChart3, label: "Progress", desc: "Log check-ins, photos, and milestones", to: "/dashboard/progress", gradient: "linear-gradient(135deg, #A78BFA, #C4B5FD)", bgTint: "rgba(167,139,250,0.05)" },
           ].map((card) => (
             <motion.button
               key={card.label}

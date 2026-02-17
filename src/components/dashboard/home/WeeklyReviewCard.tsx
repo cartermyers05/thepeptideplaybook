@@ -63,6 +63,9 @@ export function WeeklyReviewCard({ protocolId, weekNumber }: Props) {
                 Week {weekNumber} Review
               </p>
               <p className="text-[11px] text-muted-foreground">AI-powered analysis of your week</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5" style={{ fontFamily: "'JetBrains Mono', ui-monospace, monospace" }}>
+                See your compliance patterns, compound timing analysis, and what to adjust for next week.
+              </p>
             </div>
           </div>
           <button

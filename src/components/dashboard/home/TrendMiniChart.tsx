@@ -38,6 +38,7 @@ export function TrendMiniChart({ allLogs }: TrendMiniChartProps) {
   }, [allLogs]);
 
   const hasData = chartData.some((d) => d.compliance !== undefined || d.energy !== undefined);
+  const dataPointCount = chartData.filter((d) => d.compliance !== undefined || d.energy !== undefined).length;
   if (!hasData) return null;
 
   return (
@@ -140,6 +141,11 @@ export function TrendMiniChart({ allLogs }: TrendMiniChartProps) {
           </AreaChart>
         </ResponsiveContainer>
       </div>
+      {dataPointCount < 7 && (
+        <p className="text-center text-[12px] text-muted-foreground pb-3 px-4" style={{ fontFamily: mono }}>
+          Trends become meaningful after 7 days of logging. Keep checking in daily.
+        </p>
+      )}
     </div>
   );
 }
