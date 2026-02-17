@@ -1,88 +1,140 @@
 
-
-# Deep Compound Intelligence — Protocol Page Upgrade
+# Pre-Launch Comprehensive Testing Plan
 
 ## Overview
 
-Transform the "Your Stack" section on `/dashboard/protocol` from basic compound cards into a comprehensive, expandable peptide guide. Each card gets a "Learn more" toggle that reveals mechanism of action, synergy notes, timeline, side effects, diet/exercise tips, storage, and a pro tip. A new "Why This Stack Works" synergy card appears above the individual compounds when 2+ are present.
+A full end-to-end manual testing checklist covering every critical user flow on the site, from first landing to daily dashboard usage. We will systematically walk through each flow in the browser preview, verify functionality, and document any issues found.
 
-All existing content (name, badge, dose, frequency, route, timing, rationale) stays exactly as-is. We are only ADDING below it.
-
----
-
-## New Files
-
-### `src/lib/compoundIntelligence.ts`
-
-A standalone data file containing the full `compoundIntelligence` map with entries for all 8 peptides specified:
-- CJC-1295 (No DAC), Ipamorelin, GHK-Cu, BPC-157, TB-500, Semaglutide, AOD-9604, Tesamorelin
-
-Each entry has: `mechanism`, `synergies`, `timeline`, `sideEffects`, `dietTips`, `exerciseTips`, `storageNotes`, `proTip`
-
-Also exports a `getStackSynergyText(compoundNames: string[]): string | null` function that checks compound combinations and returns the matching synergy explanation (CJC+Ipa, +GHK-Cu, BPC+TB500, Sema+AOD, or generic fallback for 2+ compounds).
-
-A helper `getCompoundIntel(name: string)` does fuzzy matching (lowercase includes) so "CJC-1295" matches "CJC-1295 (No DAC)", etc.
-
-### `src/components/protocol/StackSynergyCard.tsx`
-
-A new component rendered above the compound cards when 2+ compounds exist. Replaces the current simple `SynergyBadge` gradient pills.
-
-- Title: "Why This Stack Works" with a beaker/sparkles icon
-- Left border: 3px solid #06D6A0
-- Body text from `getStackSynergyText()` based on the user's actual compound names
-- Styled as a card matching existing protocol card patterns (bg-card, border-border, rounded-2xl)
+This is NOT a code change -- it is a structured QA walkthrough. I will test each flow interactively using the browser tools and report back what works and what is broken.
 
 ---
 
-## Modified Files
+## Testing Flows (in order)
 
-### `src/components/protocol/ProtocolCompoundCard.tsx`
+### 1. Landing Page and Navigation
+- Homepage loads without errors
+- All sections render (Hero, How It Works, What's Inside, Guided Demo, Pricing, Who This Is For, FAQ, Final CTA)
+- Navbar links work (Guides, Pricing, Login)
+- Footer links work (Terms, Privacy, Disclaimer, About, Editorial Policy)
+- Floating CTA appears on scroll
+- Mobile responsive check
 
-This is the main change. The existing card content stays untouched. Below the "Why chosen" rationale line, add:
+### 2. Quiz / Conversion Funnel
+- Hero CTA button navigates to quiz
+- Quiz loads, AI conversation starts
+- User can answer questions and progress
+- Email gate appears at correct point
+- Quiz results page renders with personalized content
+- CTA from results leads to signup/checkout
 
-1. A "Learn more" toggle button (full-width tap target for mobile)
-   - Font: JetBrains Mono, 12px, color #06D6A0
-   - Shows "Learn more ▾" when collapsed, "Show less ▴" when expanded
-   
-2. When expanded (framer-motion AnimatePresence, 200ms ease), show these sections in order, each separated by a subtle 1px border-border divider:
+### 3. Signup Flow
+- `/signup` page loads
+- Step 1: Email entry, continue button works
+- Step 2: Name, password, terms checkbox
+- Promo code input works (validation call fires)
+- Account creation succeeds (auth signup)
+- Redirect to `/checkout` after signup
 
-   **A. How It Works** — mechanism text from compoundIntelligence map
-   
-   **B. What to Expect (Timeline)** — timeline text
-   
-   **C. Diet Tips** — dietTips text
-   
-   **D. Exercise Tips** — exerciseTips text
-   
-   **E. Managing Side Effects** — sideEffects text
-   
-   **F. Storage and Handling** — storageNotes text
-   
-   **G. Pro Tip** — highlighted box at the bottom:
-   - Background: rgba(6, 214, 160, 0.06)
-   - Border: 1px solid rgba(6, 214, 160, 0.12)
-   - Border-radius: 10px, padding: 14px
-   - Label: "PRO TIP" in JetBrains Mono, 11px, uppercase, #06D6A0, letter-spacing 0.08em
-   - Content: proTip text
+### 4. Login Flow
+- `/login` page loads
+- Email + password login works
+- Redirect to dashboard after login
+- "Forgot password" link works
 
-If a compound name doesn't match any entry in the intelligence map, the "Learn more" toggle simply doesn't appear (falls back to existing behavior which shows mechanism/side_effects/storage from the Compound data if present).
+### 5. Checkout Flow
+- `/checkout` page loads for authenticated user
+- Shows pricing ($67 one-time)
+- "Get Your Full Blueprint" button calls `create-checkout` edge function
+- Stripe redirect works (URL returned)
+- Promo code redemption works on checkout page
+- Already-paid users redirect to dashboard
 
-Section headers use the existing Outfit font at 14px font-weight 600. Body text is 13px text-muted-foreground with line-height 1.6.
+### 6. Payment Verification (Thank You Page)
+- `/thank-you?session_id=...` verifies payment via edge function
+- Success state shows and redirects to onboarding
+- Error state shows retry button
+- No-session state shows fallback
 
-### `src/pages/dashboard/Protocol.tsx`
+### 7. Onboarding Flow
+- `/welcome/onboarding` loads for authenticated paid users
+- Goal selection works
+- Protocol generation triggers
+- Redirects to dashboard after completion
 
-Two small changes:
-1. Import `StackSynergyCard` and render it where `SynergyBadge` currently is (replace the SynergyBadge with the new richer card)
-2. Remove the `SynergyBadge` local component (replaced by the new standalone component)
+### 8. Dashboard Home (`/dashboard`)
+- Loads for authenticated user
+- Active protocol state renders (compounds, progress ring, week calendar)
+- Today's schedule shows correct compounds
+- Daily check-in works
+- FDA timeline card renders
+- Daily briefing card renders
+- Weekly review card renders
+
+### 9. Protocol Page (`/dashboard/protocol`)
+- Protocol detail view loads with compound cards
+- Stack Synergy card appears (user has 3 compounds: CJC-1295, Ipamorelin, GHK-Cu)
+- "Learn more" toggle expands compound cards
+- Expanded sections show: mechanism, timeline, diet tips, exercise tips, side effects, storage, pro tip
+- Collapse works smoothly
+- All compound intelligence data matches for CJC-1295, Ipamorelin, GHK-Cu
+
+### 10. AI Chat (`/dashboard/chat`)
+- Chat interface loads
+- Can type and send a message
+- Response streams word-by-word (not instant dump)
+- Auto-scroll follows streaming text
+- Message history persists
+
+### 11. AI Coach (`/dashboard/coach`)
+- Coach interface loads
+- Can send messages
+- Streaming works properly
+- Check-in flow works
+
+### 12. Progress Page (`/dashboard/progress`)
+- Loads with trend charts
+- Achievement grid renders
+- Data from daily logs appears
+
+### 13. Settings Page (`/dashboard/settings`)
+- Profile info displays
+- Can update settings
+- Subscription management button works
+
+### 14. Guide Pages
+- `/guides` index loads with search and filters
+- Individual guide pages load (spot check 2-3)
+- Navigation between guides works
+
+### 15. Edge Function Health Checks
+- `check-subscription` responds correctly
+- `verify-payment` handles null session_id
+- `create-checkout` returns URL for authenticated user
+- `chat` streams SSE properly
+- `coach` streams properly
+
+### 16. Auth Guards
+- Protected routes redirect to login when not authenticated
+- Admin routes block non-admin users
+- Paid-tier content blocks free users
 
 ---
 
-## What Does NOT Change
+## How I Will Execute This
 
-- No database changes or migrations
-- No changes to `useUserProtocol` hook or any data fetching
-- No changes to routing, navigation, or other pages
-- Existing compound card content (name, badge, dose, frequency, route, timing, rationale) remains identical
-- All other protocol page sections (hero, this week, quick tools, schedule, timeline, safety banner, CTAs) untouched
-- The existing detail expansion for compounds that have `mechanism`/`side_effects`/`storage` from the AI-generated protocol data is replaced by the richer intelligence map content when available, but falls back to existing data when no match is found
+I will use the browser tools to navigate to each page, interact with elements, read console logs and network requests, and report findings. For edge functions, I will use the curl tool to verify responses directly.
 
+After testing, I will provide a detailed report of:
+- What works perfectly
+- What has issues (with specifics)
+- Recommended fixes prioritized by severity
+
+---
+
+## What This Does NOT Include
+
+- Load testing / performance benchmarks
+- Cross-browser testing (only the preview browser)
+- Real Stripe payment processing (we verify the redirect URL is generated, not that money moves)
+- Email delivery testing (Resend)
+- SEO crawlability verification
