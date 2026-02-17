@@ -165,29 +165,98 @@ What's your experience level with peptides?`
         throw new Error(errorData.error || 'Failed to get response');
       }
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type') || '';
 
-      setState(prev => {
-        const newExtractedValues = { ...prev.extractedValues };
-        if (data.extracted) {
-          newExtractedValues[data.extracted.key as keyof ExtractedValues] = data.extracted.value;
+      if (contentType.includes('text/event-stream') && response.body) {
+        // SSE streaming path
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullText = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const payload = line.slice(6).trim();
+            if (!payload || payload === '[DONE]') continue;
+
+            try {
+              const event = JSON.parse(payload);
+
+              if (event.text) {
+                fullText += event.text;
+                const currentText = fullText;
+                setState(prev => ({
+                  ...prev,
+                  messages: prev.messages.map(m =>
+                    m.id === assistantMsg.id
+                      ? { ...m, content: currentText, isStreaming: true }
+                      : m
+                  )
+                }));
+              }
+
+              if (event.done) {
+                setState(prev => {
+                  const newExtractedValues = { ...prev.extractedValues };
+                  if (event.extracted) {
+                    newExtractedValues[event.extracted.key as keyof ExtractedValues] = event.extracted.value;
+                  }
+                  return {
+                    ...prev,
+                    messages: prev.messages.map(m =>
+                      m.id === assistantMsg.id
+                        ? { ...m, isStreaming: false }
+                        : m
+                    ),
+                    extractedValues: newExtractedValues,
+                    currentStep: event.shouldAdvance ? prev.currentStep + 1 : prev.currentStep,
+                    isLoading: false,
+                    isComplete: event.isComplete
+                  };
+                });
+              }
+            } catch {
+              // skip malformed events
+            }
+          }
         }
 
-        const updatedMessages = prev.messages.map(m => 
-          m.id === assistantMsg.id 
-            ? { ...m, content: data.response, isStreaming: false }
-            : m
-        );
+        // Safety: ensure loading is cleared even if no done event
+        setState(prev => prev.isLoading ? { ...prev, isLoading: false } : prev);
+      } else {
+        // Fallback JSON path (backward compatible)
+        const data = await response.json();
 
-        return {
-          ...prev,
-          messages: updatedMessages,
-          extractedValues: newExtractedValues,
-          currentStep: data.shouldAdvance ? prev.currentStep + 1 : prev.currentStep,
-          isLoading: false,
-          isComplete: data.isComplete
-        };
-      });
+        setState(prev => {
+          const newExtractedValues = { ...prev.extractedValues };
+          if (data.extracted) {
+            newExtractedValues[data.extracted.key as keyof ExtractedValues] = data.extracted.value;
+          }
+
+          const updatedMessages = prev.messages.map(m => 
+            m.id === assistantMsg.id 
+              ? { ...m, content: data.response, isStreaming: false }
+              : m
+          );
+
+          return {
+            ...prev,
+            messages: updatedMessages,
+            extractedValues: newExtractedValues,
+            currentStep: data.shouldAdvance ? prev.currentStep + 1 : prev.currentStep,
+            isLoading: false,
+            isComplete: data.isComplete
+          };
+        });
+      }
 
     } catch (error) {
       console.error('Quiz chat error:', error);

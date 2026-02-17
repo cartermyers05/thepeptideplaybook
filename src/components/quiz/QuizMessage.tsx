@@ -1,8 +1,7 @@
 import { motion } from "framer-motion";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { TypewriterMessage } from "@/components/dashboard/TypewriterMessage";
 import { Logo } from "@/components/brand/Logo";
 
 interface QuizMessageProps {
@@ -10,6 +9,20 @@ interface QuizMessageProps {
   content: string;
   isStreaming?: boolean;
   isLatest?: boolean;
+}
+
+function TypingDots() {
+  return (
+    <div className="flex items-center gap-1.5 py-1">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="w-2 h-2 rounded-full bg-muted-foreground/50 animate-bounce"
+          style={{ animationDelay: `${i * 150}ms`, animationDuration: '0.6s' }}
+        />
+      ))}
+    </div>
+  );
 }
 
 export function QuizMessage({ role, content, isStreaming, isLatest }: QuizMessageProps) {
@@ -39,10 +52,13 @@ export function QuizMessage({ role, content, isStreaming, isLatest }: QuizMessag
             : "bg-foreground text-background rounded-tr-sm"
         )}
       >
-        {isAssistant && isLatest && isStreaming ? (
-          <TypewriterMessage content={content} isStreaming={isStreaming} />
+        {isAssistant && isStreaming && !content ? (
+          <TypingDots />
         ) : (
           <p className="text-base leading-relaxed whitespace-pre-wrap">{content}</p>
+        )}
+        {isAssistant && isStreaming && content && (
+          <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-middle rounded-full" />
         )}
       </div>
 
