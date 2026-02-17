@@ -18,6 +18,11 @@ const itemVariants = {
 const mono = "'JetBrains Mono', ui-monospace, monospace";
 const heading = "'Outfit', sans-serif";
 
+interface WeeklyExpectation {
+  week: number;
+  description: string;
+}
+
 interface ActiveProtocolStateProps {
   protocol: UserProtocol;
   currentWeek: number | null;
@@ -55,6 +60,11 @@ export function ActiveProtocolState({
 }: ActiveProtocolStateProps) {
   const navigate = useNavigate();
 
+  const weeklyExpectations = (protocol.weekly_expectations || []) as WeeklyExpectation[];
+  const currentWeekExpectation = currentWeek
+    ? weeklyExpectations.find((w) => w.week === currentWeek)
+    : null;
+
   const getNextScheduledDay = () => {
     if (!protocol.schedule) return null;
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -68,100 +78,53 @@ export function ActiveProtocolState({
     return null;
   };
 
+  // Determine phase from weekly expectations
+  const getPhaseInfo = () => {
+    if (!currentWeek || weeklyExpectations.length === 0) return null;
+    const totalWeeks = protocol.cycle_length_weeks;
+    if (currentWeek <= Math.ceil(totalWeeks * 0.25)) return { name: "Starting", index: 0 };
+    if (currentWeek <= Math.ceil(totalWeeks * 0.6)) return { name: "Building", index: 1 };
+    if (currentWeek <= Math.ceil(totalWeeks * 0.85)) return { name: "Optimization", index: 2 };
+    return { name: "Final", index: 3 };
+  };
+
+  const phase = getPhaseInfo();
+
   return (
     <>
-      {/* ─── HERO STATUS CARD ─── */}
-      <motion.div variants={itemVariants} className="mb-6">
-        <div className="rounded-[24px] overflow-hidden relative bg-white border border-border"
-          style={{ borderTop: "3px solid transparent", borderImage: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA) 1", borderImageSlice: "1 1 0 1" }}
-        >
-          <div className="p-6 md:p-7">
-            {/* Mobile: ring centered above */}
-            <div className="flex flex-col items-center md:hidden mb-4">
-              <ProgressRing percent={progressPercent} size={88} strokeWidth={6} />
-            </div>
-
-            {/* Desktop: two columns */}
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium mb-1 text-muted-foreground">
-                  Hey {firstName}
-                </p>
-                <h1
-                  className="text-[24px] md:text-[26px] font-extrabold truncate text-foreground"
-                  style={{ letterSpacing: "-0.03em", fontFamily: heading }}
-                >
-                  {protocol.protocol_name}
-                </h1>
-
-                {/* Stat pills */}
-                <div className="flex items-center gap-2 mt-3.5 flex-wrap">
-                  {[
-                    { dot: "#F97316", label: `Week ${currentWeek} of ${protocol.cycle_length_weeks}` },
-                    { dot: "#FB7185", label: `Day ${dayNumber}` },
-                    ...(compliancePercent > 0
-                      ? [{ dot: "#34D399", label: `${compliancePercent}%` }]
-                      : []),
-                  ].map((pill, i) => (
-                    <div
-                      key={i}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted border border-border"
-                    >
-                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: pill.dot }} />
-                      <span className="text-xs font-medium text-muted-foreground" style={{ fontFamily: mono }}>
-                        {pill.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Desktop ring */}
-              <div className="hidden md:block flex-shrink-0">
-                <ProgressRing percent={progressPercent} size={100} strokeWidth={6} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Progress bar below hero card */}
-        <div className="mt-4">
-          <div className="w-full h-1 rounded-full overflow-hidden bg-muted">
-            <motion.div
-              className="h-full rounded-full"
-              style={{ background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)" }}
-              initial={{ width: "0%" }}
-              animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 0.8, ease: "easeOut", delay: 1.2 }}
-            />
-          </div>
-          <p className="text-right mt-1.5 text-[11px] text-muted-foreground" style={{ fontFamily: mono }}>
-            {daysRemaining} days remaining
-          </p>
-        </div>
+      {/* ─── SECTION 1: TODAY'S FOCUS ─── */}
+      <motion.div variants={itemVariants} className="mb-2">
+        <p className="text-[13px] font-medium text-muted-foreground mb-0.5">
+          Hey {firstName}
+        </p>
+        <p className="text-sm font-semibold text-foreground" style={{ fontFamily: heading }}>
+          {protocol.protocol_name}
+        </p>
       </motion.div>
 
-      {/* ─── WEEK CALENDAR ─── */}
-      <motion.div variants={itemVariants} className="mb-8">
-        <h2 className="text-xs font-semibold uppercase tracking-wider mb-3 text-muted-foreground" style={{ fontFamily: mono, letterSpacing: "0.08em" }}>
-          This Week
-        </h2>
-        <div className="rounded-[16px] p-4 bg-white border border-border">
-          <WeekCalendarStrip
-            currentDay={dayNumber}
-            courseStartDate={protocol.start_date}
-            schedule={protocol.schedule as Record<string, string[]>}
+      {/* Status line + progress bar */}
+      <motion.div variants={itemVariants} className="mb-6">
+        <p className="text-[12px] text-muted-foreground mb-2" style={{ fontFamily: mono }}>
+          Week {currentWeek} of {protocol.cycle_length_weeks} · Day {dayNumber} · {daysRemaining} days left
+        </p>
+        <div className="w-full h-1 rounded-full overflow-hidden bg-muted">
+          <motion.div
+            className="h-full rounded-full"
+            style={{ background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)" }}
+            initial={{ width: "0%" }}
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.6 }}
           />
         </div>
       </motion.div>
 
-      {/* ─── TODAY'S STACK ─── */}
+      {/* Today's Stack */}
       <motion.div variants={itemVariants} className="mb-8">
-        <div className="flex items-baseline justify-between mb-4">
-          <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: heading, letterSpacing: "-0.03em" }}>
+        <div className="flex items-baseline justify-between mb-3">
+          <h2 className="text-lg font-bold text-foreground" style={{ fontFamily: heading, letterSpacing: "-0.03em" }}>
             Today's Stack
           </h2>
-          <span className="text-[13px] text-muted-foreground" style={{ fontFamily: mono }}>
+          <span className="text-[12px] text-muted-foreground" style={{ fontFamily: mono }}>
             {format(new Date(), "EEE, MMM d")}
           </span>
         </div>
@@ -189,7 +152,80 @@ export function ActiveProtocolState({
         </AnimatePresence>
       </motion.div>
 
-      {/* ─── JOURNEY TIMELINE ─── */}
+      {/* ─── SECTION 2: THIS WEEK'S OUTLOOK ─── */}
+      <motion.div variants={itemVariants} className="mb-8">
+        <h2 className="text-xs font-semibold uppercase tracking-wider mb-3 text-muted-foreground" style={{ fontFamily: mono, letterSpacing: "0.08em" }}>
+          This Week
+        </h2>
+        <div className="rounded-[16px] bg-white border border-border overflow-hidden">
+          {currentWeekExpectation && (
+            <div className="px-4 pt-4 pb-3 border-b border-border">
+              <p className="text-sm text-foreground leading-relaxed" style={{ fontFamily: heading }}>
+                {currentWeekExpectation.description}
+              </p>
+            </div>
+          )}
+          <div className="p-3">
+            <WeekCalendarStrip
+              currentDay={dayNumber}
+              courseStartDate={protocol.start_date}
+              schedule={protocol.schedule as Record<string, string[]>}
+            />
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ─── SECTION 3: PROTOCOL OVERVIEW ─── */}
+      <motion.div variants={itemVariants} className="mb-8">
+        <h2 className="text-xs font-semibold uppercase tracking-wider mb-3 text-muted-foreground" style={{ fontFamily: mono, letterSpacing: "0.08em" }}>
+          Protocol Overview
+        </h2>
+        <div className="rounded-[16px] bg-white border border-border p-5">
+          <div className="flex items-center gap-5">
+            <ProgressRing percent={progressPercent} size={100} strokeWidth={6} />
+            <div className="flex-1 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <Flame className="w-4 h-4" style={{ color: currentStreak > 0 ? "#F97316" : "#9CA3AF" }} />
+                <span className="text-sm font-medium text-foreground" style={{ fontFamily: mono }}>
+                  {currentStreak} day streak
+                </span>
+              </div>
+              {compliancePercent > 0 && (
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" style={{ color: "#34D399" }} />
+                  <span className="text-sm font-medium text-foreground" style={{ fontFamily: mono }}>
+                    {compliancePercent}% compliance
+                  </span>
+                </div>
+              )}
+              {/* Phase indicator */}
+              {phase && (
+                <div className="flex items-center gap-1 mt-1">
+                  {["Starting", "Building", "Optimization", "Final"].map((p, i) => (
+                    <div
+                      key={p}
+                      className="h-1.5 flex-1 rounded-full"
+                      style={{
+                        background: i <= phase.index
+                          ? "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)"
+                          : "hsl(0 0% 92%)",
+                        opacity: i <= phase.index ? 1 : 0.5,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+              {phase && (
+                <p className="text-[11px] text-muted-foreground" style={{ fontFamily: mono }}>
+                  {phase.name} phase
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ─── SECTION 4: JOURNEY TIMELINE ─── */}
       <motion.div variants={itemVariants} className="mb-8">
         <h2 className="text-xs font-semibold uppercase tracking-wider mb-3 text-muted-foreground" style={{ fontFamily: mono, letterSpacing: "0.08em" }}>
           Your Journey
@@ -199,69 +235,33 @@ export function ActiveProtocolState({
             currentDay={dayNumber}
             courseStartDate={protocol.start_date}
             totalDays={totalDays}
+            maxVisible={4}
           />
         </div>
       </motion.div>
 
-      {/* ─── STREAK + CHECK-IN ─── */}
-      {(currentStreak >= 2 || true) && (
-        <motion.div variants={itemVariants} className="mb-8">
-          <div className="grid grid-cols-2 gap-3">
-            {/* Streak */}
-            <div className="rounded-[14px] p-4 flex items-center gap-3 bg-white border border-border">
-              <div
-                className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: currentStreak > 0 ? "rgba(249,115,22,0.08)" : "hsl(0 0% 96%)" }}
-              >
-                <Flame
-                  className="w-[18px] h-[18px]"
-                  style={{
-                    color: currentStreak > 0 ? "#F97316" : "#9CA3AF",
-                    filter: currentStreak > 0 ? "drop-shadow(0 0 4px rgba(249,115,22,0.3))" : "none",
-                  }}
-                />
-              </div>
-              <div>
-                <p className="text-lg font-bold" style={{ fontFamily: mono }}>
-                  <span style={{ color: "#F97316" }}>{currentStreak}</span>{" "}
-                  <span className="text-sm font-medium text-muted-foreground">day streak</span>
-                </p>
-              </div>
-            </div>
-
-            {/* Check-in nudge */}
-            <button
-              onClick={() => navigate("/dashboard/progress")}
-              className="rounded-[14px] p-4 flex items-center gap-3 text-left transition-all hover:shadow-sm active:scale-[0.98] bg-white border border-border"
-            >
-              <div
-                className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: hasCheckedInThisWeek ? "rgba(52,211,153,0.08)" : "rgba(251,113,133,0.08)" }}
-              >
-                {hasCheckedInThisWeek ? (
-                  <CheckCircle2 className="w-[18px] h-[18px]" style={{ color: "#34D399" }} />
-                ) : (
-                  <Clock className="w-[18px] h-[18px]" style={{ color: "#FB7185" }} />
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">
-                  {hasCheckedInThisWeek ? "Checked in" : "Check-in due"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {hasCheckedInThisWeek ? "This week" : "Weekly"}
-                </p>
-              </div>
-            </button>
-          </div>
-        </motion.div>
-      )}
-
-      {/* ─── QUICK ACCESS ─── */}
+      {/* ─── SECTION 5: QUICK ACTIONS ─── */}
       <motion.div variants={itemVariants} className="mb-8">
-        <h2 className="text-lg font-bold mb-3 text-foreground" style={{ fontFamily: heading, letterSpacing: "-0.03em" }}>
-          Quick Access
-        </h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold text-foreground" style={{ fontFamily: heading, letterSpacing: "-0.03em" }}>
+            Quick Access
+          </h2>
+          {/* Inline check-in nudge */}
+          <button
+            onClick={() => navigate("/dashboard/progress")}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border border-border transition-colors hover:bg-muted"
+            style={{ fontFamily: mono }}
+          >
+            {hasCheckedInThisWeek ? (
+              <CheckCircle2 className="w-3 h-3" style={{ color: "#34D399" }} />
+            ) : (
+              <Clock className="w-3 h-3" style={{ color: "#FB7185" }} />
+            )}
+            <span className="text-muted-foreground">
+              {hasCheckedInThisWeek ? "Checked in" : "Check-in due"}
+            </span>
+          </button>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           {[
             { icon: MessageSquare, label: "AI Coach", desc: "Ask anything", to: "/dashboard/coach", color: "#F97316", gradient: "linear-gradient(90deg, #F97316, #F59E0B)" },
@@ -276,9 +276,7 @@ export function ActiveProtocolState({
               <div className="h-[2px]" style={{ background: card.gradient }} />
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2.5">
-                  <div
-                    className="w-9 h-9 rounded-[10px] flex items-center justify-center bg-muted"
-                  >
+                  <div className="w-9 h-9 rounded-[10px] flex items-center justify-center bg-muted">
                     <card.icon className="w-4 h-4" style={{ color: card.color }} />
                   </div>
                   <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />

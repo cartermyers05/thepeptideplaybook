@@ -10,6 +10,7 @@ interface MilestonesTimelineProps {
   courseStartDate?: string | null;
   totalDays: number;
   earnedMilestoneIds?: MilestoneId[];
+  maxVisible?: number;
 }
 
 const iconMap: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
@@ -44,8 +45,20 @@ function getMilestones(
   });
 }
 
-export function MilestonesTimeline({ currentDay, courseStartDate, totalDays, earnedMilestoneIds = [] }: MilestonesTimelineProps) {
-  const milestones = getMilestones(currentDay, courseStartDate, totalDays, earnedMilestoneIds);
+export function MilestonesTimeline({ currentDay, courseStartDate, totalDays, earnedMilestoneIds = [], maxVisible }: MilestonesTimelineProps) {
+  const allMilestones = getMilestones(currentDay, courseStartDate, totalDays, earnedMilestoneIds);
+
+  // Smart filtering: show nearest milestones around current progress
+  let milestones = allMilestones;
+  if (maxVisible && allMilestones.length > maxVisible) {
+    const currentIdx = allMilestones.findIndex((m) => m.isCurrent);
+    const firstIncompleteIdx = allMilestones.findIndex((m) => !m.completed);
+    const anchorIdx = currentIdx >= 0 ? currentIdx : firstIncompleteIdx >= 0 ? firstIncompleteIdx : 0;
+    
+    // Show 1 before anchor + anchor + rest up to maxVisible
+    const startIdx = Math.max(0, anchorIdx - 1);
+    milestones = allMilestones.slice(startIdx, startIdx + maxVisible);
+  }
 
   return (
     <div className="relative">
