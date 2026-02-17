@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FloatingOrbs } from "@/components/landing/FloatingOrbs";
 import { GridPattern } from "@/components/landing/GridPattern";
 import { Logo } from "@/components/brand/Logo";
+import { LogoPattern } from "@/components/brand/LogoPattern";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -49,6 +50,7 @@ export default function Login() {
       
       {/* Gradient overlay */}
       <div className="absolute inset-0 gradient-mesh-bg" />
+      <LogoPattern />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
