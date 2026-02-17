@@ -1,102 +1,120 @@
 
 
-# Homepage Redesign: Reorder Sections + Animation Upgrade
+# Dashboard Upgrades: Background Animations, Charts & FDA Timeline
 
-## Section Reorder
+## Overview
 
-Current order vs. proposed new order:
+Three additions to the dashboard home page: animated background effects, a data visualization chart, and a live FDA regulatory timeline that auto-updates from your news feed.
 
-| Current Position | Section | New Position | Rationale |
-|---|---|---|---|
-| 1 | Hero | 1 | Stays -- it's the entry point |
-| 2 | GuidedDemo ("Try It Yourself") | 4 | Move down -- let users understand the product before trying it |
-| 3 | WhatsInside (6 feature cards) | 3 | Move up one slot -- show what they get right after social proof |
-| 4 | WhoThisIsFor (4 persona cards) | 6 | Move down -- less urgent than pricing |
-| 5 | HowItWorks (3 steps) | 2 | Move UP -- immediately show how simple it is after the hero |
-| 6 | PricingCTA | 5 | Move up -- price anchoring earlier increases conversions |
-| 7 | FAQ | 7 | Stays |
-| 8 | FinalCTA | 8 | Stays |
+## 1. Animated Dashboard Background
 
-**New flow:** Hero --> How It Works --> What's Inside --> Try It Yourself --> Pricing --> Who This Is For --> FAQ --> Final CTA
+The dashboard currently has a flat `#FAFAFA` background. We'll add subtle ambient animations to the `DashboardLayout` wrapper without overwhelming the content cards.
 
-This puts the "3 easy steps" right after the hook, then features, then the interactive demo as proof, then the price before objections/FAQ.
+**What gets added:**
+- Slow-drifting gradient orbs (indigo, emerald, violet) at very low opacity behind all content
+- Micro-particle field (20-30 tiny dots floating gently) for depth
+- A soft breathing glow pulse centered behind the stat cards area
+- All animations use CSS `will-change: transform` for GPU acceleration and are `pointer-events-none`
 
-## Animation Upgrades
+**Implementation:** New `DashboardBackground` component rendered inside `DashboardLayout.tsx`, positioned absolutely behind the `{children}` content.
 
-### 1. Hero Section -- Staggered Text Reveal + Floating Cards
+## 2. Compliance & Energy Trend Chart
 
-- Each word in the headline animates in individually with a slight Y offset and blur, creating a "typewriter meets fade" effect
-- The product preview cards on the right get a subtle continuous float animation (gentle Y oscillation, 3-4px, 6s loop)
-- Trust bar items slide in from the left one by one with spring physics
-- Add a subtle gradient orb behind the hero text that slowly drifts
+A new Recharts-powered card placed between the Weekly Review and Today's Stack sections, showing the user's last 14 days of data at a glance.
 
-### 2. HowItWorks -- Connected Timeline Animation
+**What it shows:**
+- Dual-axis line chart: compliance rate (left axis, %) and energy level (right axis, 1-10)
+- Gradient-filled area under each line (blue for compliance, emerald for energy)
+- Animated draw-in on first render
+- Compact card style matching the existing dashboard aesthetic
 
-- The 3 steps animate in sequence with a visible "connecting line" that draws itself between them (SVG path animation)
-- Each step number badge scales up with a spring bounce when it enters the viewport
-- The icons inside each step do a subtle rotate-in (15 degrees to 0)
-- Add a pulsing glow on each step badge that fades once the next step appears
+**Implementation:** New `TrendMiniChart` component using Recharts (already installed). Data sourced from the `allLogs` prop already passed through to `ActiveProtocolState`.
 
-### 3. WhatsInside -- Card Cascade with Hover Tilt
+## 3. FDA Regulatory Timeline
 
-- Cards stagger in with a 3D perspective tilt (start rotated 5 degrees on Y axis, animate to 0)
-- On hover, cards tilt slightly toward the mouse direction (CSS perspective transform)
-- The gradient top bar on each card does a shimmer sweep animation on first appearance
-- The icon in each card does a gentle bounce animation
+An interactive timeline card showing key peptide regulatory events and upcoming expected dates. This auto-updates by pulling from two sources:
 
-### 4. GuidedDemo -- Attention-Grabbing Entrance
+**Data sources:**
+- A new `fda_timeline_events` database table storing structured events (date, peptide, event type, status)
+- Regulatory news articles from the existing `news_articles` table (category = "regulatory")
 
-- The question cards fan out from the center like a card deck spread
-- When an answer is showing, the chat bubbles slide in with elastic easing
-- Add a subtle "typing indicator" animation before the AI answer appears (3 bouncing dots)
+**What the user sees:**
+- A vertical timeline with color-coded nodes:
+  - Green = Approved/positive
+  - Red = Banned/Category 2
+  - Amber = Under review/pending
+  - Blue = Upcoming expected date
+- Each node shows: date, peptide name, short description
+- "Upcoming" events have a pulsing animation to indicate they're projected
+- A "Latest News" badge links to relevant regulatory articles when one exists
+- Scrollable within a fixed-height card
 
-### 5. PricingCTA -- Dramatic Reveal
+**Auto-updating mechanism:**
+- The `fda_timeline_events` table stores both historical facts and projected future dates
+- When new regulatory news articles are published (via existing news pipeline), an admin can add corresponding timeline events
+- A backend function `update-fda-timeline` can be called to use AI to extract timeline-relevant info from recent regulatory news and suggest new events
 
-- The price number ($67) counts up from $0 with an animated counter
-- Feature checkmarks cascade in one by one with a satisfying "pop" scale animation
-- The comparison table rows slide in from the left with staggered delays
-- The glow pulse behind the pricing card becomes more pronounced
+### Database: `fda_timeline_events` table
 
-### 6. WhoThisIsFor -- Slide-In Cards
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| peptide_name | text | e.g. "BPC-157", "Semaglutide" |
+| event_date | date | When it happened/expected |
+| event_type | text | "approved", "banned", "under_review", "hearing", "expected_decision" |
+| title | text | Short headline |
+| description | text | 1-2 sentence detail |
+| status | text | "confirmed" or "projected" |
+| source_url | text | Link to source (nullable) |
+| news_article_id | uuid | FK to news_articles (nullable) |
+| created_at | timestamptz | Auto |
 
-- Cards alternate sliding in from left and right instead of all fading up together
-- Icons do a gentle spin-in animation (180 degrees to 0) when entering viewport
+RLS: Public read access (this is regulatory reference data, not user-specific). Insert/update restricted to service role.
 
-### 7. FAQ -- Smooth Accordion Upgrade
+**Seed data includes:**
+- 2023: FDA places BPC-157, TB-500, AOD-9604 on Category 2
+- Sep 2024: CJC-1295 and Ipamorelin removed from Category 2 (but NOT added to Category 1)
+- 2025: FDA guidance updates on compounding
+- 2026 projected: PCAC review hearings, potential reclassification decisions
 
-- Questions slide in from the right with staggered timing
-- The heading on the left gets a text gradient animation that slowly shifts colors
-- Plus/minus icons rotate smoothly instead of swapping
+### Backend Function: `update-fda-timeline`
 
-### 8. Global -- Scroll Progress + Parallax
-
-- Add a thin gradient progress bar at the very top of the page (below navbar) showing scroll progress
-- Section backgrounds get subtle parallax movement (background moves at 0.3x scroll speed)
-- Add smooth scroll-snap behavior between major sections on desktop
+An edge function that:
+1. Fetches recent regulatory news articles (last 30 days)
+2. Sends them to Gemini Flash with a structured prompt to extract timeline events
+3. Returns suggested new events for admin review
+4. Optionally auto-inserts confirmed events
 
 ## Technical Details
 
+### Files Created
+
+| File | Purpose |
+|------|---------|
+| `src/components/dashboard/home/DashboardBackground.tsx` | Animated gradient orbs, particles, and breathing pulse for dashboard bg |
+| `src/components/dashboard/home/TrendMiniChart.tsx` | Recharts dual-axis line chart for compliance + energy trends |
+| `src/components/dashboard/home/FDATimelineCard.tsx` | Interactive FDA regulatory timeline with color-coded nodes |
+| `src/hooks/useFDATimeline.ts` | Hook to fetch timeline events from database |
+| `supabase/functions/update-fda-timeline/index.ts` | AI-powered extraction of timeline events from regulatory news |
+
 ### Files Modified
 
-| File | Changes |
-|---|---|
-| `src/pages/Index.tsx` | Reorder section components, add scroll progress bar, wrap sections with parallax |
-| `src/components/landing/HeroSection.tsx` | Word-by-word headline animation, floating card oscillation, gradient orb background |
-| `src/components/landing/HowItWorksSection.tsx` | SVG connecting line draw animation, spring bounce on step badges, icon rotate-in |
-| `src/components/landing/WhatsInsideSection.tsx` | 3D perspective card entrance, shimmer on gradient bars, icon bounce |
-| `src/components/landing/GuidedDemo.tsx` | Card fan-out animation, elastic chat bubble entrance |
-| `src/components/landing/PricingCTA.tsx` | Animated price counter, cascading checkmarks, comparison row slide-in |
-| `src/components/landing/WhoThisIsForNew.tsx` | Alternating left/right slide-in, icon spin animation |
-| `src/components/landing/FAQ.tsx` | Staggered question slide-in, smooth icon rotation, heading gradient |
-| `src/components/landing/FinalCTA.tsx` | Scale-up entrance with glow pulse |
+| File | Change |
+|------|--------|
+| `src/components/dashboard/DashboardLayout.tsx` | Add `DashboardBackground` component behind content |
+| `src/components/dashboard/home/ActiveProtocolState.tsx` | Add `TrendMiniChart` and `FDATimelineCard` as new dashboard sections |
 
-### No New Dependencies
+### Animation Performance
 
-All animations use existing `framer-motion` and CSS transforms/transitions.
+- Background orbs use CSS keyframe animations (not framer-motion driven) for zero JS overhead
+- Particle count capped at 25 with `will-change: transform`
+- Chart uses Recharts built-in animation (single render, no continuous repaints)
+- Timeline pulsing dots use CSS `@keyframes` only
 
-### Performance Considerations
+### Chart Data Processing
 
-- All `whileInView` animations use `viewport: { once: true }` so they only play once
-- Continuous animations (floating cards, gradient shifts) use CSS animations instead of JS-driven framer-motion to reduce repaints
-- Parallax uses `transform: translateY()` for GPU acceleration
-- Scroll progress bar uses a passive scroll listener with `requestAnimationFrame`
+The `TrendMiniChart` processes `allLogs` to compute:
+- Daily compliance: `completed_actions / total_actions * 100`
+- Energy: pulled from `energy_level` field in each log
+- Missing days show as gaps (no interpolation to keep it honest)
+
