@@ -102,7 +102,28 @@ You have a tool called "update_protocol" that updates the user's active protocol
 - Always confirm the change conversationally after updating (e.g., "Got it, I've marked your supplies as received and updated your timeline.")
 - If the user provides a start date, use ISO format (YYYY-MM-DD). If they say "today", use today's date. If "tomorrow", use tomorrow's date.
 - When setting status to "active" and no start_date was previously set, also set start_date to today.
-- Only update fields the user explicitly mentions — don't change other fields.`;
+- Only update fields the user explicitly mentions — don't change other fields.
+
+═══════════════════════════════════════════════════════════
+DAILY LOGGING VIA CONVERSATION
+═══════════════════════════════════════════════════════════
+
+You have a tool called "log_daily_update" that writes to the user's daily log when they tell you about their day.
+
+**WHEN TO USE THIS TOOL:**
+- User mentions taking, doing, completing, or skipping a compound/dose
+- User reports how they feel (energy level, mood, symptoms)
+- User mentions their weight
+- User reports side effects or reactions (injection site, GI, etc.)
+- Any combination of the above in a single message
+
+**IMPORTANT RULES:**
+- ALWAYS call this tool when the intent is clear — never ask "should I log that?"
+- Match compound names to their protocol compounds (e.g., "CJC" → "CJC-1295 (No DAC)", "Ipa" → "Ipamorelin")
+- If user says "all my compounds" or "everything today", put ALL protocol compounds in compounds_taken
+- Energy ratings should be 1-10 scale. If user says "great energy" without a number, infer ~8. "OK" → ~6. "Low" → ~3.
+- After logging, briefly confirm what was recorded in your response (e.g., "Logged: CJC-1295 ✓, Ipamorelin ✓, energy 8/10")
+- If user mentions weight, convert to lbs if needed`;
 
 // ═══════════════════════════════════════════════════════════
 // TOOL DEFINITIONS
@@ -201,6 +222,27 @@ const tools = [
           supplies_status: { type: "string", enum: ["not_ordered", "ordered", "received", "ready"], description: "Supply tracking status" },
           start_date: { type: "string", description: "ISO date (YYYY-MM-DD) for when the protocol starts" },
           cycle_length_weeks: { type: "number", description: "Updated cycle length in weeks" },
+        },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "log_daily_update",
+      description: "Log the user's daily activity: compounds taken/skipped, energy level, weight, symptoms, and notes. Call this whenever the user mentions what they did today, how they feel, or reports any metrics.",
+      parameters: {
+        type: "object",
+        properties: {
+          compounds_taken: { type: "array", items: { type: "string" }, description: "Compound names the user took today (must match protocol compound names)" },
+          compounds_skipped: { type: "array", items: { type: "string" }, description: "Compound names the user explicitly skipped today" },
+          energy_rating: { type: "number", description: "Energy level 1-10. Infer from qualitative descriptions if no number given." },
+          injection_site_reaction: { type: "string", description: "Any injection site reaction described" },
+          gi_issues: { type: "string", description: "Any GI/stomach issues described" },
+          other_symptoms: { type: "string", description: "Any other symptoms or side effects" },
+          notes: { type: "string", description: "General notes about how the user is feeling" },
+          weight_lbs: { type: "number", description: "Weight in pounds" },
         },
         required: []
       }
@@ -432,6 +474,117 @@ async function handleUpdateProtocol(
   }
 }
 
+async function handleLogDailyUpdate(
+  args: any,
+  userId: string,
+  supabaseServiceRole: ReturnType<typeof createClient>
+): Promise<{ success: boolean; message: string }> {
+  try {
+    // Find user's active protocol
+    const { data: activeProtocol } = await supabaseServiceRole
+      .from("user_protocols")
+      .select("id, compounds")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const protocolId = activeProtocol?.id || null;
+    const allCompounds: string[] = (activeProtocol?.compounds || []).map((c: any) => c.name);
+
+    // Build actions_completed map
+    const actionsCompleted: Record<string, boolean> = {};
+    if (args.compounds_taken?.length) {
+      for (const name of args.compounds_taken) {
+        actionsCompleted[name] = true;
+      }
+    }
+    if (args.compounds_skipped?.length) {
+      for (const name of args.compounds_skipped) {
+        actionsCompleted[name] = false;
+      }
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+
+    // Check for existing log today
+    const { data: existingLog } = await supabaseServiceRole
+      .from("daily_logs")
+      .select("id, actions_completed, notes")
+      .eq("user_id", userId)
+      .eq("log_date", today)
+      .maybeSingle();
+
+    // Merge actions_completed with existing if present
+    let mergedActions = actionsCompleted;
+    if (existingLog?.actions_completed && typeof existingLog.actions_completed === "object") {
+      mergedActions = { ...(existingLog.actions_completed as Record<string, boolean>), ...actionsCompleted };
+    }
+
+    // Only include actions_completed if we have any
+    const hasActions = Object.keys(mergedActions).length > 0;
+
+    // Build upsert data
+    const logData: Record<string, any> = {
+      user_id: userId,
+      log_date: today,
+      protocol_id: protocolId,
+    };
+
+    if (hasActions) logData.actions_completed = mergedActions;
+    if (args.energy_rating != null) logData.energy_rating = args.energy_rating;
+    if (args.weight_lbs != null) logData.weight_lbs = args.weight_lbs;
+    if (args.injection_site_reaction) logData.injection_site_reaction = args.injection_site_reaction;
+    if (args.gi_issues) logData.gi_issues = args.gi_issues;
+    if (args.other_symptoms) logData.other_symptoms = args.other_symptoms;
+    if (args.notes) {
+      // Append to existing notes if present
+      const existingNotes = existingLog?.notes || "";
+      logData.notes = existingNotes ? `${existingNotes}\n${args.notes}` : args.notes;
+    }
+
+    if (existingLog) {
+      // Update existing log
+      const { error } = await supabaseServiceRole
+        .from("daily_logs")
+        .update(logData)
+        .eq("id", existingLog.id);
+
+      if (error) {
+        console.error("Failed to update daily log:", error);
+        return { success: false, message: `Failed to update daily log: ${error.message}` };
+      }
+    } else {
+      // Insert new log
+      const { error } = await supabaseServiceRole
+        .from("daily_logs")
+        .insert(logData);
+
+      if (error) {
+        console.error("Failed to insert daily log:", error);
+        return { success: false, message: `Failed to insert daily log: ${error.message}` };
+      }
+    }
+
+    // Build confirmation
+    const parts: string[] = [];
+    if (args.compounds_taken?.length) parts.push(`Taken: ${args.compounds_taken.join(", ")}`);
+    if (args.compounds_skipped?.length) parts.push(`Skipped: ${args.compounds_skipped.join(", ")}`);
+    if (args.energy_rating != null) parts.push(`Energy: ${args.energy_rating}/10`);
+    if (args.weight_lbs != null) parts.push(`Weight: ${args.weight_lbs} lbs`);
+    if (args.injection_site_reaction) parts.push(`Site reaction: ${args.injection_site_reaction}`);
+    if (args.gi_issues) parts.push(`GI: ${args.gi_issues}`);
+    if (args.other_symptoms) parts.push(`Symptoms: ${args.other_symptoms}`);
+
+    console.log("Daily log updated:", parts.join(", "));
+    return { success: true, message: `Daily log updated for ${today}. ${parts.join(". ")}.` };
+  } catch (e) {
+    console.error("Error in log_daily_update:", e);
+    return { success: false, message: "Failed to log daily update" };
+  }
+}
+
 async function handleToolCall(
   toolCall: { function: { name: string; arguments: string } },
   userId: string,
@@ -447,6 +600,11 @@ async function handleToolCall(
   if (toolCall.function.name === "update_protocol") {
     const result = await handleUpdateProtocol(args, userId, supabaseServiceRole);
     return { ...result, toolName: "update_protocol" };
+  }
+
+  if (toolCall.function.name === "log_daily_update") {
+    const result = await handleLogDailyUpdate(args, userId, supabaseServiceRole);
+    return { ...result, toolName: "log_daily_update" };
   }
 
   return { success: false, message: "Unknown tool" };
@@ -517,11 +675,13 @@ serve(async (req) => {
       const toolResults = [];
       let protocolCreated = false;
       let protocolUpdated = false;
+      let dailyLogUpdated = false;
 
       for (const toolCall of assistantMessage.tool_calls) {
         const result = await handleToolCall(toolCall, userId, supabaseServiceRole);
         if (result.success && result.toolName === "create_protocol") protocolCreated = true;
         if (result.success && result.toolName === "update_protocol") protocolUpdated = true;
+        if (result.success && result.toolName === "log_daily_update") dailyLogUpdated = true;
         toolResults.push({
           tool_call_id: toolCall.id,
           role: "tool",
@@ -552,10 +712,11 @@ serve(async (req) => {
       const responseHeaders: Record<string, string> = {
         ...corsHeaders,
         "Content-Type": "text/event-stream",
-        "Access-Control-Expose-Headers": "X-Protocol-Created, X-Protocol-Updated",
+        "Access-Control-Expose-Headers": "X-Protocol-Created, X-Protocol-Updated, X-Daily-Log-Updated",
       };
       if (protocolCreated) responseHeaders["X-Protocol-Created"] = "true";
       if (protocolUpdated) responseHeaders["X-Protocol-Updated"] = "true";
+      if (dailyLogUpdated) responseHeaders["X-Daily-Log-Updated"] = "true";
 
       return new Response(followUpResponse.body, { headers: responseHeaders });
     }
