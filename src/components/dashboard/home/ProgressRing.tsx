@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +50,7 @@ export function ProgressRing({
             <stop offset="100%" stopColor="#A78BFA" />
           </linearGradient>
         </defs>
-        {/* Track - light gray */}
+        {/* Track */}
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -75,17 +75,7 @@ export function ProgressRing({
       {showLabel && (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <div className="flex items-baseline">
-            <span
-              ref={(el) => {
-                if (el) {
-                  const unsub = displayPercent.on("change", (v) => {
-                    el.textContent = String(v);
-                  });
-                  (el as any).__unsub = unsub;
-                }
-              }}
-              style={{ fontFamily: mono, fontWeight: 700, fontSize: size > 90 ? 28 : 22, color: "#0A0A0A" }}
-            />
+            <PercentDisplay displayPercent={displayPercent} size={size} />
             <span style={{ fontFamily: mono, fontSize: size > 90 ? 14 : 11, color: "#9CA3AF", marginLeft: 1 }}>%</span>
           </div>
           <span
@@ -103,5 +93,28 @@ export function ProgressRing({
         </div>
       )}
     </div>
+  );
+}
+
+/* Fix: separate component to properly subscribe to motion value */
+function PercentDisplay({ displayPercent, size }: { displayPercent: any; size: number }) {
+  useEffect(() => {
+    // Force initial render
+  }, []);
+
+  return (
+    <span
+      ref={(el) => {
+        if (!el) return;
+        // Set initial value
+        el.textContent = String(Math.round(displayPercent.get()));
+        // Subscribe to changes
+        const unsub = displayPercent.on("change", (v: number) => {
+          el.textContent = String(v);
+        });
+        (el as any).__unsub = unsub;
+      }}
+      style={{ fontFamily: mono, fontWeight: 700, fontSize: size > 90 ? 28 : 22, color: "#0A0A0A" }}
+    />
   );
 }

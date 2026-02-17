@@ -48,12 +48,17 @@ export function CompoundCard({ compound, checked, onToggle, index = 0 }: Compoun
       initial="hidden"
       animate="visible"
       onClick={onToggle}
-      className="w-full rounded-[16px] flex items-stretch text-left transition-all duration-200 overflow-hidden group bg-white border border-border hover:shadow-sm"
+      whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(0,0,0,0.06)" }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className="w-full rounded-[16px] flex items-stretch text-left transition-all duration-200 overflow-hidden group bg-white border border-border"
     >
       {/* Category accent bar */}
       <div
-        className="w-[3px] flex-shrink-0 my-3 ml-0 rounded-r-full"
-        style={{ backgroundColor: catColor }}
+        className="w-[3px] flex-shrink-0 my-3 ml-0 rounded-r-full transition-all duration-300"
+        style={{
+          backgroundColor: catColor,
+          boxShadow: checked ? "none" : `0 0 8px ${catColor}40`,
+        }}
       />
 
       <div className="flex-1 py-4 pl-3.5 pr-4 flex items-center gap-4">
@@ -67,7 +72,6 @@ export function CompoundCard({ compound, checked, onToggle, index = 0 }: Compoun
             </span>
             <span className="text-muted-foreground"> · {compound.route}</span>
           </p>
-          {/* Rationale — the "why" behind each compound */}
           {compound.rationale && (
             <p className="text-[12px] mt-1 text-muted-foreground leading-snug line-clamp-1">
               {compound.rationale}
@@ -85,7 +89,7 @@ export function CompoundCard({ compound, checked, onToggle, index = 0 }: Compoun
           style={{
             border: checked ? "none" : "2px solid hsl(0 0% 85%)",
             backgroundColor: checked ? "#34D399" : "transparent",
-            boxShadow: checked ? "0 0 10px rgba(52,211,153,0.25)" : "none",
+            boxShadow: checked ? "0 0 12px rgba(52,211,153,0.3)" : "none",
           }}
           animate={checked ? { scale: [1, 1.15, 1] } : { scale: 1 }}
           transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
