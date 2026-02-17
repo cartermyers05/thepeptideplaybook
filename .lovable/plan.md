@@ -1,56 +1,81 @@
 
 
-# Dashboard Polish: Clean Layout, Animations, and More User Value
+# Dashboard Visual Overhaul: Modern, Interactive, High-Impact
 
-## What's Wrong Now
+## What's Wrong
 
-The dashboard has the right data structure but looks cluttered — inconsistent spacing between rows, stat cards feel disconnected, sections lack visual hierarchy, and there are no entrance animations on individual elements (just a single container fade). It needs tightening, polished staggered animations, and more contextual value injected into each section.
+Looking at the live dashboard, the problems are clear:
 
-## Changes
+1. **Everything is flat white** -- every card is the same `bg-white border border-border rounded-[16px]`. No depth, no hierarchy, no visual interest.
+2. **No interactivity** -- stat cards are dead. You can't click, hover, or expand anything. The only interactive elements are compound checkboxes.
+3. **Massive empty space** -- the "This Week" card is 60% whitespace. The journey timeline is sparse. Quick Access cards are undersized.
+4. **No visual texture** -- no gradients on backgrounds, no glassmorphism, no subtle patterns. It looks like a wireframe, not a shipped product.
+5. **Progress ring shows "%" with no number** -- the animated counter ref isn't initializing properly at 0%.
+6. **The insight card is forgettable** -- just text with a tiny icon. No visual weight.
 
-### 1. Staggered Entrance Animations (Every Section)
+## The Redesign
 
-Each row gets its own `motion.div` with the blur-to-sharp `itemVariants`, but currently they all share the same variant with no stagger per card. Fix:
+### 1. Hero Stat Row -- Glassmorphic Cards with Hover Reveal
 
-- **Stat cards**: Each of the 4 cards animates individually with 80ms stagger using `custom` index prop on framer-motion. Cards slide up from 20px with blur clearing.
-- **Compound cards**: Each compound card staggers in with 60ms delay, creating a "loading in" feel.
-- **Quick Access cards**: Stagger in from left to right.
-- **Milestone nodes**: Each node fades in sequentially.
-- **Progress Ring**: Animated stroke already exists — add a scale-in entrance (0.8 to 1.0) with spring physics.
+Replace the 4 flat white stat cards with **glassmorphic bento cards** that have:
+- A subtle gradient mesh background (different tint per card -- warm orange, cool blue, rose, violet)
+- `backdrop-blur(12px)` with semi-transparent white overlay
+- **Hover interaction**: on hover, the card lifts (`y: -4`) and reveals a second line of contextual detail (e.g., Progress card shows "X days elapsed" on hover, Streak card shows "Best: X days")
+- Animated number counter on mount using framer-motion `useMotionValue`
+- Larger visual indicators (the sparkline and arc get 50% bigger)
 
-### 2. Layout Cleanup (Spacing and Hierarchy)
+### 2. Smart Insight -- Full-Width Gradient Banner
 
-- Reduce `mb-6` gaps between rows to `mb-5` for tighter feel
-- Add a thin full-width gradient separator line between major sections (4px, subtle, the brand gradient at 10% opacity)
-- Stat card padding tightened: `p-4` becomes `p-3.5` on mobile, stays `p-4` on desktop
-- "This Week" and "Protocol Overview" right-column cards get minimum height so they align evenly with their left neighbors
-- Quick Access section header alignment fix — the check-in badge aligns center vertically with the "Quick Access" label
+Replace the plain white insight card with a **gradient mesh banner**:
+- Background: subtle radial gradient using brand colors at 6% opacity
+- Left side: animated pulsing hexagon icon (not a static lightbulb)
+- The text gets slightly larger (15px) with Outfit font
+- A subtle shimmer animation sweeps across the card on mount
 
-### 3. More User Value: Smart Insights Row (NEW)
+### 3. Today's Stack -- Dark Header Treatment
 
-Add a new "Insights" section between the stat cards and Today's Stack. This is a single card spanning full width with 1-2 contextual, dynamic messages based on the user's actual data:
+The "Today's Stack" card gets a **dark header strip**:
+- Header background: `#0A0A0A` with white text for the "TODAY'S STACK" label and date
+- The progress bar sits on the dark header, making the gradient pop
+- Card body stays white for compound cards (contrast)
+- This creates visual hierarchy -- the most important section LOOKS most important
 
-- **If compliance > 90%**: "Your consistency is in the top tier. Keep this pace through Week {X} for optimal results."
-- **If compliance < 50%**: "Missed a few days? That's okay. Consistency matters more than perfection — get back on track today."
-- **If streak > 7**: "7-day streak! You're building a solid habit. Research shows 21 consecutive days locks in behavior change."
-- **If it's the first week**: "Welcome to Week 1. Focus on getting comfortable with your routine. Side effects are typically mildest now."
-- **If weekly_expectations exists for current week**: Show the expectation text here prominently instead of buried in the "This Week" card.
+### 4. This Week -- Interactive Day Cells
 
-This replaces generic filler with personalized, motivational, research-backed context. The insight card has a subtle left border using the brand gradient and an info icon.
+The WeekCalendarStrip gets interactive:
+- Each day cell becomes a **hoverable card** that shows a tooltip with scheduled compounds
+- Today's cell gets a pulsing gradient border animation (not just static gradient border)
+- Completed days get a subtle green checkmark animation on mount
+- The weekly expectation text gets a subtle typewriter-style entrance animation
 
-### 4. Decorative Hexagon Watermark
+### 5. Protocol Overview -- Animated Gradient Ring Background
 
-Add a subtle SVG hexagon (from the brand logo) as a watermark in the top-right of the page, rotated 15 degrees, at 8% opacity. This ties the dashboard visually to the brand identity without being distracting. Uses the same hexagon path from `AnimatedLogo.tsx`.
+The Protocol Overview card gets depth:
+- Behind the ProgressRing, add a subtle concentric circle pattern (decorative SVG rings at 4% opacity)
+- The phase indicator becomes **interactive** -- each phase segment is clickable/hoverable showing a tooltip with what that phase means
+- Stats rows get alternating subtle background tints
 
-### 5. Today's Stack: Completion Progress Bar
+### 6. Journey Timeline -- Animated Nodes
 
-Add a thin progress bar at the top of the "Today's Stack" card header showing X/Y compounds completed. Uses the brand gradient fill. When all done, the entire bar pulses once with a glow effect.
+Milestone nodes get life:
+- Completed nodes animate in with a satisfying "pop" (scale 0 to 1 with overshoot spring)
+- The current node gets a continuous subtle pulse animation
+- The vertical connecting line animates its gradient fill on mount (drawing downward)
+- Each node staggers in 100ms apart
 
-### 6. Quick Access Cards: Hover Micro-Interactions
+### 7. Quick Access -- Bento Card Style with Gradient Fills
 
-- On hover, the icon container scales to 1.1 with a spring animation
-- The arrow rotates 45 degrees on hover (pointing up-right)
-- Card lifts with a subtle shadow transition (already partially there, make it more pronounced)
+Quick Access cards get completely restyled:
+- Instead of white cards with tiny gradient top borders, each card gets a **subtle gradient background fill** matching its accent color (at ~5% opacity)
+- Icon containers become 44px with the gradient background (not gray)
+- On hover, the gradient opacity increases to 12% and the card lifts with shadow
+- The arrow animates to a 45-degree rotation on hover
+
+### 8. Floating Elements and Polish
+
+- Add 2-3 small floating hexagon shapes in the background (like the watermark but smaller, scattered, animated with slow float)
+- Add a subtle noise texture overlay to the entire page at 2% opacity for tactile feel
+- Footer gets a top gradient border instead of plain border
 
 ---
 
@@ -60,36 +85,44 @@ Add a thin progress bar at the top of the "Today's Stack" card header showing X/
 
 | File | Changes |
 |------|---------|
-| `ActiveProtocolState.tsx` | Complete rewrite: add per-card stagger animations, smart insights row, hexagon watermark, completion progress bar in Today's Stack header, tighten spacing, add gradient separators, hover animations on quick access |
-| `CompoundCard.tsx` | Wrap in `motion.div` for stagger support (accept `index` prop for delay) |
-| `MilestonesTimeline.tsx` | Add per-node stagger animation with `motion.div` |
+| `ActiveProtocolState.tsx` | Complete visual overhaul: glassmorphic stat cards with hover states, dark header on Today's Stack, gradient insight banner, interactive quick access cards, floating hexagons, shimmer animations |
+| `CompoundCard.tsx` | Add hover lift effect, subtle left-border glow on hover |
+| `WeekCalendarStrip.tsx` | Add pulsing border animation on today, hover tooltips showing scheduled compounds, stagger entrance |
+| `MilestonesTimeline.tsx` | Add per-node spring-pop entrance, animated gradient line draw, pulse on current node |
+| `ProgressRing.tsx` | Fix the 0% display bug (counter shows nothing when percent is 0) |
+| `CompletionBanner.tsx` | Add confetti-style particles animation on appear |
+| `RestDayCard.tsx` | Add subtle animated dashed border and a calming gradient background |
 
 ### No New Dependencies
-All animations use existing framer-motion. Hexagon SVG is inline (copied from AnimatedLogo path). Insights are computed from existing props (compliancePercent, currentStreak, currentWeek, weeklyExpectations).
 
-### Animation Specs
-- Container stagger: `staggerChildren: 0.12`
-- Stat card entrance: `y: 24 -> 0`, `opacity: 0 -> 1`, `filter: blur(6px) -> blur(0)`, duration 0.5s, spring
-- Compound card stagger: 60ms between each
-- Quick access hover: `scale: 1.02`, `y: -2`, shadow `0 8px 24px rgba(0,0,0,0.08)`, duration 200ms
-- Progress bar fill: animated width transition with `transition: width 0.6s ease`
+Everything uses existing framer-motion for animations. Glassmorphic effects use standard CSS (`backdrop-filter: blur()`, semi-transparent backgrounds). Gradient meshes are CSS radial gradients.
 
-### Smart Insights Logic (pseudo)
-```
-if (currentWeek === 1) -> week 1 welcome message
-else if (compliancePercent >= 90) -> consistency praise
-else if (compliancePercent < 50) -> encouragement
-else if (currentStreak >= 7) -> streak milestone
-else if (weeklyExpectation) -> show this week's expectation
-else -> generic "Stay consistent" message
-```
+### Key Animation Specs
 
-### Layout Order (final)
-1. Greeting (protocol name + status line)
-2. Stat cards (4-col, staggered)
-3. Smart Insight card (full-width, dynamic)
-4. Today's Stack + This Week (2-col 60/40)
-5. Journey + Protocol Overview (2-col 60/40)
-6. Quick Access (3-col with hover effects)
-7. Footer disclaimer
+- **Stat card hover**: `y: -4`, `boxShadow: "0 12px 40px rgba(0,0,0,0.08)"`, duration 200ms spring
+- **Number counter**: `useMotionValue` animating from 0 to value over 1.2s with easeOut
+- **Shimmer sweep**: CSS `@keyframes` moving a diagonal white gradient across the insight banner, 2s duration, once on mount
+- **Hexagon float**: `y: [-8, 8]` oscillation, 6s duration infinite, ease-in-out
+- **Milestone pop**: `scale: [0, 1.15, 1]`, stagger 100ms per node
+- **Today cell pulse**: border color oscillates between gradient colors, 2s infinite
+- **Dark header**: solid `#0A0A0A` background, white `text-white` labels, gradient progress bar on dark
 
+### Visual Palette (unchanged brand colors, new applications)
+
+| Element | Treatment |
+|---------|-----------|
+| Stat card backgrounds | `rgba(249,115,22,0.04)`, `rgba(96,165,250,0.04)`, `rgba(251,113,133,0.04)`, `rgba(167,139,250,0.04)` |
+| Glassmorphic overlay | `rgba(255,255,255,0.7)` + `backdrop-blur(12px)` |
+| Dark header | `#0A0A0A` with `text-white` |
+| Insight banner | Radial gradient `rgba(249,115,22,0.06)` center, transparent edges |
+| Quick Access fills | Each card's accent at 5% opacity background, 12% on hover |
+| Floating hexagons | Brand gradient stroke at 4% opacity |
+
+### Layout Order (unchanged)
+1. Greeting + status line + progress bar
+2. Glassmorphic stat cards (4-col, hover reveals)
+3. Gradient insight banner (full-width, shimmer)
+4. Today's Stack (dark header) + This Week (interactive days) -- 60/40
+5. Journey (animated nodes) + Protocol Overview (decorative rings) -- 60/40
+6. Quick Access (gradient bento cards) -- 3-col
+7. Footer with gradient top border
