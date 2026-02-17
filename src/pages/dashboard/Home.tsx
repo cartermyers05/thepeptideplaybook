@@ -11,8 +11,12 @@ import { ActiveProtocolState } from "@/components/dashboard/home/ActiveProtocolS
 import { FloatingChatButton } from "@/components/dashboard/home/FloatingChatButton";
 
 const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+  hidden: { opacity: 0, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    filter: "blur(0px)",
+    transition: { staggerChildren: 0.1, duration: 0.5 },
+  },
 };
 
 export default function Dashboard() {
@@ -31,13 +35,13 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="max-w-[800px] mx-auto space-y-6 py-8">
-          <Skeleton className="h-10 w-48 rounded-xl" />
-          <Skeleton className="h-52 w-full rounded-[20px]" />
+        <div className="max-w-[680px] mx-auto space-y-6 py-8">
+          <Skeleton className="h-10 w-48 rounded-xl bg-[#19191E]" />
+          <Skeleton className="h-52 w-full rounded-[20px] bg-[#19191E]" />
           <div className="grid grid-cols-3 gap-4">
-            <Skeleton className="h-36 rounded-2xl" />
-            <Skeleton className="h-36 rounded-2xl" />
-            <Skeleton className="h-36 rounded-2xl" />
+            <Skeleton className="h-36 rounded-2xl bg-[#19191E]" />
+            <Skeleton className="h-36 rounded-2xl bg-[#19191E]" />
+            <Skeleton className="h-36 rounded-2xl bg-[#19191E]" />
           </div>
         </div>
       </DashboardLayout>
@@ -61,12 +65,11 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      {/* Noise texture overlay */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-[720px] mx-auto py-6 md:py-8 px-0 relative z-10"
+        className="max-w-[680px] mx-auto py-6 md:py-8 px-0 relative z-10"
       >
         {!protocol ? (
           <NoProtocolState firstName={firstName} />
