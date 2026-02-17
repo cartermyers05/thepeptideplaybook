@@ -1,80 +1,185 @@
 
+# Dashboard "Command Center" Dark Theme Implementation
 
-# Dashboard Home Redesign
-
-## Current State
-
-The dashboard is a simple flat list: greeting, protocol name, stats text, compound checklist cards, 3 quick-access buttons, and a disclaimer. It works but feels like a to-do app, not a premium health platform.
-
-## New Design: "Command Center"
-
-The redesigned home becomes a single-scroll daily command center with 5 distinct sections, using your signature orange-pink-violet gradient system and a more visual, data-rich layout.
+Complete visual overhaul of the dashboard home page from light mode to a cinematic dark theme. All 12 files modified, zero database changes, all existing data flow untouched.
 
 ---
 
-### Section 1: Hero Status Card (replaces greeting + stats row)
+## Step 1: Font Imports
 
-A single elevated card with a gradient top border containing:
-- Left side: Greeting ("Hey Carter"), protocol name, and a "Week 3 of 12" label
-- Right side: An animated circular progress ring (reusing the existing `ProgressRing` component) showing overall protocol completion percentage
-- Below: A row of 3 mini stat pills -- Day number, Compliance %, and Days Remaining -- using the monospace font for numbers
-- Gradient progress bar at the bottom of the card (keep existing)
+**File: `index.html` (line 34)**
 
-### Section 2: Today's Actions (refined checklist)
-
-- Section header: "Today's Protocol" with date on the right (keep existing pattern)
-- Compound cards stay as-is -- they're already well designed with color strips, dosing, timing, and circular checkboxes
-- Completion banner stays as-is
-- Rest day card stays as-is
-- No changes to this section, it already works great
-
-### Section 3: Weekly Insight Card (NEW)
-
-A new card that shows context for where you are in the protocol:
-- If `weekly_expectations` data exists on the protocol, show the current week's expectation text (e.g., "Week 3: You may start noticing improved recovery times and sleep quality")
-- Styled as a subtle card with a left gradient accent bar
-- If no weekly expectations data, this section is hidden (no empty state needed)
-
-### Section 4: Streak + Check-in Nudge (NEW)
-
-A horizontal row with two mini cards:
-- **Streak card**: Shows the user's `current_streak` from their profile with a flame icon. "3-day streak" etc.
-- **Check-in nudge**: If `hasCheckedInThisWeek` is false (from `useProgressStats`), show a gentle nudge card: "Weekly check-in due" with a link to /dashboard/progress. If already checked in, show a green checkmark "Checked in this week"
-
-### Section 5: Quick Access (refined)
-
-Keep the existing 3-button grid (AI Coach, Protocol, Progress) but upgrade the styling:
-- Add the gradient top accent bar (2px) to each card, using orange/pink/violet respectively
-- This matches the pattern already used in the NoProtocolState feature preview cards
-
-### Footer
-
-Keep the existing legal disclaimer as-is.
+Update the Google Fonts link to add Plus Jakarta Sans (weights 500,600,700,800) and IBM Plex Mono (weights 400,500,600) alongside existing DM Sans and JetBrains Mono.
 
 ---
 
-## Technical Details
+## Step 2: Dark Layout Background
 
-### Files Modified
+**File: `DashboardLayout.tsx`**
 
-| File | Changes |
-|------|---------|
-| `src/components/dashboard/home/ActiveProtocolState.tsx` | Major rewrite: wrap header in a card, add ProgressRing, add stat pills, add weekly insight section, add streak/check-in row, upgrade quick access styling |
-| `src/pages/dashboard/Home.tsx` | Pass additional data to ActiveProtocolState: `profile` (for streak), `hasCheckedInThisWeek` (from stats) |
+- Import `useLocation` from react-router-dom
+- When path starts with `/dashboard`: apply `#08080A` background with 3 CSS layers:
+  - Gradient mesh nebula (3 radial gradients at 3-4% opacity for subtle warm glow)
+  - Micro dot grid pattern (20px spacing, 3% white dots)
+- Non-dashboard routes keep existing `#FAFAFA`
 
-### Files Created
+---
 
-None -- all changes fit within existing components.
+## Step 3: Dark Top Navigation
 
-### Data Sources (all already available, no new queries)
+**File: `DashboardTopNav.tsx`**
 
-- `useUserProtocol()` -- protocol name, week, day, compounds, weekly_expectations, progress
-- `useProgressStats()` -- compliance %, hasCheckedInThisWeek
-- `useProfile()` -- current_streak, full_name
-- `useTodayLog()` -- today's check completion state
-- `ProgressRing` component -- already exists at `src/components/dashboard/home/ProgressRing.tsx`
+- Import `useLocation`, detect `/dashboard` routes
+- Dark mode: `#08080A` background, `rgba(255,255,255,0.05)` border
+- Nav pills: `#4A4A5A` default, active gets `#19191E` bg + `#EBEBF0` text
+- Mobile menu panel: `#111114` background with dark-styled items
+- Avatar and dropdown styling adjusted for dark context
 
-### No database changes needed
+---
 
-All data is already being fetched. This is purely a UI/layout upgrade.
+## Step 4: Dark Bottom Navigation
 
+**File: `MobileBottomNav.tsx`**
+
+- Import `useLocation`, detect `/dashboard` routes
+- Dark mode: `#08080A` background, `rgba(255,255,255,0.05)` border
+- Icons: `#4A4A5A` default, `#EBEBF0` active
+
+---
+
+## Step 5: Home Page Container
+
+**File: `Home.tsx`**
+
+- Loading skeletons: `bg-[#19191E]` instead of default muted
+- Container animation variants updated with `filter: "blur(4px)"` for cinematic entrance
+- All data passing to child components stays identical
+
+---
+
+## Step 6: Animated Gradient Progress Ring
+
+**File: `ProgressRing.tsx` (full rewrite)**
+
+- Built-in SVG `linearGradient` definition (orange to rose to violet)
+- Track color: `#19191E` (dark)
+- Animated `stroke-dashoffset` from 0% to current on mount (1.2s ease-out) using framer-motion `useMotionValue` + `useTransform`
+- `stroke-linecap: round`
+- Drop-shadow glow: `drop-shadow(0 0 8px rgba(249,115,22,0.15))`
+- Center: percentage in IBM Plex Mono weight 700, `#EBEBF0` text, "complete" sublabel in `#4A4A5A`
+- Props: size (100px desktop / 88px mobile), strokeWidth, animated flag, showLabel flag
+
+---
+
+## Step 7: No-Protocol State (Dark Redesign)
+
+**File: `NoProtocolState.tsx` (full rewrite)**
+
+- Greeting: Plus Jakarta Sans, weight 800, 32px (28px mobile), `#EBEBF0`, no emoji
+- Subtitle: "Your protocol starts here." in `#8A8A9A`
+- Hero CTA card:
+  - Background: `linear-gradient(135deg, #111114, #16131E, #131118)`
+  - Border: `rgba(255,255,255,0.06)`, 24px radius
+  - Decorative SVG hexagons (bottom-right, clipped, hidden on mobile)
+  - "PROTOCOL ENGINE" label in IBM Plex Mono, `#F97316`
+  - Heading with gradient text on "personalized" using logo gradient
+  - Orange gradient CTA button with glow hover/shadow effects
+  - "Takes about 3 minutes" in IBM Plex Mono `#4A4A5A`
+- 3 feature preview cards: `#111114` bg, 50% opacity (locked), lock icon top-right
+- Trust strip: IBM Plex Mono uppercase, orange-tinted dots
+
+---
+
+## Step 8: Active Protocol State (Dark Command Center)
+
+**File: `ActiveProtocolState.tsx` (full rewrite)**
+
+All fonts switch to Plus Jakarta Sans (headings) and IBM Plex Mono (data). All colors to dark palette.
+
+### Hero Status Card
+- Dark card with gradient tint background, decorative hexagons (hidden mobile)
+- Two-column desktop (info left, ProgressRing right), single column mobile (ring centered above)
+- Greeting: `#4A4A5A`, protocol name: Plus Jakarta Sans weight 800 `#EBEBF0`
+- Stat pills on `#19191E` with colored dot indicators (orange=week, rose=day, green=compliance)
+- Full-width gradient progress bar with animated width reveal
+- "X days remaining" right-aligned below bar
+
+### Today's Stack
+- "Today's Stack" in Plus Jakarta Sans `#EBEBF0`, date in IBM Plex Mono `#4A4A5A`
+- Compound cards, completion banner, rest day card (all dark themed)
+
+### Streak Counter (only if currentStreak >= 2)
+- `#111114` card, fire icon with orange glow filter
+- Streak number in `#F97316`, "day streak" label in `#EBEBF0`
+- "Keep going." in `#4A4A5A`
+
+### Quick Access
+- 3 dark cards with colored icon containers on `#19191E`
+- Arrow top-right in `#4A4A5A`
+- Hover: bg `#222228`, `translateY(-2px)`
+- Links: AI Coach, My Protocol, Progress
+
+### Footer disclaimer
+- `#4A4A5A` text, border `rgba(255,255,255,0.05)`
+
+---
+
+## Step 9: Dark Compound Cards
+
+**File: `CompoundCard.tsx`**
+
+- Background: `#111114`, border: `rgba(255,255,255,0.05)`
+- 3px left accent bar (category colored, same logic)
+- Compound name: `#EBEBF0` (Plus Jakarta Sans), dose in category color (IBM Plex Mono)
+- Route: `#8A8A9A`, timing: `#4A4A5A`
+- 28px circular checkbox:
+  - Unchecked: border `rgba(255,255,255,0.12)`
+  - Checked: `#34D399` fill, white checkmark, spring bounce animation
+  - Card content fades to 40% opacity when checked
+  - Brief green glow flash on checkbox
+- Hover: `translateY(-1px)`, border brightens to `rgba(255,255,255,0.14)`
+
+---
+
+## Step 10: Dark Completion Banner
+
+**File: `CompletionBanner.tsx`**
+
+- Background: `rgba(52,211,153,0.08)`
+- Border: `rgba(52,211,153,0.12)`, 16px radius
+- 32px green circle with white checkmark
+- "Day X Complete" in `#EBEBF0`, body in `#8A8A9A`
+- "Consistency builds results. See you tomorrow."
+
+---
+
+## Step 11: Dark Rest Day Card
+
+**File: `RestDayCard.tsx`**
+
+- Border: `2px dashed rgba(255,255,255,0.06)`
+- "Rest Day" in `#EBEBF0`, body in `#8A8A9A`
+- Next scheduled info in `#4A4A5A` (IBM Plex Mono)
+
+---
+
+## Step 12: Orange Gradient Floating Chat Button
+
+**File: `FloatingChatButton.tsx`**
+
+- Background: `linear-gradient(135deg, #F97316, #EA580C)` (always, not just hover)
+- Box-shadow: `0 4px 20px rgba(249,115,22,0.3)`
+- CSS pulse keyframe animation when `shouldPulse` (expanding ring at 2.5s interval)
+- Hover: `scale(1.08)`, increased glow
+- Active: `scale(0.96)`
+
+---
+
+## What Does NOT Change
+
+- Zero routing changes
+- Zero hook/query changes (useUserProtocol, useDailyLog, useProfile, useProgressData all untouched)
+- Zero database/schema changes
+- Zero other pages affected
+- All data flow remains identical
+- All existing props and interfaces preserved
