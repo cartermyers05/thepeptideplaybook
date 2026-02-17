@@ -44,6 +44,8 @@ import MyPlan from "./pages/dashboard/MyPlan";
 import Protocols from "./pages/dashboard/Protocols";
 import CoursePreview from "./pages/CoursePreview";
 import History from "./pages/History";
+import Quiz from "./pages/Quiz";
+import QuizResults from "./pages/QuizResults";
 
 // SEO Guide pages
 import Guides from "./pages/Guides";
@@ -111,6 +113,8 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/free-guide" element={<FreeGuide />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/quiz" element={<Quiz />} />
+            <Route path="/quiz/results" element={<QuizResults />} />
             <Route path="/about" element={<About />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
