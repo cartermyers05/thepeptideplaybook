@@ -32,12 +32,12 @@ export default function Dashboard() {
     return (
       <DashboardLayout>
         <div className="max-w-[800px] mx-auto space-y-6 py-8">
-          <Skeleton className="h-10 w-48 rounded-xl bg-[#19191E]" />
-          <Skeleton className="h-52 w-full rounded-[20px] bg-[#19191E]" />
+          <Skeleton className="h-10 w-48 rounded-xl" />
+          <Skeleton className="h-52 w-full rounded-[20px]" />
           <div className="grid grid-cols-3 gap-4">
-            <Skeleton className="h-36 rounded-2xl bg-[#19191E]" />
-            <Skeleton className="h-36 rounded-2xl bg-[#19191E]" />
-            <Skeleton className="h-36 rounded-2xl bg-[#19191E]" />
+            <Skeleton className="h-36 rounded-2xl" />
+            <Skeleton className="h-36 rounded-2xl" />
+            <Skeleton className="h-36 rounded-2xl" />
           </div>
         </div>
       </DashboardLayout>
@@ -61,6 +61,7 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
+      {/* Noise texture overlay */}
       <motion.div
         variants={containerVariants}
         initial="hidden"

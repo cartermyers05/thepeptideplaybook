@@ -1,8 +1,6 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 
-const jakarta = "'Plus Jakarta Sans', sans-serif";
-
 interface CompletionBannerProps {
   dayNumber: number;
 }
@@ -10,31 +8,25 @@ interface CompletionBannerProps {
 export function CompletionBanner({ dayNumber }: CompletionBannerProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-      className="mt-3 rounded-[16px] px-5 py-4 flex items-center gap-3.5"
-      style={{
-        backgroundColor: "rgba(52,211,153,0.08)",
-        border: "1px solid rgba(52,211,153,0.12)",
-      }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="mt-3 rounded-[14px] px-5 py-4 flex items-center gap-3"
+      style={{ backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0" }}
     >
       <div
-        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-        style={{ backgroundColor: "#34D399" }}
+        className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+        style={{ background: "linear-gradient(135deg, #34D399, #2DD4BF)" }}
       >
-        <Check className="w-4 h-4 text-white" />
+        <Check className="w-3.5 h-3.5 text-white" />
       </div>
       <div>
-        <p
-          className="text-[15px] font-bold"
-          style={{ fontFamily: jakarta, color: "#EBEBF0" }}
-        >
-          Day {dayNumber} Complete
+        <p className="text-base font-semibold" style={{ color: "#0A0A0A" }}>
+          Day {dayNumber} complete
         </p>
-        <p className="text-[13px]" style={{ color: "#8A8A9A" }}>
-          Consistency builds results. See you tomorrow.
+        <p className="text-[13px]" style={{ color: "#4B5563" }}>
+          Nice work. Back tomorrow.
         </p>
       </div>
     </motion.div>
