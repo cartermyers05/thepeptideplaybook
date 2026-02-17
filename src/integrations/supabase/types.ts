@@ -462,6 +462,36 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_briefings: {
+        Row: {
+          briefing_date: string
+          compound_tips: Json | null
+          content: string
+          created_at: string
+          data_highlight: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          briefing_date?: string
+          compound_tips?: Json | null
+          content: string
+          created_at?: string
+          data_highlight?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          briefing_date?: string
+          compound_tips?: Json | null
+          content?: string
+          created_at?: string
+          data_highlight?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_logs: {
         Row: {
           actions_completed: Json | null
@@ -1696,6 +1726,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      weekly_reviews: {
+        Row: {
+          full_analysis: string | null
+          generated_at: string
+          id: string
+          insights: Json
+          mood: string
+          protocol_id: string | null
+          recommendation: string | null
+          user_id: string
+          week_number: number
+        }
+        Insert: {
+          full_analysis?: string | null
+          generated_at?: string
+          id?: string
+          insights?: Json
+          mood?: string
+          protocol_id?: string | null
+          recommendation?: string | null
+          user_id: string
+          week_number: number
+        }
+        Update: {
+          full_analysis?: string | null
+          generated_at?: string
+          id?: string
+          insights?: Json
+          mood?: string
+          protocol_id?: string | null
+          recommendation?: string | null
+          user_id?: string
+          week_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_reviews_protocol_id_fkey"
+            columns: ["protocol_id"]
+            isOneToOne: false
+            referencedRelation: "user_protocols"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
