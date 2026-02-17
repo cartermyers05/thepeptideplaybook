@@ -1,120 +1,139 @@
 
 
-# Remove Pre-Payment Quiz, Add Post-Payment Onboarding
+# Dashboard Content Intelligence Upgrade
 
-## Overview
+## Goal
 
-The quiz currently sits in the middle of the conversion funnel as a lead capture + personalization tool. We're removing it from the pre-payment flow entirely and replacing it with a streamlined post-payment onboarding that collects the same personalization data (goal, experience, concerns) after the user has already paid.
+Pack every existing dashboard section with compound-specific, week-aware, personalized content that makes the product feel like a $10,000 coaching program. No theme changes. No layout changes. No new sections. Just dramatically richer content inside every box.
 
-## What Changes
+## What Gets Created
 
-### 1. Update all "Take the Free Quiz" CTAs to go straight to checkout
+### New file: `src/lib/dashboardIntelligence.ts`
 
-Every landing page CTA currently points to `/quiz`. These all change to `/signup` (for new users) or `/checkout` (context-dependent). The main CTA text changes from "Take the Free Quiz" to something like "Get Your Blueprint" or "Start Now."
+A centralized intelligence module containing all the smart content helpers:
 
-**Files affected:**
-- `src/components/landing/HeroSection.tsx` -- Hero CTA
-- `src/components/landing/PricingCTA.tsx` -- Pricing section CTA
-- `src/components/landing/WhatsInsideSection.tsx` -- Bottom CTA
-- `src/components/landing/GuidedDemo.tsx` -- Demo section CTA
-- `src/components/landing/SolutionSection.tsx` -- Solution CTA
-- `src/components/landing/GoalSelectionSection.tsx` -- Goal cards (these can link to `/signup` with a `?goal=` param to pre-select)
-- `src/components/blog/BlogCTA.tsx` -- Blog CTA
-- `src/components/chat/ChatWidget.tsx` -- Chat widget link
-- `src/pages/tools/PeptideCalculator.tsx` -- Calculator CTA
-- `src/components/landing/FloatingCTA.tsx` -- Floating bottom CTA (if it links to quiz)
+**1. `COMPOUND_WHY_MAP`** -- One-liner mechanism explanations for 12+ peptides:
+- CJC-1295, Ipamorelin, GHK-Cu, BPC-157, TB-500, Semaglutide, AOD-9604, Tesamorelin, Epitalon, PT-141, Sermorelin, MK-677
 
-### 2. Update post-payment redirect flow
+**2. `getWeekPhaseLabel(week)`** -- Returns a phase one-liner for the greeting area:
+- Week 1: "Priming phase -- your receptors are calibrating to the new signals."
+- Week 2: "Adaptation phase -- most users report first noticeable changes this week."
+- Week 3-4: "Optimization/Acceleration phase" messages
+- Week 5-8: "Maintenance phase" message
+- Week 9-12: "Final stretch" message
 
-Currently: ThankYou page --> Dashboard
-New: ThankYou page --> `/welcome/onboarding` (new onboarding flow)
+**3. `getProgressSubtitle(percent, day, total)`** -- Context-aware subtitle for the Progress stat card:
+- Less than 10%: "building the foundation"
+- 10-25%: "early adaptation window"
+- 25-50%: "hitting your stride"
+- 50-75%: "past the halfway mark"
+- 75-90%: "final optimization phase"
+- Over 90%: "finish strong"
 
-Also: Checkout promo code success currently goes to `/quiz` -- change to `/welcome/onboarding`
+**4. `getDayCardInsight(week, compounds)`** -- Compound-aware insight for the Day stat card:
+- Checks if protocol contains CJC-1295/Ipamorelin, BPC-157/TB-500, or GHK-Cu
+- Returns week-specific biological insight like "GH receptor priming" or "Peak healing cascade"
 
-**Files affected:**
-- `src/pages/ThankYou.tsx` -- Change redirect from `/dashboard` to `/welcome/onboarding`
-- `src/pages/Checkout.tsx` -- Change promo success redirect from `/quiz` to `/welcome/onboarding`
+**5. `getStreakSubtitle(streak)`** -- Motivational subtitle for Streak card:
+- 1 day: "Every streak starts with day 1"
+- 7-13 days: "1 week+ streak -- top 20% of users"
+- 30+: "30 day streak -- elite consistency"
 
-### 3. Create post-payment onboarding page
+**6. `getWeeklyBriefing(week, compounds)`** -- Compound-specific briefing text:
+- Generates multi-sentence briefings referencing the user's actual compounds
+- Week 1 with CJC/Ipa: explains GH receptor calibration, expected sleep changes, injection site info
+- Week 2: explains rhythm establishment, GHK-Cu pathway activation
+- Week 3+: explains peak sensitivity windows, visible changes
+- Falls back to a still-intelligent generic message for unmapped compounds
 
-New page at `/welcome/onboarding` that collects personalization data through a clean, step-by-step flow (not a chatbot -- just simple selection cards like the existing WelcomeStep2 pattern).
+**7. `getThisWeekGuidance(week)`** -- Week-aware guidance for the "This Week" card:
+- Week 1: injection rhythm, common first-week experiences
+- Week 2: consistent timing, receptor binding advice
+- Week 3+: steady-state, don't change doses without AI Coach
 
-**Steps:**
-1. **Goal selection** -- 6 goal cards (same as current quiz: Fat Loss, Build Muscle, Heal Injury, Anti-Aging, Cognitive, Not Sure)
-2. **Experience level** -- 3 options (Never used peptides, Some research, Experienced)
-3. **Main concern** -- What worries you most? (Injections, Side effects, Legal status, Cost, Nothing)
-4. **Supplies status** -- Do you have supplies? (reuse existing WelcomeStep2 pattern)
+**8. `getProtocolCategory(compounds)`** -- Derives a category label from compound names:
+- CJC/Ipamorelin/Sermorelin/MK-677 -> "GH Optimization"
+- BPC-157/TB-500 -> "Recovery and Healing"
+- GHK-Cu -> "Skin and Tissue Repair"
+- Semaglutide/Tirzepatide/AOD-9604 -> "Body Composition"
+- Combines multiple: "GH Optimization + Skin Repair"
 
-On completion, saves to `quiz_responses` table (same schema) and redirects to `/dashboard/my-plan?updated=true`.
+## What Gets Modified
 
-**New file:** `src/pages/Onboarding.tsx`
+### `src/components/dashboard/home/ActiveProtocolState.tsx`
 
-### 4. Add route and protect it
+**Section 1 -- Greeting**: Add the week phase one-liner below the protocol name using `getWeekPhaseLabel()`. Styled in JetBrains Mono, 13px, muted color.
 
-Add `/welcome/onboarding` as a protected route (requires auth + paid).
+**Section 2 -- Stat Cards**: Replace static `detail` strings with intelligence functions:
+- Progress card: `getProgressSubtitle(progressPercent, dayNumber, totalDays)`
+- Day card: Add `getDayCardInsight(currentWeek, todayCompounds)` as a second detail line
+- Streak card: `getStreakSubtitle(currentStreak)` replaces "Keep it going!"
 
-**File:** `src/App.tsx`
+**Section 3 -- Daily Briefing**: Update `fallbackInsight` to use `getWeeklyBriefing(currentWeek, todayCompounds)` instead of the current generic `getSmartInsight()` output. The existing AI-generated briefing still takes priority when available.
 
-### 5. Remove quiz routes and pages (cleanup)
+**Section 5 -- This Week**: When no `currentWeekExpectation` from the protocol, fall back to `getThisWeekGuidance(currentWeek)` instead of showing nothing.
 
-Remove the quiz-related routes from App.tsx. The quiz pages themselves can stay in the codebase for now (no harm), but the routes are removed so they're not accessible.
+**Section 7 -- Protocol Overview**: Add two rows to the stats list:
+- "Category" using `getProtocolCategory(protocol.compounds)`
+- "Next milestone" showing the next uncompleted milestone name
 
-**Files affected:**
-- `src/App.tsx` -- Remove `/quiz` and `/quiz/results` routes
+**Section 8 -- Quick Access Cards**: Update descriptions:
+- AI Coach: "Ask about your stack, timing, or interactions"
+- My Protocol: "Doses, schedule, reconstitution guides"
+- Progress: "Log check-ins, photos, and milestones"
 
-### 6. Skip onboarding if already completed
+### `src/components/dashboard/home/CompoundCard.tsx`
 
-The onboarding page checks if a `quiz_responses` record already exists for the user. If yes, redirect straight to `/dashboard`.
+Add a "WHY" one-liner below the timing line, pulled from `COMPOUND_WHY_MAP`. Only shows if a match exists. Styled italic, 12px, muted color. Single line with ellipsis on mobile, up to 2 lines on desktop.
 
-## What Stays the Same
+### `src/components/dashboard/home/DailyBriefingCard.tsx`
 
-- The `quiz_responses` database table -- same schema, same data
-- The AI Coach's ability to read quiz responses for personalization
-- The `useQuizResponse` hook -- still works exactly the same
-- The My Plan page's "Blueprint Updated" banner
-- All dashboard personalization based on quiz data
+Add a subtle left border accent (3px solid with the existing indigo tint) to visually elevate the briefing card.
 
-## Technical Details
+### `src/components/dashboard/home/WeeklyReviewCard.tsx`
 
-### New Onboarding Page Structure
+Add a preview teaser line below "AI-powered analysis of your week":
+"See your compliance patterns, compound timing analysis, and what to adjust for next week."
 
-```
-/welcome/onboarding (ProtectedRoute)
-  Step 1: Goal Selection (6 cards with icons)
-  Step 2: Experience Level (3 cards)
-  Step 3: Main Concern (5 cards)
-  Step 4: Supplies Status (3 cards, reuse WelcomeStep2 pattern)
-  --> Save to quiz_responses
-  --> Navigate to /dashboard/my-plan?updated=true
-```
+### `src/components/dashboard/home/TrendMiniChart.tsx`
 
-Each step is a simple card-tap interaction (no typing, no AI, no chatbot). Fast and friction-free since they've already paid.
+Add helper text below the chart when fewer than 7 data points exist:
+"Trends become meaningful after 7 days of logging. Keep checking in daily."
+Styled in JetBrains Mono, 12px, muted, centered.
 
-### CTA Text Updates
+### `src/components/dashboard/home/FDATimelineCard.tsx`
 
-| Location | Current | New |
-|----------|---------|-----|
-| Hero | "Take the Free Quiz" | "Get Started -- $67" |
-| Pricing | "Get Your Blueprint" | "Get Your Blueprint" (no change needed) |
-| Goal cards | Links to `/quiz?goal=X` | Links to `/signup?goal=X` |
-| Blog CTA | "Take the Free Quiz" | "Get Your Blueprint" |
-| Floating CTA | Quiz link | Signup/checkout link |
+Add a small info tooltip (?) icon next to the header. On hover/tap shows: "We track FDA, PCAC, and regulatory developments that may affect your protocol compounds. Updated monthly."
 
-### Files Summary
+### `src/lib/milestoneDefinitions.ts`
+
+Update milestone titles and descriptions to feel more premium:
+- "First Check-In" -> "Protocol Activated" / "Your personalized stack was generated"
+- "Supplies Ready" -> "Supplies Confirmed" / "Peptides and supplies sourced"
+- "Reconstitution Complete" -> "First Reconstitution" / "Peptides mixed and ready for use"
+- "Week 1 Complete" -> "One Week Complete" / "Receptor adaptation checkpoint"
+- "One Month Complete" -> "30-Day Mark" / "First major assessment window"
+- "Course Complete" -> "Protocol Complete" / "Full cycle finished -- assess results"
+
+## Files Summary
 
 | File | Action |
 |------|--------|
-| `src/pages/Onboarding.tsx` | CREATE -- New post-payment onboarding page |
-| `src/App.tsx` | EDIT -- Remove quiz routes, add onboarding route |
-| `src/pages/ThankYou.tsx` | EDIT -- Redirect to onboarding instead of dashboard |
-| `src/pages/Checkout.tsx` | EDIT -- Promo success goes to onboarding |
-| `src/components/landing/HeroSection.tsx` | EDIT -- CTA to signup |
-| `src/components/landing/PricingCTA.tsx` | EDIT -- CTA to signup |
-| `src/components/landing/WhatsInsideSection.tsx` | EDIT -- CTA to signup |
-| `src/components/landing/GuidedDemo.tsx` | EDIT -- CTA to signup |
-| `src/components/landing/SolutionSection.tsx` | EDIT -- CTA to signup |
-| `src/components/landing/GoalSelectionSection.tsx` | EDIT -- Goal cards to signup |
-| `src/components/blog/BlogCTA.tsx` | EDIT -- CTA to signup |
-| `src/components/chat/ChatWidget.tsx` | EDIT -- Link to signup |
-| `src/pages/tools/PeptideCalculator.tsx` | EDIT -- CTA to signup |
+| `src/lib/dashboardIntelligence.ts` | CREATE -- All helper functions and compound data |
+| `src/components/dashboard/home/ActiveProtocolState.tsx` | EDIT -- Integrate intelligence into greeting, stats, briefing, this week, overview, quick access |
+| `src/components/dashboard/home/CompoundCard.tsx` | EDIT -- Add WHY one-liner |
+| `src/components/dashboard/home/DailyBriefingCard.tsx` | EDIT -- Left border accent |
+| `src/components/dashboard/home/WeeklyReviewCard.tsx` | EDIT -- Teaser line |
+| `src/components/dashboard/home/TrendMiniChart.tsx` | EDIT -- Low-data helper text |
+| `src/components/dashboard/home/FDATimelineCard.tsx` | EDIT -- Info tooltip |
+| `src/lib/milestoneDefinitions.ts` | EDIT -- Premium milestone titles |
 
+## What Does NOT Change
+
+- No theme or color changes -- stays consistent with landing page
+- No layout rearrangement, no new sections, no removed sections
+- No Supabase queries, hooks, or data fetching changes
+- No routing or navigation changes
+- Chat, Protocol, and Progress pages untouched
+- FDA Timeline content untouched (just adding tooltip)
+- Disclaimer footer stays
