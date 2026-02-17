@@ -228,10 +228,10 @@ export function ChatWidget({ onClose }: ChatWidgetProps) {
               Want unlimited AI conversations?
             </p>
             <a 
-              href="/quiz" 
+              href="/signup" 
               className="text-xs text-primary hover:underline font-medium"
             >
-              Take the Free Quiz →
+              Get Your Blueprint →
             </a>
           </div>
         </div>

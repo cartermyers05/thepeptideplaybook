@@ -90,9 +90,8 @@ import EditorialPolicy from "./pages/EditorialPolicy";
 import Partners from "./pages/Partners";
 import ReferralLanding from "./pages/ReferralLanding";
 
-// Quiz pages
-import Quiz from "./pages/Quiz";
-import QuizResults from "./pages/QuizResults";
+// Onboarding
+import Onboarding from "./pages/Onboarding";
 
 const queryClient = new QueryClient();
 
@@ -166,12 +165,9 @@ const App = () => (
             <Route path="/editorial-policy" element={<EditorialPolicy />} />
             <Route path="/partners" element={<Partners />} />
             
-            {/* Quiz flow - open for all users */}
-            <Route path="/quiz" element={<Quiz />} />
-            <Route path="/quiz/results" element={<QuizResults />} />
-            
-            {/* Welcome flow - after payment */}
+            {/* Welcome / Onboarding flow - after payment */}
             <Route path="/welcome" element={<ProtectedRoute><Welcome /></ProtectedRoute>} />
+            <Route path="/welcome/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             
             {/* Course preview (pre-purchase) */}
             <Route path="/course/:goal" element={<CoursePreview />} />

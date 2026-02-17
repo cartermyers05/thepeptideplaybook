@@ -26,8 +26,8 @@ export function BlogCTA() {
         </div>
 
         <Button asChild size="lg" className="btn-primary-clean flex-shrink-0">
-          <Link to="/quiz">
-            Take the Free Quiz
+          <Link to="/signup">
+            Get Your Blueprint
             <ArrowRight className="ml-2 w-4 h-4" />
           </Link>
         </Button>

@@ -156,7 +156,7 @@ export function PricingCTA() {
               </ul>
 
               {/* CTA */}
-              <Link to="/quiz" className="block">
+              <Link to="/signup" className="block">
                 <PillButton 
                   variant="dark" 
                   size="lg" 
