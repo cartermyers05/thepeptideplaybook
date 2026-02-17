@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useProtocol } from "@/hooks/useProtocol";
 import { useCheckIn } from "@/hooks/useCheckIn";
 import { useQuizResponse } from "@/hooks/useQuizResponse";
+import { CheckCircle, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyProtocolState } from "@/components/protocol/EmptyProtocolState";
 import { ProtocolHeader } from "@/components/protocol/ProtocolHeader";
@@ -19,12 +21,22 @@ export default function MyPlan() {
   const { protocol, isLoading, startProtocol, pauseProtocol, resumeProtocol } = useProtocol();
   const { submitCheckIn, hasCheckedInToday } = useCheckIn();
   const { data: quizResponse } = useQuizResponse();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showUpdatedBanner, setShowUpdatedBanner] = useState(false);
 
   const userGoal = quizResponse?.primary_goal;
   const goalLabel = userGoal ? getGoalLabel(userGoal) : undefined;
   
   // Track completed doses locally (persists for today via check-in)
   const [completedDoses, setCompletedDoses] = useState<string[]>([]);
+
+  // Detect ?updated=true param
+  useEffect(() => {
+    if (searchParams.get('updated') === 'true') {
+      setShowUpdatedBanner(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Load completed doses from localStorage on mount
   useEffect(() => {
@@ -100,6 +112,23 @@ export default function MyPlan() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-2xl mx-auto space-y-6"
       >
+        {/* Blueprint Updated Banner */}
+        {showUpdatedBanner && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 border border-primary/20"
+          >
+            <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+            <p className="text-sm font-medium text-foreground flex-1">
+              Your Blueprint has been updated based on your quiz answers
+            </p>
+            <button onClick={() => setShowUpdatedBanner(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+
         {/* Header with progress */}
         <ProtocolHeader
           protocol={protocol}
