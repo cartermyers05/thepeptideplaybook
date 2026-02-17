@@ -1,131 +1,110 @@
 
 
-# AI-Powered Weekly Intelligence Report + Personalized Daily Briefing
+# Kill the Orange Mono-Color -- Make Everything Colorful
 
-## The Big Idea
+## The Problem
 
-You're collecting daily logs (compliance, energy, injection site reactions, GI issues, weight, symptoms) but the data just sits in charts. The highest-value feature you can add is turning that passive data into **active intelligence** — an AI that reads the user's week, spots patterns, and delivers a personalized briefing every time they open the dashboard.
+Almost every accent in the dashboard is orange (#F97316). The stat card gradient bars, the sparkline fill, the ambient orbs, the progress bars, the flame glow, the insight panel background -- all orange. The Quick Access cards at the bottom are the only section that feels alive because each one has its own color identity (orange, rose, violet).
 
-This creates a "can't-live-without-it" feedback loop: log data -> get smarter insights -> feel motivated to log more.
+## The Fix
 
-## Feature 1: AI Weekly Intelligence Report
+Give every section its own color from a diverse palette. No single dominant color. Each stat card, each section accent, each visual element gets a unique hue.
 
-A new page/section that generates a personalized AI analysis of the user's week. Think of it like a "therapist session" for their protocol.
+### 1. Stat Cards -- Each Gets Its Own Color
 
-**What the AI analyzes:**
-- Compliance trend (improving, declining, stable)
-- Energy ratings over the past 7 days — are they trending up?
-- Symptom patterns (e.g., "GI issues appeared on 3 of 5 logging days — consider taking BPC-157 with food")
-- Weight trajectory and rate of change
-- Where they are in their protocol timeline and what to expect next
-- Whether they missed any compounds and which ones
+Current: All four gradient top bars lean orange.
+New color assignments:
 
-**What the user sees:**
-- A beautifully designed "Week X Review" card on the dashboard
-- 3-4 bullet-point insights (not a wall of text)
-- A "mood" indicator for the week (green/yellow/red based on overall data)
-- One specific actionable recommendation
-- A "deep dive" expandable section with the full AI analysis
+| Card | Gradient Top Bar | Sparkline/Visual Color |
+|------|-----------------|----------------------|
+| Progress | Blue to Indigo (`#60A5FA` to `#818CF8`) | Blue arc |
+| Day | Emerald to Teal (`#34D399` to `#2DD4BF`) | Teal week badge |
+| Compliance | Rose to Pink (`#FB7185` to `#F472B6`) | Rose sparkline bars |
+| Streak | Amber to Orange (`#F59E0B` to `#F97316`) | Orange flame (keeps thematic sense) |
 
-**Example output:**
-> **Week 3 Review** — Solid week overall
-> - Compliance was 85% (up from 71% last week) — great improvement
-> - Energy trending upward: averaged 7.2/10 vs 6.1 last week
-> - You reported mild GI issues on 2 days — this is common in weeks 2-4 of semaglutide and typically resolves
-> - **Recommendation:** You missed your Tuesday BPC-157 dose twice now. Consider setting a phone alarm for your morning window.
+### 2. Ambient Orbs -- Multi-Color
 
-## Feature 2: "Today's Briefing" on Dashboard Home
+Current: Both orbs are orange-tinted.
+New:
+- Top-right orb: Blue-violet tint (`rgba(99,102,241,0.06)` to `rgba(167,139,250,0.04)`)
+- Bottom-left orb: Emerald-teal tint (`rgba(52,211,153,0.05)` to `rgba(45,212,191,0.03)`)
 
-Replace the current static "Smart Insight" card with a dynamic, AI-generated daily briefing that changes every day based on context:
+### 3. Today's Stack Left Border -- Rainbow Gradient
 
-- What compounds are scheduled today and any tips specific to them
-- Where the user is in their protocol cycle and what to expect physically
-- A motivational data point from their own tracking ("Your compliance this week is already at 100% — keep it going")
-- A relevant research fact about one of their active compounds
+Current: Orange to rose to violet.
+New: Full spectrum -- blue, emerald, rose, violet -- so it reads as "colorful" not "orange-first."
+`linear-gradient(180deg, #60A5FA, #34D399, #FB7185, #A78BFA)`
 
-This runs via a backend function that generates the briefing using the user's protocol + logs + week number, cached daily.
+### 4. Progress Bars -- Matching Rainbow
 
-## Feature 3: Symptom Pattern Alerts
+The completion progress bar in Today's Stack and the mini progress arc both currently use orange starts.
+New: Blue to emerald to rose to violet gradient for the progress bar.
+Mini arc: Use a blue-to-violet gradient instead of orange-to-violet.
 
-When the AI detects a repeating symptom pattern across multiple logs, surface it as a dismissible alert card:
+### 5. Daily Briefing Card -- Cooler Gradient
 
-- "You've reported injection site reactions 4 times in the last 2 weeks. Try rotating to a different site — here's our injection site guide." (links to existing guide)
-- "Your energy dipped below 5 on days you skipped your morning dose. Consistency with timing may help."
-- "Weight has plateaued for 2 weeks — this is normal at week 6 of GLP-1 protocols. Expect movement again by week 8."
+Current: Orange-heavy background tint.
+New: A balanced multi-color tint using blue, emerald, and violet at low opacities.
+Background: `linear-gradient(135deg, rgba(99,102,241,0.08), rgba(52,211,153,0.06), rgba(167,139,250,0.08))`
+Icon glow: Shift from orange to indigo.
+
+### 6. Sparkline Bars -- Rose Instead of Orange
+
+The compliance sparkline currently colors high-compliance bars orange and mid-range bars rose.
+New: High compliance = emerald (#34D399), mid = blue (#60A5FA), zero = gray (unchanged).
+
+### 7. Phase Indicator -- Multi-Color Segments
+
+Current: All filled segments use the same orange-rose-violet gradient.
+New: Each segment gets its own color:
+- Starting: Blue
+- Building: Emerald
+- Optimization: Rose
+- Final: Violet
+
+### 8. Decorative Rings -- Violet-to-Teal
+
+Current: Orange-to-violet gradient on concentric rings.
+New: Indigo-to-teal for a cooler, more modern feel.
+
+### 9. Quick Access Cards -- Keep As-Is
+
+These already have distinct colors (orange, rose, violet) and are the design the user likes. No changes needed.
 
 ---
 
-## Technical Plan
+## Technical Details
 
-### New Backend Function: `generate-weekly-review`
+### Single File Modified
 
-An edge function that:
-1. Fetches the user's daily_logs for the past 7 days
-2. Fetches their active protocol (compounds, schedule, week number)
-3. Sends this data to Lovable AI (Gemini Flash) with a structured prompt
-4. Returns 3-4 insights, a mood score, and one recommendation
-5. Caches the result in a new `weekly_reviews` table so it's not regenerated on every page load
+`src/components/dashboard/home/ActiveProtocolState.tsx` -- all color changes are in this one file.
 
-### New Database Table: `weekly_reviews`
+### Specific Code Changes
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | Primary key |
-| user_id | uuid | References auth user |
-| protocol_id | uuid | Active protocol |
-| week_number | int | Protocol week |
-| insights | jsonb | Array of insight objects |
-| mood | text | "green", "yellow", "red" |
-| recommendation | text | Single actionable tip |
-| full_analysis | text | Detailed markdown analysis |
-| generated_at | timestamptz | When AI generated this |
+**statGradients array** (line 195-200): Replace with per-card unique colors:
+- `["linear-gradient(90deg, #60A5FA, #818CF8)", "linear-gradient(90deg, #34D399, #2DD4BF)", "linear-gradient(90deg, #FB7185, #F472B6)", "linear-gradient(90deg, #F59E0B, #F97316)"]`
 
-RLS: Users can only read their own reviews.
+**AmbientOrbs** (line 68-87): Change the radial gradient colors from orange to blue-violet (top) and emerald-teal (bottom).
 
-### New Backend Function: `generate-daily-briefing`
+**ComplianceSparkline** (line 111-134): Change fill colors from `#F97316`/`#FB7185` to `#34D399`/`#60A5FA`.
 
-A lighter function that:
-1. Checks what compounds are scheduled today
-2. Looks at recent compliance and energy trends
-3. Generates a 2-3 sentence personalized briefing
-4. Caches in a `daily_briefings` table (one per user per day)
+**MiniProgressArc** (line 137-161): Change the linearGradient stops from `#F97316`/`#A78BFA` to `#60A5FA`/`#A78BFA`.
 
-### New Database Table: `daily_briefings`
+**DailyBriefingCard background reference**: The briefing card component itself already has its own file -- the fallback insight's shimmer and icon coloring are in `DailyBriefingCard.tsx`, which will also need the orange references updated to use indigo/violet.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid | Primary key |
-| user_id | uuid | References auth user |
-| briefing_date | date | The date this is for |
-| content | text | The briefing text |
-| compound_tips | jsonb | Tips for today's compounds |
-| data_highlight | text | One stat from their data |
-| created_at | timestamptz | Auto-generated |
+**Today's Stack left accent** (line 381): Change gradient to `linear-gradient(180deg, #60A5FA, #34D399, #FB7185, #A78BFA)`.
 
-### Frontend Changes
+**Today's Stack progress bar** (line 398): Change gradient to `linear-gradient(90deg, #60A5FA, #34D399, #FB7185, #A78BFA)` with a blue glow instead of orange.
 
-| File | Change |
-|------|--------|
-| `ActiveProtocolState.tsx` | Replace static insight card with dynamic daily briefing (fetched from daily_briefings table, with a "generate" button if none exists for today) |
-| New: `WeeklyReview.tsx` | A new component showing the weekly intelligence report — expandable card with insights, mood indicator, and recommendation |
-| `ActiveProtocolState.tsx` | Add WeeklyReview card between stats and Today's Stack (only shows if a review exists for the current week) |
-| New: `SymptomAlert.tsx` | Dismissible alert cards that surface pattern-detected insights from symptom data |
-| `Home.tsx` | Pass additional data (symptom patterns) to ActiveProtocolState |
+**Phase indicator segments** (line 554-568): Each segment gets its own solid color instead of the shared gradient: blue, emerald, rose, violet.
 
-### AI Prompt Strategy
+**Decorative concentric rings** (line 510-520): Change gradient from `#F97316`/`#A78BFA` to `#6366F1`/`#2DD4BF`.
 
-The weekly review prompt will be structured to:
-- Receive raw data (not ask the AI to fetch it)
-- Output structured JSON (not free-form text)
-- Include the user's specific compound names and dosing schedule
-- Reference their protocol week and what's expected at that stage
-- Keep insights under 30 words each
-- Always include one actionable recommendation
-- Never provide medical advice — frame everything as "based on your tracking data" and "discuss with your provider"
+### Also Modified
 
-### Cost Control
+`src/components/dashboard/home/DailyBriefingCard.tsx` -- Update the icon gradient, background tint, and glow from orange-dominant to indigo/violet/emerald mix.
 
-- Weekly review: Generated once per week (Sunday night or first dashboard visit of the week)
-- Daily briefing: Generated once per day on first visit, cached
-- Uses Gemini Flash (cheapest model) since the prompts are structured and data-driven
-- Total AI cost per user: ~2-3 calls per week
+### No Layout Changes
+
+Structure, spacing, shadows, typography, animations -- all stay exactly the same. This is purely a color palette shift from mono-orange to distributed rainbow.
+
