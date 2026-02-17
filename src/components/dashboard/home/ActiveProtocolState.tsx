@@ -61,36 +61,24 @@ interface ActiveProtocolStateProps {
   allLogs: DailyLog[];
 }
 
-/* ── Floating Hexagons ── */
-function FloatingHexagons() {
+/* ── Ambient gradient orbs ── */
+function AmbientOrbs() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {[
-        { size: 80, top: "5%", right: "3%", delay: 0, duration: 7 },
-        { size: 50, top: "35%", left: "2%", delay: 1.5, duration: 8 },
-        { size: 35, bottom: "20%", right: "8%", delay: 3, duration: 6 },
-      ].map((hex, i) => (
-        <motion.svg
-          key={i}
-          width={hex.size}
-          height={hex.size}
-          viewBox="0 0 32 32"
-          fill="none"
-          className="absolute"
-          style={{ top: hex.top, right: hex.right, left: (hex as any).left, bottom: (hex as any).bottom }}
-          animate={{ y: [-6, 6, -6], rotate: [0, 5, -5, 0] }}
-          transition={{ duration: hex.duration, repeat: Infinity, ease: "easeInOut", delay: hex.delay }}
-        >
-          <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" stroke="url(#fh)" strokeWidth="0.8" fill="none" opacity={0.04} />
-          <defs>
-            <linearGradient id={`fh${i}`} x1="0" y1="0" x2="32" y2="32">
-              <stop offset="0%" stopColor="#F97316" />
-              <stop offset="50%" stopColor="#FB7185" />
-              <stop offset="100%" stopColor="#A78BFA" />
-            </linearGradient>
-          </defs>
-        </motion.svg>
-      ))}
+      <div
+        className="absolute -top-20 -right-20 w-[300px] h-[300px] rounded-full"
+        style={{
+          background: "radial-gradient(circle, rgba(249,115,22,0.06) 0%, rgba(251,113,133,0.04) 40%, transparent 70%)",
+          filter: "blur(60px)",
+        }}
+      />
+      <div
+        className="absolute -bottom-16 -left-16 w-[200px] h-[200px] rounded-full"
+        style={{
+          background: "radial-gradient(circle, rgba(167,139,250,0.05) 0%, rgba(96,165,250,0.03) 40%, transparent 70%)",
+          filter: "blur(50px)",
+        }}
+      />
     </div>
   );
 }
@@ -142,7 +130,7 @@ function ComplianceSparkline({ logs }: { logs: DailyLog[] }) {
   );
 }
 
-/* ── Mini progress arc (bigger) ── */
+/* ── Mini progress arc ── */
 function MiniProgressArc({ percent }: { percent: number }) {
   const r = 16;
   const circ = 2 * Math.PI * r;
@@ -175,44 +163,13 @@ function getSmartInsight(
   compliancePercent: number,
   currentStreak: number,
   weeklyExpectation: string | null
-): { text: string; type: "welcome" | "praise" | "encourage" | "streak" | "expectation" | "default" } {
+): { text: string; type: string } {
   if (currentWeek === 1) return { text: "Welcome to Week 1. Focus on getting comfortable with your routine — side effects are typically mildest now.", type: "welcome" };
   if (compliancePercent >= 90) return { text: `Your consistency is in the top tier. Keep this pace through Week ${currentWeek} for optimal results.`, type: "praise" };
   if (currentStreak >= 7) return { text: `${currentStreak}-day streak! You're building a solid habit. Research shows 21 consecutive days locks in behavior change.`, type: "streak" };
   if (compliancePercent < 50) return { text: "Missed a few days? That's okay. Consistency matters more than perfection — get back on track today.", type: "encourage" };
   if (weeklyExpectation) return { text: weeklyExpectation, type: "expectation" };
   return { text: "Stay consistent with your protocol. Small daily actions compound into significant results over time.", type: "default" };
-}
-
-/* ── Completion Progress Bar for Today's Stack ── */
-function StackProgressBar({ completed, total }: { completed: number; total: number }) {
-  const pct = total > 0 ? (completed / total) * 100 : 0;
-  const allDone = completed === total && total > 0;
-  return (
-    <div className="flex items-center gap-2.5">
-      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
-        <motion.div
-          className="h-full rounded-full"
-          style={{ background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)" }}
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        />
-      </div>
-      <span className="text-[10px] font-semibold text-muted-foreground" style={{ fontFamily: mono }}>
-        {completed}/{total}
-      </span>
-      {allDone && (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 400, damping: 15 }}
-        >
-          <CheckCircle2 className="w-3.5 h-3.5" style={{ color: "#34D399" }} />
-        </motion.div>
-      )}
-    </div>
-  );
 }
 
 /* ── Shimmer overlay for insight card ── */
@@ -231,13 +188,21 @@ function ShimmerOverlay() {
   );
 }
 
-/* ── Stat card color configs ── */
-const statCardConfigs = [
-  { tint: "rgba(249,115,22,0.04)", borderColor: "rgba(249,115,22,0.12)", hoverBg: "rgba(249,115,22,0.08)" },
-  { tint: "rgba(96,165,250,0.04)", borderColor: "rgba(96,165,250,0.12)", hoverBg: "rgba(96,165,250,0.08)" },
-  { tint: "rgba(251,113,133,0.04)", borderColor: "rgba(251,113,133,0.12)", hoverBg: "rgba(251,113,133,0.08)" },
-  { tint: "rgba(167,139,250,0.04)", borderColor: "rgba(167,139,250,0.12)", hoverBg: "rgba(167,139,250,0.08)" },
+/* ── Stat card gradient accent bars ── */
+const statGradients = [
+  "linear-gradient(90deg, #F97316, #FB923C)",
+  "linear-gradient(90deg, #60A5FA, #93C5FD)",
+  "linear-gradient(90deg, #FB7185, #FDA4AF)",
+  "linear-gradient(90deg, #A78BFA, #C4B5FD)",
 ];
+
+/* ── Card shadow system ── */
+const shadows = {
+  stat: "0 1px 3px rgba(0,0,0,0.04), 0 6px 24px rgba(0,0,0,0.04)",
+  statHover: "0 2px 6px rgba(0,0,0,0.06), 0 12px 40px rgba(0,0,0,0.08)",
+  primary: "0 2px 8px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.06)",
+  quickHover: "0 4px 16px rgba(0,0,0,0.06), 0 16px 48px rgba(0,0,0,0.06)",
+};
 
 export function ActiveProtocolState({
   protocol,
@@ -296,29 +261,29 @@ export function ActiveProtocolState({
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="relative">
-      <FloatingHexagons />
+      <AmbientOrbs />
 
       {/* ─── GREETING ─── */}
-      <motion.div variants={itemVariants} className="mb-1">
+      <motion.div variants={itemVariants} className="mb-5">
         <p className="text-[13px] font-medium text-muted-foreground">Hey {firstName}</p>
         <p className="text-sm font-semibold text-foreground" style={{ fontFamily: heading }}>
           {protocol.protocol_name}
         </p>
       </motion.div>
 
-      {/* ─── ROW 1: GLASSMORPHIC STAT CARDS ─── */}
+      {/* ─── ROW 1: ELEVATED STAT CARDS with gradient top accent ─── */}
       <motion.div variants={cardStagger} className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
         {[
           {
             label: "Progress", value: progressPercent, suffix: "%",
-            detail: `${dayNumber} days elapsed`,
+            detail: `${dayNumber} of ${totalDays} days`,
             visual: <MiniProgressArc percent={progressPercent} />,
           },
           {
             label: "Day", value: dayNumber, suffix: "",
             detail: `Week ${currentWeek || 1}`,
             visual: (
-              <span className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/60 text-muted-foreground mt-1" style={{ fontFamily: mono }}>
+              <span className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-md mt-1 text-muted-foreground" style={{ fontFamily: mono, backgroundColor: "rgba(0,0,0,0.03)" }}>
                 Week {currentWeek}
               </span>
             ),
@@ -347,59 +312,58 @@ export function ActiveProtocolState({
           <motion.div
             key={card.label}
             variants={cardItem}
-            whileHover={{ y: -4, boxShadow: "0 12px 40px rgba(0,0,0,0.08)" }}
+            whileHover={{ y: -4, boxShadow: shadows.statHover }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="rounded-[16px] overflow-hidden cursor-default group relative"
+            className="rounded-[20px] overflow-hidden cursor-default bg-white"
             style={{
-              background: statCardConfigs[idx].tint,
-              backdropFilter: "blur(12px)",
-              border: `1px solid ${statCardConfigs[idx].borderColor}`,
+              boxShadow: shadows.stat,
+              border: "1px solid rgba(0,0,0,0.06)",
             }}
           >
+            {/* Gradient top accent bar */}
+            <div className="h-[3px] rounded-t-[20px]" style={{ background: statGradients[idx] }} />
             <div className="p-3.5 md:p-4">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1" style={{ fontFamily: mono }}>
                 {card.label}
               </p>
               <div className="flex items-center justify-between">
-                <p className="text-[28px] font-bold text-foreground leading-tight" style={{ fontFamily: heading }}>
+                <p className="text-[32px] font-bold text-foreground leading-tight" style={{ fontFamily: heading }}>
                   <AnimatedCounter value={card.value} suffix={card.suffix} />
                 </p>
                 {card.visual}
               </div>
-              {/* Hover reveal detail */}
-              <motion.p
-                className="text-[11px] text-muted-foreground mt-1 overflow-hidden"
-                initial={{ opacity: 0, height: 0 }}
-                whileHover={{ opacity: 1, height: "auto" }}
-                style={{ fontFamily: mono }}
-              >
+              {/* Always-visible detail line */}
+              <p className="text-[11px] text-muted-foreground mt-1.5" style={{ fontFamily: mono }}>
                 {card.detail}
-              </motion.p>
+              </p>
             </div>
           </motion.div>
         ))}
       </motion.div>
 
-      {/* ─── SMART INSIGHT GRADIENT BANNER ─── */}
+      {/* ─── SMART INSIGHT — Glass Panel ─── */}
       <motion.div variants={itemVariants} className="mb-5">
         <div
-          className="rounded-[16px] overflow-hidden relative flex"
+          className="rounded-[20px] overflow-hidden relative flex"
           style={{
-            background: "radial-gradient(ellipse at 20% 50%, rgba(249,115,22,0.06), transparent 70%), radial-gradient(ellipse at 80% 50%, rgba(167,139,250,0.05), transparent 70%), rgba(255,255,255,0.8)",
-            backdropFilter: "blur(8px)",
-            border: "1px solid rgba(249,115,22,0.1)",
+            background: "linear-gradient(135deg, rgba(249,115,22,0.08), rgba(251,113,133,0.06), rgba(167,139,250,0.08))",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(255,255,255,0.6)",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.02)",
           }}
         >
           <ShimmerOverlay />
-          <div className="w-[3px] flex-shrink-0" style={{ background: "linear-gradient(180deg, #F97316, #FB7185, #A78BFA)" }} />
           <div className="p-4 flex items-start gap-3">
             <motion.div
-              className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-              style={{ background: "linear-gradient(135deg, rgba(249,115,22,0.12), rgba(167,139,250,0.12))" }}
-              animate={{ scale: [1, 1.08, 1] }}
+              className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+              style={{
+                background: "linear-gradient(135deg, rgba(249,115,22,0.15), rgba(167,139,250,0.15))",
+                boxShadow: "0 0 20px rgba(249,115,22,0.1)",
+              }}
+              animate={{ scale: [1, 1.06, 1] }}
               transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
             >
-              <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
+              <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
                 <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" stroke="url(#insightHex)" strokeWidth="2" fill="none" />
                 <defs>
                   <linearGradient id="insightHex" x1="0" y1="0" x2="32" y2="32">
@@ -409,45 +373,52 @@ export function ActiveProtocolState({
                 </defs>
               </svg>
             </motion.div>
-            <p className="text-[15px] text-foreground leading-relaxed" style={{ fontFamily: heading }}>
+            <p className="text-[15px] text-foreground leading-relaxed font-medium" style={{ fontFamily: heading }}>
               {insight.text}
             </p>
           </div>
         </div>
       </motion.div>
 
-      {/* ─── Gradient Separator ─── */}
-      <div className="my-5 h-[2px] rounded-full opacity-10" style={{ background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)" }} />
-
-      {/* ─── ROW 2: TODAY'S STACK (dark header) + THIS WEEK ─── */}
+      {/* ─── ROW 2: TODAY'S STACK + THIS WEEK ─── */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-5">
-        {/* Left: Today's Stack */}
-        <div className="md:col-span-3 rounded-[16px] overflow-hidden border border-border bg-white">
-          {/* Dark header */}
+        {/* Left: Today's Stack — elevated white card with gradient left border */}
+        <div
+          className="md:col-span-3 rounded-[20px] overflow-hidden bg-white relative"
+          style={{
+            boxShadow: shadows.primary,
+            border: "1px solid rgba(0,0,0,0.06)",
+          }}
+        >
+          {/* Gradient left accent */}
           <div
-            className="px-4 pt-3.5 pb-3 space-y-2"
-            style={{ backgroundColor: "#0A0A0A" }}
-          >
+            className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full"
+            style={{ background: "linear-gradient(180deg, #F97316, #FB7185, #A78BFA)" }}
+          />
+          <div className="px-5 pt-4 pb-3 space-y-2">
             <div className="flex items-baseline justify-between">
-              <h2 className="text-[11px] font-semibold uppercase tracking-wider" style={{ fontFamily: mono, color: "rgba(255,255,255,0.7)" }}>
+              <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" style={{ fontFamily: mono }}>
                 Today's Stack
               </h2>
-              <span className="text-[11px]" style={{ fontFamily: mono, color: "rgba(255,255,255,0.4)" }}>
+              <span className="text-[11px] text-muted-foreground" style={{ fontFamily: mono }}>
                 {format(new Date(), "EEE, MMM d")}
               </span>
             </div>
             {todayCompounds.length > 0 && (
               <div className="flex items-center gap-2.5">
-                <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
+                <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)" }}
+                    style={{
+                      background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)",
+                      boxShadow: "0 0 8px rgba(249,115,22,0.3)",
+                    }}
                     initial={{ width: 0 }}
                     animate={{ width: `${todayCompounds.length > 0 ? (completedCount / todayCompounds.length) * 100 : 0}%` }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
                   />
                 </div>
-                <span className="text-[10px] font-semibold" style={{ fontFamily: mono, color: "rgba(255,255,255,0.5)" }}>
+                <span className="text-[10px] font-semibold text-muted-foreground" style={{ fontFamily: mono }}>
                   {completedCount}/{todayCompounds.length}
                 </span>
                 {allDone && todayCompounds.length > 0 && (
@@ -458,7 +429,7 @@ export function ActiveProtocolState({
               </div>
             )}
           </div>
-          <div className="p-3">
+          <div className="px-4 pb-4">
             {todayCompounds.length === 0 ? (
               <RestDayCard nextDay={getNextScheduledDay()} />
             ) : (
@@ -484,8 +455,14 @@ export function ActiveProtocolState({
         </div>
 
         {/* Right: This Week */}
-        <div className="md:col-span-2 rounded-[16px] bg-white border border-border overflow-hidden md:min-h-[280px]">
-          <div className="px-4 pt-4 pb-2 border-b border-border">
+        <div
+          className="md:col-span-2 rounded-[20px] bg-white overflow-hidden md:min-h-[280px]"
+          style={{
+            boxShadow: shadows.stat,
+            border: "1px solid rgba(0,0,0,0.06)",
+          }}
+        >
+          <div className="px-4 pt-4 pb-2">
             <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" style={{ fontFamily: mono }}>
               This Week
             </h2>
@@ -511,14 +488,17 @@ export function ActiveProtocolState({
         </div>
       </motion.div>
 
-      {/* ─── Gradient Separator ─── */}
-      <div className="my-5 h-[2px] rounded-full opacity-10" style={{ background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)" }} />
-
       {/* ─── ROW 3: JOURNEY + PROTOCOL OVERVIEW ─── */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-5">
         {/* Left: Journey */}
-        <div className="md:col-span-3 rounded-[16px] bg-white border border-border overflow-hidden">
-          <div className="px-4 pt-4 pb-2 border-b border-border">
+        <div
+          className="md:col-span-3 rounded-[20px] bg-white overflow-hidden"
+          style={{
+            boxShadow: shadows.stat,
+            border: "1px solid rgba(0,0,0,0.06)",
+          }}
+        >
+          <div className="px-4 pt-4 pb-2">
             <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" style={{ fontFamily: mono }}>
               Your Journey
             </h2>
@@ -534,7 +514,13 @@ export function ActiveProtocolState({
         </div>
 
         {/* Right: Protocol Overview */}
-        <div className="md:col-span-2 rounded-[16px] bg-white border border-border overflow-hidden md:min-h-[280px] relative">
+        <div
+          className="md:col-span-2 rounded-[20px] bg-white overflow-hidden md:min-h-[280px] relative"
+          style={{
+            boxShadow: shadows.stat,
+            border: "1px solid rgba(0,0,0,0.06)",
+          }}
+        >
           {/* Decorative concentric rings */}
           <svg className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" width="160" height="160" viewBox="0 0 160 160" fill="none">
             {[50, 65, 80].map((r) => (
@@ -548,7 +534,7 @@ export function ActiveProtocolState({
             </defs>
           </svg>
 
-          <div className="px-4 pt-4 pb-2 border-b border-border">
+          <div className="px-4 pt-4 pb-2">
             <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" style={{ fontFamily: mono }}>
               Protocol Overview
             </h2>
@@ -583,7 +569,7 @@ export function ActiveProtocolState({
                   {["Starting", "Building", "Optimization", "Final"].map((p, i) => (
                     <motion.div
                       key={p}
-                      className="h-2 flex-1 rounded-full cursor-default relative group"
+                      className="h-2 flex-1 rounded-full cursor-default relative"
                       whileHover={{ scaleY: 1.8 }}
                       style={{
                         background: i <= phase.index
@@ -605,9 +591,6 @@ export function ActiveProtocolState({
         </div>
       </motion.div>
 
-      {/* ─── Gradient Separator ─── */}
-      <div className="my-5 h-[2px] rounded-full opacity-10" style={{ background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)" }} />
-
       {/* ─── ROW 4: QUICK ACCESS — Bento gradient cards ─── */}
       <motion.div variants={cardStagger} className="mb-8">
         <div className="flex items-center justify-between mb-3">
@@ -616,8 +599,8 @@ export function ActiveProtocolState({
           </h2>
           <button
             onClick={() => navigate("/dashboard/progress")}
-            className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border border-border transition-colors hover:bg-muted"
-            style={{ fontFamily: mono }}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full transition-colors hover:bg-muted"
+            style={{ fontFamily: mono, border: "1px solid rgba(0,0,0,0.06)" }}
           >
             {hasCheckedInThisWeek ? (
               <CheckCircle2 className="w-3 h-3" style={{ color: "#34D399" }} />
@@ -629,36 +612,38 @@ export function ActiveProtocolState({
             </span>
           </button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { icon: MessageSquare, label: "AI Coach", desc: "Ask anything", to: "/dashboard/coach", color: "#F97316", bgTint: "rgba(249,115,22,0.05)", bgHover: "rgba(249,115,22,0.12)" },
-            { icon: Layers, label: "My Protocol", desc: "Compounds & schedule", to: "/dashboard/protocol", color: "#FB7185", bgTint: "rgba(251,113,133,0.05)", bgHover: "rgba(251,113,133,0.12)" },
-            { icon: BarChart3, label: "Progress", desc: "Track results", to: "/dashboard/progress", color: "#A78BFA", bgTint: "rgba(167,139,250,0.05)", bgHover: "rgba(167,139,250,0.12)" },
+            { icon: MessageSquare, label: "AI Coach", desc: "Ask anything about your blueprint", to: "/dashboard/coach", gradient: "linear-gradient(135deg, #F97316, #FB923C)", bgTint: "rgba(249,115,22,0.05)" },
+            { icon: Layers, label: "My Protocol", desc: "Compounds, schedule & guides", to: "/dashboard/protocol", gradient: "linear-gradient(135deg, #FB7185, #FDA4AF)", bgTint: "rgba(251,113,133,0.05)" },
+            { icon: BarChart3, label: "Progress", desc: "Track your results over time", to: "/dashboard/progress", gradient: "linear-gradient(135deg, #A78BFA, #C4B5FD)", bgTint: "rgba(167,139,250,0.05)" },
           ].map((card) => (
             <motion.button
               key={card.label}
               variants={cardItem}
               onClick={() => navigate(card.to)}
-              whileHover={{ scale: 1.02, y: -3, boxShadow: "0 12px 32px rgba(0,0,0,0.08)" }}
+              whileHover={{ y: -3, boxShadow: shadows.quickHover }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="rounded-[14px] overflow-hidden text-left group relative border border-border"
-              style={{ background: card.bgTint }}
+              className="rounded-[20px] overflow-hidden text-left group bg-white"
+              style={{
+                boxShadow: shadows.stat,
+                border: "1px solid rgba(0,0,0,0.06)",
+              }}
             >
-              <div className="p-4">
-                <div className="flex items-start justify-between mb-2.5">
-                  <motion.div
-                    className="w-11 h-11 rounded-[12px] flex items-center justify-center"
-                    style={{ background: `linear-gradient(135deg, ${card.bgTint}, ${card.bgHover})` }}
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              <div className="py-5 px-5">
+                <div className="flex items-start justify-between mb-3">
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center"
+                    style={{ background: card.gradient }}
                   >
-                    <card.icon className="w-5 h-5" style={{ color: card.color }} />
-                  </motion.div>
+                    <card.icon className="w-5 h-5 text-white" />
+                  </div>
                   <motion.div
-                    whileHover={{ rotate: -45 }}
+                    className="mt-1"
+                    whileHover={{ x: 4 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
-                    <ArrowRight className="w-3.5 h-3.5 text-muted-foreground" />
+                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </motion.div>
                 </div>
                 <p className="font-bold text-sm text-foreground" style={{ fontFamily: heading }}>
@@ -672,10 +657,7 @@ export function ActiveProtocolState({
       </motion.div>
 
       {/* Footer */}
-      <div
-        className="text-xs text-center py-4 text-muted-foreground"
-        style={{ borderTop: "2px solid transparent", borderImage: "linear-gradient(90deg, transparent, rgba(249,115,22,0.1), rgba(167,139,250,0.1), transparent) 1" }}
-      >
+      <div className="text-xs text-center py-4 text-muted-foreground">
         For educational purposes only. Not medical advice. Always consult a healthcare provider.
       </div>
     </motion.div>

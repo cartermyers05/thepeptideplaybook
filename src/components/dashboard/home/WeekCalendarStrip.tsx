@@ -81,25 +81,25 @@ export function WeekCalendarStrip({ currentDay, courseStartDate, schedule }: Wee
                 <div
                   className="text-center rounded-[12px] py-2.5 px-1 transition-all relative cursor-default group"
                   style={{
-                    backgroundColor: day.isToday ? "#F4F4F5" : "transparent",
-                    border: "1.5px solid transparent",
-                    backgroundImage: day.isToday
-                      ? "linear-gradient(#F4F4F5, #F4F4F5), linear-gradient(135deg, #F97316, #FB7185, #A78BFA)"
-                      : "none",
-                    backgroundOrigin: "border-box",
-                    backgroundClip: day.isToday ? "padding-box, border-box" : "padding-box",
-                    animation: day.isToday ? "pulse-border 2s ease-in-out infinite" : "none",
+                    backgroundColor: day.isToday
+                      ? "rgba(249,115,22,0.08)"
+                      : day.isCompleted
+                        ? "rgba(52,211,153,0.06)"
+                        : "transparent",
+                    border: day.isToday
+                      ? "1.5px solid rgba(249,115,22,0.25)"
+                      : "1.5px solid transparent",
                   }}
                 >
                   {/* Hover highlight */}
-                  <div className="absolute inset-0 rounded-[12px] bg-muted/0 group-hover:bg-muted/50 transition-colors duration-200" />
+                  <div className="absolute inset-0 rounded-[12px] bg-muted/0 group-hover:bg-muted/40 transition-colors duration-200" />
                   <p className="text-[10px] font-medium mb-1 text-muted-foreground relative z-10" style={{ fontFamily: mono }}>
                     {day.dayName}
                   </p>
                   <p
                     className="text-base font-bold relative z-10"
                     style={{
-                      color: day.isToday ? "#0A0A0A" : day.isFuture ? "#C4C4C4" : "#6B7280",
+                      color: day.isToday ? "#F97316" : day.isCompleted ? "#0A0A0A" : day.isFuture ? "#C4C4C4" : "#6B7280",
                       fontFamily: mono,
                     }}
                   >
