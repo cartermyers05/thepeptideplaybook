@@ -71,14 +71,14 @@ function AmbientOrbs() {
       <div
         className="absolute -top-20 -right-20 w-[300px] h-[300px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(249,115,22,0.06) 0%, rgba(251,113,133,0.04) 40%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(99,102,241,0.06) 0%, rgba(167,139,250,0.04) 40%, transparent 70%)",
           filter: "blur(60px)",
         }}
       />
       <div
         className="absolute -bottom-16 -left-16 w-[200px] h-[200px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(167,139,250,0.05) 0%, rgba(96,165,250,0.03) 40%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(52,211,153,0.05) 0%, rgba(45,212,191,0.03) 40%, transparent 70%)",
           filter: "blur(50px)",
         }}
       />
@@ -122,7 +122,7 @@ function ComplianceSparkline({ logs }: { logs: DailyLog[] }) {
         <motion.rect
           key={i} x={i * 10 + 1} y={28 - val * 24}
           width={7} height={Math.max(3, val * 24)} rx={2}
-          fill={val >= 0.8 ? "#F97316" : val > 0 ? "#FB7185" : "hsl(0 0% 88%)"}
+          fill={val >= 0.8 ? "#34D399" : val > 0 ? "#60A5FA" : "hsl(0 0% 88%)"}
           initial={{ scaleY: 0 }}
           animate={{ scaleY: 1 }}
           transition={{ delay: i * 0.05, duration: 0.4 }}
@@ -152,7 +152,7 @@ function MiniProgressArc({ percent }: { percent: number }) {
       />
       <defs>
         <linearGradient id="miniGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#F97316" />
+          <stop offset="0%" stopColor="#60A5FA" />
           <stop offset="100%" stopColor="#A78BFA" />
         </linearGradient>
       </defs>
@@ -193,10 +193,10 @@ function ShimmerOverlay() {
 
 /* ── Stat card gradient accent bars ── */
 const statGradients = [
-  "linear-gradient(90deg, #F97316, #FB923C)",
-  "linear-gradient(90deg, #60A5FA, #93C5FD)",
-  "linear-gradient(90deg, #FB7185, #FDA4AF)",
-  "linear-gradient(90deg, #A78BFA, #C4B5FD)",
+  "linear-gradient(90deg, #60A5FA, #818CF8)",
+  "linear-gradient(90deg, #34D399, #2DD4BF)",
+  "linear-gradient(90deg, #FB7185, #F472B6)",
+  "linear-gradient(90deg, #F59E0B, #F97316)",
 ];
 
 /* ── Card shadow system ── */
@@ -378,7 +378,7 @@ export function ActiveProtocolState({
           {/* Gradient left accent */}
           <div
             className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full"
-            style={{ background: "linear-gradient(180deg, #F97316, #FB7185, #A78BFA)" }}
+            style={{ background: "linear-gradient(180deg, #60A5FA, #34D399, #FB7185, #A78BFA)" }}
           />
           <div className="px-5 pt-4 pb-3 space-y-2">
             <div className="flex items-baseline justify-between">
@@ -395,8 +395,8 @@ export function ActiveProtocolState({
                   <motion.div
                     className="h-full rounded-full"
                     style={{
-                      background: "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)",
-                      boxShadow: "0 0 8px rgba(249,115,22,0.3)",
+                      background: "linear-gradient(90deg, #60A5FA, #34D399, #FB7185, #A78BFA)",
+                      boxShadow: "0 0 8px rgba(96,165,250,0.3)",
                     }}
                     initial={{ width: 0 }}
                     animate={{ width: `${todayCompounds.length > 0 ? (completedCount / todayCompounds.length) * 100 : 0}%` }}
@@ -513,8 +513,8 @@ export function ActiveProtocolState({
             ))}
             <defs>
               <linearGradient id="decorRing" x1="0" y1="0" x2="160" y2="160">
-                <stop offset="0%" stopColor="#F97316" />
-                <stop offset="100%" stopColor="#A78BFA" />
+                <stop offset="0%" stopColor="#6366F1" />
+                <stop offset="100%" stopColor="#2DD4BF" />
               </linearGradient>
             </defs>
           </svg>
@@ -558,7 +558,7 @@ export function ActiveProtocolState({
                       whileHover={{ scaleY: 1.8 }}
                       style={{
                         background: i <= phase.index
-                          ? "linear-gradient(90deg, #F97316, #FB7185, #A78BFA)"
+                          ? ["#60A5FA", "#34D399", "#FB7185", "#A78BFA"][i]
                           : "hsl(0 0% 92%)",
                         opacity: i <= phase.index ? 1 : 0.5,
                         transformOrigin: "bottom",
