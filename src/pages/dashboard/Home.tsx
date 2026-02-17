@@ -8,7 +8,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useProgressStats } from "@/hooks/useProgressData";
 import { NoProtocolState } from "@/components/dashboard/home/NoProtocolState";
 import { ActiveProtocolState } from "@/components/dashboard/home/ActiveProtocolState";
-import { FloatingChatButton } from "@/components/dashboard/home/FloatingChatButton";
+
 
 const containerVariants = {
   hidden: { opacity: 0, filter: "blur(4px)" },
@@ -30,7 +30,7 @@ export default function Dashboard() {
   const stats = useProgressStats(allLogs, protocol ?? null);
 
   const firstName = profile?.full_name?.split(" ")[0] || "there";
-  const shouldPulse = recentLogs.length === 0;
+  
 
   if (isLoading) {
     return (
@@ -96,7 +96,7 @@ export default function Dashboard() {
         )}
       </motion.div>
 
-      <FloatingChatButton onClick={() => navigate("/dashboard/coach")} shouldPulse={shouldPulse} />
+      
     </DashboardLayout>
   );
 }
