@@ -1,0 +1,1 @@
+ALTER TABLE public.user_protocols ADD COLUMN supplies_status text NOT NULL DEFAULT 'not_ordered';

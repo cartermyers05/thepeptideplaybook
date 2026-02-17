@@ -81,7 +81,28 @@ When calling create_protocol, you MUST populate ALL of the following with real, 
    - side_effects: Specific to this compound with onset/resolution timeline
    - storage: Specific handling instructions with temperature and expiration
 
-⚠️ DO NOT leave side_effects, storage, or mechanism empty. Each must be specific to the actual compound.`;
+⚠️ DO NOT leave side_effects, storage, or mechanism empty. Each must be specific to the actual compound.
+
+═══════════════════════════════════════════════════════════
+PROTOCOL UPDATES VIA CONVERSATION
+═══════════════════════════════════════════════════════════
+
+You have a tool called "update_protocol" that updates the user's active protocol based on what they tell you.
+
+**WHEN TO USE THIS TOOL:**
+- User says they got their supplies → update supplies_status to "received" or "ready"
+- User says they ordered supplies → update supplies_status to "ordered"
+- User says they're starting today/tomorrow → set status to "active", start_date to today or specified date
+- User wants to pause → set status to "paused"
+- User wants to resume → set status back to "active"
+- User wants to extend or shorten cycle → update cycle_length_weeks
+- User says they're done → set status to "completed"
+
+**IMPORTANT RULES:**
+- Always confirm the change conversationally after updating (e.g., "Got it, I've marked your supplies as received and updated your timeline.")
+- If the user provides a start date, use ISO format (YYYY-MM-DD). If they say "today", use today's date. If "tomorrow", use tomorrow's date.
+- When setting status to "active" and no start_date was previously set, also set start_date to today.
+- Only update fields the user explicitly mentions — don't change other fields.`;
 
 // ═══════════════════════════════════════════════════════════
 // TOOL DEFINITIONS
@@ -167,25 +188,36 @@ const tools = [
         required: ["goal", "protocol_name", "peptides", "cycle_length_weeks", "experience_level", "risk_assessment", "doctor_script", "weekly_expectations"]
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_protocol",
+      description: "Update the user's active protocol. Use when the user mentions getting supplies, starting, pausing, resuming, or changing their protocol duration.",
+      parameters: {
+        type: "object",
+        properties: {
+          status: { type: "string", enum: ["not_started", "active", "paused", "completed"], description: "New protocol status" },
+          supplies_status: { type: "string", enum: ["not_ordered", "ordered", "received", "ready"], description: "Supply tracking status" },
+          start_date: { type: "string", description: "ISO date (YYYY-MM-DD) for when the protocol starts" },
+          cycle_length_weeks: { type: "number", description: "Updated cycle length in weeks" },
+        },
+        required: []
+      }
+    }
   }
 ];
 
 // ═══════════════════════════════════════════════════════════
-// TOOL HANDLER (dual-write to protocols + user_protocols)
+// TOOL HANDLERS
 // ═══════════════════════════════════════════════════════════
 
-async function handleToolCall(
-  toolCall: { function: { name: string; arguments: string } },
+async function handleCreateProtocol(
+  args: any,
   userId: string,
   supabaseServiceRole: ReturnType<typeof createClient>
 ): Promise<{ success: boolean; message: string; protocolId?: string }> {
-  if (toolCall.function.name !== "create_protocol") {
-    return { success: false, message: "Unknown tool" };
-  }
-
   try {
-    const args = JSON.parse(toolCall.function.arguments);
-
     // Write to protocols table
     const { data, error } = await supabaseServiceRole
       .from("protocols")
@@ -212,7 +244,7 @@ async function handleToolCall(
       return { success: false, message: `Failed to save protocol: ${error.message}` };
     }
 
-    // Dual-write to user_protocols (the table the dashboard reads)
+    // Dual-write to user_protocols
     try {
       const compounds = (args.peptides || []).map((p: any) => ({
         name: p.name,
@@ -299,6 +331,127 @@ async function handleToolCall(
   }
 }
 
+async function handleUpdateProtocol(
+  args: any,
+  userId: string,
+  supabaseServiceRole: ReturnType<typeof createClient>
+): Promise<{ success: boolean; message: string }> {
+  try {
+    // Find user's active protocol
+    const { data: activeProtocol, error: fetchError } = await supabaseServiceRole
+      .from("user_protocols")
+      .select("id, start_date, cycle_length_weeks, status")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // Also check for not_started protocols if no active one
+    let protocolToUpdate = activeProtocol;
+    if (!protocolToUpdate) {
+      const { data: notStarted } = await supabaseServiceRole
+        .from("user_protocols")
+        .select("id, start_date, cycle_length_weeks, status")
+        .eq("user_id", userId)
+        .in("status", ["not_started", "paused"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      protocolToUpdate = notStarted;
+    }
+
+    if (!protocolToUpdate) {
+      return { success: false, message: "No active protocol found to update. Create a protocol first." };
+    }
+
+    const updates: Record<string, any> = {};
+    const changes: string[] = [];
+
+    if (args.status) {
+      updates.status = args.status;
+      changes.push(`status → ${args.status}`);
+    }
+
+    if (args.supplies_status) {
+      updates.supplies_status = args.supplies_status;
+      changes.push(`supplies → ${args.supplies_status}`);
+    }
+
+    if (args.start_date) {
+      updates.start_date = args.start_date;
+      changes.push(`start date → ${args.start_date}`);
+      // Auto-calculate end_date
+      const startMs = new Date(args.start_date + "T00:00:00").getTime();
+      const weeks = args.cycle_length_weeks || protocolToUpdate.cycle_length_weeks || 8;
+      const endMs = startMs + weeks * 7 * 24 * 60 * 60 * 1000;
+      updates.end_date = new Date(endMs).toISOString().split("T")[0];
+    }
+
+    if (args.cycle_length_weeks) {
+      updates.cycle_length_weeks = args.cycle_length_weeks;
+      changes.push(`cycle length → ${args.cycle_length_weeks} weeks`);
+      // Recalculate end_date if start_date exists
+      const startDate = args.start_date || protocolToUpdate.start_date;
+      if (startDate) {
+        const startMs = new Date(startDate + "T00:00:00").getTime();
+        const endMs = startMs + args.cycle_length_weeks * 7 * 24 * 60 * 60 * 1000;
+        updates.end_date = new Date(endMs).toISOString().split("T")[0];
+      }
+    }
+
+    // If setting to active and no start_date, set it to today
+    if (args.status === "active" && !args.start_date && !protocolToUpdate.start_date) {
+      const today = new Date().toISOString().split("T")[0];
+      updates.start_date = today;
+      const weeks = args.cycle_length_weeks || protocolToUpdate.cycle_length_weeks || 8;
+      const endMs = new Date(today + "T00:00:00").getTime() + weeks * 7 * 24 * 60 * 60 * 1000;
+      updates.end_date = new Date(endMs).toISOString().split("T")[0];
+      changes.push(`start date → ${today} (auto-set)`);
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return { success: false, message: "No valid fields to update." };
+    }
+
+    const { error: updateError } = await supabaseServiceRole
+      .from("user_protocols")
+      .update(updates)
+      .eq("id", protocolToUpdate.id);
+
+    if (updateError) {
+      console.error("Failed to update protocol:", updateError);
+      return { success: false, message: `Failed to update: ${updateError.message}` };
+    }
+
+    console.log("Protocol updated:", changes.join(", "));
+    return { success: true, message: `Protocol updated: ${changes.join(", ")}` };
+  } catch (e) {
+    console.error("Error in update_protocol:", e);
+    return { success: false, message: "Failed to update protocol" };
+  }
+}
+
+async function handleToolCall(
+  toolCall: { function: { name: string; arguments: string } },
+  userId: string,
+  supabaseServiceRole: ReturnType<typeof createClient>
+): Promise<{ success: boolean; message: string; protocolId?: string; toolName?: string }> {
+  const args = JSON.parse(toolCall.function.arguments);
+
+  if (toolCall.function.name === "create_protocol") {
+    const result = await handleCreateProtocol(args, userId, supabaseServiceRole);
+    return { ...result, toolName: "create_protocol" };
+  }
+
+  if (toolCall.function.name === "update_protocol") {
+    const result = await handleUpdateProtocol(args, userId, supabaseServiceRole);
+    return { ...result, toolName: "update_protocol" };
+  }
+
+  return { success: false, message: "Unknown tool" };
+}
+
 // ═══════════════════════════════════════════════════════════
 // MAIN HANDLER
 // ═══════════════════════════════════════════════════════════
@@ -363,10 +516,12 @@ serve(async (req) => {
     if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
       const toolResults = [];
       let protocolCreated = false;
+      let protocolUpdated = false;
 
       for (const toolCall of assistantMessage.tool_calls) {
         const result = await handleToolCall(toolCall, userId, supabaseServiceRole);
-        if (result.success && result.protocolId) protocolCreated = true;
+        if (result.success && result.toolName === "create_protocol") protocolCreated = true;
+        if (result.success && result.toolName === "update_protocol") protocolUpdated = true;
         toolResults.push({
           tool_call_id: toolCall.id,
           role: "tool",
@@ -376,8 +531,8 @@ serve(async (req) => {
 
       // Follow-up streaming call with tool results
       const followUpMessages = [
-        ...apiMessages.slice(0, -1), // system + history
-        apiMessages[apiMessages.length - 1], // user message
+        ...apiMessages.slice(0, -1),
+        apiMessages[apiMessages.length - 1],
         assistantMessage,
         ...toolResults,
       ];
@@ -397,9 +552,10 @@ serve(async (req) => {
       const responseHeaders: Record<string, string> = {
         ...corsHeaders,
         "Content-Type": "text/event-stream",
-        "Access-Control-Expose-Headers": "X-Protocol-Created",
+        "Access-Control-Expose-Headers": "X-Protocol-Created, X-Protocol-Updated",
       };
       if (protocolCreated) responseHeaders["X-Protocol-Created"] = "true";
+      if (protocolUpdated) responseHeaders["X-Protocol-Updated"] = "true";
 
       return new Response(followUpResponse.body, { headers: responseHeaders });
     }

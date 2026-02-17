@@ -1687,6 +1687,7 @@ export type Database = {
           schedule: Json
           start_date: string | null
           status: string
+          supplies_status: string
           user_id: string
           weekly_expectations: Json | null
         }
@@ -1704,6 +1705,7 @@ export type Database = {
           schedule?: Json
           start_date?: string | null
           status?: string
+          supplies_status?: string
           user_id: string
           weekly_expectations?: Json | null
         }
@@ -1721,6 +1723,7 @@ export type Database = {
           schedule?: Json
           start_date?: string | null
           status?: string
+          supplies_status?: string
           user_id?: string
           weekly_expectations?: Json | null
         }
