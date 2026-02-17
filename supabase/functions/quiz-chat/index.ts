@@ -61,46 +61,20 @@ const quizSteps: QuizStep[] = [
   }
 ];
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+function buildSystemPrompt(step: QuizStep, currentStep: number, conversationHistory: Array<{role: string; content: string}>, extractedValues: Record<string, string | null>) {
+  const goalFriendlyNames: Record<string, string> = {
+    fat_loss: "fat loss & metabolism",
+    muscle: "muscle building & recovery",
+    recovery: "healing from injury",
+    anti_aging: "anti-aging & longevity",
+    cognitive: "cognitive enhancement",
+    beginner: "exploring your options"
+  };
+  
+  const currentGoal = extractedValues.goal;
+  const goalFriendly = currentGoal ? goalFriendlyNames[currentGoal] || currentGoal : "";
 
-  try {
-    const { message, currentStep, conversationHistory, extractedValues } = await req.json();
-    
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
-    const step = quizSteps[currentStep];
-    if (!step) {
-      // All steps complete
-      return new Response(JSON.stringify({
-        response: "Perfect! I've got everything I need. Those are exactly the things we'll cover. Let me build your personalized course...",
-        extracted: null,
-        shouldAdvance: true,
-        isComplete: true
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    // Build friendly goal name for context
-    const goalFriendlyNames: Record<string, string> = {
-      fat_loss: "fat loss & metabolism",
-      muscle: "muscle building & recovery",
-      recovery: "healing from injury",
-      anti_aging: "anti-aging & longevity",
-      cognitive: "cognitive enhancement",
-      beginner: "exploring your options"
-    };
-    
-    const currentGoal = extractedValues.goal;
-    const goalFriendly = currentGoal ? goalFriendlyNames[currentGoal] || currentGoal : "";
-
-    const systemPrompt = `You are a friendly, warm onboarding assistant for Peptide Playbook - an educational peptide course platform. Your job is to have a natural conversation while extracting specific information.
+  return `You are a friendly, warm onboarding assistant for Peptide Playbook - an educational peptide course platform. Your job is to have a natural conversation while extracting specific information.
 
 CURRENT STEP: ${step.id} (Step ${currentStep + 1} of ${quizSteps.length})
 QUESTION TO EXTRACT: ${step.question}
@@ -108,7 +82,7 @@ QUESTION TO EXTRACT: ${step.question}
 ${step.systemPromptAddition}
 
 CONVERSATION SO FAR:
-${conversationHistory.map((m: { role: string; content: string }) => `${m.role}: ${m.content}`).join('\n')}
+${conversationHistory.map((m) => `${m.role}: ${m.content}`).join('\n')}
 
 WHAT WE'VE COLLECTED:
 ${Object.entries(extractedValues).filter(([_, v]) => v).map(([k, v]) => `- ${k}: ${v}`).join('\n') || 'Nothing yet'}
@@ -132,38 +106,75 @@ TRANSITION PHRASES (use naturally based on step):
 NEXT QUESTION (if advancing): ${quizSteps[currentStep + 1]?.question || "None - this is the last step"}
 
 TONE: Warm, supportive, encouraging. Like a helpful friend who knows about peptides. Never preachy or condescending.`;
+}
 
-    const tools = [{
-      type: "function",
-      function: {
-        name: "extract_quiz_answer",
-        description: "Extract the user's answer and provide a conversational response",
-        parameters: {
-          type: "object",
-          properties: {
-            response: {
-              type: "string",
-              description: "Your warm, conversational reply to the user (2-3 sentences). If advancing, naturally transition to ask the next question."
-            },
-            extracted_value: {
-              type: "string",
-              enum: step.validValues,
-              description: "The extracted value from their answer, or null if unclear"
-            },
-            confidence: {
-              type: "number",
-              description: "Confidence in extraction (0-1). Use 0.7+ if you're fairly sure."
-            },
-            should_advance: {
-              type: "boolean",
-              description: "Should we move to the next question? True if we extracted a value with confidence >= 0.7"
-            }
+function buildTools(step: QuizStep) {
+  return [{
+    type: "function",
+    function: {
+      name: "extract_quiz_answer",
+      description: "Extract the user's answer and provide a conversational response",
+      parameters: {
+        type: "object",
+        properties: {
+          response: {
+            type: "string",
+            description: "Your warm, conversational reply to the user (2-3 sentences). If advancing, naturally transition to ask the next question."
           },
-          required: ["response", "should_advance"]
-        }
+          extracted_value: {
+            type: "string",
+            enum: step.validValues,
+            description: "The extracted value from their answer, or null if unclear"
+          },
+          confidence: {
+            type: "number",
+            description: "Confidence in extraction (0-1). Use 0.7+ if you're fairly sure."
+          },
+          should_advance: {
+            type: "boolean",
+            description: "Should we move to the next question? True if we extracted a value with confidence >= 0.7"
+          }
+        },
+        required: ["response", "should_advance"]
       }
-    }];
+    }
+  }];
+}
 
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { message, currentStep, conversationHistory, extractedValues } = await req.json();
+    
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    const step = quizSteps[currentStep];
+    if (!step) {
+      // All steps complete - stream as SSE for consistency
+      const encoder = new TextEncoder();
+      const body = new ReadableStream({
+        start(controller) {
+          const text = "Perfect! I've got everything I need. Those are exactly the things we'll cover. Let me build your personalized course...";
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, extracted: null, shouldAdvance: true, isComplete: true })}\n\n`));
+          controller.close();
+        }
+      });
+      return new Response(body, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream", "Cache-Control": "no-cache" }
+      });
+    }
+
+    const systemPrompt = buildSystemPrompt(step, currentStep, conversationHistory, extractedValues);
+    const tools = buildTools(step);
+
+    // Make streaming request to AI gateway
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -172,6 +183,7 @@ TONE: Warm, supportive, encouraging. Like a helpful friend who knows about pepti
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
+        stream: true,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: message }
@@ -199,37 +211,118 @@ TONE: Warm, supportive, encouraging. Like a helpful friend who knows about pepti
       throw new Error("AI service error");
     }
 
-    const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    
-    if (!toolCall) {
-      // Fallback if no tool call
-      const content = data.choices?.[0]?.message?.content || "I'd love to help! Could you tell me more about what you're looking for?";
-      return new Response(JSON.stringify({
-        response: content,
-        extracted: null,
-        shouldAdvance: false,
-        isComplete: false
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
+    // Parse the SSE stream from AI gateway, collect tool call args, and forward response text
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    const encoder = new TextEncoder();
+    let toolCallArgs = "";
+    let contentText = "";
+    let buffer = "";
 
-    const result = JSON.parse(toolCall.function.arguments);
-    const isLastStep = currentStep === quizSteps.length - 1;
-    const shouldAdvance = result.should_advance && result.confidence >= 0.7;
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-    return new Response(JSON.stringify({
-      response: result.response,
-      extracted: result.extracted_value ? {
-        key: step.valueKey,
-        value: result.extracted_value,
-        confidence: result.confidence || 0.8
-      } : null,
-      shouldAdvance,
-      isComplete: isLastStep && shouldAdvance
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const payload = line.slice(6).trim();
+              if (payload === "[DONE]") continue;
+
+              try {
+                const chunk = JSON.parse(payload);
+                const delta = chunk.choices?.[0]?.delta;
+                if (!delta) continue;
+
+                // Content text (fallback if model returns content instead of tool call)
+                if (delta.content) {
+                  contentText += delta.content;
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: delta.content })}\n\n`));
+                }
+
+                // Tool call argument deltas
+                if (delta.tool_calls?.[0]?.function?.arguments) {
+                  toolCallArgs += delta.tool_calls[0].function.arguments;
+                }
+              } catch {
+                // skip malformed chunks
+              }
+            }
+          }
+
+          // Parse completed tool call
+          const isLastStep = currentStep === quizSteps.length - 1;
+          
+          if (toolCallArgs) {
+            try {
+              const result = JSON.parse(toolCallArgs);
+              const shouldAdvance = result.should_advance && (result.confidence || 0) >= 0.7;
+
+              // If we got a tool call with response text but didn't stream content, send it now
+              if (result.response && !contentText) {
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: result.response })}\n\n`));
+              }
+
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                done: true,
+                extracted: result.extracted_value ? {
+                  key: step.valueKey,
+                  value: result.extracted_value,
+                  confidence: result.confidence || 0.8
+                } : null,
+                shouldAdvance,
+                isComplete: isLastStep && shouldAdvance
+              })}\n\n`));
+            } catch (e) {
+              console.error("Failed to parse tool call args:", toolCallArgs, e);
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                done: true,
+                extracted: null,
+                shouldAdvance: false,
+                isComplete: false
+              })}\n\n`));
+            }
+          } else if (contentText) {
+            // No tool call, just content - send done with no extraction
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              done: true,
+              extracted: null,
+              shouldAdvance: false,
+              isComplete: false
+            })}\n\n`));
+          } else {
+            // Nothing received - send fallback
+            const fallback = "I'd love to help! Could you tell me more about what you're looking for?";
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: fallback })}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              done: true,
+              extracted: null,
+              shouldAdvance: false,
+              isComplete: false
+            })}\n\n`));
+          }
+
+          controller.close();
+        } catch (e) {
+          console.error("Stream processing error:", e);
+          controller.error(e);
+        }
+      }
+    });
+
+    return new Response(stream, {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      }
     });
 
   } catch (error) {
