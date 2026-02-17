@@ -1,140 +1,91 @@
 
-# Pre-Launch Comprehensive Testing Plan
 
-## Overview
+# Landing Page Copy Rewrite
 
-A full end-to-end manual testing checklist covering every critical user flow on the site, from first landing to daily dashboard usage. We will systematically walk through each flow in the browser preview, verify functionality, and document any issues found.
-
-This is NOT a code change -- it is a structured QA walkthrough. I will test each flow interactively using the browser tools and report back what works and what is broken.
+Text-only changes across 9 existing component files. No design, layout, animation, or structural changes. Every section keeps its current component architecture, styling, and behavior.
 
 ---
 
-## Testing Flows (in order)
+## Files to Modify
 
-### 1. Landing Page and Navigation
-- Homepage loads without errors
-- All sections render (Hero, How It Works, What's Inside, Guided Demo, Pricing, Who This Is For, FAQ, Final CTA)
-- Navbar links work (Guides, Pricing, Login)
-- Footer links work (Terms, Privacy, Disclaimer, About, Editorial Policy)
-- Floating CTA appears on scroll
-- Mobile responsive check
+### 1. `src/components/landing/Navbar.tsx`
+- Change "Our Studies" link text to "Research" (lines 71, 131)
+- Change "Sign Up" button to "Take the Free Quiz" with teal/green styling and link to `/quiz` instead of `/signup` (line 60-63)
+- Keep "Sign In" link as-is
 
-### 2. Quiz / Conversion Funnel
-- Hero CTA button navigates to quiz
-- Quiz loads, AI conversation starts
-- User can answer questions and progress
-- Email gate appears at correct point
-- Quiz results page renders with personalized content
-- CTA from results leads to signup/checkout
+### 2. `src/components/landing/HeroSection.tsx`
+- Change `headlineWords` from `["Your", "Personal", "Peptide", "Research", "Assistant"]` to `["Your", "Exact", "Peptide", "Protocol", "in", "60", "Seconds"]`
+- Change subheadline text to the new copy about quiz + AI + 500+ studies
+- Change primary CTA from "Get Started -- $67" linking to `/signup` to "Take the Free Quiz" linking to `/quiz`
+- Change secondary CTA from "Try the AI Free" to keep as-is (scrolls to demo, still useful)
+- Change `trustItems` to `["500+ Studies Analyzed", "45+ Peptides Covered", "Updated February 2026"]` (remove "30-Day Money Back" -- moved to pricing)
+- Add small text "Free. Takes 60 seconds. No account needed." below the CTA buttons
 
-### 3. Signup Flow
-- `/signup` page loads
-- Step 1: Email entry, continue button works
-- Step 2: Name, password, terms checkbox
-- Promo code input works (validation call fires)
-- Account creation succeeds (auth signup)
-- Redirect to `/checkout` after signup
+### 3. `src/components/landing/HowItWorksSection.tsx`
+- Change section headline from "3 Steps. That's It." to "How It Works"
+- Step 1: Title "Take the 60-Second Quiz", description updated
+- Step 2: Title "Get Your Personalized Protocol", description updated
+- Step 3: Title "Follow Your Blueprint", description updated
 
-### 4. Login Flow
-- `/login` page loads
-- Email + password login works
-- Redirect to dashboard after login
-- "Forgot password" link works
+### 4. `src/components/landing/WhatsInsideSection.tsx`
+- Change section headline from "Everything Inside The Peptide Playbook" to "Everything You Need. Nothing You Don't."
+- Change subtitle to remove it or keep minimal
+- Update all 6 feature card titles and descriptions to match the new copy:
+  1. "Your Personalized Protocol" (was "AI Research Coach")
+  2. "AI Coach -- 24/7" (was "45+ Peptide Database")
+  3. "Daily Compound Tracker" (was "Custom Protocols")
+  4. "Diet and Training Optimization" (was "Daily Plan and Tracking")
+  5. "Week-by-Week Timeline" (was "Doctor Scripts")
+  6. "FDA Regulatory Tracker" (was "30+ Research Guides")
+- Change bottom CTA from "Get Your Full Blueprint -- $67" linking to `/signup` to "Build My Protocol -- Free Quiz" linking to `/quiz`
 
-### 5. Checkout Flow
-- `/checkout` page loads for authenticated user
-- Shows pricing ($67 one-time)
-- "Get Your Full Blueprint" button calls `create-checkout` edge function
-- Stripe redirect works (URL returned)
-- Promo code redemption works on checkout page
-- Already-paid users redirect to dashboard
+### 5. `src/components/landing/GuidedDemo.tsx`
+- Change section headline from "Try It Yourself" to "See It In Action"
+- Change subtitle to "Pick a question. Watch the AI answer it in real time."
+- Update the 6 demo question texts to match the new copy
+- Change post-answer CTA text from "This is real. Try it yourself." to "This is 1 of 10,000+ questions Peptide Playbook can answer."
+- Change CTA button from "Get Your Full Blueprint -- $67" linking to `/signup` to "Take the Free Quiz" linking to `/quiz`
 
-### 6. Payment Verification (Thank You Page)
-- `/thank-you?session_id=...` verifies payment via edge function
-- Success state shows and redirects to onboarding
-- Error state shows retry button
-- No-session state shows fallback
+### 6. `src/components/landing/PricingCTA.tsx`
+- Keep headline "One Payment. Lifetime Access. No Subscriptions." as-is (already matches)
+- Update comparison items to new copy (clinic consultations $300-500, trial and error $200-400, Reddit rabbit holes)
+- Update feature list to new copy (7 items matching the spec)
+- Change CTA from "Get Your Full Blueprint -- $67" to "Take the Free Quiz -- It's Free" linking to `/quiz`
+- Update trust badge text to match spec
+- Keep price display ($99 strikethrough, $67 animated) as-is
 
-### 7. Onboarding Flow
-- `/welcome/onboarding` loads for authenticated paid users
-- Goal selection works
-- Protocol generation triggers
-- Redirects to dashboard after completion
+### 7. `src/components/landing/WhoThisIsForNew.tsx`
+- Keep section structure (4 persona cards)
+- Update headline, titles, and descriptions to match new target audience copy (if the provided copy maps; otherwise keep existing since it already targets the right audience -- the existing copy is already well-targeted, but I'll refine card descriptions to be more specific to 20-35 male aesthetics audience)
 
-### 8. Dashboard Home (`/dashboard`)
-- Loads for authenticated user
-- Active protocol state renders (compounds, progress ring, week calendar)
-- Today's schedule shows correct compounds
-- Daily check-in works
-- FDA timeline card renders
-- Daily briefing card renders
-- Weekly review card renders
+### 8. `src/components/landing/FAQ.tsx`
+- Replace all 6 FAQ items with the 8 new FAQ items from the spec
 
-### 9. Protocol Page (`/dashboard/protocol`)
-- Protocol detail view loads with compound cards
-- Stack Synergy card appears (user has 3 compounds: CJC-1295, Ipamorelin, GHK-Cu)
-- "Learn more" toggle expands compound cards
-- Expanded sections show: mechanism, timeline, diet tips, exercise tips, side effects, storage, pro tip
-- Collapse works smoothly
-- All compound intelligence data matches for CJC-1295, Ipamorelin, GHK-Cu
+### 9. `src/components/landing/FinalCTA.tsx`
+- Change headline from "You've Already Been Researching..." to "Stop Guessing. Start Knowing."
+- Change subheadline to "Your personalized peptide protocol is 60 seconds away."
+- Change CTA from "Get Your Full Blueprint -- $67" to "Take the Free Quiz"
+- Change bottom text to "For educational purposes only. Not medical advice. Always consult a healthcare provider."
 
-### 10. AI Chat (`/dashboard/chat`)
-- Chat interface loads
-- Can type and send a message
-- Response streams word-by-word (not instant dump)
-- Auto-scroll follows streaming text
-- Message history persists
+### 10. `src/components/landing/FloatingCTA.tsx`
+- Change button text from "Get Your Blueprint" to "Take the Free Quiz"
+- Change link from `/signup` to `/quiz`
 
-### 11. AI Coach (`/dashboard/coach`)
-- Coach interface loads
-- Can send messages
-- Streaming works properly
-- Check-in flow works
+### 11. `src/components/landing/HeroProductCards.tsx`
+- No text changes needed (the preview cards show product UI mockups, not marketing copy)
 
-### 12. Progress Page (`/dashboard/progress`)
-- Loads with trend charts
-- Achievement grid renders
-- Data from daily logs appears
-
-### 13. Settings Page (`/dashboard/settings`)
-- Profile info displays
-- Can update settings
-- Subscription management button works
-
-### 14. Guide Pages
-- `/guides` index loads with search and filters
-- Individual guide pages load (spot check 2-3)
-- Navigation between guides works
-
-### 15. Edge Function Health Checks
-- `check-subscription` responds correctly
-- `verify-payment` handles null session_id
-- `create-checkout` returns URL for authenticated user
-- `chat` streams SSE properly
-- `coach` streams properly
-
-### 16. Auth Guards
-- Protected routes redirect to login when not authenticated
-- Admin routes block non-admin users
-- Paid-tier content blocks free users
+### 12. `src/pages/Index.tsx`
+- Update SEO title and description to match new headline focus
+- No structural changes
 
 ---
 
-## How I Will Execute This
+## Technical Notes
 
-I will use the browser tools to navigate to each page, interact with elements, read console logs and network requests, and report findings. For edge functions, I will use the curl tool to verify responses directly.
+- All changes are string/text replacements within existing data arrays, JSX text nodes, and component props
+- No new components, no removed components, no layout changes
+- Primary CTA destination changes from `/signup` to `/quiz` across Hero, WhatsInside, GuidedDemo, PricingCTA, FinalCTA, FloatingCTA, and Navbar
+- The "Research" nav link keeps its existing `/guides` destination
+- Footer copy stays as-is (already correct and contains required legal disclaimer)
+- No changes to any dashboard, quiz, protocol, or other pages
 
-After testing, I will provide a detailed report of:
-- What works perfectly
-- What has issues (with specifics)
-- Recommended fixes prioritized by severity
-
----
-
-## What This Does NOT Include
-
-- Load testing / performance benchmarks
-- Cross-browser testing (only the preview browser)
-- Real Stripe payment processing (we verify the redirect URL is generated, not that money moves)
-- Email delivery testing (Resend)
-- SEO crawlability verification
