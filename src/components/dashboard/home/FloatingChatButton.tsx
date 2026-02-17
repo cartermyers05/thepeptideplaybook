@@ -21,22 +21,21 @@ export function FloatingChatButton({ onClick, shouldPulse = false }: FloatingCha
       )}
       <style>{`
         @keyframes fab-pulse {
-          0% { box-shadow: 0 0 0 0 rgba(249,115,22,0.4); }
-          70% { box-shadow: 0 0 0 14px rgba(249,115,22,0); }
-          100% { box-shadow: 0 0 0 0 rgba(249,115,22,0); }
+          0% { box-shadow: 0 0 0 0 rgba(10,10,10,0.3); }
+          70% { box-shadow: 0 0 0 14px rgba(10,10,10,0); }
+          100% { box-shadow: 0 0 0 0 rgba(10,10,10,0); }
         }
       `}</style>
       <motion.button
         onClick={onClick}
-        className="w-[52px] h-[52px] rounded-full flex items-center justify-center"
+        className="w-[52px] h-[52px] rounded-full flex items-center justify-center bg-foreground text-background"
         style={{
-          background: "linear-gradient(135deg, #F97316, #EA580C)",
-          boxShadow: "0 4px 20px rgba(249,115,22,0.3), 0 1px 4px rgba(0,0,0,0.2)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.1)",
         }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.96 }}
       >
-        <MessageCircle className="w-5 h-5 text-white" />
+        <MessageCircle className="w-5 h-5" />
       </motion.button>
     </div>
   );

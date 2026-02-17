@@ -1,7 +1,7 @@
 import { format, addDays, startOfWeek, getDay, isSameDay, parseISO, differenceInDays, isAfter } from "date-fns";
 import { Check, Syringe } from "lucide-react";
 
-const mono = "'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace";
+const mono = "'JetBrains Mono', ui-monospace, monospace";
 
 interface WeekCalendarStripProps {
   currentDay: number;
@@ -66,24 +66,24 @@ export function WeekCalendarStrip({ currentDay, courseStartDate, schedule }: Wee
           key={day.dateKey}
           className="text-center rounded-[12px] py-2.5 px-1 transition-all relative"
           style={{
-            backgroundColor: day.isToday ? "#19191E" : "transparent",
+            backgroundColor: day.isToday ? "#F4F4F5" : "transparent",
             border: day.isToday
               ? "1.5px solid transparent"
               : "1.5px solid transparent",
             backgroundImage: day.isToday
-              ? "linear-gradient(#19191E, #19191E), linear-gradient(135deg, #F97316, #FB7185, #A78BFA)"
+              ? "linear-gradient(#F4F4F5, #F4F4F5), linear-gradient(135deg, #F97316, #FB7185, #A78BFA)"
               : "none",
             backgroundOrigin: "border-box",
             backgroundClip: day.isToday ? "padding-box, border-box" : "padding-box",
           }}
         >
-          <p className="text-[10px] font-medium mb-1" style={{ color: "#4A4A5A", fontFamily: mono }}>
+          <p className="text-[10px] font-medium mb-1 text-muted-foreground" style={{ fontFamily: mono }}>
             {day.dayName}
           </p>
           <p
             className="text-base font-bold"
             style={{
-              color: day.isToday ? "#EBEBF0" : day.isFuture ? "#4A4A5A" : "#8A8A9A",
+              color: day.isToday ? "#0A0A0A" : day.isFuture ? "#C4C4C4" : "#6B7280",
               fontFamily: mono,
             }}
           >

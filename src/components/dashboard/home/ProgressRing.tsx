@@ -11,7 +11,7 @@ interface ProgressRingProps {
   showLabel?: boolean;
 }
 
-const mono = "'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace";
+const mono = "'JetBrains Mono', ui-monospace, monospace";
 
 export function ProgressRing({
   percent,
@@ -26,7 +26,6 @@ export function ProgressRing({
   const progress = useMotionValue(0);
   const strokeDashoffset = useTransform(progress, (v) => circumference - (v / 100) * circumference);
   const displayPercent = useTransform(progress, (v) => Math.round(v));
-  const textRef = useRef<SVGTextElement>(null);
 
   useEffect(() => {
     if (animated) {
@@ -36,21 +35,13 @@ export function ProgressRing({
     }
   }, [percent, animated, progress]);
 
-  // Update text content reactively
-  useEffect(() => {
-    const unsubscribe = displayPercent.on("change", (v) => {
-      if (textRef.current) textRef.current.textContent = String(v);
-    });
-    return unsubscribe;
-  }, [displayPercent]);
-
   return (
     <div className={cn("relative", className)} style={{ width: size, height: size }}>
       <svg
         className="transform -rotate-90"
         width={size}
         height={size}
-        style={{ filter: "drop-shadow(0 0 8px rgba(249,115,22,0.15))" }}
+        style={{ filter: "drop-shadow(0 0 6px rgba(249,115,22,0.12))" }}
       >
         <defs>
           <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -59,13 +50,13 @@ export function ProgressRing({
             <stop offset="100%" stopColor="#A78BFA" />
           </linearGradient>
         </defs>
-        {/* Track */}
+        {/* Track - light gray */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#19191E"
+          stroke="hsl(0 0% 92%)"
           strokeWidth={strokeWidth}
         />
         {/* Progress */}
@@ -84,28 +75,24 @@ export function ProgressRing({
       {showLabel && (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <div className="flex items-baseline">
-            <svg width={0} height={0} className="absolute">
-              <text ref={textRef} />
-            </svg>
             <span
               ref={(el) => {
                 if (el) {
                   const unsub = displayPercent.on("change", (v) => {
                     el.textContent = String(v);
                   });
-                  // Store cleanup - will be called on unmount via effect
                   (el as any).__unsub = unsub;
                 }
               }}
-              style={{ fontFamily: mono, fontWeight: 700, fontSize: size > 90 ? 28 : 22, color: "#EBEBF0" }}
+              style={{ fontFamily: mono, fontWeight: 700, fontSize: size > 90 ? 28 : 22, color: "#0A0A0A" }}
             />
-            <span style={{ fontFamily: mono, fontSize: size > 90 ? 14 : 11, color: "#4A4A5A", marginLeft: 1 }}>%</span>
+            <span style={{ fontFamily: mono, fontSize: size > 90 ? 14 : 11, color: "#9CA3AF", marginLeft: 1 }}>%</span>
           </div>
           <span
             style={{
               fontFamily: mono,
               fontSize: 10,
-              color: "#4A4A5A",
+              color: "#9CA3AF",
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               marginTop: 2,
