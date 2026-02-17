@@ -397,7 +397,7 @@ export default function QuizResults() {
           >
             {showFull ? (
               <>
-                <Link to="/dashboard">
+                <Link to="/dashboard/my-plan?updated=true">
                   <Button size="lg" className="h-12 px-8 gap-2 btn-primary-clean">
                     <Flame className="w-4 h-4" />
                     Start My Blueprint
