@@ -12,6 +12,7 @@ const compoundVariants = {
     transition: { duration: 0.4, delay: i * 0.06 },
   }),
 };
+
 const categoryColors: Record<string, string> = {
   "weight-loss": "#34D399",
   fat_loss: "#34D399",
@@ -50,18 +51,13 @@ export function CompoundCard({ compound, checked, onToggle, index = 0 }: Compoun
       onClick={onToggle}
       whileHover={{ y: -2, boxShadow: "0 8px 24px rgba(0,0,0,0.06)" }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="w-full rounded-[16px] flex items-stretch text-left transition-all duration-200 overflow-hidden group bg-white border border-border"
+      className="w-full rounded-[16px] flex items-stretch text-left transition-all duration-200 overflow-hidden group bg-white"
+      style={{
+        border: "1px solid rgba(0,0,0,0.06)",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+      }}
     >
-      {/* Category accent bar */}
-      <div
-        className="w-[3px] flex-shrink-0 my-3 ml-0 rounded-r-full transition-all duration-300"
-        style={{
-          backgroundColor: catColor,
-          boxShadow: checked ? "none" : `0 0 8px ${catColor}40`,
-        }}
-      />
-
-      <div className="flex-1 py-4 pl-3.5 pr-4 flex items-center gap-4">
+      <div className="flex-1 py-4 pl-4 pr-4 flex items-center gap-4">
         <div className="flex-1 min-w-0" style={{ opacity: checked ? 0.45 : 1, transition: "opacity 200ms" }}>
           <p className="font-bold text-[15px] text-foreground" style={{ fontFamily: heading }}>
             {compound.name}
