@@ -5,6 +5,13 @@ import type { Compound } from "@/hooks/useUserProtocol";
 const mono = "'JetBrains Mono', ui-monospace, monospace";
 const heading = "'Outfit', sans-serif";
 
+const compoundVariants = {
+  hidden: { opacity: 0, y: 12, filter: "blur(4px)" },
+  visible: (i: number) => ({
+    opacity: 1, y: 0, filter: "blur(0px)",
+    transition: { duration: 0.4, delay: i * 0.06 },
+  }),
+};
 const categoryColors: Record<string, string> = {
   "weight-loss": "#34D399",
   fat_loss: "#34D399",
@@ -28,13 +35,18 @@ interface CompoundCardProps {
   checked: boolean;
   allDone: boolean;
   onToggle: () => void;
+  index?: number;
 }
 
-export function CompoundCard({ compound, checked, onToggle }: CompoundCardProps) {
+export function CompoundCard({ compound, checked, onToggle, index = 0 }: CompoundCardProps) {
   const catColor = getCategoryColor(compound.category);
 
   return (
-    <button
+    <motion.button
+      variants={compoundVariants}
+      custom={index}
+      initial="hidden"
+      animate="visible"
       onClick={onToggle}
       className="w-full rounded-[16px] flex items-stretch text-left transition-all duration-200 overflow-hidden group bg-white border border-border hover:shadow-sm"
     >
@@ -81,6 +93,6 @@ export function CompoundCard({ compound, checked, onToggle }: CompoundCardProps)
           {checked && <Check className="w-3.5 h-3.5 text-white" />}
         </motion.div>
       </div>
-    </button>
+    </motion.button>
   );
 }
