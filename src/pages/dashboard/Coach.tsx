@@ -108,8 +108,9 @@ export default function Coach() {
         throw new Error(err.error || `Error ${response.status}`);
       }
 
-      // Check for protocol creation header
+      // Check for protocol creation/update headers
       const protocolCreated = response.headers.get("X-Protocol-Created") === "true";
+      const protocolUpdated = response.headers.get("X-Protocol-Updated") === "true";
 
       // Parse SSE stream
       const reader = response.body?.getReader();
@@ -188,6 +189,14 @@ export default function Coach() {
             label: "View Protocol",
             onClick: () => navigate("/dashboard/protocol"),
           },
+        });
+      }
+
+      // Handle protocol update
+      if (protocolUpdated) {
+        queryClient.invalidateQueries({ queryKey: ["user-protocol"] });
+        toast.success("Protocol updated!", {
+          description: "Your journey has been updated.",
         });
       }
     } catch (err) {

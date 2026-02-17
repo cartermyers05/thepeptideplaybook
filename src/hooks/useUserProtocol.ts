@@ -38,6 +38,7 @@ export interface UserProtocol {
   weekly_expectations: { week: number; description: string }[] | null;
   ai_generation_context: string | null;
   doctor_script: DoctorScript | null;
+  supplies_status: string;
 }
 
 export function useUserProtocol() {
