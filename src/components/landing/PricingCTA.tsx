@@ -1,7 +1,8 @@
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Check, Lock, Shield, RefreshCw } from "lucide-react";
 import { PillButton } from "./PillButton";
+import { useRef, useEffect, useState } from "react";
 
 const features = [
   "AI Research Coach with 500+ studies",
@@ -20,24 +21,45 @@ const comparisons = [
   { item: "Peptide Playbook", price: "$67 for everything", highlight: true },
 ];
 
-// Glow pulse component for the pricing card
+function AnimatedPrice() {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+    let start = 0;
+    const end = 67;
+    const duration = 1200;
+    const stepTime = duration / end;
+    const timer = setInterval(() => {
+      start++;
+      setCount(start);
+      if (start >= end) clearInterval(timer);
+    }, stepTime);
+    return () => clearInterval(timer);
+  }, [isInView]);
+
+  return <span ref={ref}>${count}</span>;
+}
+
 function GlowPulse() {
   return (
     <motion.div
       className="absolute inset-0 rounded-3xl"
       initial={{ opacity: 0 }}
       animate={{ 
-        opacity: [0.3, 0.5, 0.3],
-        scale: [1, 1.02, 1],
+        opacity: [0.3, 0.6, 0.3],
+        scale: [1, 1.03, 1],
       }}
       transition={{
-        duration: 4,
+        duration: 3,
         repeat: Infinity,
         ease: "easeInOut",
       }}
       style={{
-        background: "radial-gradient(ellipse at center, hsl(var(--primary) / 0.15) 0%, transparent 70%)",
-        filter: "blur(40px)",
+        background: "radial-gradient(ellipse at center, hsl(var(--primary) / 0.2) 0%, transparent 70%)",
+        filter: "blur(50px)",
         zIndex: -1,
       }}
     />
@@ -65,19 +87,23 @@ export function PricingCTA() {
             </h2>
             
             {/* Price comparison box */}
-            <div className="bg-card border border-border rounded-2xl p-6 mt-8">
+            <div className="bg-card border border-border rounded-2xl p-6 mt-8 overflow-hidden">
               <h3 className="font-semibold mb-4 text-foreground">What you'd pay elsewhere:</h3>
               <ul className="space-y-3">
                 {comparisons.map((item, index) => (
-                  <li 
-                    key={index} 
+                  <motion.li
+                    key={index}
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.4 }}
                     className={`flex justify-between items-center ${
                       item.highlight ? "text-primary font-semibold" : "text-muted-foreground"
                     }`}
                   >
                     <span>{item.item}</span>
                     <span className={item.highlight ? "text-primary" : ""}>{item.price}</span>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
             </div>
@@ -91,7 +117,6 @@ export function PricingCTA() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative"
           >
-            {/* Glow effect behind the card */}
             <GlowPulse />
             
             <div className="bg-card border border-border rounded-3xl p-8 md:p-12 relative overflow-hidden">
@@ -99,22 +124,34 @@ export function PricingCTA() {
               <div className="mb-8">
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl text-muted-foreground line-through">$99</span>
-                  <span className="text-6xl md:text-7xl font-bold">$67</span>
+                  <span className="text-6xl md:text-7xl font-bold"><AnimatedPrice /></span>
                 </div>
                 <p className="mt-2 text-muted-foreground">
                   One-time payment. Lifetime access.
                 </p>
               </div>
 
-              {/* Features */}
+              {/* Features with cascade pop */}
               <ul className="space-y-4 mb-10">
                 {features.map((feature, index) => (
-                  <li key={index} className="flex items-center gap-3">
+                  <motion.li
+                    key={index}
+                    className="flex items-center gap-3"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{
+                      delay: 0.3 + index * 0.08,
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 20,
+                    }}
+                  >
                     <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <Check className="w-3 h-3 text-primary" />
                     </div>
                     <span className="text-foreground">{feature}</span>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
 
