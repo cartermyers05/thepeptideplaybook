@@ -10,6 +10,7 @@ import { QuickToolsRow } from "@/components/protocol/QuickToolsRow";
 import { HorizontalSchedule } from "@/components/protocol/HorizontalSchedule";
 import { CompactTimeline } from "@/components/protocol/CompactTimeline";
 import { ProtocolCompoundCard } from "@/components/protocol/ProtocolCompoundCard";
+import { StackSynergyCard } from "@/components/protocol/StackSynergyCard";
 
 export default function Protocol() {
   const navigate = useNavigate();
@@ -116,7 +117,7 @@ export default function Protocol() {
             Your Stack
           </h3>
           {(protocol.compounds as Compound[]).length > 1 && (
-            <SynergyBadge compounds={protocol.compounds as Compound[]} />
+            <StackSynergyCard compounds={protocol.compounds as Compound[]} />
           )}
           <div className="space-y-3">
             {(protocol.compounds as Compound[]).map((compound, i) => (
@@ -210,34 +211,3 @@ function StatPill({ label, value, accent }: { label: string; value: string; acce
   );
 }
 
-function SynergyBadge({ compounds }: { compounds: Compound[] }) {
-  const categories: Record<string, string[]> = {};
-  for (const c of compounds) {
-    const cat = c.category?.toLowerCase() || "general";
-    let group = "General";
-    if (cat.includes("recovery") || cat.includes("healing")) group = "Recovery";
-    else if (cat.includes("weight") || cat.includes("metabolic")) group = "Weight Loss";
-    else if (cat.includes("performance") || cat.includes("muscle")) group = "Performance";
-    else if (cat.includes("skin") || cat.includes("aesthetic")) group = "Skin";
-
-    if (!categories[group]) categories[group] = [];
-    categories[group].push(c.name);
-  }
-
-  const synergies = Object.entries(categories).filter(([_, names]) => names.length > 1);
-  if (synergies.length === 0) return null;
-
-  return (
-    <div className="mb-3">
-      {synergies.map(([group, names]) => (
-        <span
-          key={group}
-          className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-full mr-2 mb-1 font-medium text-white"
-          style={{ background: "linear-gradient(135deg, #F97316, #FB7185, #A78BFA)" }}
-        >
-          {names.join(" + ")} = {group} Stack
-        </span>
-      ))}
-    </div>
-  );
-}
