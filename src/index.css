@@ -803,3 +803,26 @@
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+@keyframes dashOrb {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0px) translateX(0px); }
+  33% { transform: translate(-50%, -50%) translateY(-20px) translateX(10px); }
+  66% { transform: translate(-50%, -50%) translateY(15px) translateX(-15px); }
+}
+
+@keyframes dashBreathe {
+  0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+}
+
+@keyframes dashParticle {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  25% { transform: translateY(-12px) translateX(6px); }
+  50% { transform: translateY(-4px) translateX(-8px); }
+  75% { transform: translateY(10px) translateX(4px); }
+}
+
+@keyframes fdaPulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.15); }
+}

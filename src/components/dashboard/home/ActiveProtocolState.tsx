@@ -12,6 +12,8 @@ import { MilestonesTimeline } from "./MilestonesTimeline";
 import { WeeklyReviewCard } from "./WeeklyReviewCard";
 import { DailyBriefingCard } from "./DailyBriefingCard";
 import { SymptomAlerts } from "./SymptomAlerts";
+import { TrendMiniChart } from "./TrendMiniChart";
+import { FDATimelineCard } from "./FDATimelineCard";
 import type { UserProtocol, Compound } from "@/hooks/useUserProtocol";
 import type { DailyLog } from "@/hooks/useDailyLog";
 
@@ -365,6 +367,11 @@ export function ActiveProtocolState({
         <WeeklyReviewCard protocolId={protocol.id} weekNumber={currentWeek} />
       </motion.div>
 
+      {/* ─── TREND CHART ─── */}
+      <motion.div variants={itemVariants} className="mb-5">
+        <TrendMiniChart allLogs={allLogs} />
+      </motion.div>
+
       {/* ─── ROW 2: TODAY'S STACK + THIS WEEK ─── */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-5">
         {/* Left: Today's Stack — elevated white card with gradient left border */}
@@ -574,6 +581,11 @@ export function ActiveProtocolState({
             )}
           </div>
         </div>
+      </motion.div>
+
+      {/* ─── FDA TIMELINE ─── */}
+      <motion.div variants={itemVariants} className="mb-5">
+        <FDATimelineCard />
       </motion.div>
 
       {/* ─── ROW 4: QUICK ACCESS — Bento gradient cards ─── */}
