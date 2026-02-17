@@ -30,17 +30,17 @@ export function FinalCTA() {
           </h2>
           
           <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            Your personalized peptide protocol is 60 seconds away.
+            Your personalized peptide protocol is waiting.
           </p>
 
-          <Link to="/quiz">
+          <Link to="/signup">
             <PillButton 
               variant="dark" 
               size="lg" 
               className="h-14 px-10 text-lg"
               icon={<span>→</span>}
             >
-              Take the Free Quiz
+              Get Started
             </PillButton>
           </Link>
           

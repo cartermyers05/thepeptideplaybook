@@ -271,14 +271,11 @@ export function GuidedDemo() {
                   <p className="text-muted-foreground mb-4">
                     This is 1 of 10,000+ questions Peptide Playbook can answer.
                   </p>
-                  <Link to="/quiz">
+                  <Link to="/signup">
                     <PillButton variant="dark" size="lg" icon={<ArrowRight className="w-4 h-4" />}>
-                      Take the Free Quiz
+                      Get Started
                     </PillButton>
                   </Link>
-                  <p className="text-sm text-muted-foreground mt-3">
-                    Free. Takes 60 seconds. No account needed.
-                  </p>
                   
                   {availableQuestions.length > 0 && (
                     <button
