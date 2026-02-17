@@ -1,57 +1,51 @@
 
 
-# Remove Quiz References from Landing Page
+# Signup Page Visual Upgrade -- Logo Pattern Background
 
-Replace every "Take the Free Quiz" CTA and `/quiz` link on the landing page with a direct `/signup` link. Text-only changes across the same landing page components. No design or layout changes.
-
----
-
-## Changes
-
-### 1. Navbar (`src/components/landing/Navbar.tsx`)
-- Button text: "Take the Free Quiz" → "Get Started"
-- Link: `/quiz` → `/signup` (2 places: desktop + mobile menu)
-
-### 2. HeroSection (`src/components/landing/HeroSection.tsx`)
-- Primary CTA: "Take the Free Quiz" → "Get Started"
-- Link: `/quiz` → `/signup`
-- Remove small text "Free. Takes 60 seconds. No account needed."
-
-### 3. HowItWorksSection (`src/components/landing/HowItWorksSection.tsx`)
-- Bottom CTA: "Take the Free Quiz" → "Get Started"
-- Link: `/quiz` → `/signup`
-- Step 1 title: "Take the 60-Second Quiz" → "Create Your Free Account"
-- Step 1 description: updated to match (no quiz mention)
-
-### 4. WhatsInsideSection (`src/components/landing/WhatsInsideSection.tsx`)
-- Bottom CTA: "Build My Protocol — Free Quiz" → "Get Your Full Blueprint"
-- Link: `/quiz` → `/signup`
-
-### 5. GuidedDemo (`src/components/landing/GuidedDemo.tsx`)
-- CTA button: "Take the Free Quiz" → "Get Started"
-- Link: `/quiz` → `/signup`
-
-### 6. PricingCTA (`src/components/landing/PricingCTA.tsx`)
-- CTA: "Take the Free Quiz — It's Free" → "Get Your Full Blueprint — $67"
-- Link: `/quiz` → `/signup`
-
-### 7. FinalCTA (`src/components/landing/FinalCTA.tsx`)
-- CTA: "Take the Free Quiz" → "Get Started"
-- Link: `/quiz` → `/signup`
-
-### 8. FloatingCTA (`src/components/landing/FloatingCTA.tsx`)
-- Button: "Take the Free Quiz" → "Get Started"
-- Link: `/quiz` → `/signup`
-
-### 9. HeroSection headline update
-- "Your Exact Peptide Protocol in 60 Seconds" → "Your Personalized Peptide Protocol" (remove "60 Seconds" quiz reference)
-- Subheadline: remove quiz-specific language, keep the AI + 500 studies angle
+Transform the bare signup page into a visually rich experience by adding a scattered logo watermark pattern and the same animated background effects used on the login page.
 
 ---
 
-## What stays untouched
-- The `/quiz` and `/quiz/results` routes remain in `App.tsx` (they still work if someone has the link)
-- Quiz components themselves are not deleted
-- All design, layout, animations unchanged
-- Dashboard, protocol, coach, chat pages unchanged
+## Current State
+- **Signup**: Plain white left side with form, gradient right panel (desktop only). Mobile is entirely bare white.
+- **Login**: Already has FloatingOrbs, GridPattern, and gradient overlay -- looks great.
+
+## What Changes
+
+### 1. Add animated background to the full page (`src/pages/Signup.tsx`)
+- Wrap the entire page with `FloatingOrbs` (subtle variant) and `GridPattern` (dots) -- same as login page
+- Add a `gradient-mesh-bg` overlay for depth
+- This fills the empty white space on mobile and behind the form on desktop
+
+### 2. Add a scattered logo watermark pattern
+- Create a new lightweight component `src/components/brand/LogoPattern.tsx`
+- Renders 12-15 hexagon logos at randomized positions, sizes (24px-64px), rotations, and very low opacity (3-8%)
+- Uses the `AnimatedLogo` component with `animate={false}` (static, no performance cost) for each instance
+- Subtle floating animation on each logo (slow drift) using framer-motion
+- Acts as a branded watermark wallpaper behind the form content
+
+### 3. Glassmorphism card around the form
+- Wrap the left-side form area in a `glass-card` container (same style as login card) so the form floats above the patterned background
+- Keeps form readable against the busier background
+
+### 4. Keep the right panel as-is
+- The gradient right panel with features list stays unchanged on desktop
+- The logo pattern only appears behind the left (form) side
+
+---
+
+## Technical Details
+
+### New file: `src/components/brand/LogoPattern.tsx`
+- Generates an array of 12-15 logo positions using `useMemo` (deterministic, no re-renders)
+- Each logo: random x/y position (0-100%), random size (24-64px), random rotation (0-360deg), random opacity (0.03-0.08)
+- Uses the existing hexagon SVG from `AnimatedLogo` with `animate={false}`
+- Wrapped in `absolute inset-0 overflow-hidden pointer-events-none` so it sits behind content
+
+### Modified file: `src/pages/Signup.tsx`
+- Import `FloatingOrbs`, `GridPattern`, and new `LogoPattern`
+- Add background layers before the flex container (same pattern as Login.tsx)
+- Add `relative z-10` to the content container
+- Wrap the form `max-w-md` div in a glass-card with padding and shadow
+- No changes to form logic, steps, validation, or navigation
 
