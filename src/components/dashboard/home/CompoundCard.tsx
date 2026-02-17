@@ -2,8 +2,8 @@ import { motion } from "framer-motion";
 import { Check, Clock } from "lucide-react";
 import type { Compound } from "@/hooks/useUserProtocol";
 
-const mono = "'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace";
-const heading = "'Plus Jakarta Sans', sans-serif";
+const mono = "'JetBrains Mono', ui-monospace, monospace";
+const heading = "'Outfit', sans-serif";
 
 const categoryColors: Record<string, string> = {
   "weight-loss": "#34D399",
@@ -20,7 +20,7 @@ const categoryColors: Record<string, string> = {
 };
 
 function getCategoryColor(category?: string) {
-  return categoryColors[category || ""] || "#8A8A9A";
+  return categoryColors[category || ""] || "#9CA3AF";
 }
 
 interface CompoundCardProps {
@@ -36,11 +36,7 @@ export function CompoundCard({ compound, checked, onToggle }: CompoundCardProps)
   return (
     <button
       onClick={onToggle}
-      className="w-full rounded-[16px] flex items-stretch text-left transition-all duration-200 overflow-hidden group"
-      style={{
-        backgroundColor: "#111114",
-        border: checked ? "1px solid rgba(52,211,153,0.15)" : "1px solid rgba(255,255,255,0.05)",
-      }}
+      className="w-full rounded-[16px] flex items-stretch text-left transition-all duration-200 overflow-hidden group bg-white border border-border hover:shadow-sm"
     >
       {/* Category accent bar */}
       <div
@@ -49,20 +45,17 @@ export function CompoundCard({ compound, checked, onToggle }: CompoundCardProps)
       />
 
       <div className="flex-1 py-4 pl-3.5 pr-4 flex items-center gap-4">
-        <div className="flex-1 min-w-0" style={{ opacity: checked ? 0.4 : 1, transition: "opacity 200ms" }}>
-          <p
-            className="font-bold text-[15px]"
-            style={{ color: "#EBEBF0", fontFamily: heading }}
-          >
+        <div className="flex-1 min-w-0" style={{ opacity: checked ? 0.45 : 1, transition: "opacity 200ms" }}>
+          <p className="font-bold text-[15px] text-foreground" style={{ fontFamily: heading }}>
             {compound.name}
           </p>
           <p className="text-[13px] mt-0.5">
             <span style={{ color: catColor, fontFamily: mono, fontWeight: 600 }}>
               {compound.dose}
             </span>
-            <span style={{ color: "#8A8A9A" }}> · {compound.route}</span>
+            <span className="text-muted-foreground"> · {compound.route}</span>
           </p>
-          <p className="flex items-center gap-1 text-xs mt-1" style={{ color: "#4A4A5A", fontFamily: mono }}>
+          <p className="flex items-center gap-1 text-xs mt-1 text-muted-foreground" style={{ fontFamily: mono }}>
             <Clock className="w-3 h-3" />
             {compound.timing}
           </p>
@@ -72,9 +65,9 @@ export function CompoundCard({ compound, checked, onToggle }: CompoundCardProps)
         <motion.div
           className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
           style={{
-            border: checked ? "none" : "2px solid rgba(255,255,255,0.12)",
+            border: checked ? "none" : "2px solid hsl(0 0% 85%)",
             backgroundColor: checked ? "#34D399" : "transparent",
-            boxShadow: checked ? "0 0 12px rgba(52,211,153,0.3)" : "none",
+            boxShadow: checked ? "0 0 10px rgba(52,211,153,0.25)" : "none",
           }}
           animate={checked ? { scale: [1, 1.15, 1] } : { scale: 1 }}
           transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}

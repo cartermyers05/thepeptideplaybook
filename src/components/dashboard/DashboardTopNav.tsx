@@ -21,23 +21,15 @@ const navItems = [
 
 export function DashboardTopNav() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { signOut, user } = useAuth();
   const { data: profile } = useProfile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isDark = location.pathname.startsWith("/dashboard");
 
   const displayName = profile?.full_name || user?.email?.split("@")[0] || "User";
   const initials = displayName.charAt(0).toUpperCase();
 
   return (
-    <header
-      className="fixed top-0 left-0 right-0 z-50"
-      style={{
-        backgroundColor: isDark ? "#08080A" : "#FFFFFF",
-        borderBottom: isDark ? "1px solid rgba(255,255,255,0.05)" : "1px solid #E5E7EB",
-      }}
-    >
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-border">
       <nav className="flex items-center justify-between h-16 px-4 md:px-8 max-w-7xl mx-auto">
         <Link to="/dashboard" className="flex-shrink-0 hover:opacity-80 transition-opacity">
           <Logo size="sm" />
@@ -49,12 +41,8 @@ export function DashboardTopNav() {
               key={item.path}
               to={item.path}
               end={item.path === "/dashboard"}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                isDark
-                  ? "text-[#4A4A5A] hover:text-[#EBEBF0] hover:bg-[#19191E]"
-                  : "text-[#6B7280] hover:text-[#111827] hover:bg-gray-50"
-              }`}
-              activeClassName={isDark ? "!bg-[#19191E] !text-[#EBEBF0]" : "!bg-[#111827] !text-white"}
+              className="px-4 py-2 rounded-full text-sm font-medium transition-all text-muted-foreground hover:text-foreground hover:bg-muted"
+              activeClassName="!bg-foreground !text-background"
             >
               {item.label}
             </NavLink>
@@ -64,31 +52,28 @@ export function DashboardTopNav() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-full hover:bg-gray-100/10 transition-colors"
+            className="md:hidden p-2 rounded-full hover:bg-muted transition-colors"
           >
             {mobileMenuOpen ? (
-              <X className="w-5 h-5" style={{ color: isDark ? "#EBEBF0" : "#111827" }} />
+              <X className="w-5 h-5 text-foreground" />
             ) : (
-              <Menu className="w-5 h-5" style={{ color: isDark ? "#EBEBF0" : "#111827" }} />
+              <Menu className="w-5 h-5 text-foreground" />
             )}
           </button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-white/5 transition-colors">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: isDark ? "#19191E" : "#111827" }}
-                >
-                  <span className="text-white font-medium text-sm">{initials}</span>
+              <button className="flex items-center gap-2 p-1.5 pr-3 rounded-full hover:bg-muted transition-colors">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-foreground">
+                  <span className="text-background font-medium text-sm">{initials}</span>
                 </div>
-                <ChevronDown className="w-4 h-4 hidden md:block" style={{ color: isDark ? "#8A8A9A" : "#6B7280" }} />
+                <ChevronDown className="w-4 h-4 hidden md:block text-muted-foreground" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <div className="px-3 py-2 border-b border-[#E5E7EB]">
-                <p className="text-sm font-medium text-[#111827] truncate">{displayName}</p>
-                <p className="text-xs text-[#6B7280] truncate">{user?.email}</p>
+              <div className="px-3 py-2 border-b border-border">
+                <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
               <DropdownMenuItem onClick={() => navigate("/guides")} className="cursor-pointer">
                 <BookOpen className="w-4 h-4 mr-2" />
@@ -114,11 +99,7 @@ export function DashboardTopNav() {
           onClick={() => setMobileMenuOpen(false)}
         >
           <div
-            className="p-4 space-y-1"
-            style={{
-              backgroundColor: isDark ? "#111114" : "#FFFFFF",
-              borderBottom: isDark ? "1px solid rgba(255,255,255,0.05)" : "1px solid #E5E7EB",
-            }}
+            className="p-4 space-y-1 bg-white border-b border-border"
             onClick={(e) => e.stopPropagation()}
           >
             {navItems.map((item) => (
@@ -127,12 +108,8 @@ export function DashboardTopNav() {
                 to={item.path}
                 end={item.path === "/dashboard"}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${
-                  isDark
-                    ? "text-[#4A4A5A] hover:text-[#EBEBF0] hover:bg-[#19191E]"
-                    : "text-[#6B7280] hover:text-[#111827] hover:bg-gray-50"
-                }`}
-                activeClassName={isDark ? "!bg-[#19191E] !text-[#EBEBF0]" : "!bg-[#111827] !text-white"}
+                className="block px-4 py-3 rounded-xl text-base font-medium transition-all text-muted-foreground hover:text-foreground hover:bg-muted"
+                activeClassName="!bg-foreground !text-background"
               >
                 {item.label}
               </NavLink>

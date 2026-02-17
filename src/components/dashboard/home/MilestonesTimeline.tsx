@@ -2,8 +2,8 @@ import { format, addDays, parseISO } from "date-fns";
 import { Check, Circle, Target, Package, FlaskConical, Calendar, TrendingUp, Award, Flag, Zap, Star, Trophy, CalendarCheck } from "lucide-react";
 import { MILESTONE_DEFINITIONS, MilestoneId } from "@/lib/milestoneDefinitions";
 
-const mono = "'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace";
-const heading = "'Plus Jakarta Sans', sans-serif";
+const mono = "'JetBrains Mono', ui-monospace, monospace";
+const heading = "'Outfit', sans-serif";
 
 interface MilestonesTimelineProps {
   currentDay: number;
@@ -53,7 +53,7 @@ export function MilestonesTimeline({ currentDay, courseStartDate, totalDays, ear
       <div
         className="absolute left-[15px] top-4 bottom-4 w-[2px]"
         style={{
-          background: `linear-gradient(180deg, #F97316 0%, #FB7185 ${Math.min(100, (currentDay / totalDays) * 100)}%, rgba(255,255,255,0.05) ${Math.min(100, (currentDay / totalDays) * 100)}%)`,
+          background: `linear-gradient(180deg, #F97316 0%, #FB7185 ${Math.min(100, (currentDay / totalDays) * 100)}%, hsl(0 0% 90%) ${Math.min(100, (currentDay / totalDays) * 100)}%)`,
         }}
       />
 
@@ -68,21 +68,21 @@ export function MilestonesTimeline({ currentDay, courseStartDate, totalDays, ear
                 className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 relative z-10"
                 style={{
                   backgroundColor: milestone.completed
-                    ? "rgba(52,211,153,0.15)"
+                    ? "rgba(52,211,153,0.1)"
                     : milestone.isCurrent
-                      ? "#19191E"
-                      : "#111114",
+                      ? "#F4F4F5"
+                      : "#FFFFFF",
                   border: milestone.isCurrent
                     ? "2px solid transparent"
                     : milestone.completed
                       ? "none"
-                      : "1px solid rgba(255,255,255,0.05)",
+                      : "1px solid hsl(0 0% 90%)",
                   backgroundImage: milestone.isCurrent
-                    ? "linear-gradient(#19191E, #19191E), linear-gradient(135deg, #F97316, #FB7185, #A78BFA)"
+                    ? "linear-gradient(#F4F4F5, #F4F4F5), linear-gradient(135deg, #F97316, #FB7185, #A78BFA)"
                     : "none",
                   backgroundOrigin: "border-box",
                   backgroundClip: milestone.isCurrent ? "padding-box, border-box" : "padding-box",
-                  boxShadow: milestone.isCurrent ? "0 0 12px rgba(249,115,22,0.2)" : "none",
+                  boxShadow: milestone.isCurrent ? "0 0 10px rgba(249,115,22,0.15)" : "none",
                 }}
               >
                 {milestone.completed ? (
@@ -90,7 +90,7 @@ export function MilestonesTimeline({ currentDay, courseStartDate, totalDays, ear
                 ) : milestone.isCurrent ? (
                   <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: "linear-gradient(135deg, #F97316, #FB7185)" }} />
                 ) : (
-                  <IconComponent className="w-3.5 h-3.5" style={{ color: "#4A4A5A" }} />
+                  <IconComponent className="w-3.5 h-3.5 text-muted-foreground" />
                 )}
               </div>
 
@@ -98,7 +98,7 @@ export function MilestonesTimeline({ currentDay, courseStartDate, totalDays, ear
               <p
                 className="flex-1 text-sm font-medium"
                 style={{
-                  color: milestone.completed ? "#4A4A5A" : milestone.isCurrent ? "#EBEBF0" : "#8A8A9A",
+                  color: milestone.completed ? "#9CA3AF" : milestone.isCurrent ? "#0A0A0A" : "#6B7280",
                   textDecoration: milestone.completed ? "line-through" : "none",
                   fontFamily: heading,
                   fontWeight: milestone.isCurrent ? 700 : 500,
@@ -111,7 +111,7 @@ export function MilestonesTimeline({ currentDay, courseStartDate, totalDays, ear
               <span
                 className="text-xs flex-shrink-0"
                 style={{
-                  color: milestone.completed ? "#34D399" : "#4A4A5A",
+                  color: milestone.completed ? "#34D399" : "#9CA3AF",
                   fontFamily: mono,
                 }}
               >
