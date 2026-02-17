@@ -55,6 +55,12 @@ export function CompoundCard({ compound, checked, onToggle }: CompoundCardProps)
             </span>
             <span className="text-muted-foreground"> · {compound.route}</span>
           </p>
+          {/* Rationale — the "why" behind each compound */}
+          {compound.rationale && (
+            <p className="text-[12px] mt-1 text-muted-foreground leading-snug line-clamp-1">
+              {compound.rationale}
+            </p>
+          )}
           <p className="flex items-center gap-1 text-xs mt-1 text-muted-foreground" style={{ fontFamily: mono }}>
             <Clock className="w-3 h-3" />
             {compound.timing}
