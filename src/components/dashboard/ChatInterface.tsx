@@ -98,7 +98,7 @@ export default function ChatInterface() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isSubmittingRef = useRef(false);
@@ -115,11 +115,10 @@ export default function ChatInterface() {
     ? (goalStarterPrompts[quizResponse.primary_goal] || goalStarterPrompts.general)
     : goalStarterPrompts.general;
 
+  const lastMessageContent = messages[messages.length - 1]?.content;
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, lastMessageContent]);
 
   const handleNewChat = () => {
     setMessages([]);
@@ -419,7 +418,7 @@ export default function ChatInterface() {
 
       {/* Chat area */}
       <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full" ref={scrollRef}>
+        <ScrollArea className="h-full">
           <div className="max-w-3xl mx-auto px-4 py-8">
             {messages.length === 0 ? (
               <motion.div 
@@ -557,6 +556,7 @@ export default function ChatInterface() {
                 </AnimatePresence>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
       </div>
