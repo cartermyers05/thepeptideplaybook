@@ -1,75 +1,82 @@
 
 
-# AI Coach Protocol Updates via Conversation
+# Speed Up the Quiz: Streaming Responses
 
-## What This Does
+## Problem
 
-Right now, the AI Coach can **create** protocols but can't **update** them. When a user says "I got my supplies" or "starting today," the coach just responds with text but nothing actually changes in their dashboard.
+The quiz calls the AI and waits for the **entire response** to come back before showing anything. Even though the model is fast (~1-2 seconds), it feels slow because the user stares at nothing while waiting. There's also no loading indicator beyond the empty bubble.
 
-This upgrade gives the coach a new tool so it can update the user's active protocol in real-time based on what they say in conversation. No buttons needed -- just tell the coach what's happening and your journey updates automatically.
+## Solution
 
-## Examples of What Works After This
+Two changes that together make the quiz feel instant:
 
-- "I got my supplies today" --> Coach marks supplies as ready, updates dashboard
-- "I'm starting my protocol tomorrow" --> Coach sets the start date, status changes to "active"
-- "I need to pause for a week" --> Coach pauses the protocol
-- "I'm back, resuming now" --> Coach reactivates and adjusts the timeline
-- "I want to extend my cycle by 2 weeks" --> Coach updates cycle length
+### 1. Add Streaming to the Quiz Edge Function
+
+Switch from waiting for the full JSON response to streaming tokens as they arrive. The AI's conversational reply streams in real-time (like ChatGPT), while the structured extraction (goal/experience/etc.) is parsed from the tool call at the end.
+
+**How it works:**
+- Enable `stream: true` on the AI gateway request
+- Stream the response text chunks back to the frontend via Server-Sent Events (SSE)
+- Parse the tool call arguments from the final chunk to get extracted values
+- Send a final `[DONE]` event with the extraction metadata
+
+### 2. Update the Frontend to Consume the Stream
+
+The `useQuizChat` hook currently does a single `fetch` + `response.json()`. We switch it to read `response.body` as a `ReadableStream`, updating the assistant message content incrementally as chunks arrive.
+
+**What the user sees:**
+- They send a message
+- Within ~200ms the assistant bubble appears and text starts flowing in character by character
+- The progress bar and step counter update once the full response finishes
+
+### 3. Add a Typing Indicator
+
+While waiting for the first token (the ~200ms cold start), show a pulsing dot indicator in the assistant bubble so there's immediate visual feedback.
 
 ## Technical Details
-
-### 1. Database Change
-
-Add a `supplies_status` column to `user_protocols`:
-
-| Column | Type | Default | Purpose |
-|--------|------|---------|---------|
-| supplies_status | text | 'not_ordered' | Tracks: not_ordered, ordered, received, ready |
-
-### 2. New AI Tool: `update_protocol`
-
-Added to the `peptide-coach` edge function alongside the existing `create_protocol` tool. The AI decides when to call it based on conversational context.
-
-**Fields the tool can update:**
-- `status` (not_started, active, paused, completed)
-- `supplies_status` (not_ordered, ordered, received, ready)
-- `start_date` (when user says they're starting)
-- `cycle_length_weeks` (if user wants to extend/shorten)
-- `end_date` (auto-calculated from start_date + cycle_length)
-
-### 3. Updated System Prompt
-
-New instructions tell the coach when to use `update_protocol`:
-
-- User mentions having supplies --> update supplies_status to "received" or "ready"
-- User says they're starting --> set status to "active", start_date to today (or specified date)
-- User asks to pause --> set status to "paused"
-- User resumes --> set status back to "active", optionally adjust start_date
-- User wants to change duration --> update cycle_length_weeks
-
-The coach confirms the change conversationally ("Got it, I've marked your supplies as received and updated your timeline").
-
-### 4. Frontend: Protocol Refresh on Update
-
-The Coach page already handles `X-Protocol-Created` header to refresh protocol data. We add an `X-Protocol-Updated` header so the same refresh logic triggers on updates too.
-
-### 5. Dashboard Reflection
-
-The existing dashboard components (`ActiveProtocolState`, `ProtocolHeader`, etc.) already read from `user_protocols`. Once the coach updates the record, the dashboard automatically reflects changes on next visit. The `supplies_status` field will show in the protocol detail view.
 
 ### Files Modified
 
 | File | Change |
 |------|--------|
-| `supabase/functions/peptide-coach/index.ts` | Add `update_protocol` tool definition, handler, and system prompt instructions |
-| `src/pages/dashboard/Coach.tsx` | Handle `X-Protocol-Updated` header to refresh protocol query |
-| `src/hooks/useUserProtocol.ts` | Export `supplies_status` from protocol data |
-| `src/components/dashboard/home/ActiveProtocolState.tsx` | Show supplies status indicator |
+| `supabase/functions/quiz-chat/index.ts` | Enable `stream: true`, parse SSE chunks from AI gateway, forward them as SSE to client. Send extraction metadata in final event. |
+| `src/hooks/useQuizChat.ts` | Replace `response.json()` with `ReadableStream` reader. Update assistant message content incrementally as chunks arrive. Parse final metadata event for extraction. |
+| `src/components/quiz/QuizMessage.tsx` | Add a small pulsing dot indicator when `content` is empty and `isStreaming` is true (typing state). |
 
-### Migration
+### Edge Function Changes
 
-```sql
-ALTER TABLE public.user_protocols 
-ADD COLUMN supplies_status text NOT NULL DEFAULT 'not_ordered';
+The quiz-chat function currently returns a single JSON response. It will change to:
+
+1. Make the AI request with `stream: true`
+2. Read the SSE stream from the AI gateway
+3. Collect the tool call arguments across `delta` chunks
+4. Forward each content delta as `data: {"text": "chunk"}` to the client
+5. On stream end, parse the complete tool call JSON and send `data: {"done": true, "extracted": {...}, "shouldAdvance": true, "isComplete": false}`
+
+The response content type changes from `application/json` to `text/event-stream`.
+
+### Frontend Stream Reading
+
+The `sendMessage` function in `useQuizChat` will:
+
+1. Check `response.headers.get('content-type')` -- if SSE, use streaming path; otherwise fall back to current JSON path (backward compatible)
+2. Use `response.body.getReader()` + `TextDecoderStream` to read chunks
+3. On each `data:` line containing `{"text": "..."}`, append to the assistant message via `setState`
+4. On the `{"done": true, ...}` event, update `extractedValues`, `currentStep`, and `isComplete`
+
+### Typing Indicator
+
+In `QuizMessage.tsx`, when `isStreaming && !content`:
+
 ```
+Three small dots with a pulse animation (CSS keyframes, no extra deps)
+```
+
+This replaces the current empty bubble during the brief wait before first token.
+
+### Performance Impact
+
+- **Time to first visible token**: ~200-400ms (down from 1-2s for full response)
+- **Perceived speed improvement**: ~3-4x faster feeling
+- **No new dependencies** -- uses native `ReadableStream` and `EventSource` format
 
