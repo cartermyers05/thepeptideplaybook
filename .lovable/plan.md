@@ -1,15 +1,19 @@
 
 
-# Add Logo Pattern to Login Page
+# Fix Browser Tab Favicon
 
-A single small change to `src/pages/Login.tsx`:
+The favicon SVG file and the `index.html` link tag are both present and correct, but the hexagon logo with gradients may not render well at tiny favicon sizes (16x16px) in all browsers, causing the browser to fall back to a generated "PP" icon.
 
-## Change
+## Fix
 
-### `src/pages/Login.tsx`
-- Import the existing `LogoPattern` component from `@/components/brand/LogoPattern`
-- Add `<LogoPattern />` alongside the existing background layers (after `FloatingOrbs`, `GridPattern`, and the gradient overlay)
-- No other changes needed — the login page already has the glass card, animated backgrounds, and proper z-indexing
+### 1. Simplify `public/favicon.svg`
+- Keep the same hexagon molecule design but use solid fills instead of gradient references for better rendering at small sizes
+- Gradients defined via `<defs>` inside SVGs can sometimes fail to render in favicon contexts across browsers
+- Replace `url(#rainbow-stroke)` with a single solid color (e.g., the purple `hsl(270, 70%, 55%)`) for the stroke and nodes
+- This ensures the icon is always visible in the browser tab
 
-This is a one-line import and one-line JSX addition. Everything else stays the same.
+### 2. Update `index.html` favicon link
+- Remove the `sizes="any"` attribute which can confuse some browsers
+- Keep `type="image/svg+xml"` for proper SVG favicon support
 
+These are two small changes -- one to simplify the SVG for favicon rendering, and one minor HTML attribute tweak.
