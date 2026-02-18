@@ -26,11 +26,11 @@ export function FinalCTA() {
           className="max-w-3xl mx-auto text-center"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6">
-            Stop Guessing. Start Knowing.
+            Your Protocol Is Ready in 2 Minutes
           </h2>
           
           <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-            Your personalized peptide protocol is waiting.
+            One payment. Lifetime access. 30-day money-back guarantee.
           </p>
 
           <Link to="/signup">
@@ -40,7 +40,7 @@ export function FinalCTA() {
               className="h-14 px-10 text-lg"
               icon={<span>→</span>}
             >
-              Get Started
+              Get Your Protocol — $67
             </PillButton>
           </Link>
           

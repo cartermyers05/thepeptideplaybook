@@ -129,6 +129,9 @@ export function PricingCTA() {
                 <p className="mt-2 text-muted-foreground">
                   One-time payment. Lifetime access.
                 </p>
+                <p className="mt-1 text-xs text-primary font-medium">
+                  Launch pricing — increases soon
+                </p>
               </div>
 
               {/* Features with cascade pop */}
@@ -163,7 +166,7 @@ export function PricingCTA() {
                   className="w-full justify-center"
                   icon={<span>→</span>}
                 >
-                  Get Your Full Blueprint — $67
+                  Get Instant Access — $67
                 </PillButton>
               </Link>
               

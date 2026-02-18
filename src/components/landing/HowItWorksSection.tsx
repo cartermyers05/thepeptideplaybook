@@ -7,8 +7,8 @@ const steps = [
   {
     number: "01",
     icon: ClipboardList,
-    title: "Create Your Free Account",
-    description: "Sign up in seconds. Tell us your goal, experience level, and any concerns.",
+    title: "Tell Us Your Goal",
+    description: "Fat loss, muscle growth, recovery, anti-aging — pick your goal and tell us your experience level. Takes 60 seconds.",
   },
   {
     number: "02",
@@ -123,7 +123,7 @@ export function HowItWorksSection() {
         >
           <Link to="/signup">
             <PillButton variant="dark" size="lg" icon={<span>→</span>}>
-              Get Started
+              Get Your Protocol — $67
             </PillButton>
           </Link>
         </motion.div>

@@ -144,7 +144,7 @@ export function WhatsInsideSection() {
         >
           <Link to="/signup">
             <PillButton variant="dark" size="lg" icon={<span>→</span>}>
-              Get Your Full Blueprint
+              Get Your Protocol — $67
             </PillButton>
           </Link>
         </motion.div>

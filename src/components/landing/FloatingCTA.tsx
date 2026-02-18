@@ -21,7 +21,7 @@ export function FloatingCTA() {
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 md:hidden animate-fade-up">
       <Link to="/signup">
         <Button size="lg" className="btn-primary-clean h-12 px-6 shadow-lg">
-          Get Started
+          Get Your Protocol — $67
           <span className="ml-2">→</span>
         </Button>
       </Link>
