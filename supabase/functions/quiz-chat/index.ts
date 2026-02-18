@@ -1,9 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, getClientIP } from "../_shared/rateLimiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+
+const MAX_MESSAGE_LENGTH = 500;
+const MAX_CONVERSATION_HISTORY = 20;
+const MAX_REQUESTS_PER_HOUR = 30;
 
 interface QuizStep {
   id: string;
@@ -147,7 +152,40 @@ serve(async (req) => {
   }
 
   try {
-    const { message, currentStep, conversationHistory, extractedValues } = await req.json();
+    // Rate limiting by IP
+    const clientIP = getClientIP(req);
+    const rateLimit = checkRateLimit(`quiz-chat:${clientIP}`, MAX_REQUESTS_PER_HOUR, 3600);
+    if (!rateLimit.allowed) {
+      return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    const body = await req.json();
+    const { message, currentStep, conversationHistory, extractedValues } = body;
+
+    // Input validation
+    if (typeof message !== 'string' || message.length === 0 || message.length > MAX_MESSAGE_LENGTH) {
+      return new Response(JSON.stringify({ error: "Invalid message" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    if (typeof currentStep !== 'number' || currentStep < 0 || currentStep > 10) {
+      return new Response(JSON.stringify({ error: "Invalid step" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    if (Array.isArray(conversationHistory) && conversationHistory.length > MAX_CONVERSATION_HISTORY) {
+      return new Response(JSON.stringify({ error: "Conversation too long" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
