@@ -8,9 +8,10 @@ const trustItems = [
   "500+ Studies Analyzed",
   "45+ Peptides Covered",
   "Updated February 2026",
+  "30-Day Money-Back Guarantee",
 ];
 
-const headlineWords = ["Your", "Personalized", "Peptide", "Protocol"];
+const headlineWords = ["Know", "Exactly", "What to Take,", "How Much,", "and When"];
 
 export function HeroSection() {
   return (
@@ -54,7 +55,7 @@ export function HeroSection() {
               transition={{ delay: 0.9, duration: 0.6 }}
               className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed"
             >
-              Our AI — trained on 500+ studies — builds your personalized protocol with exact compounds, doses, timing, and safety info.
+              Tell us your goal. Get a research-backed protocol with exact compounds, doses, timing, and safety info — built from 500+ peer-reviewed studies.
             </motion.p>
 
             <motion.div
@@ -69,7 +70,7 @@ export function HeroSection() {
                   size="lg"
                   icon={<span>→</span>}
                 >
-                  Get Started
+                  Get Your Protocol — $67
                 </PillButton>
               </Link>
               <a
@@ -82,7 +83,7 @@ export function HeroSection() {
                 }}
               >
                 <PillButton variant="outline" size="lg">
-                  Try the AI Free
+                  See a Sample Answer
                 </PillButton>
               </a>
             </motion.div>

@@ -58,7 +58,7 @@ export function Navbar() {
               <span className="text-muted-foreground mx-2">—</span>
               <Link to="/signup">
                 <PillButton variant="dark" icon={<span className="text-xs">•</span>}>
-                  Get Started
+                  Get Your Protocol
                 </PillButton>
               </Link>
               <Link to="/login">
