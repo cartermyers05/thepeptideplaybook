@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft, Share2, Bookmark, Clock, Eye, Quote } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -30,7 +30,6 @@ import { toast } from "sonner";
 
 export default function ArticleDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { data: article, isLoading, error } = useArticle(slug || "");
   const incrementPageView = useIncrementPageView();
@@ -81,10 +80,12 @@ export default function ArticleDetail() {
           <p className="text-muted-foreground mb-6">
             The article you're looking for doesn't exist or has been removed.
           </p>
-          <Button onClick={() => navigate("/articles")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Articles
-          </Button>
+          <Link to="/articles">
+            <Button>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Articles
+            </Button>
+          </Link>
         </div>
       </div>
     );
@@ -172,15 +173,12 @@ export default function ArticleDetail() {
       <div className="min-h-screen bg-background">
         <div className="container max-w-4xl mx-auto px-4 py-8">
           {/* Back button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/articles")}
-            className="mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Articles
-          </Button>
+          <Link to="/articles" className="mb-4 inline-block">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Articles
+            </Button>
+          </Link>
 
           {/* Breadcrumbs */}
           <Breadcrumbs
