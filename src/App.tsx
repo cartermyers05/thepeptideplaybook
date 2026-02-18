@@ -83,6 +83,21 @@ import PeptidesForBeginners from "./pages/guides/PeptidesForBeginners";
 import IGF1PeptideGuide from "./pages/guides/IGF1PeptideGuide";
 import HGHFragmentGuide from "./pages/guides/HGHFragmentGuide";
 import WhatArePeptides from "./pages/guides/WhatArePeptides";
+import ArePeptidesLegal from "./pages/guides/ArePeptidesLegal";
+import BPC157GutHealing from "./pages/guides/BPC157GutHealing";
+import BPC157SideEffects from "./pages/guides/BPC157SideEffects";
+import BPC157Tendonitis from "./pages/guides/BPC157Tendonitis";
+import BPC157WADABanned from "./pages/guides/BPC157WADABanned";
+import FindPeptideClinic from "./pages/guides/FindPeptideClinic";
+import GHKCuHairLoss from "./pages/guides/GHKCuHairLoss";
+import IpamorelinCJC1295 from "./pages/guides/IpamorelinCJC1295";
+import OralVsInjectableBPC157 from "./pages/guides/OralVsInjectableBPC157";
+import PeptideCycling from "./pages/guides/PeptideCycling";
+import PeptideInjectionSites from "./pages/guides/PeptideInjectionSites";
+import PeptideQualityTesting from "./pages/guides/PeptideQualityTesting";
+import SemaglutideVsTirzepatideWeightLoss from "./pages/guides/SemaglutideVsTirzepatideWeightLoss";
+import TB500TendonRepair from "./pages/guides/TB500TendonRepair";
+import TB500vsBPC157 from "./pages/guides/TB500vsBPC157";
 
 // Tool pages
 import PeptideCalculator from "./pages/tools/PeptideCalculator";
@@ -161,6 +176,21 @@ const App = () => (
             <Route path="/guides/peptides-for-beginners" element={<PeptidesForBeginners />} />
             <Route path="/guides/igf-1-peptide" element={<IGF1PeptideGuide />} />
             <Route path="/guides/hgh-fragment" element={<HGHFragmentGuide />} />
+            <Route path="/guides/are-peptides-legal" element={<ArePeptidesLegal />} />
+            <Route path="/guides/bpc-157-gut-healing" element={<BPC157GutHealing />} />
+            <Route path="/guides/bpc-157-side-effects" element={<BPC157SideEffects />} />
+            <Route path="/guides/bpc-157-tendonitis" element={<BPC157Tendonitis />} />
+            <Route path="/guides/bpc-157-wada-banned" element={<BPC157WADABanned />} />
+            <Route path="/guides/find-peptide-clinic" element={<FindPeptideClinic />} />
+            <Route path="/guides/ghk-cu-hair-loss" element={<GHKCuHairLoss />} />
+            <Route path="/guides/ipamorelin-cjc-1295" element={<IpamorelinCJC1295 />} />
+            <Route path="/guides/oral-vs-injectable-bpc-157" element={<OralVsInjectableBPC157 />} />
+            <Route path="/guides/peptide-cycling" element={<PeptideCycling />} />
+            <Route path="/guides/peptide-injection-sites" element={<PeptideInjectionSites />} />
+            <Route path="/guides/peptide-quality-testing" element={<PeptideQualityTesting />} />
+            <Route path="/guides/semaglutide-vs-tirzepatide-weight-loss" element={<SemaglutideVsTirzepatideWeightLoss />} />
+            <Route path="/guides/tb-500-tendon-repair" element={<TB500TendonRepair />} />
+            <Route path="/guides/tb-500-vs-bpc-157" element={<TB500vsBPC157 />} />
             
             {/* Tool pages */}
             <Route path="/tools/peptide-calculator" element={<PeptideCalculator />} />

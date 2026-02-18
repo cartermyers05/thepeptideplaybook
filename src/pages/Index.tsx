@@ -20,8 +20,8 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="Peptide Playbook — Your Exact Peptide Protocol in 60 Seconds"
-        description="Answer a few questions about your goals. Our AI — trained on 500+ studies — builds your personalized protocol with exact compounds, doses, timing, and safety info."
+        title="Peptide Playbook — Research-Based Peptide Protocols Matched to Your Goal"
+        description="Take the free quiz and get a personalized peptide protocol backed by 500+ peer-reviewed studies. Covers semaglutide, BPC-157, tirzepatide, and more."
         canonical="/"
       />
       <HomepageSchemas />
