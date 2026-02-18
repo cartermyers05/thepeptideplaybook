@@ -286,11 +286,10 @@ function PhotoSection({ protocolId, userId }: { protocolId: string; userId?: str
     const path = `${userId}/${new Date().toISOString().split("T")[0]}-${side}.jpg`;
     const { error } = await supabase.storage.from("progress-photos").upload(path, file, { upsert: true });
     if (error) { console.error("Upload error:", error); return; }
-    const { data: urlData } = supabase.storage.from("progress-photos").getPublicUrl(path);
-    const url = urlData.publicUrl;
+    // Store the storage path (not a public URL) since the bucket is private
     upsertLog.mutate({
       protocol_id: protocolId,
-      ...(side === "front" ? { photo_front_url: url } : { photo_side_url: url }),
+      ...(side === "front" ? { photo_front_url: path } : { photo_side_url: path }),
     });
   };
 
