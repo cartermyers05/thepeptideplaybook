@@ -91,8 +91,8 @@ export default function PeptideCalculator() {
 
   return (
     <ToolLayout
-      title="Free Peptide Dosing Calculator"
-      description="Calculate exactly how many units to draw on your insulin syringe for any peptide dose. Free tool with step-by-step instructions for BPC-157, semaglutide, TB-500 and more."
+      title="Peptide Reconstitution Calculator"
+      description="Free peptide reconstitution and dosing calculator. Calculate exact doses for any vial size and concentration."
       slug="peptide-calculator"
       howToSchema={howToSchema}
     >

@@ -478,8 +478,8 @@ export default function Guides() {
   return (
     <>
       <SEOHead
-        title="Peptide Research Guides | Evidence-Based Information"
-        description="Evidence-based peptide guides. No hype. No sales pitch. Just research on BPC-157, TB-500, Semaglutide, FDA regulations, and safety."
+        title="Peptide Research Library — Evidence-Based Guides | Peptide Playbook"
+        description="Browse 50+ evidence-based peptide guides. Research ratings, dosing data, and legal status for semaglutide, BPC-157, tirzepatide, GHK-Cu, and more."
         canonical="/guides"
       />
 
