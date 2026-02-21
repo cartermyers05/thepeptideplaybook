@@ -2,7 +2,7 @@
 
 export const SITE_NAME = "Peptide Playbook AI";
 export const SITE_URL = "https://peptideplaybook.org";
-export const SITE_DESCRIPTION = "Evidence-based peptide education. Understand what peptides are, how they work, and what research says. Cut through the hype.";
+export const SITE_DESCRIPTION = "AI-powered peptide research tool backed by 500+ published studies. Get personalized evidence ratings for semaglutide, BPC-157, tirzepatide, and 45+ compounds.";
 export const DEFAULT_AUTHOR = {
   name: "Peptide Playbook",
   credential: "Research-based peptide education",

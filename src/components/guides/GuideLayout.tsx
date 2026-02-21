@@ -39,8 +39,8 @@ export function GuideLayout({
       name: "Peptide Playbook",
       url: SITE_URL,
     },
-    datePublished: "2025-01-15",
-    dateModified: "2025-02-12",
+    datePublished: "2026-01-15",
+    dateModified: "2026-02-20",
     description: description.slice(0, 155),
     mainEntityOfPage: canonicalUrl,
   };
@@ -110,7 +110,7 @@ export function GuideLayout({
 
             {/* Visible metadata */}
             <div className="mb-6" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '14px', color: '#64748B', marginTop: '8px' }}>
-              <p>Last updated: February 2025</p>
+              <p>Last updated: February 2026</p>
               <p>Based on peer-reviewed research · Not medical advice</p>
             </div>
 

@@ -1,0 +1,26 @@
+# Peptide Playbook
+> AI-powered peptide research platform backed by 500+ published studies
+
+Peptide Playbook is an evidence-based peptide education tool. Users get personalized compound ratings, dosing information, legal status updates, and research summaries for 45+ peptides including semaglutide, tirzepatide, BPC-157, GHK-Cu, and more.
+
+## Key Pages
+- Homepage: https://peptideplaybook.org
+- Research Library: https://peptideplaybook.org/guides
+- Peptide Calculator: https://peptideplaybook.org/tools/peptide-calculator
+
+## Guide Topics
+The Research Library contains 50+ evidence-based guides covering:
+- GLP-1 receptor agonists (semaglutide, tirzepatide, retatrutide)
+- Healing peptides (BPC-157, TB-500)
+- Skin and anti-aging peptides (GHK-Cu)
+- Growth hormone peptides (CJC-1295, Ipamorelin, Sermorelin)
+- FDA legal status and compounding regulations (updated February 2026)
+- Peptide reconstitution and dosing guides
+- Safety profiles and side effect data
+- Comparison guides (semaglutide vs tirzepatide, BPC-157 vs TB-500)
+
+## About
+Peptide Playbook does not sell peptides. It is an independent research and education platform. All information is sourced from peer-reviewed published studies. Evidence strength is rated on a 5-star scale from Preliminary to Strong.
+
+## Contact
+Website: https://peptideplaybook.org
