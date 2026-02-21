@@ -11,7 +11,7 @@ const trustItems = [
   "30-Day Money-Back Guarantee",
 ];
 
-const headlineWords = ["Know", "Exactly", "What to Take,", "How Much,", "and When"];
+const headlineWords = ["Stop Guessing.", "Start Knowing", "What the Research", "Actually Says", "About Peptides."];
 
 export function HeroSection() {
   return (
@@ -55,7 +55,7 @@ export function HeroSection() {
               transition={{ delay: 0.9, duration: 0.6 }}
               className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed"
             >
-              Tell us your goal. Get a research-backed protocol with exact compounds, doses, timing, and safety info — built from 500+ peer-reviewed studies.
+              Get personalized compound ratings, dosing data, and legal status for 45+ peptides — backed by 500+ published studies. Not Reddit. Not TikTok. Actual research.
             </motion.p>
 
             <motion.div
