@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Navbar } from "@/components/landing/Navbar";
+import { MobileStickyBar } from "@/components/MobileStickyBar";
 import { Footer } from "@/components/landing/Footer";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { GuideCardEnhanced } from "@/components/guides/GuideCardEnhanced";
@@ -8,7 +9,6 @@ import { SearchBar } from "@/components/guides/SearchBar";
 import { CategoryFilter } from "@/components/guides/CategoryFilter";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { MessageCircle } from "lucide-react";
 
 const categories = [
   { id: "all", label: "All Guides" },
@@ -567,23 +567,24 @@ export default function Guides() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="text-center py-10 px-6 content-card"
+              className="text-center py-10 px-6 bg-card border border-border rounded-xl"
             >
-              <h2 className="text-2xl font-bold mb-3">Have Specific Questions?</h2>
+              <h2 className="text-2xl font-bold mb-3">Ready to go deeper?</h2>
               <p className="text-muted-foreground mb-6">
-                Try our AI assistant — it's trained on all our research.
+                Get personalized, cited answers from our AI Research Coach.
               </p>
-              <Link to="/">
-                <Button className="btn-primary-clean gap-2">
-                  <MessageCircle className="w-4 h-4" />
-                  Ask the Peptide Assistant
+              <Link to="/sales">
+                <Button className="bg-primary text-primary-foreground font-bold gap-2 min-h-[48px] rounded-xl px-8">
+                  Get Full Access — $67
                 </Button>
               </Link>
+              <p className="text-muted-foreground/60 text-[13px] mt-3">One-time · 30-day guarantee</p>
             </motion.div>
           </div>
         </main>
 
         <Footer />
+        <MobileStickyBar />
       </div>
     </>
   );

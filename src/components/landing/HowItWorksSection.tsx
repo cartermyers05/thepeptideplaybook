@@ -121,9 +121,9 @@ export function HowItWorksSection() {
           transition={{ delay: 0.6 }}
           className="text-center mt-12"
         >
-          <Link to="/signup">
+          <Link to="/sales">
             <PillButton variant="dark" size="lg" icon={<span>→</span>}>
-              Get Your Protocol — $67
+              Get Full Access — $67
             </PillButton>
           </Link>
         </motion.div>

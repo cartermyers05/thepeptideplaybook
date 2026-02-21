@@ -3,8 +3,6 @@
 # Allow all search engines
 User-agent: *
 Allow: /
-Disallow: /admin/
-Disallow: /api/
 Disallow: /dashboard
 Disallow: /chat
 Disallow: /history
@@ -12,6 +10,9 @@ Disallow: /saved
 Disallow: /stats
 Disallow: /referral
 Disallow: /account
+Disallow: /login
+Disallow: /checkout
+Disallow: /welcome
 
 # Explicitly allow AI crawlers
 User-agent: GPTBot
