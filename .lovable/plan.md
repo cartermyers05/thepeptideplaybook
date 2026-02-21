@@ -1,115 +1,70 @@
 
-# Landing Page Conversion Overhaul
 
-## The Problem
-82% bounce rate. 298 visitors -> ~10 checkouts (~3%). The hero isn't hooking visitors and the CTAs aren't compelling enough to drive action.
+# SEO/AEO Infrastructure Fixes
 
-## Strategy
-Rewrite copy and CTAs for outcome-focused messaging. Add urgency and social proof. Keep all layout, styling, and components exactly the same — only change TEXT content and minor additions.
+## Summary of What's Already In Place
+Most of the requested infrastructure already exists. Here's the gap analysis:
+
+| Task | Status | Action Needed |
+|------|--------|---------------|
+| Task 1: Fix meta description in index.html | Needs update | Change description in 3 places |
+| Task 2: react-helmet-async + per-page meta | 90% done | Update Guides.tsx title/desc, update PeptideCalculator title/desc |
+| Task 3: Article JSON-LD on guides | Already done | Update dates from 2025 to 2026 |
+| Task 4: FAQ schema on guides | Already done | No changes needed |
+| Task 5: Breadcrumb schema on guides | Already done | No changes needed |
+| Task 6: llms.txt | Missing | Create new file |
+| Task 7: noscript fallback | Missing | Add to index.html |
+| Task 8: Sitemap lastmod dates | Needs update | Change all dates to 2026-02-20 |
 
 ---
 
-## Changes (Copy + CTA Only — No Layout or Style Changes)
+## Changes
 
-### 1. Hero Headline (`HeroSection.tsx`)
-**Current:** "Your Personalized Peptide Protocol"
-**New:** "Know Exactly What to Take, How Much, and When"
+### 1. `index.html` -- Update meta description (3 places) + add noscript block
+- Line 9: Change `<meta name="description">` to: "AI-powered peptide research tool backed by 500+ published studies. Get personalized evidence ratings for semaglutide, BPC-157, tirzepatide, and 45+ compounds."
+- Line 17: Change `og:description` to match
+- Line 25: Change `twitter:description` to match
+- After `<div id="root"></div>`, add the full noscript block with heading, description, guide links, and disclaimer text
 
-This shifts from describing the product to describing the outcome. It answers the visitor's actual question.
+### 2. `src/pages/Guides.tsx` -- Update SEOHead title and description
+- Change title to: "Peptide Research Library -- Evidence-Based Guides | Peptide Playbook"
+- Change description to: "Browse 50+ evidence-based peptide guides. Research ratings, dosing data, and legal status for semaglutide, BPC-157, tirzepatide, GHK-Cu, and more."
 
-### 2. Hero Subhead (`HeroSection.tsx`)
-**Current:** "Our AI — trained on 500+ studies — builds your personalized protocol with exact compounds, doses, timing, and safety info."
-**New:** "Tell us your goal. Get a research-backed protocol with exact compounds, doses, timing, and safety info — built from 500+ peer-reviewed studies."
+### 3. `src/pages/tools/PeptideCalculator.tsx` -- Update ToolLayout title and description
+- Change title to: "Peptide Reconstitution Calculator | Peptide Playbook"
+- Change description to: "Free peptide reconstitution and dosing calculator. Calculate exact doses for any vial size and concentration."
 
-Leads with what the USER does, not what the AI does.
+### 4. `src/components/guides/GuideLayout.tsx` -- Fix stale dates in Article schema
+- Change `datePublished` from `"2025-01-15"` to `"2026-01-15"`
+- Change `dateModified` from `"2025-02-12"` to `"2026-02-20"`
+- Change visible text "Last updated: February 2025" to "Last updated: February 2026"
 
-### 3. Hero Primary CTA (`HeroSection.tsx`)
-**Current:** "Get Started"
-**New:** "Get Your Protocol — $67"
+### 5. `public/llms.txt` -- Create new file
+New file with site description, key pages, guide topics, about section, and contact info as specified.
 
-Shows price upfront (filters tire-kickers, attracts serious buyers). Specific > vague.
+### 6. `public/sitemap.xml` -- Update all lastmod dates
+Change all `2026-02-12` and `2026-02-18` dates to `2026-02-20`.
 
-### 4. Hero Secondary CTA (`HeroSection.tsx`)
-**Current:** "Try the AI Free"
-**New:** "See a Sample Answer"
-
-Less commitment-sounding. Curiosity-driven.
-
-### 5. Trust Items (`HeroSection.tsx`)
-**Current:** "500+ Studies Analyzed", "45+ Peptides Covered", "Updated February 2026"
-**Add a 4th item:** "30-Day Money-Back Guarantee"
-
-Gets the risk-reversal above the fold.
-
-### 6. How It Works Step 1 (`HowItWorksSection.tsx`)
-**Current title:** "Create Your Free Account"
-**New title:** "Tell Us Your Goal"
-**Current description:** "Sign up in seconds. Tell us your goal, experience level, and any concerns."
-**New description:** "Fat loss, muscle growth, recovery, anti-aging — pick your goal and tell us your experience level. Takes 60 seconds."
-
-"Create your free account" is a friction word. Lead with the value step instead.
-
-### 7. How It Works CTA (`HowItWorksSection.tsx`)
-**Current:** "Get Started"
-**New:** "Get Your Protocol — $67"
-
-### 8. What's Inside CTA (`WhatsInsideSection.tsx`)
-**Current:** "Get Your Full Blueprint"
-**New:** "Get Your Protocol — $67"
-
-### 9. Pricing CTA (`PricingCTA.tsx`)
-**Current:** "Get Your Full Blueprint — $67"
-**New:** "Get Instant Access — $67"
-
-### 10. Final CTA Section (`FinalCTA.tsx`)
-**Current headline:** "Stop Guessing. Start Knowing."
-**New headline:** "Your Protocol Is Ready in 2 Minutes"
-**Current subhead:** "Your personalized peptide protocol is waiting."
-**New subhead:** "One payment. Lifetime access. 30-day money-back guarantee."
-**Current CTA:** "Get Started"
-**New CTA:** "Get Your Protocol — $67"
-
-### 11. Floating Mobile CTA (`FloatingCTA.tsx`)
-**Current:** "Get Started"
-**New:** "Get Your Protocol — $67"
-
-### 12. GuidedDemo CTA text (`GuidedDemo.tsx`)
-**Current:** "This is 1 of 10,000+ questions Peptide Playbook can answer."
-**New:** "This is a sample. Members get unlimited answers with full citations."
-**Current CTA:** "Get Started"
-**New CTA:** "Get Full Access — $67"
-
-### 13. Add urgency line to PricingCTA (`PricingCTA.tsx`)
-Below the $99 strikethrough, add a small line: "Launch pricing — increases soon" (text only, muted style, no countdown timer or fake scarcity).
-
-### 14. Navbar CTA (`Navbar.tsx`)
-**Current:** "Get Started"
-**New:** "Get Your Protocol"
-
-More specific, still concise for nav.
+### 7. `src/lib/seo.ts` -- Update SITE_DESCRIPTION constant
+Change to match the new meta description so the fallback is consistent: "AI-powered peptide research tool backed by 500+ published studies. Get personalized evidence ratings for semaglutide, BPC-157, tirzepatide, and 45+ compounds."
 
 ---
 
 ## What This Does NOT Change
-- No layout changes
-- No component restructuring
-- No new dependencies
-- No styling/color/font changes
-- No dashboard, auth, quiz, or payment flow changes
-- No new components created
-
-## Expected Impact
-- Lower bounce rate: Outcome-focused headline gives visitors a reason to keep reading
-- Higher click-through: Specific CTAs with price reduce friction (no surprise at checkout)
-- Better qualified traffic: Price in CTA filters out people who were never going to buy
-- Urgency: "Launch pricing" gives a reason to act now
+- No visual design, layout, colors, fonts, or styling changes
+- No navigation changes
+- No landing page content changes
+- No quiz, dashboard, or auth changes
+- No Stripe or backend changes
+- No new routes or components removed
 
 ## Files Modified
-1. `src/components/landing/HeroSection.tsx` — headline, subhead, CTAs, trust items
-2. `src/components/landing/HowItWorksSection.tsx` — step 1 copy, CTA
-3. `src/components/landing/WhatsInsideSection.tsx` — CTA text
-4. `src/components/landing/PricingCTA.tsx` — CTA text, urgency line
-5. `src/components/landing/FinalCTA.tsx` — headline, subhead, CTA
-6. `src/components/landing/FloatingCTA.tsx` — CTA text
-7. `src/components/landing/GuidedDemo.tsx` — CTA text
-8. `src/components/landing/Navbar.tsx` — CTA text
+1. `index.html` -- meta descriptions + noscript block
+2. `src/pages/Guides.tsx` -- SEOHead title/description
+3. `src/pages/tools/PeptideCalculator.tsx` -- ToolLayout title/description
+4. `src/components/guides/GuideLayout.tsx` -- date fixes
+5. `src/lib/seo.ts` -- SITE_DESCRIPTION constant
+6. `public/sitemap.xml` -- lastmod dates
+
+## Files Created
+1. `public/llms.txt`
