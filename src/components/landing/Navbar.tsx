@@ -56,9 +56,9 @@ export function Navbar() {
             {/* Desktop nav - Right aligned controls */}
             <div className="hidden md:flex items-center gap-4">
               <span className="text-muted-foreground mx-2">—</span>
-              <Link to="/signup">
+              <Link to="/sales">
                 <PillButton variant="dark" icon={<span className="text-xs">•</span>}>
-                  Get Your Protocol
+                  Get Full Access
                 </PillButton>
               </Link>
               <Link to="/login">

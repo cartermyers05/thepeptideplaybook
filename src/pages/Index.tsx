@@ -10,7 +10,7 @@ import { PricingCTA } from "@/components/landing/PricingCTA";
 import { FAQ } from "@/components/landing/FAQ";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { Footer } from "@/components/landing/Footer";
-import { FloatingCTA } from "@/components/landing/FloatingCTA";
+import { MobileStickyBar } from "@/components/MobileStickyBar";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { HomepageSchemas } from "@/components/seo/HomepageSchemas";
 
@@ -20,8 +20,8 @@ const Index = () => {
   return (
     <>
       <SEOHead
-        title="Peptide Playbook — Research-Based Peptide Protocols Matched to Your Goal"
-        description="Take the free quiz and get a personalized peptide protocol backed by 500+ peer-reviewed studies. Covers semaglutide, BPC-157, tirzepatide, and more."
+        title="Peptide Playbook — AI-Powered Peptide Research Education"
+        description="Understand peptides with an AI research coach trained on 500+ peer-reviewed studies. Evidence ratings, safety profiles, doctor conversation scripts for 41+ peptides. $67 one-time."
         canonical="/"
       />
       <HomepageSchemas />
@@ -46,7 +46,7 @@ const Index = () => {
           <FinalCTA />
         </main>
         <Footer />
-        <FloatingCTA />
+        <MobileStickyBar />
       </div>
     </>
   );

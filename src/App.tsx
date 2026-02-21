@@ -20,6 +20,7 @@ import Privacy from "./pages/Privacy";
 import Disclaimer from "./pages/Disclaimer";
 import ThankYou from "./pages/ThankYou";
 import Welcome from "./pages/Welcome";
+import Sales from "./pages/Sales";
 import ArticleGenerator from "./pages/admin/ArticleGenerator";
 import CitationsDashboard from "./pages/admin/CitationsDashboard";
 import NewsDetail from "./pages/NewsDetail";
@@ -199,8 +200,11 @@ const App = () => (
             <Route path="/editorial-policy" element={<EditorialPolicy />} />
             <Route path="/partners" element={<Partners />} />
             
-            {/* Welcome / Onboarding flow - after payment */}
-            <Route path="/welcome" element={<ProtectedRoute><Welcome /></ProtectedRoute>} />
+            {/* Sales page */}
+            <Route path="/sales" element={<Sales />} />
+            
+            {/* Welcome / link-in-bio (public) */}
+            <Route path="/welcome" element={<Welcome />} />
             <Route path="/welcome/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             
             {/* Course preview (pre-purchase) */}
