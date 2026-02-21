@@ -55,7 +55,7 @@ export function HeroSection() {
               transition={{ delay: 0.9, duration: 0.6 }}
               className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed"
             >
-              Get personalized compound ratings, dosing data, and legal status for 45+ peptides — backed by 500+ published studies. Not Reddit. Not TikTok. Actual research.
+              You've been Googling for weeks and you're more confused than when you started. Ask our AI anything about peptides and get a straight answer — based on real published research, not TikTok opinions.
             </motion.p>
 
             <motion.div
