@@ -147,8 +147,8 @@ export function Navbar() {
                 <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                   <PillButton variant="light">Sign In</PillButton>
                 </Link>
-                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                  <PillButton variant="dark">Get Started</PillButton>
+                <Link to="/sales" onClick={() => setIsMobileMenuOpen(false)}>
+                  <PillButton variant="dark">Get Full Access</PillButton>
                 </Link>
               </div>
             </nav>
