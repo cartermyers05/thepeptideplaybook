@@ -12,6 +12,7 @@ import {
   Shield,
   ShieldCheck,
   ArrowLeft,
+  Database,
 } from "lucide-react";
 import {
   Accordion,
@@ -19,6 +20,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import HowItWorks from "@/components/sales/HowItWorks";
+import PreviewCards from "@/components/sales/PreviewCards";
+import ComparisonTable from "@/components/sales/ComparisonTable";
+import WhoThisIsFor from "@/components/sales/WhoThisIsFor";
 
 const problemCards = [
   {
@@ -118,6 +123,24 @@ export default function Sales() {
 
         {/* SECTION 1 — HERO */}
         <section className="pt-12 pb-12 md:pt-20 md:pb-16 px-6 text-center">
+          {/* Trust bar */}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-6">
+            <span className="inline-flex items-center gap-1.5 text-muted-foreground text-[13px]">
+              <BookOpen className="w-3.5 h-3.5 text-primary" />
+              500+ Studies Analyzed
+            </span>
+            <span className="text-muted-foreground/40 text-[13px]">·</span>
+            <span className="inline-flex items-center gap-1.5 text-muted-foreground text-[13px]">
+              <Database className="w-3.5 h-3.5 text-primary" />
+              41+ Peptides
+            </span>
+            <span className="text-muted-foreground/40 text-[13px]">·</span>
+            <span className="inline-flex items-center gap-1.5 text-muted-foreground text-[13px]">
+              <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+              Evidence-Rated
+            </span>
+          </div>
+
           <span
             className="inline-block text-primary text-[11px] uppercase tracking-[1.5px] border border-primary/30 rounded-full px-4 py-1"
             style={{ fontFamily: "'JetBrains Mono', monospace" }}
@@ -137,9 +160,26 @@ export default function Sales() {
               Get Full Access — $67
             </Button>
           </Link>
-          <p className="text-muted-foreground/60 text-[13px] mt-3">
-            One-time payment · Instant access · 30-day money-back guarantee
-          </p>
+
+          {/* Expanded guarantee */}
+          <div className="flex flex-col items-center gap-1.5 mt-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+              <span className="text-muted-foreground text-sm font-bold">
+                30-day money-back guarantee
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-muted-foreground/60 text-[13px]">
+              <span>One-time payment</span>
+              <span>·</span>
+              <span>Instant access</span>
+              <span>·</span>
+              <span>No subscription</span>
+            </div>
+            <p className="text-muted-foreground text-[13px] italic max-w-[380px] mt-1">
+              Try it for 30 days. If it doesn't give you clarity, get every penny back.
+            </p>
+          </div>
         </section>
 
         {/* SECTION 2 — THE PROBLEM */}
@@ -163,7 +203,7 @@ export default function Sales() {
           </p>
         </section>
 
-        {/* SECTION 3 — THE SOLUTION */}
+        {/* SECTION 3 — THE SOLUTION (Chat Mockup) */}
         <section className="py-10 md:py-16 px-6">
           <h2 className="text-2xl md:text-4xl font-bold text-center max-w-[650px] mx-auto mb-10">
             What if you had a research assistant that actually read the studies?
@@ -174,7 +214,6 @@ export default function Sales() {
               <span className="font-semibold text-sm">Peptide Playbook AI</span>
               <span className="text-muted-foreground/60 text-xs">Online</span>
             </div>
-            {/* User bubble */}
             <div className="flex justify-end mb-3">
               <div className="bg-secondary rounded-xl px-4 py-3 max-w-[85%]">
                 <p className="text-sm">
@@ -182,7 +221,6 @@ export default function Sales() {
                 </p>
               </div>
             </div>
-            {/* AI bubble */}
             <div className="flex justify-start mb-3">
               <div className="bg-background border border-border rounded-xl px-4 py-3 max-w-[85%]">
                 <p className="text-sm">
@@ -203,7 +241,16 @@ export default function Sales() {
           </div>
         </section>
 
-        {/* SECTION 4 — WHAT'S INSIDE */}
+        {/* SECTION 4 — HOW IT WORKS */}
+        <HowItWorks />
+
+        {/* SECTION 5 — WHAT YOU'LL SEE INSIDE */}
+        <PreviewCards />
+
+        {/* SECTION 6 — COMPARISON TABLE */}
+        <ComparisonTable />
+
+        {/* SECTION 7 — VALUE STACK */}
         <section className="py-10 md:py-16 px-6">
           <h2 className="text-2xl md:text-4xl font-bold text-center mb-10">
             Everything inside Peptide Playbook:
@@ -252,7 +299,10 @@ export default function Sales() {
           </div>
         </section>
 
-        {/* SECTION 5 — GUARANTEE */}
+        {/* SECTION 8 — WHO THIS IS FOR */}
+        <WhoThisIsFor />
+
+        {/* SECTION 9 — GUARANTEE */}
         <section className="px-6 py-8">
           <div className="bg-card border border-border rounded-xl p-8 max-w-[600px] mx-auto text-center">
             <ShieldCheck className="w-10 h-10 text-primary mx-auto mb-4" />
@@ -267,7 +317,7 @@ export default function Sales() {
           </div>
         </section>
 
-        {/* SECTION 6 — FAQ */}
+        {/* SECTION 10 — FAQ */}
         <section className="py-10 md:py-16 px-6">
           <h2 className="text-2xl font-bold text-center mb-8">
             Common questions
@@ -294,7 +344,7 @@ export default function Sales() {
           </Accordion>
         </section>
 
-        {/* SECTION 7 — FINAL CTA */}
+        {/* SECTION 11 — FINAL CTA */}
         <section className="py-10 md:py-16 px-6 text-center">
           <h2 className="text-[28px] md:text-[40px] font-bold mb-6">
             Pro-peptide. Pro-research. Anti-BS.
