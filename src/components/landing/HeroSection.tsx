@@ -53,7 +53,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.6 }}
-              className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed">Ask anything. Get research-backed answers matched to your goals — not TikTok opinions.
+              className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed">Ask anything... Get research backed answers matched to your goals and not TikTok opinions
             </motion.p>
 
             <motion.div
