@@ -105,7 +105,7 @@ const whatsIncluded = [
   "Step-by-step reconstitution walkthrough",
   "Injection guide for beginners",
   "Day-by-day guidance through your cycle",
-  "24/7 AI coach for questions",
+  "24/7 AI coach with built-in dosing calculator",
   "Progress tracking with streaks",
 ];
 
