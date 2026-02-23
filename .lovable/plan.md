@@ -1,34 +1,22 @@
 
 
-# Hero Section Copy Update
+# Update H1 Headline
 
-Two small text changes in `src/components/landing/HeroSection.tsx`. Nothing else modified.
+Single line change in `src/components/landing/HeroSection.tsx`.
 
-## Changes
+## Change
 
-### 1. Headline (line 14)
-Update the `headlineWords` array from:
-```
-["Stop Guessing.", "Start Knowing", "What the Research", "Actually Says", "About Peptides."]
-```
-To:
+**Line 14** -- Update the `headlineWords` array:
+
+From:
 ```
 ["The AI-Powered", "Peptide Guide", "Built From", "500+ Studies."]
 ```
-This keeps the word-by-word animation intact with 4 words instead of 5.
 
-### 2. Subheadline (line 56)
-Replace the long paragraph with:
+To:
 ```
-Ask anything. Get research-backed answers matched to your goals — not TikTok opinions.
+["Get Clear Answers", "on Any Peptide", "in 60 Seconds"]
 ```
-Single line, same styling (text-lg md:text-xl, muted-foreground, max-w-lg).
 
-## What stays the same
-- All layout, positioning, colors, fonts, sizes
-- CTA buttons and their links
-- Trust badges
-- Right-column product preview cards
-- Gradient orb animation
-- Navigation bar
-- Every other page and component
+This preserves the word-by-word stagger animation (now 3 items instead of 4). Nothing else changes.
+
