@@ -11,7 +11,7 @@ const trustItems = [
 "30-Day Money-Back Guarantee"];
 
 
-const headlineWords = ["The AI-Powered", "Peptide Guide", "Built From", "500+ Studies."];
+const headlineWords = ["Get Clear Answers", "on Any Peptide", "in 60 Seconds"];
 
 export function HeroSection() {
   return (
