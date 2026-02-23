@@ -46,6 +46,7 @@ const Index = () => {
           <FinalCTA />
         </main>
         <Footer />
+        <p className="text-center text-xs text-muted-foreground py-4">QA audit completed 2026-02-23</p>
         <MobileStickyBar />
       </div>
     </>

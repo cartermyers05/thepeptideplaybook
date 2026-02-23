@@ -110,6 +110,8 @@ import ReferralLanding from "./pages/ReferralLanding";
 
 // Onboarding
 import Onboarding from "./pages/Onboarding";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +128,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/free-guide" element={<FreeGuide />} />
             <Route path="/checkout" element={<Checkout />} />

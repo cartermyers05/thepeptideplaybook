@@ -124,24 +124,39 @@ export function Navbar() {
           <div className="container px-4 pt-28 pb-12">
             <nav className="space-y-1">
               {[
-                { label: "What's Inside", href: "#curriculum" },
+                { label: "What's Inside", href: "#features" },
                 { label: "How It Works", href: "#how-it-works" },
                 { label: "Pricing", href: "#pricing" },
                 { label: "FAQ", href: "#faq" },
-                { label: "Research", href: "/guides" },
+                { label: "Research", href: "/guides", isRoute: true },
               ].map((link, index) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block text-4xl md:text-6xl font-bold py-3 hover:text-foreground transition-colors opacity-0 animate-fade-in-up"
-                  style={{
-                    animationDelay: `${index * 0.1}s`,
-                    animationFillMode: "forwards",
-                  }}
-                >
-                  {link.label}
-                </a>
+                link.isRoute ? (
+                  <Link
+                    key={link.label}
+                    to={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block text-4xl md:text-6xl font-bold py-3 hover:text-foreground transition-colors opacity-0 animate-fade-in-up"
+                    style={{
+                      animationDelay: `${index * 0.1}s`,
+                      animationFillMode: "forwards",
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block text-4xl md:text-6xl font-bold py-3 hover:text-foreground transition-colors opacity-0 animate-fade-in-up"
+                    style={{
+                      animationDelay: `${index * 0.1}s`,
+                      animationFillMode: "forwards",
+                    }}
+                  >
+                    {link.label}
+                  </a>
+                )
               ))}
               <div className="pt-8 flex gap-4">
                 <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
