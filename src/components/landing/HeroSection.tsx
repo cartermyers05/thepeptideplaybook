@@ -11,7 +11,7 @@ const trustItems = [
 "30-Day Money-Back Guarantee"];
 
 
-const headlineWords = ["Stop Guessing.", "Start Knowing", "What the Research", "Actually Says", "About Peptides."];
+const headlineWords = ["The AI-Powered", "Peptide Guide", "Built From", "500+ Studies."];
 
 export function HeroSection() {
   return (
@@ -53,9 +53,7 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9, duration: 0.6 }}
-              className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed">You've been Googling for weeks and you're more confused than when you started. Ask our AI anything about peptides and get a straight answer, know whats right for you, hit your goals based on real published research, not TikTok opinions.
-
-
+              className="mt-6 text-lg md:text-xl text-muted-foreground max-w-lg leading-relaxed">Ask anything. Get research-backed answers matched to your goals — not TikTok opinions.
             </motion.p>
 
             <motion.div
