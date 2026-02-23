@@ -6,7 +6,7 @@ import { useRef, useEffect, useState } from "react";
 
 const features = [
   "Personalized AI-built protocol",
-  "24/7 AI research coach",
+  "24/7 AI research coach with dosing calculator",
   "Daily compound tracker with streaks",
   "Diet & training optimization",
   "Week-by-week timeline",

@@ -48,7 +48,7 @@ const valueRows = [
   {
     icon: MessageSquare,
     title: "AI Research Coach",
-    desc: "Ask anything about 41+ peptides. Get cited, evidence-rated answers.",
+    desc: "Ask any peptide question and get a cited answer in seconds. Includes a built-in dosing calculator: tell it your vial size and it does the reconstitution math for you.",
     value: "$197 value",
   },
   {

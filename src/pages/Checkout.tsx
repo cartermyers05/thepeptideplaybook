@@ -12,7 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { SEOHead } from "@/components/seo/SEOHead";
 
 const BULLET_ITEMS = [
-  "AI Research Coach — ask anything, get cited answers",
+  "AI Research Coach — Ask any peptide question and get a cited answer in seconds. Includes a built-in dosing calculator: tell it your vial size and it does the reconstitution math for you.",
   "41+ peptide profiles with evidence ratings",
   "Doctor conversation scripts",
   "2026 legal status guide",
