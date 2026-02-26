@@ -79,8 +79,9 @@ serve(async (req) => {
       logStep("No auth header, proceeding as unauthenticated");
     }
 
-    // Get session_id and tracking data from request body
-    const { session_id, tracking } = await req.json();
+    // Get session_id and tracking/attribution data from request body
+    const { session_id, tracking, attribution } = await req.json();
+    const attrData = attribution || tracking; // prefer new field, fallback to old
 
     if (!session_id) {
       // No session_id — backup check requires auth
@@ -301,8 +302,14 @@ serve(async (req) => {
         logStep("Purchase recorded");
       }
 
+      // Write attribution data to purchases table
+      if (attrData) {
+        await supabase.from("purchases").update({ attribution: attrData }).eq("stripe_payment_id", paymentIntentId);
+        logStep("Attribution written to purchase", { paymentIntentId });
+      }
+
       // Write tracking data to profile (only if not already set)
-      if (tracking && (tracking.landing_page || tracking.utm_source || tracking.referrer_url)) {
+      if (attrData && (attrData.landing_page || attrData.utm_source || attrData.referrer || attrData.referrer_url)) {
         const { data: existingProfile } = await supabase
           .from("profiles")
           .select("landing_page")
@@ -311,13 +318,17 @@ serve(async (req) => {
 
         if (!existingProfile?.landing_page) {
           const trackingFields: Record<string, unknown> = {};
-          if (tracking.landing_page) trackingFields.landing_page = tracking.landing_page;
-          if (tracking.utm_source) trackingFields.utm_source = tracking.utm_source;
-          if (tracking.utm_medium) trackingFields.utm_medium = tracking.utm_medium;
-          if (tracking.utm_campaign) trackingFields.utm_campaign = tracking.utm_campaign;
-          if (tracking.utm_content) trackingFields.utm_content = tracking.utm_content;
-          if (tracking.referrer_url) trackingFields.referrer_url = tracking.referrer_url;
-          if (tracking.first_visit_at) trackingFields.first_visit_at = tracking.first_visit_at;
+          if (attrData.landing_page) trackingFields.landing_page = attrData.landing_page;
+          if (attrData.utm_source) trackingFields.utm_source = attrData.utm_source;
+          if (attrData.utm_medium) trackingFields.utm_medium = attrData.utm_medium;
+          if (attrData.utm_campaign) trackingFields.utm_campaign = attrData.utm_campaign;
+          if (attrData.utm_content) trackingFields.utm_content = attrData.utm_content;
+          if (attrData.utm_term) trackingFields.utm_term = attrData.utm_term;
+          if (attrData.referrer || attrData.referrer_url) trackingFields.referrer_url = attrData.referrer || attrData.referrer_url;
+          if (attrData.captured_at || attrData.first_visit_at) {
+            trackingFields.first_visit_at = attrData.captured_at || attrData.first_visit_at;
+            trackingFields.attribution_captured_at = attrData.captured_at || attrData.first_visit_at;
+          }
 
           await supabase.from("profiles").update(trackingFields).eq("user_id", user.id);
           logStep("Tracking data written to profile", trackingFields);

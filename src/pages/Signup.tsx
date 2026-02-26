@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { PromoCodeInput } from "@/components/auth/PromoCodeInput";
 import { Logo } from "@/components/brand/Logo";
-import { getTrackingData, clearTrackingData } from "@/lib/trackingCapture";
+import { getAttribution } from "@/utils/trackingCapture";
 import { FloatingOrbs } from "@/components/landing/FloatingOrbs";
 import { GridPattern } from "@/components/landing/GridPattern";
 import { LogoPattern } from "@/components/brand/LogoPattern";
@@ -85,15 +85,24 @@ export default function Signup() {
         }
       }
 
-      // Write tracking data to profile
+      // Write attribution data to profile
       if (signUpData.user) {
-        const tracking = getTrackingData();
-        if (tracking.landing_page || tracking.utm_source || tracking.referrer_url) {
+        const attribution = getAttribution();
+        if (attribution) {
           await supabase
             .from("profiles")
-            .update(tracking as any)
+            .update({
+              landing_page: attribution.landing_page,
+              utm_source: attribution.utm_source,
+              utm_medium: attribution.utm_medium,
+              utm_campaign: attribution.utm_campaign,
+              utm_content: attribution.utm_content,
+              utm_term: attribution.utm_term,
+              referrer_url: attribution.referrer,
+              first_visit_at: attribution.captured_at,
+              attribution_captured_at: attribution.captured_at,
+            } as any)
             .eq("user_id", signUpData.user.id);
-          clearTrackingData();
         }
       }
 
