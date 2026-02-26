@@ -43,8 +43,8 @@ export function ChatPreviewCard({
       transition={{ delay }}
       whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
       className={cn(
-        "relative overflow-hidden rounded-3xl backdrop-blur-sm border border-amber-300/60 shadow-xl cursor-default",
-        "bg-gradient-to-br from-orange-500/30 via-amber-400/20 to-yellow-300/25 dark:from-orange-500/25 dark:via-amber-400/15 dark:to-yellow-300/20",
+        "relative overflow-hidden rounded-3xl backdrop-blur-sm border border-amber-300/20 shadow-xl cursor-default",
+        "bg-gradient-to-br from-orange-500/20 via-amber-400/10 to-yellow-300/15 dark:from-orange-500/15 dark:via-amber-400/10 dark:to-yellow-300/10",
         className
       )}
     >
@@ -135,7 +135,7 @@ export function CoursePreviewCard({
       transition={{ delay }}
       whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
       className={cn(
-        "relative overflow-hidden rounded-3xl backdrop-blur-sm border border-violet-300/60 shadow-xl p-4 cursor-default",
+        "relative overflow-hidden rounded-3xl backdrop-blur-sm border border-violet-300/20 shadow-xl p-4 cursor-default",
         "bg-gradient-to-br from-violet-500/25 via-purple-500/15 to-card dark:from-violet-500/20 dark:via-purple-500/10",
         className
       )}
@@ -214,7 +214,7 @@ export function DigestPreviewCard({
       transition={{ delay }}
       whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
       className={cn(
-        "relative overflow-hidden rounded-3xl backdrop-blur-sm border border-blue-300/60 shadow-xl p-4 cursor-default",
+        "relative overflow-hidden rounded-3xl backdrop-blur-sm border border-blue-300/20 shadow-xl p-4 cursor-default",
         "bg-gradient-to-br from-blue-500/25 via-sky-500/15 to-card dark:from-blue-500/20 dark:via-sky-500/10",
         className
       )}
