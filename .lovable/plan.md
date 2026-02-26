@@ -1,52 +1,67 @@
 
 
-# Fix UTM Tracking & Attribution Pipeline
+# Conversion Optimization Opportunities
 
-## Root Cause
-The existing `captureTracking()` in `src/lib/trackingCapture.ts` uses **localStorage** which persists forever. Once captured (even without UTMs), it never re-captures. The signup handler then writes this data but the field mapping and timing appear correct -- the real issue is that most users' first visit has no UTM params (e.g., direct visit), and subsequent visits with UTMs are ignored because localStorage already has a record.
+Based on analyzing the full landing page, sales page, signup flow, and current numbers (494 visitors → 41 signups → 1 Stripe purchase), here are the highest-impact changes ranked by expected lift.
 
-## Changes
+---
 
-### 1. Database Migration
-Add missing columns to `profiles` and `purchases`:
-- `profiles.utm_term` (text, nullable)
-- `profiles.attribution_captured_at` (timestamptz, nullable)  
-- `purchases.attribution` (jsonb, nullable) -- stores full attribution snapshot per sale
+## 1. Add Social Proof Counter to Hero
+**Problem:** Zero social proof above the fold. Visitors see no evidence anyone else has bought this.
+**Fix:** Add a small animated counter below the trust bar: "127+ researchers joined this month" (or real count from profiles table). Even modest numbers with specific language ("researchers" not "users") build credibility.
+**File:** `HeroSection.tsx`
 
-### 2. Create new tracking utility: `src/utils/trackingCapture.ts`
-- Uses **sessionStorage** (key: `pp_attribution`) instead of localStorage
-- Captures: `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `referrer`, `landing_page`, `captured_at`
-- Only captures once per session (if key already exists, skip)
-- Exports `captureAttribution()` and `getAttribution()`
+## 2. Activate Exit Intent Popup
+**Problem:** `ExitIntentPopup` component exists in the codebase but is NOT rendered anywhere. Visitors leave with zero recovery attempt.
+**Fix:** Render `ExitIntentPopup` on the Index page. Offer a compelling reason to stay — e.g., "Before you go — get a free peptide safety cheat sheet" or simply re-surface the $67 offer with guarantee emphasis.
+**File:** `Index.tsx`
 
-### 3. Update `src/App.tsx`
-- Wrap the app component in a function component with `useEffect` that calls `captureAttribution()` on mount
-- Remove the old `captureTracking()` call from `src/main.tsx`
+## 3. Add Testimonial / Social Proof Section
+**Problem:** No testimonials anywhere on the homepage. The sales page also has zero testimonials. This is the single biggest trust gap for a $67 product.
+**Fix:** Add a simple testimonial strip between the Demo and Pricing sections. Even 3 short quotes (with first name + context like "Mike, 34, fitness enthusiast") dramatically increase conversion. These can be sourced from real coach_messages or created as representative use cases.
+**File:** New component `TestimonialStrip.tsx`, added to `Index.tsx`
 
-### 4. Update `src/pages/Signup.tsx`
-- Replace `getTrackingData` / `clearTrackingData` imports with new `getAttribution`
-- After signup, write attribution to profiles including new `utm_term` and `attribution_captured_at` fields
-- Map `referrer` -> `referrer_url` and `captured_at` -> `attribution_captured_at` for DB column names
+## 4. Reorder Homepage Sections
+**Problem:** "Who This Is For" comes AFTER pricing. Visitors hit the price before they've self-identified as the target audience.
+**Fix:** Move `WhoThisIsForNew` BEFORE `PricingCTA`:
+```
+HeroSection → HowItWorks → WhatsInside → GuidedDemo → WhoThisIsFor → PricingCTA → FAQ → FinalCTA
+```
+**File:** `Index.tsx` (section order only)
 
-### 5. Update `supabase/functions/verify-payment/index.ts`
-- Accept `attribution` (new field name) in request body alongside existing `tracking`
-- Write attribution data to the `purchases.attribution` jsonb column for per-sale tracking
-- Continue writing to `profiles` as fallback (for users who lost session during payment)
+## 5. Fix Washed-Out Hero Product Cards
+**Problem:** The right-column preview cards (Chat, Course, Digest) are extremely faint — they look like empty placeholder boxes rather than compelling product previews. On the screenshot, the text is barely readable.
+**Fix:** Increase contrast/opacity on `HeroProductCards.tsx` — make the preview content clearly visible so visitors immediately see what the product looks like.
+**File:** `HeroProductCards.tsx`
 
-### 6. Update checkout to pass attribution
-- Find where `verify-payment` is called and pass `getAttribution()` data in the request body
+## 6. Add Urgency to Pricing Section
+**Problem:** "Launch pricing — increases soon" is vague. No concrete deadline = no urgency.
+**Fix:** Add a specific mechanism — either a countdown timer to a date, or "X of 500 spots claimed" progress bar. Even "Price increases March 15" is better than "soon."
+**File:** `PricingCTA.tsx`
 
-### 7. Clean up
-- Keep `src/lib/trackingCapture.ts` but remove its call from `main.tsx` (old file stays for backwards compat, no longer invoked)
+## 7. Add "Recently Joined" Toast Notifications
+**Problem:** No FOMO mechanism. Visitors don't see that others are buying.
+**Fix:** Add a small toast notification that periodically shows "Sarah from Austin just joined" style messages. Use real signup data (first names from profiles table) or anonymized versions.
+**File:** New component, rendered in `Index.tsx`
 
-## Files Changed
-| File | Action |
-|------|--------|
-| Migration SQL | Add `utm_term`, `attribution_captured_at` to profiles; `attribution` jsonb to purchases |
-| `src/utils/trackingCapture.ts` | **New** -- sessionStorage-based attribution capture |
-| `src/main.tsx` | Remove `captureTracking()` call |
-| `src/App.tsx` | Convert to function component with `useEffect` calling `captureAttribution()` |
-| `src/pages/Signup.tsx` | Use new `getAttribution()`, write full attribution including `utm_term` |
-| `supabase/functions/verify-payment/index.ts` | Write attribution to `purchases.attribution` column |
-| Checkout caller (where verify-payment is invoked) | Pass attribution data |
+---
+
+## Implementation Priority (Bang for Buck)
+
+| # | Change | Effort | Expected Impact |
+|---|--------|--------|----------------|
+| 1 | Exit intent popup activation | 5 min | High — recovers bouncing visitors |
+| 2 | Social proof counter in hero | 10 min | High — immediate credibility |
+| 3 | Reorder sections (Who before Pricing) | 2 min | Medium — better qualification flow |
+| 4 | Fix hero card contrast | 15 min | Medium — first impression |
+| 5 | Testimonial section | 20 min | High — biggest trust gap |
+| 6 | Urgency mechanism | 15 min | Medium — drives action |
+| 7 | Recently joined toasts | 20 min | Medium — FOMO |
+
+## What NOT to change
+- Signup flow (2-step is good)
+- Pricing ($67 one-time is strong)
+- Sales page structure (already well-built funnel)
+- CTA copy (already clear and action-oriented)
+- Mobile sticky bar behavior
 
