@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { PillButton } from "./PillButton";
 import { ChatPreviewCard, CoursePreviewCard, DigestPreviewCard } from "./HeroProductCards";
-import { Check } from "lucide-react";
+import { Check, Users } from "lucide-react";
 
 const trustItems = [
 "500+ Studies Analyzed",
@@ -88,8 +88,25 @@ export function HeroSection() {
 
             
 
+            {/* Social proof counter */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.7, duration: 0.5 }}
+              className="mt-6 flex items-center gap-2 text-sm text-muted-foreground"
+            >
+              <div className="flex -space-x-2">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="w-7 h-7 rounded-full bg-primary/10 border-2 border-background flex items-center justify-center">
+                    <Users className="w-3 h-3 text-primary" />
+                  </div>
+                ))}
+              </div>
+              <span><span className="font-semibold text-foreground">140+</span> researchers joined this month</span>
+            </motion.div>
+
             {/* Trust Bar - spring stagger */}
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
+            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
               {trustItems.map((item, index) =>
               <motion.div
                 key={index}
