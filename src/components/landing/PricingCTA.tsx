@@ -130,7 +130,7 @@ export function PricingCTA() {
                   One-time payment. Lifetime access.
                 </p>
                 <p className="mt-1 text-xs text-primary font-medium">
-                  Launch pricing — increases March 15, 2026
+                  Launch pricing — increases soon
                 </p>
               </div>
 
