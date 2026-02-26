@@ -13,6 +13,9 @@ import { Footer } from "@/components/landing/Footer";
 import { MobileStickyBar } from "@/components/MobileStickyBar";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { HomepageSchemas } from "@/components/seo/HomepageSchemas";
+import { ExitIntentPopup } from "@/components/landing/ExitIntentPopup";
+import { TestimonialStrip } from "@/components/landing/TestimonialStrip";
+import { RecentJoinToast } from "@/components/landing/RecentJoinToast";
 
 const Index = () => {
   const { scrollYProgress } = useScroll();
@@ -40,14 +43,17 @@ const Index = () => {
           <HowItWorksSection />
           <WhatsInsideSection />
           <GuidedDemo />
-          <PricingCTA />
+          <TestimonialStrip />
           <WhoThisIsForNew />
+          <PricingCTA />
           <FAQ />
           <FinalCTA />
         </main>
         <Footer />
         <p className="text-center text-xs text-muted-foreground py-4">QA audit completed 2026-02-23</p>
         <MobileStickyBar />
+        <ExitIntentPopup />
+        <RecentJoinToast />
       </div>
     </>
   );

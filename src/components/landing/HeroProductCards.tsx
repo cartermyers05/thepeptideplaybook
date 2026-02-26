@@ -43,8 +43,8 @@ export function ChatPreviewCard({
       transition={{ delay }}
       whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
       className={cn(
-        "relative overflow-hidden rounded-3xl backdrop-blur border border-amber-300/50 shadow-xl cursor-default",
-        "bg-gradient-to-br from-orange-500/20 via-amber-400/10 to-yellow-300/20",
+        "relative overflow-hidden rounded-3xl backdrop-blur-sm border border-amber-300/60 shadow-xl cursor-default",
+        "bg-gradient-to-br from-orange-500/30 via-amber-400/20 to-yellow-300/25 dark:from-orange-500/25 dark:via-amber-400/15 dark:to-yellow-300/20",
         className
       )}
     >
@@ -135,8 +135,8 @@ export function CoursePreviewCard({
       transition={{ delay }}
       whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
       className={cn(
-        "relative overflow-hidden rounded-3xl backdrop-blur border border-violet-200/50 shadow-xl p-4 cursor-default",
-        "bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-card/95",
+        "relative overflow-hidden rounded-3xl backdrop-blur-sm border border-violet-300/60 shadow-xl p-4 cursor-default",
+        "bg-gradient-to-br from-violet-500/25 via-purple-500/15 to-card dark:from-violet-500/20 dark:via-purple-500/10",
         className
       )}
     >
@@ -153,7 +153,7 @@ export function CoursePreviewCard({
               "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors",
               goal.selected
                 ? "bg-violet-500 text-white"
-                : "bg-white/50 text-muted-foreground"
+                : "bg-card/80 text-muted-foreground border border-border/50"
             )}
           >
             {goal.selected && (
@@ -178,7 +178,7 @@ export function CoursePreviewCard({
         className="space-y-2"
       >
         <p className="text-[10px] text-muted-foreground">Building your blueprint...</p>
-        <div className="h-1.5 bg-white/30 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full"
             initial={{ width: "0%" }}
@@ -214,8 +214,8 @@ export function DigestPreviewCard({
       transition={{ delay }}
       whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
       className={cn(
-        "relative overflow-hidden rounded-3xl backdrop-blur border border-blue-200/50 shadow-xl p-4 cursor-default",
-        "bg-gradient-to-br from-blue-500/10 via-sky-500/5 to-card/95",
+        "relative overflow-hidden rounded-3xl backdrop-blur-sm border border-blue-300/60 shadow-xl p-4 cursor-default",
+        "bg-gradient-to-br from-blue-500/25 via-sky-500/15 to-card dark:from-blue-500/20 dark:via-sky-500/10",
         className
       )}
     >
