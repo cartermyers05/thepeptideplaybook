@@ -918,6 +918,7 @@ export type Database = {
       profiles: {
         Row: {
           ai_disclaimer_accepted_at: string | null
+          attribution_captured_at: string | null
           avatar_url: string | null
           created_at: string
           current_streak: number | null
@@ -942,9 +943,11 @@ export type Database = {
           utm_content: string | null
           utm_medium: string | null
           utm_source: string | null
+          utm_term: string | null
         }
         Insert: {
           ai_disclaimer_accepted_at?: string | null
+          attribution_captured_at?: string | null
           avatar_url?: string | null
           created_at?: string
           current_streak?: number | null
@@ -969,9 +972,11 @@ export type Database = {
           utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          utm_term?: string | null
         }
         Update: {
           ai_disclaimer_accepted_at?: string | null
+          attribution_captured_at?: string | null
           avatar_url?: string | null
           created_at?: string
           current_streak?: number | null
@@ -996,6 +1001,7 @@ export type Database = {
           utm_content?: string | null
           utm_medium?: string | null
           utm_source?: string | null
+          utm_term?: string | null
         }
         Relationships: [
           {
@@ -1315,6 +1321,7 @@ export type Database = {
       purchases: {
         Row: {
           amount: number
+          attribution: Json | null
           course_goal: string | null
           created_at: string | null
           id: string
@@ -1325,6 +1332,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          attribution?: Json | null
           course_goal?: string | null
           created_at?: string | null
           id?: string
@@ -1335,6 +1343,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          attribution?: Json | null
           course_goal?: string | null
           created_at?: string | null
           id?: string
