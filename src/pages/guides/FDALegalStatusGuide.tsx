@@ -24,26 +24,37 @@ const tocItems = [
 
 const faqItems = [
   {
-    question: "Is it illegal to possess peptides like BPC-157?",
+    question: "Is BPC-157 legal in the US?",
     answer:
-      "Possession isn't criminalized — BPC-157 is not DEA scheduled. But there's no legal basis for selling it for human use.",
+      "BPC-157 was classified as a Category 2 substance by the FDA in 2024, meaning compounding pharmacies can no longer produce it. It remains available as a research chemical from peptide suppliers, but it is not legal for human use.",
   },
   {
-    question: "Can my doctor prescribe Category 2 peptides?",
+    question: "Can you buy peptides without a prescription?",
     answer:
-      "No. Compounding pharmacies cannot legally compound Category 2 substances even with a valid prescription from a doctor.",
+      "FDA-approved peptides require a prescription. Research peptides can legally be purchased as 'for research use only' chemicals, but using them for personal health purposes exists in a legal gray area.",
   },
   {
-    question: "Will regulations change under new administration?",
+    question: "Did the FDA ban peptides?",
     answer:
-      "Possible but uncertain. Formal regulatory processes take time. Don't base health decisions on speculation about future policy changes.",
+      "The FDA did not ban all peptides. It specifically restricted certain compounded peptides under Category 2 classifications. FDA-approved pharmaceutical peptides remain fully legal. The restrictions primarily affect non-FDA-approved research peptides that were previously available from compounding pharmacies.",
+  },
+  {
+    question: "Are peptides legal in 2026?",
+    answer:
+      "FDA-approved peptides (semaglutide, tirzepatide, liraglutide, sermorelin, tesamorelin) are legal with a prescription. The regulatory landscape for compounded peptides remains in flux, with ongoing legal challenges and potential policy changes under the current administration.",
+  },
+  {
+    question: "Will peptides be banned?",
+    answer:
+      "Complete peptide bans are extremely unlikely given that several peptides are FDA-approved blockbuster medications. The regulatory focus is on restricting unapproved compounded versions while maintaining access to pharmaceutical-grade approved products.",
   },
 ];
 
 const relatedGuides = [
   { title: "BPC-157: Complete Research Guide", href: "/guides/bpc-157-complete-guide" },
-  { title: "Are Peptides Safe? What the Research Shows", href: "/guides/are-peptides-safe" },
-  { title: "BPC-157 vs TB-500: What's the Difference?", href: "/guides/bpc-157-vs-tb-500" },
+  { title: "What Are Peptides?", href: "/guides/what-are-peptides" },
+  { title: "Peptides for Beginners", href: "/guides/peptides-for-beginners" },
+  { title: "Best Peptides for Weight Loss", href: "/guides/best-peptides-weight-loss" },
 ];
 
 const articleSchema = {
@@ -52,7 +63,7 @@ const articleSchema = {
   headline: "FDA Peptide Regulations 2026: Complete Legal Status Guide",
   description: "Complete breakdown of which peptides are legal, banned, or in regulatory limbo in 2026. Category 1, Category 2, compounding rules explained.",
   datePublished: "2026-01-30",
-  dateModified: "2026-02-02",
+  dateModified: "2026-02-27",
   author: {
     "@type": "Organization",
     name: "Peptide Playbook",

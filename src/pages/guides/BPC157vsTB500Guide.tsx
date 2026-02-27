@@ -29,19 +29,31 @@ const faqItems = [
       "This is a popular claim based on BPC-157's origin from gastric protein. However, no human evidence supports this specialization. It's speculation based on the peptide's source, not clinical data.",
   },
   {
-    question: "Can I take both together?",
+    question: "Can I take BPC-157 and TB-500 together?",
     answer:
-      "There is no research on combined use of BPC-157 and TB-500. You'd be adding unknowns together with no data on how they interact.",
+      "There is no research on combined use of BPC-157 and TB-500. You'd be adding unknowns together with no data on how they interact. Many users stack both, but this is based entirely on anecdotal reports, not evidence.",
   },
   {
     question: "Which has fewer side effects?",
     answer:
       "Neither has a validated human side effect profile. Both are anecdotally described as well-tolerated, but anecdotes aren't safety data.",
   },
+  {
+    question: "Are BPC-157 and TB-500 legal?",
+    answer:
+      "Both BPC-157 and TB-500 are FDA Category 2 substances, meaning compounding pharmacies cannot legally produce them. They are also prohibited by WADA. They can be purchased as research chemicals but are not legal for human use.",
+  },
+  {
+    question: "Which is better for tendon injuries?",
+    answer:
+      "BPC-157 has more published animal studies on tendon healing, while TB-500 works through a different mechanism (actin binding and cell migration). No human comparative data exists. Claims that one is definitively better are not supported by evidence.",
+  },
 ];
 
 const relatedGuides = [
   { title: "BPC-157: Complete Research Guide", href: "/guides/bpc-157-complete-guide" },
+  { title: "BPC-157 Side Effects", href: "/guides/bpc-157-side-effects" },
+  { title: "TB-500 Research Guide", href: "/guides/tb-500-research-guide" },
   { title: "FDA Peptide Regulations 2026", href: "/guides/peptides-fda-legal-status-2026" },
   { title: "Are Peptides Safe? What the Research Shows", href: "/guides/are-peptides-safe" },
 ];
@@ -52,7 +64,7 @@ const articleSchema = {
   headline: "BPC-157 vs TB-500: Complete Comparison [2026]",
   description: "BPC-157 vs TB-500 comparison. Different mechanisms, same regulatory status. What evidence shows about these healing peptides.",
   datePublished: "2026-01-30",
-  dateModified: "2026-02-02",
+  dateModified: "2026-02-27",
   author: {
     "@type": "Organization",
     name: "Peptide Playbook",

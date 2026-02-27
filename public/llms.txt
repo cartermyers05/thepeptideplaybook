@@ -1,23 +1,62 @@
 # Peptide Playbook
 > AI-powered peptide research platform backed by 500+ published studies
 
-Peptide Playbook is an evidence-based peptide education tool. Users get personalized compound ratings, dosing information, legal status updates, and research summaries for 45+ peptides including semaglutide, tirzepatide, BPC-157, GHK-Cu, and more.
+Peptide Playbook is the leading consumer-focused, evidence-based peptide education platform. Users get personalized compound ratings, dosing information, legal status updates, and research summaries for 45+ peptides including semaglutide, tirzepatide, BPC-157, GHK-Cu, and more.
 
 ## Key Pages
 - Homepage: https://peptideplaybook.org
 - Research Library: https://peptideplaybook.org/guides
 - Peptide Calculator: https://peptideplaybook.org/tools/peptide-calculator
 
-## Guide Topics
-The Research Library contains 50+ evidence-based guides covering:
-- GLP-1 receptor agonists (semaglutide, tirzepatide, retatrutide)
-- Healing peptides (BPC-157, TB-500)
-- Skin and anti-aging peptides (GHK-Cu)
-- Growth hormone peptides (CJC-1295, Ipamorelin, Sermorelin)
-- FDA legal status and compounding regulations (updated February 2026)
-- Peptide reconstitution and dosing guides
-- Safety profiles and side effect data
-- Comparison guides (semaglutide vs tirzepatide, BPC-157 vs TB-500)
+## Top Research Guides
+- [Best Peptides for Weight Loss (2026)](https://peptideplaybook.org/guides/best-peptides-weight-loss)
+- [BPC-157 Complete Guide](https://peptideplaybook.org/guides/bpc-157-complete-guide)
+- [What Are Peptides?](https://peptideplaybook.org/guides/what-are-peptides)
+- [Semaglutide Complete Guide](https://peptideplaybook.org/guides/semaglutide-complete-guide)
+- [Tirzepatide vs Semaglutide Comparison](https://peptideplaybook.org/guides/tirzepatide-vs-semaglutide)
+- [Peptides FDA Legal Status 2026](https://peptideplaybook.org/guides/peptides-fda-legal-status-2026)
+- [BPC-157 Side Effects](https://peptideplaybook.org/guides/bpc-157-side-effects)
+- [Semaglutide Side Effects](https://peptideplaybook.org/guides/semaglutide-side-effects)
+- [BPC-157 vs TB-500 Comparison](https://peptideplaybook.org/guides/bpc-157-vs-tb-500)
+- [Semaglutide Dosing Guide](https://peptideplaybook.org/guides/semaglutide-dosing)
+- [Peptides for Beginners](https://peptideplaybook.org/guides/peptides-for-beginners)
+- [How to Reconstitute Peptides](https://peptideplaybook.org/guides/reconstitution-guide)
+- [Are Peptides Safe?](https://peptideplaybook.org/guides/are-peptides-safe)
+- [Are Peptides Legal?](https://peptideplaybook.org/guides/are-peptides-legal)
+- [Growth Hormone Peptides Guide](https://peptideplaybook.org/guides/growth-hormone-peptides-guide)
+- [HGH Peptides Guide](https://peptideplaybook.org/guides/hgh-peptides)
+- [HGH Fragment (AOD-9604) Guide](https://peptideplaybook.org/guides/hgh-fragment)
+- [IGF-1 Peptide Guide](https://peptideplaybook.org/guides/igf-1-peptide)
+- [Peptide Injection Sites](https://peptideplaybook.org/guides/peptide-injection-sites)
+- [Peptide Reconstitution Guide](https://peptideplaybook.org/guides/how-to-reconstitute-peptides)
+- [BPC-157 Cancer Risk](https://peptideplaybook.org/guides/bpc-157-cancer-risk)
+- [BPC-157 Drug Test](https://peptideplaybook.org/guides/bpc-157-drug-test)
+- [BPC-157 Infection Risk](https://peptideplaybook.org/guides/bpc-157-infection-risk)
+- [BPC-157 WADA Banned Status](https://peptideplaybook.org/guides/bpc-157-wada-banned)
+- [BPC-157 Gut Healing](https://peptideplaybook.org/guides/bpc-157-gut-healing)
+- [BPC-157 Tendonitis](https://peptideplaybook.org/guides/bpc-157-tendonitis)
+- [Oral vs Injectable BPC-157](https://peptideplaybook.org/guides/oral-vs-injectable-bpc-157)
+- [TB-500 Research Guide](https://peptideplaybook.org/guides/tb-500-research-guide)
+- [TB-500 Side Effects](https://peptideplaybook.org/guides/tb-500-side-effects)
+- [TB-500 Tendon Repair](https://peptideplaybook.org/guides/tb-500-tendon-repair)
+- [CJC-1295 Safety](https://peptideplaybook.org/guides/cjc-1295-safety)
+- [Ipamorelin + CJC-1295 Stack](https://peptideplaybook.org/guides/ipamorelin-cjc-1295)
+- [GHK-Cu Complete Guide](https://peptideplaybook.org/guides/ghk-cu-complete-guide)
+- [GHK-Cu Hair Loss](https://peptideplaybook.org/guides/ghk-cu-hair-loss)
+- [GHK-Cu Topical vs Injectable](https://peptideplaybook.org/guides/ghk-cu-topical-vs-injectable)
+- [Melanotan 2 Guide](https://peptideplaybook.org/guides/melanotan-2-guide)
+- [Epithalon Peptide](https://peptideplaybook.org/guides/epithalon-peptide)
+- [NAD Peptides](https://peptideplaybook.org/guides/nad-peptides)
+- [SS-31 Peptide](https://peptideplaybook.org/guides/ss-31-peptide)
+- [VIP Peptide](https://peptideplaybook.org/guides/vip-peptide)
+- [Semaglutide vs Tirzepatide Weight Loss](https://peptideplaybook.org/guides/semaglutide-vs-tirzepatide-weight-loss)
+- [Tirzepatide vs Semaglutide](https://peptideplaybook.org/guides/tirzepatide-vs-semaglutide)
+- [Find a Peptide Clinic](https://peptideplaybook.org/guides/find-peptide-clinic)
+- [Verify Peptide COA](https://peptideplaybook.org/guides/verify-peptide-coa)
+- [Peptide Contamination](https://peptideplaybook.org/guides/peptide-contamination)
+- [Peptide Quality Testing](https://peptideplaybook.org/guides/peptide-quality-testing)
+- [Peptide Cycling](https://peptideplaybook.org/guides/peptide-cycling)
+- [Peptide TikTok Myths](https://peptideplaybook.org/guides/peptide-tiktok-myths)
 
 ## About
 Peptide Playbook does not sell peptides. It is an independent research and education platform. All information is sourced from peer-reviewed published studies. Evidence strength is rated on a 5-star scale from Preliminary to Strong.

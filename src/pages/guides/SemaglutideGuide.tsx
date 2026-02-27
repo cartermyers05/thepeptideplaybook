@@ -41,6 +41,11 @@ const faqItems = [
     answer:
       "Both contain semaglutide but are FDA-approved for different uses. Ozempic (0.25mg-2mg) is approved for type 2 diabetes. Wegovy (up to 2.4mg) is approved for chronic weight management. Wegovy uses higher doses specifically optimized for weight loss.",
   },
+  {
+    question: "What are the most common side effects of semaglutide?",
+    answer:
+      "The most common side effects are gastrointestinal: nausea (affecting 30-44% of patients), diarrhea (21-30%), vomiting (18-24%), and constipation (16-24%). These typically diminish within 4-8 weeks at a stable dose.",
+  },
 ];
 
 const relatedGuides = [
@@ -55,7 +60,7 @@ const articleSchema = {
   headline: "Semaglutide Complete Guide: How It Works, Results & Safety [2026]",
   description: "Everything you need to know about semaglutide (Ozempic, Wegovy) in 2026. FDA-approved uses, clinical trial results, side effects, costs, and the compounding controversy explained.",
   datePublished: "2026-01-30",
-  dateModified: "2026-01-30",
+  dateModified: "2026-02-27",
   author: {
     "@type": "Organization",
     name: "Peptide Playbook",
@@ -112,8 +117,8 @@ export default function SemaglutideGuide() {
 
           <section id="what-is-semaglutide" className="mb-10">
             <h2 className="text-2xl font-bold mb-4">What is Semaglutide?</h2>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
-              Semaglutide is a glucagon-like peptide-1 (GLP-1) receptor agonist — a class of medications that mimic a natural hormone your body produces after eating. Unlike many peptides discussed in wellness circles, semaglutide is FDA-approved with extensive clinical trial data.
+            <p className="text-muted-foreground mb-4 leading-relaxed text-lg">
+              Semaglutide is a GLP-1 receptor agonist available as Ozempic (for type 2 diabetes), Wegovy (for weight management), and Rybelsus (oral tablet). Clinical trials demonstrate average weight loss of 15-17% over 68 weeks, making it one of the most effective FDA-approved weight loss medications. As of January 2026, an oral version of Wegovy is also available, expanding access beyond weekly injections.
             </p>
             <p className="text-muted-foreground mb-4 leading-relaxed">
               Developed by Novo Nordisk, semaglutide is available in two brand-name versions:

@@ -54,7 +54,7 @@ const articleSchema = {
   headline: "BPC-157 Side Effects: What Human Data Actually Exists [2026]",
   description: "Honest breakdown of BPC-157 side effects based on actual research. What animal studies show, what users report, and what remains completely unknown.",
   datePublished: "2026-02-02",
-  dateModified: "2026-02-02",
+  dateModified: "2026-02-27",
   author: {
     "@type": "Organization",
     name: "Peptide Playbook",
@@ -111,8 +111,8 @@ export default function BPC157SideEffects() {
 
           <section id="human-data-problem" className="mb-10">
             <h2 className="text-2xl font-bold mb-4">The Human Data Problem</h2>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
-              The fundamental problem with BPC-157 side effect information is simple: there is almost no human clinical data. A 2025 systematic review found only one pilot study in humans, involving just 2 healthy adults who received a single IV dose.
+            <p className="text-muted-foreground mb-4 leading-relaxed text-lg">
+              The most commonly reported side effects of BPC-157 from anecdotal human use are mild nausea, dizziness, headache, and injection site reactions (redness, swelling, or mild pain). No serious adverse effects have been documented in the over 100 animal studies conducted to date, even at doses many times higher than typical human use. However, no completed human clinical trials exist, so the full side effect profile in humans remains unknown.
             </p>
             <p className="text-muted-foreground mb-4 leading-relaxed">
               This means most "side effect" information you find online falls into two categories:

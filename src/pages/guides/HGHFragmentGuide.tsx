@@ -104,7 +104,7 @@ const articleSchema = {
   "@type": "Article",
   headline: "HGH Fragment 176-191 Research Guide",
   datePublished: "2026-02-05",
-  dateModified: "2026-02-05",
+  dateModified: "2026-02-27",
   author: {
     "@type": "Organization",
     name: "Peptide Playbook",
@@ -122,6 +122,19 @@ const articleSchema = {
   },
 };
 
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
+};
+
 export default function HGHFragmentGuide() {
   return (
     <GuideLayout
@@ -129,6 +142,7 @@ export default function HGHFragmentGuide() {
       description="HGH Fragment 176-191 (AOD-9604) is a modified fragment of human growth hormone specifically studied for fat metabolism. Unlike full HGH, research suggests it targets fat loss without affecting blood sugar or insulin sensitivity."
       slug="hgh-fragment"
       articleSchema={articleSchema}
+      faqSchema={faqSchema}
     >
       <div className="flex flex-col lg:flex-row gap-10">
         {/* Table of Contents Sidebar */}
