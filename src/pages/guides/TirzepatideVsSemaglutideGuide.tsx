@@ -21,26 +21,37 @@ const tocItems = [
 
 const faqItems = [
   {
-    question: "Is tirzepatide more effective than semaglutide for weight loss?",
+    question: "Which causes more weight loss, tirzepatide or semaglutide?",
     answer:
-      "Yes, head-to-head trials show tirzepatide produces greater average weight loss (20-22%) compared to semaglutide (15-17%). The SURMOUNT-5 trial directly comparing them showed tirzepatide patients lost about 5 percentage points more body weight. However, individual responses vary significantly.",
+      "Tirzepatide produces more weight loss in clinical comparisons. A 2024 JAMA study of 18,386 patients found tirzepatide users were significantly more likely to achieve 15%+ weight loss than semaglutide users, with the average tirzepatide patient losing 5-7 more pounds.",
+  },
+  {
+    question: "Is tirzepatide safer than semaglutide?",
+    answer:
+      "Both medications have similar side effect profiles, primarily gastrointestinal symptoms like nausea and diarrhea. Neither has shown significant safety advantages over the other in published clinical trials.",
+  },
+  {
+    question: "Can I switch from semaglutide to tirzepatide?",
+    answer:
+      "Yes, many patients switch under medical supervision. The typical approach is to start tirzepatide at a lower dose after discontinuing semaglutide, with gradual dose escalation. Consult your prescribing physician for transition protocols.",
+  },
+  {
+    question: "Which is cheaper, tirzepatide or semaglutide?",
+    answer:
+      "List prices are comparable ($900-1,300/month without insurance). Insurance coverage and manufacturer coupons vary significantly. Compounded semaglutide is more widely available and often less expensive than compounded tirzepatide through telehealth platforms.",
   },
   {
     question: "Which has fewer side effects — tirzepatide or semaglutide?",
     answer:
       "Both medications have similar GI side effect profiles (nausea, vomiting, diarrhea). Some data suggests tirzepatide may have slightly lower rates of nausea, but the differences aren't dramatic. Both are generally well-tolerated when doses are titrated slowly.",
   },
-  {
-    question: "Can I switch from semaglutide to tirzepatide?",
-    answer:
-      "Yes, switching is possible under medical supervision. Doctors typically start tirzepatide at the lowest dose even if you were on high-dose semaglutide. A 'washout' period isn't usually needed, but dose titration should still be gradual to minimize side effects.",
-  },
 ];
 
 const relatedGuides = [
   { title: "Semaglutide Complete Guide: How It Works & Safety", href: "/guides/semaglutide-complete-guide" },
-  { title: "FDA Peptide Regulations 2026: What's Legal", href: "/guides/peptides-fda-legal-status-2026" },
-  { title: "Growth Hormone Peptides: Complete Research Guide", href: "/guides/growth-hormone-peptides-guide" },
+  { title: "Best Peptides for Weight Loss", href: "/guides/best-peptides-weight-loss" },
+  { title: "Semaglutide Side Effects", href: "/guides/semaglutide-side-effects" },
+  { title: "Semaglutide Dosing Guide", href: "/guides/semaglutide-dosing" },
 ];
 
 const articleSchema = {
@@ -49,7 +60,7 @@ const articleSchema = {
   headline: "Tirzepatide vs Semaglutide: Which Is Better for Weight Loss? [2026]",
   description: "Head-to-head comparison of tirzepatide (Mounjaro/Zepbound) and semaglutide (Ozempic/Wegovy). Clinical trial results, side effects, costs, and which one might be right for you.",
   datePublished: "2026-01-30",
-  dateModified: "2026-01-30",
+  dateModified: "2026-02-27",
   author: {
     "@type": "Organization",
     name: "Peptide Playbook",

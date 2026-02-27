@@ -26,31 +26,43 @@ const tocItems = [
 
 const faqItems = [
   {
-    question: "Is BPC-157 legal to buy?",
+    question: "Is BPC-157 FDA approved?",
     answer:
-      "BPC-157 exists in a legal gray area. It's not a controlled substance, so possession isn't necessarily illegal. However, there's no legal basis for selling it as a drug, food, or supplement in the US. Products are typically labeled 'for research use only.'",
+      "No. BPC-157 is not FDA-approved for any medical use. The FDA classified it as a Category 2 substance in 2024, which prohibits compounding pharmacies from producing it. It is only legally available as a research chemical.",
   },
   {
-    question: "Does BPC-157 actually work for injury healing?",
+    question: "What does BPC-157 do?",
     answer:
-      "In animal studies, BPC-157 has shown effects on tissue healing. However, no human clinical trials have proven it works for any injury in people. The honest answer is: we don't know if it works in humans.",
+      "In animal studies, BPC-157 has demonstrated accelerated tendon, ligament, and muscle healing, protection against gut damage from NSAIDs, reduced inflammation, and potential neuroprotective effects. No completed human clinical trials exist as of February 2026.",
   },
   {
-    question: "What are the side effects of BPC-157?",
+    question: "Is BPC-157 safe?",
     answer:
-      "There is no clinical safety data on BPC-157 in humans beyond a pilot study in two people. Animal studies haven't shown obvious toxicity, but this doesn't mean it's safe for human use.",
+      "No serious adverse effects have been reported in animal studies, even at very high doses. Anecdotal human reports commonly mention mild nausea, dizziness, and injection site irritation as the most frequent side effects. However, no human clinical trials exist to confirm safety.",
   },
   {
-    question: "Can my doctor prescribe BPC-157?",
+    question: "How do you take BPC-157?",
     answer:
-      "No. Because BPC-157 is a Category 2 substance, compounding pharmacies cannot legally prepare it, and there's no FDA-approved version to prescribe.",
+      "BPC-157 can be administered via subcutaneous injection near the injury site, intramuscularly, or orally. Most users inject 250-500mcg once or twice daily. Oral administration may be effective for gut-related conditions but has lower systemic bioavailability.",
+  },
+  {
+    question: "Does BPC-157 cause cancer?",
+    answer:
+      "No published research has shown BPC-157 causes cancer. Some theoretical concerns exist around its angiogenic (blood vessel forming) properties, but animal studies including long-term dosing have not demonstrated tumor formation. The absence of human clinical data means this question cannot be definitively answered.",
+  },
+  {
+    question: "Where can I buy BPC-157?",
+    answer:
+      "Since the FDA's 2024 Category 2 classification, BPC-157 is no longer available from US compounding pharmacies. It can still be purchased as a research chemical from peptide suppliers, though quality and purity vary significantly.",
   },
 ];
 
 const relatedGuides = [
-  { title: "FDA Peptide Regulations 2026: What's Legal", href: "/guides/peptides-fda-legal-status-2026" },
-  { title: "Are Peptides Safe? What the Research Shows", href: "/guides/are-peptides-safe" },
+  { title: "BPC-157 Side Effects", href: "/guides/bpc-157-side-effects" },
   { title: "BPC-157 vs TB-500: What's the Difference?", href: "/guides/bpc-157-vs-tb-500" },
+  { title: "BPC-157 Cancer Risk", href: "/guides/bpc-157-cancer-risk" },
+  { title: "How to Reconstitute Peptides", href: "/guides/reconstitution-guide" },
+  { title: "Peptides for Beginners", href: "/guides/peptides-for-beginners" },
 ];
 
 const articleSchema = {
@@ -59,7 +71,7 @@ const articleSchema = {
   headline: "BPC-157: Complete Guide to Research, Safety & Legal Status [2026]",
   description: "Everything you need to know about BPC-157 in 2026. FDA status, research findings, safety profile, and what confused Americans should understand.",
   datePublished: "2026-01-30",
-  dateModified: "2026-02-02",
+  dateModified: "2026-02-27",
   author: {
     "@type": "Organization",
     name: "Peptide Playbook",
@@ -116,14 +128,11 @@ export default function BPC157Guide() {
 
           <section id="what-is-bpc-157" className="mb-10">
             <h2 className="text-2xl font-bold mb-4">What is BPC-157?</h2>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
-              BPC-157, short for Body Protection Compound-157, is a synthetic peptide consisting of 15 amino acids. It's derived from a naturally occurring protein found in human gastric juice — the digestive fluid in your stomach.
+            <p className="text-muted-foreground mb-4 leading-relaxed text-lg">
+              BPC-157 (Body Protection Compound-157) is a synthetic peptide derived from a protein in human gastric juice that has shown powerful healing and anti-inflammatory effects in over 100 animal studies. It is NOT FDA-approved for human use, and the FDA classified it as a Category 2 substance in 2024, banning compounding pharmacies from producing it. Despite this, BPC-157 remains one of the most researched and discussed peptides in the biohacking community, with anecdotal human reports of accelerated injury recovery, gut healing, and reduced inflammation.
             </p>
             <p className="text-muted-foreground mb-4 leading-relaxed">
               The "body protection" name comes from early research suggesting the peptide may help protect and heal various tissues. However, this research has been conducted almost exclusively in animals, not humans.
-            </p>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
-              BPC-157 gained popularity in wellness and biohacking communities after anecdotal reports suggested benefits for injury recovery, gut health, and general healing. Influencers and TikTok creators have promoted it heavily, often making claims that far exceed what the actual research supports.
             </p>
             <div className="p-4 bg-primary/5 border-l-4 border-primary rounded-r-lg">
               <p className="text-sm font-medium">

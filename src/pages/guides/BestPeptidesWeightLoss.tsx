@@ -62,10 +62,11 @@ const faqItems = [
 ];
 
 const relatedGuides = [
-  { title: "HGH Fragment (AOD-9604) Guide", href: "/guides/hgh-fragment", description: "Deep dive on the fat-targeting peptide" },
-  { title: "Semaglutide Complete Guide", href: "/guides/semaglutide-guide", description: "GLP-1 mechanism and research" },
-  { title: "HGH Peptides Guide", href: "/guides/hgh-peptides", description: "Growth hormone secretagogues" },
+  { title: "Semaglutide Complete Guide", href: "/guides/semaglutide-complete-guide", description: "GLP-1 mechanism and research" },
+  { title: "Tirzepatide vs Semaglutide", href: "/guides/tirzepatide-vs-semaglutide", description: "Head-to-head comparison" },
+  { title: "What Are Peptides?", href: "/guides/what-are-peptides", description: "Complete beginner overview" },
   { title: "Peptides for Beginners", href: "/guides/peptides-for-beginners", description: "Start here if you're new" },
+  { title: "HGH Fragment (AOD-9604) Guide", href: "/guides/hgh-fragment", description: "Deep dive on the fat-targeting peptide" },
 ];
 
 const changelogEntries = [
@@ -85,9 +86,22 @@ const articleSchema = {
   "@type": "Article",
   headline: "Best Peptides for Weight Loss (2026): Complete Research Guide",
   datePublished: "2026-02-05",
-  dateModified: "2026-02-05",
+  dateModified: "2026-02-27",
   author: { "@type": "Organization", name: "Peptide Playbook" },
   publisher: { "@type": "Organization", name: "Peptide Playbook", url: SITE_URL },
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
 };
 
 export default function BestPeptidesWeightLoss() {
@@ -97,6 +111,7 @@ export default function BestPeptidesWeightLoss() {
       description="Compare semaglutide (14.9% weight loss), tirzepatide (22.5%), AOD-9604, MOTS-c, and other peptides. Evidence-based analysis of mechanisms, trials, and costs."
       slug="best-peptides-weight-loss"
       articleSchema={articleSchema}
+      faqSchema={faqSchema}
     >
       <div className="flex flex-col lg:flex-row gap-10">
         <aside className="lg:w-64 shrink-0">
@@ -115,10 +130,10 @@ export default function BestPeptidesWeightLoss() {
           </h1>
 
           <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
-            The landscape of weight loss therapeutics has been transformed by peptide-based medications. What was once considered an intractable problem—helping patients achieve and maintain significant weight loss—now has multiple evidence-based pharmaceutical solutions. The approval of semaglutide (Wegovy) and tirzepatide (Zepbound) has validated peptides as legitimate tools for obesity treatment, with clinical trial results that far exceed what diet and exercise alone can achieve.
+            The best peptides for weight loss in 2026 are tirzepatide (Zepbound), semaglutide (Wegovy), and liraglutide (Saxenda) — all FDA-approved GLP-1 receptor agonists with clinical evidence showing 15-22.5% body weight reduction. Non-GLP-1 options like AOD-9604 and tesamorelin show promise in preclinical research but lack FDA approval for weight loss. This guide ranks every weight loss peptide by evidence strength, safety profile, and legal status.
           </p>
           <p className="text-muted-foreground mb-8 leading-relaxed">
-            This guide provides a comprehensive, research-based overview of the peptides most studied for weight loss—from FDA-approved GLP-1 agonists to investigational compounds like MOTS-c. We'll examine the clinical trial data, mechanisms of action, realistic expectations, costs, and the important distinctions between approved medications and research peptides.
+            Below we examine the clinical trial data, mechanisms of action, realistic expectations, costs, and the important distinctions between approved medications and research peptides.
           </p>
 
           {/* Section: How Peptides Target Weight Loss */}

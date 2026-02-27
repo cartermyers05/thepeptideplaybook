@@ -98,9 +98,22 @@ const articleSchema = {
   "@type": "Article",
   headline: "What Are Peptides? Complete Guide to Peptide Science (2026)",
   datePublished: "2026-02-06",
-  dateModified: "2026-02-06",
+  dateModified: "2026-02-27",
   author: { "@type": "Organization", name: "Peptide Playbook" },
   publisher: { "@type": "Organization", name: "Peptide Playbook", url: SITE_URL },
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
 };
 
 export default function WhatArePeptides() {
@@ -110,6 +123,7 @@ export default function WhatArePeptides() {
       description="What are peptides? Comprehensive guide covering how peptides work, types of peptides (healing, weight loss, anti-aging, growth hormone), safety, legal status, and clinical research."
       slug="what-are-peptides"
       articleSchema={articleSchema}
+      faqSchema={faqSchema}
     >
       <div className="flex flex-col lg:flex-row gap-10">
         <aside className="lg:w-64 shrink-0">
@@ -128,10 +142,10 @@ export default function WhatArePeptides() {
           </h1>
 
           <p className="text-muted-foreground mb-6 text-lg leading-relaxed">
-            Peptides have exploded in popularity over the past few years, driven by the success of weight loss medications like Ozempic (semaglutide) and growing interest in healing and anti-aging compounds. But what exactly are peptides, how do they work, and what does the science actually show?
+            Peptides are short chains of amino acids (typically 2-50) that act as signaling molecules in the body, regulating functions like hormone production, immune response, inflammation, and tissue repair. Unlike proteins, peptides are small enough to be easily absorbed and highly targeted in their effects. Peptide therapy uses synthetic versions of these naturally occurring compounds to treat specific health conditions, with FDA-approved peptides like semaglutide (Wegovy) and tirzepatide (Zepbound) already helping millions with weight management, while research peptides like BPC-157 and GHK-Cu are widely studied for healing and anti-aging.
           </p>
           <p className="text-muted-foreground mb-8 leading-relaxed">
-            This comprehensive guide covers everything you need to understand peptides — from basic science to specific categories, safety considerations, legal status, and how to evaluate the research. Whether you're hearing about peptides for the first time or looking to deepen your understanding, this guide provides an evidence-based foundation.
+            This guide covers everything from basic science to specific categories, safety, legal status, and how to evaluate the research.
           </p>
 
           {/* Section: What Are Peptides? */}

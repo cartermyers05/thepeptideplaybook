@@ -21,7 +21,7 @@ const Index = () => {
     <>
       <SEOHead
         title="Peptide Playbook — AI-Powered Peptide Research Education"
-        description="Understand peptides with an AI research coach trained on 500+ peer-reviewed studies. Evidence ratings, safety profiles, doctor conversation scripts for 41+ peptides. $67 one-time."
+        description="Research-backed peptide guides powered by AI. Personalized protocols, dosing calculators, and evidence-based education for BPC-157, semaglutide, tirzepatide, and 40+ peptides."
         canonical="/"
       />
       <HomepageSchemas />

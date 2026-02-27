@@ -43,7 +43,7 @@ export function GuideLayout({
       url: SITE_URL,
     },
     datePublished: "2026-01-15",
-    dateModified: "2026-02-20",
+    dateModified: "2026-02-27",
     description: description.slice(0, 155),
     mainEntityOfPage: canonicalUrl,
   };
